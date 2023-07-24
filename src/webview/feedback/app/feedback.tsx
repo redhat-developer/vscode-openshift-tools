@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
-import { Icon, Stack, Typography } from '@mui/material';
+import { Stack, SvgIcon, Typography } from '@mui/material';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 import { DefaultProps } from '../../common/propertyTypes';
@@ -65,11 +65,9 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                         <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details'>
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
-                                    <Icon sx={{
-                                        fontSize: 23
-                                    }}>
-                                        <img src={MicrosoftIcon} />
-                                    </Icon>
+                                    <SvgIcon
+                                        component={MicrosoftIcon}
+                                        style={{ margin: '0', fontSize: '23px' }} inheritViewBox/>
                                     <Typography variant='body2' className='footerText'>Rate us on Marketplace</Typography>
                                 </Stack>
                             </div>

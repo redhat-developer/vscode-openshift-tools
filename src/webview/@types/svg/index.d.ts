@@ -4,6 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 declare module '*.svg' {
-  const value: any;
-  export = value;
+    const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+    export default content;
 }
