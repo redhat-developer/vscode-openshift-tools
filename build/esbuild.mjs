@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as esbuild from 'esbuild';
+import svgr from 'esbuild-plugin-svgr';
 import { sassPlugin } from 'esbuild-sass-plugin';
 import * as fs from 'fs/promises';
 
@@ -42,6 +43,9 @@ await Promise.all([
             },
             plugins: [
                 sassPlugin(),
+                svgr({
+                    plugins: ['@svgr/plugin-jsx']
+                }),
             ]
         })
     ),
