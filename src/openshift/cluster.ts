@@ -4,8 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, Progress as VProgress, WebviewPanel, commands, env, window, workspace } from 'vscode';
-import { CommandText } from '../base/command';
+import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, Progress as VProgress, WebviewPanel, commands, env, window, workspace } from 'vscode';
 import { CliChannel, CliExitData } from '../cli';
 import { getInstance } from '../odo';
 import { Command } from '../odo/command';
@@ -14,6 +13,7 @@ import { Filters } from '../util/filters';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
+import { WindowUtil } from '../util/windowUtils';
 import { VsCommandError, vsCommand } from '../vscommand';
 import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
@@ -62,12 +62,12 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.about')
     static async about(): Promise<void> {
-        await CliChannel.getInstance().executeInTerminal(Command.printOdoVersion(), undefined, 'Show odo Version');
+        await Cluster.odo.executeInTerminal(Command.printOdoVersion(), undefined, 'OpenShift: Show odo Version');
     }
 
     @vsCommand('openshift.oc.about')
     static async ocAbout(): Promise<void> {
-        await CliChannel.getInstance().executeInTerminal(Command.printOcVersion(), undefined, 'Show OKD CLI Tool Version');
+        await Cluster.odo.executeInTerminal(Command.printOcVersion(), undefined, 'OpenShift: Show OKD CLI Tool Version');
     }
 
     @vsCommand('openshift.output')
@@ -255,7 +255,10 @@ export class Cluster extends OpenShiftItem {
         } else {
             crcBinary = crcPath;
         }
-        void CliChannel.getInstance().executeInTerminal(new CommandText(`${crcBinary} stop`), undefined, 'Stop OpenShift Local');
+        const terminal: Terminal = WindowUtil.createTerminal('OpenShift: Stop OpenShift Local', undefined);
+            terminal.sendText(`${crcBinary} stop`);
+            terminal.show();
+        return;
     }
 
     public static async getVersions(): Promise<Versions> {

@@ -9,8 +9,8 @@ import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { Filters } from './util/filters';
+import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
-import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
 export interface CliExitData {
     readonly error: cp.ExecException;
@@ -24,7 +24,7 @@ export interface Cli {
     executeTool(command: CommandText, opts?: cp.ExecOptions): Promise<CliExitData>;
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions): cp.ChildProcess;
     spawnTool(cmd: CommandText, opts: cp.SpawnOptions): Promise<cp.ChildProcess>;
-    executeInTerminal(cmd: CommandText, cwd?: string, terminalName?: string, addEnv?: {[key : string]: string}): void;
+    executeInTerminal(cmd: CommandText, cwd: string, terminalName: string): void;
 }
 
 export interface OdoChannel {
@@ -152,9 +152,13 @@ export class CliChannel implements Cli {
         return result;
     }
 
-    async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {} as {[key : string]: string} ): Promise<void> {
-        const merged = Object.fromEntries([...Object.entries(addEnv), ...Object.entries(CliChannel.createTelemetryEnv()), ...Object.entries(process.env)]);
-        await OpenShiftTerminalManager.getInstance().createTerminal(command, name, cwd, merged);
+    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env): Promise<void> {
+        const [cmd, ...params] = command.toString().split(' ');
+        const toolLocation = await ToolsConfig.detect(cmd);
+        const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
+        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
+        terminal.sendText(toolLocation === cmd ? command.toString() : toolLocation.concat(' ', ...params), true);
+        terminal.show();
     }
 
     spawn(cmd: string, params: string[], opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): cp.ChildProcess {

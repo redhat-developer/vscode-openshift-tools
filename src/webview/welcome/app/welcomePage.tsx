@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import { VSCodeMessage } from './vsCodeMessage';
-import { Checkbox, FormControlLabel, Icon, Stack, SvgIcon, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Icon, Stack, Typography } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
@@ -222,7 +222,9 @@ export class Welcome extends React.Component<DefaultProps, {
                             <a href='#!' onClick={() => this.openExternalPage('https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector')}>
                                 <div className='section__header-hint section__footer'>
                                     <Stack direction='row' alignItems='center' gap={1}>
-                                        <SvgIcon component={MicrosoftLogo} style={{ fontSize: 25 }} />
+                                        <Icon fontSize='large'>
+                                            <img src={MicrosoftLogo} />
+                                        </Icon>
                                         <Typography variant='h6' className='footerText'>View in Marketplace</Typography>
                                     </Stack>
                                 </div>
@@ -238,7 +240,7 @@ export class Welcome extends React.Component<DefaultProps, {
         const { lastRelease, isChecked } = this.state;
         return <>
             <header className='header__logo'>
-                <OpenShiftLogo className='image__logo' />
+                <img className='image__logo' src={OpenShiftLogo} />
                 <label style={{ display: 'flex', flexDirection: 'row', textAlign: 'center' }}><Typography variant='h1' className='highlight'>OpenShift</Typography><Typography variant='h1' style={{ paddingLeft: '1rem' }} className='foreGroundColor'>Toolkit</Typography></label>
             </header>
             <div className='container' id='con'>
@@ -312,7 +314,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='section__brand__preview'
                             style={{ margin: '0rem' }}>
-                            <CloudBranding className='content__image__preview' />
+                            <img className='content__image__preview' src={CloudBranding} />
                         </div>
                     </section>
                     <section className='section--settings'>

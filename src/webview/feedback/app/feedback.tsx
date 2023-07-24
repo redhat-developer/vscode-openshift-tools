@@ -2,18 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import GitHubIcon from '@mui/icons-material/GitHub';
-import { Stack, SvgIcon, Typography } from '@mui/material';
 import React from 'react';
+import { Icon, Stack, Typography } from '@mui/material';
 import { Model } from 'survey-core';
-import 'survey-core/defaultV2.css';
 import { Survey } from 'survey-react-ui';
-import OpenShiftExtensionIcon from '../../../../images/openshift_icon.png';
-import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import { DefaultProps } from '../../common/propertyTypes';
 import { json } from '../json';
-import './feedback.css';
 import { VSCodeMessage } from './vsCodeMessage';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import OpenShiftExtensionIcon from '../../../../images/openshift_icon.png';
+import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
+import 'survey-core/defaultV2.css';
+import './feedback.css'
 
 export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
 
@@ -65,9 +65,11 @@ export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
                         <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details'>
                             <div className='section__header-hint section__footer'>
                                 <Stack direction='row' alignItems='center' gap={1}>
-                                    <SvgIcon
-                                            component={MicrosoftIcon}
-                                            style={{ margin: '0', fontSize: '23px' }} />
+                                    <Icon sx={{
+                                        fontSize: 23
+                                    }}>
+                                        <img src={MicrosoftIcon} />
+                                    </Icon>
                                     <Typography variant='body2' className='footerText'>Rate us on Marketplace</Typography>
                                 </Stack>
                             </div>

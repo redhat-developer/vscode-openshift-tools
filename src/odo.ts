@@ -14,7 +14,7 @@ import * as fs from 'fs';
 import { pathExistsSync } from 'fs-extra';
 import * as path from 'path';
 import * as tempfile from 'tmp';
-import { ProviderResult, QuickPickItem, Uri, WorkspaceFolder, commands, workspace } from 'vscode';
+import { ProviderResult, QuickPickItem, Terminal, Uri, WorkspaceFolder, commands, workspace } from 'vscode';
 import { CommandText } from './base/command';
 import * as cliInstance from './cli';
 import { CliExitData } from './cli';
@@ -25,6 +25,7 @@ import { Project } from './odo/project';
 import { ToolsConfig } from './tools';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { Platform } from './util/platform';
+import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
 
 export enum ContextType {
@@ -58,6 +59,7 @@ export interface Odo {
     getCompTypesJson():Promise<DevfileComponentType[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
     execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
+    executeInTerminal(command: CommandText, cwd?: string, name?: string, addEnv?: any): Promise<void>;
     requireLogin(): Promise<boolean>;
     createProject(name: string): Promise<void>;
     deleteProject(projectName: string): Promise<void>;
@@ -70,6 +72,7 @@ export interface Odo {
     describeComponent(contextPath: string, experimental?: boolean): Promise<ComponentDescription | undefined>;
     analyze(contextPath: string): Promise<AnalyzeResponse[]>;
     canCreatePod(): Promise<boolean>;
+    isPodmanPresent(): Promise<boolean>;
 
     /**
      * Returns the URL of the API of the current active cluster,
@@ -188,6 +191,14 @@ export class OdoImpl implements Odo {
         } catch(error) {
             // ignore and return undefined
         }
+    }
+
+    public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {}): Promise<void> {
+        const [cmd] = `${command}`.split(' ');
+        const toolLocation = await ToolsConfig.detect(cmd);
+        const terminal: Terminal = WindowUtil.createTerminal(name, cwd, { ...cliInstance.CliChannel.createTelemetryEnv(), ...addEnv });
+        terminal.sendText(toolLocation === cmd ? `${command}` : `${command}`.replace(cmd, `"${toolLocation}"`), true);
+        terminal.show();
     }
 
     public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
@@ -336,6 +347,18 @@ export class OdoImpl implements Odo {
         try {
             const result: cliInstance.CliExitData = await this.execute(Command.canCreatePod());
             if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    public async isPodmanPresent(): Promise<boolean> {
+        try {
+            const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionJson());
+            if ('podman' in JSON.parse(result.stdout)) {
                 return true;
             }
         } catch {

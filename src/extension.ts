@@ -31,7 +31,6 @@ import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
 import { Platform } from './util/platform';
 import { registerCommands } from './vscommand';
-import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { WelcomePage } from './welcomePage';
 
 import fsx = require('fs-extra');
@@ -99,7 +98,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ServerlessFunctionView.getInstance(),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
-        window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
@@ -200,11 +198,13 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     }
 
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
-    void extendClusterExplorer();
+    extendClusterExplorer();
 
     await ComponentTypesView.instance.getAllComponents();
+
     await registerKubernetesCloudProvider();
-    void startTelemetry(extensionContext);
+
+    startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
 
     return {
