@@ -39,7 +39,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
     const [branchOption, setBranchOption] = React.useState<string>(undefined);
     const [cloneFailed, setCloneFailed] = React.useState(false);
 
-    const [tmpDir, setTmpDir] = React.useState<Uri>();
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
         devfile: undefined,
         showRecommendation: false,
@@ -61,7 +60,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setRecommendedDevfile((prevState) => ({ ...prevState, devfile: message.data.devfile }));
                 setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
                 setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
-                setTmpDir(message.data.tmpDir);
                 break;
             }
             case 'validateGitURL': {
@@ -104,7 +102,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
             data: {
                 devfileDisplayName: selectedDevfile ? (selectedDevfile.name) : (recommendedDevfile.devfile.name),
                 componentName: componentName,
-                tmpDirUri: tmpDir,
                 gitDestinationPath: projectFolder,
                 isFromTemplateProject: false,
             }
@@ -197,6 +194,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                                                     setSelectedDevfile(undefined);
                                                     setCloneFailed(false);
+                                                    window['vscodeApi'].postMessage({
+                                                        action: 'deleteClonedRepo'
+                                                    });
                                                 }}
                                                 sx={{ marginRight: 'auto' }}>
                                                 BACK
@@ -234,6 +234,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 setSelectedDevfile(undefined);
                                                 setCloneFailed(false);
                                                 setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                                window['vscodeApi'].postMessage({
+                                                    action: 'deleteClonedRepo'
+                                                });
                                             }}
                                             sx={{ marginRight: 'auto' }}>
                                             BACK
