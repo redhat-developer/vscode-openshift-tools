@@ -273,7 +273,7 @@ const SelectTemplateProject = React.forwardRef(
                                     }}
                                     disabled={!selectedTemplateProject}
                                 >
-                                    Next
+                                    Use Devfile
                                 </Button>
                             </Stack>
                         </Stack>
@@ -452,7 +452,6 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         <Stack
                             direction="column"
                             sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
-                            spacing={2}
                             divider={<Divider />}
                             width="100%"
                         >
