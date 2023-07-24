@@ -7,6 +7,7 @@ import { ChangeEvent } from 'react';
 import { ComponentTypeDescription, Registry } from '../../odo/componentType';
 import { StarterProject } from '../../odo/componentTypeDescription';
 import { ChartResponse } from '../helm-chart/helmChartType';
+import { Uri } from 'vscode';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -23,15 +24,15 @@ export interface StarterProjectDisplayProps extends DefaultProps {
 }
 
 export interface SearchBarProps extends DefaultProps {
-    title: string,
+    title: string;
     onSearchBarChange: (value: string) => void;
     searchBarValue: string;
     resultCount: number;
 }
 
 export interface FilterProps extends DefaultProps {
-    id: string,
-    registries?: Registry[],
+    id: string;
+    registries?: Registry[];
     onCheckBoxChange: (value: string | string[]) => void;
 }
 
@@ -51,4 +52,25 @@ export interface DevfileHomePageProps extends React.AnchorHTMLAttributes<HTMLAnc
 export interface HelmChartHomePageProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
     helmEntries: ChartResponse[];
     themeKind: number;
+}
+
+export interface CreateFunctionPageProps extends DefaultProps {
+    onCreateSubmit: (name: string, language: string, template: string, location: Uri, image: string) => void;
+}
+
+export interface BuildFunctionPageProps extends DefaultProps {
+    name: string;
+    loadScreen: boolean;
+    onBuildSubmit: (image: string, location: Uri) => void;
+}
+
+export interface ModalProp extends DefaultProps {
+    show: boolean;
+}
+
+export interface RunFunctionPageProps extends DefaultProps {
+    name: string;
+    folderPath: Uri;
+    skip: (stepCount: number) => void;
+    onRunSubmit: (folderPath: Uri, build: boolean) => void;
 }

@@ -68,7 +68,10 @@ export class ToolsConfig {
     public static async getVersion(location: string): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
-            const result = await CliChannel.getInstance().execute(`"${location}" version --client`);
+            let result = await CliChannel.getInstance().execute(`"${location}" version --client`);
+            if (result.stderr && result.stderr.indexOf('unknown flag: --client') !== -1) {
+                result = await CliChannel.getInstance().execute(`"${location}" version`);
+            }
             if (result.stdout) {
                 let trimmedText = result.stdout;
                 if(location.indexOf('helm') !== -1) {

@@ -40,6 +40,7 @@ export class Cluster extends OpenShiftItem {
             .then(async (result) => {
                 if (result.stderr === '') {
                     Cluster.explorer.refresh();
+                    Cluster.serverlessView.refresh();
                     void commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
                     if (logoutInfo === 'Yes') {
@@ -56,6 +57,7 @@ export class Cluster extends OpenShiftItem {
     @vsCommand('openshift.explorer.refresh')
     static refresh(): void {
         Cluster.explorer.refresh();
+        Cluster.serverlessView.refresh();
     }
 
     @vsCommand('openshift.about')
@@ -552,6 +554,7 @@ export class Cluster extends OpenShiftItem {
     static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
         if (result.stderr === '') {
             Cluster.explorer.refresh();
+            Cluster.serverlessView.refresh();
             await commands.executeCommand('setContext', 'isLoggedIn', true);
             return `Successfully logged in to '${clusterURL}'`;
         }

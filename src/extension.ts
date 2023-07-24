@@ -25,6 +25,7 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
+import { ServerlessFunctionView } from './serveressFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
@@ -95,6 +96,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
+        ServerlessFunctionView.getInstance(),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));

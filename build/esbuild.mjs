@@ -17,6 +17,7 @@ const webviews = [
     'log',
     'welcome',
     'feedback',
+    'serverless-function',
     'add-service-binding',
 ];
 

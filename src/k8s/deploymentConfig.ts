@@ -27,6 +27,9 @@ export class DeploymentConfig {
         getDeploymentConfigs(): CommandText {
             return new CommandText('oc get deploymentConfig -o json');
         },
+        getDeploymentFunctions(): CommandText {
+            return new CommandText('func list -o json');
+        },
         showDeploymentConfigLog(deploymentConfig: string): CommandText {
             return new CommandText('oc logs', `dc/${deploymentConfig}`);
         },

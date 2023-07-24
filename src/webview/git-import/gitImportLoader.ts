@@ -22,6 +22,7 @@ import { DevfileConverter } from './devfileConverter';
 import { gitUrlParse } from './gitParse';
 import treeKill = require('tree-kill')
 import cp = require('child_process');
+import { validateName } from '../common/utils';
 let panel: vscode.WebviewPanel;
 let childProcess: cp.ChildProcess;
 let forceCancel = false;
@@ -84,7 +85,13 @@ async function gitImportMessageListener(event: any): Promise<any> {
             validateGitURL(event);
             break;
         case 'validateComponentName':
-            validateComponentName(event)
+            const flag = validateName(event.param);
+            panel?.webview.postMessage({
+                action: event.action,
+                error: !flag ? false : true,
+                helpText: !flag ? 'A unique name given to the component that will be used to name associated resources.' : flag,
+                compName: event.param
+            });
             break;
         case 'validateDevFilePath':
             validateDevFilePath(event)
@@ -325,19 +332,6 @@ function clone(url: string, location: string): Promise<CloneProcess> {
             error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
         }
     )));
-}
-
-function validateComponentName(event: any) {
-    let validationMessage = OpenShiftItem.emptyName(`Required ${event.param}`, event.param.trim());
-    if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${event.param}.
-        Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, event.param);
-    if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${event.param} should be between 2-63 characters`, event.param, 0);
-    panel?.webview.postMessage({
-        action: event.action,
-        error: !validationMessage ? false : true,
-        helpText: !validationMessage ? 'A unique name given to the component that will be used to name associated resources.' : validationMessage,
-        compName: event.param
-    });
 }
 
 function validateDevFilePath(event: any) {

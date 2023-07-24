@@ -339,10 +339,7 @@
 				"command": "openshift.explorer.refresh",
 				"title": "Refresh Application Explorer View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.explorer.reportIssue",
@@ -620,10 +617,7 @@
 				"command": "openshift.componentTypesView.refresh",
 				"title": "Refresh Components Types View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.componentType.openStarterProjectRepository",
@@ -683,10 +677,7 @@
 				"command": "openshift.componentsView.refresh",
 				"title": "Refresh Components View",
 				"category": "OpenShift",
-				"icon": {
-					"dark": "images/title/dark/icon-refresh.svg",
-					"light": "images/title/light/icon-refresh.svg"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "openshift.componentTypesView.registry.openInView",
@@ -789,6 +780,48 @@
 				"command": "openshift.sandbox.signup",
 				"title": "Provision OpenShift Developer Sandbox",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.openFunction",
+				"title": "Open Function",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.createFunction",
+				"title": "Create Function",
+				"category": "OpenShift",
+				"icon": "$(plus)"
+			},
+			{
+				"command": "openshift.Serverless.refresh",
+				"title": "Refresh Serverless Function View",
+				"category": "OpenShift",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "openshift.Serverless.build",
+				"title": "Build",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.deploy",
+				"title": "Deploy",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.buildAndRun",
+				"title": "Build and Run",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.run",
+				"title": "Run",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.stopRun",
+				"title": "Stop",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -825,6 +858,10 @@
 				{
 					"id": "openshiftComponentTypesView",
 					"name": "Devfile Registries"
+				},
+				{
+					"id": "openshiftServerlessFunctionsView",
+					"name": "Serverless Functions"
 				},
 				{
 					"id": "openshiftDebugView",
@@ -1083,7 +1120,36 @@
 				{
 					"command": "openshift.component.binding.add",
 					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.openFunction",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.refresh",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.build",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.deploy",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.buildAndRun",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.run",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.stopRun",
+					"when": "false"
 				}
+
 			],
 			"view/title": [
 				{
@@ -1145,6 +1211,16 @@
 					"command": "openshift.component.openImportFromGit",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
+				},
+				{
+					"command": "openshift.Serverless.createFunction",
+					"when": "view == openshiftServerlessFunctionsView",
+					"group": "navigation@0"
+				},
+				{
+					"command": "openshift.Serverless.refresh",
+					"when": "view == openshiftServerlessFunctionsView",
+					"group": "navigation@1"
 				}
 			],
 			"view/item/context": [
@@ -1230,7 +1306,7 @@
 				},
 				{
 					"command": "openshift.project.create",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
 					"group": "c1"
 				},
 				{
@@ -1405,6 +1481,22 @@
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
+				},
+				{
+					"command": "openshift.Serverless.build",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.buildAndRun",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.run",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
+				},
+				{
+					"command": "openshift.Serverless.stopRun",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(running)$/"
 				}
 			]
 		},

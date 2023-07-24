@@ -26,13 +26,14 @@ function isFile(path: string) {
     }
 }
 
-function isComponent(folder: WorkspaceFolder) {
+function isComponentorFunction(folder: WorkspaceFolder) {
     return !isFile(path.join(folder.uri.fsPath, 'devfile.yaml'))
-        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'));
+        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'))
+        && !isFile(path.join(folder.uri.fsPath, 'func.yaml'));
 }
 
-function isComponentFilter(wsFolder: WorkspaceFolder) {
-    return isComponent(wsFolder);
+function componentAndFuctionFilter(wsFolder: WorkspaceFolder) {
+    return isComponentorFunction(wsFolder);
 }
 
 function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
@@ -42,14 +43,22 @@ function createWorkspaceFolderItem(wsFolder: WorkspaceFolder) {
     };
 }
 
-export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri> {
+export function selectWorkspaceFolders(): Uri[] {
+    const workspacePaths: Uri[] = [];
+    if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+        workspace.workspaceFolders.filter(componentAndFuctionFilter).map(createWorkspaceFolderItem).map((workSpaceItem) => workspacePaths.push(workSpaceItem.uri));
+    }
+    return workspacePaths;
+}
+
+export async function selectWorkspaceFolder(skipWindowPick = false, label?: string, folderName?: string): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
     let choice:WorkspaceFolderItem | QuickPickItem;
     let workspacePath: Uri;
 
     if (!skipWindowPick) {
         if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-            folders = workspace.workspaceFolders.filter(isComponentFilter).map(createWorkspaceFolderItem);
+            folders = workspace.workspaceFolders.filter(componentAndFuctionFilter).map(createWorkspaceFolderItem);
         }
 
         if (folders.length === 1 && workspace.workspaceFolders.length === 1) {
@@ -71,7 +80,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(Platform.getUserHomePath()),
-            openLabel: skipWindowPick ? 'Select as Repository Destination' : 'Add context folder for component in workspace.',
+            openLabel: label || 'Add context folder for component in workspace.',
         });
         if (!selectedFolders) return null;
         if (fs.existsSync(path.join(selectedFolders[0].fsPath, '.odo', 'config.yaml'))) {
@@ -79,6 +88,11 @@ export async function selectWorkspaceFolder(skipWindowPick = false): Promise<Uri
                 'The selected folder already contains a component. Please select a different folder.',
             );
             return selectWorkspaceFolder(skipWindowPick);
+        } else if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
+            void window.showInformationMessage(
+                `The folder ${folderName} already exists. Please select a different folder.`,
+            );
+            return selectWorkspaceFolder(skipWindowPick, label, folderName);
         }
         [workspacePath] = selectedFolders;
     } else if (choice) {
