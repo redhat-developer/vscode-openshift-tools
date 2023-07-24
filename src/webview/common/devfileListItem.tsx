@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Check, Close } from '@mui/icons-material';
-import { Box, Button, Chip, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
 
@@ -13,6 +13,31 @@ export type DevfileListItemProps = {
 };
 
 export function DevfileListItem(props: DevfileListItemProps) {
+    return (
+        <>
+            {props.buttonCallback ? (
+                <Box
+                    onClick={props.buttonCallback}
+                    sx={{
+                        padding: '1em',
+                        '&:hover': {
+                            backgroundColor: 'var(--vscode-editor-hoverHighlightBackground)',
+                            cursor: 'pointer'
+                        },
+                    }}>
+                    <DevfileListContent devfile={props.devfile} buttonCallback={props.buttonCallback} />
+                </Box >
+            ) : (
+                <>
+                    <DevfileListContent devfile={props.devfile} />
+                </>
+            )
+            }
+        </>
+    );
+}
+
+function DevfileListContent(props: DevfileListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
     return (
@@ -91,13 +116,6 @@ export function DevfileListItem(props: DevfileListItemProps) {
                     </Stack>
                 </Stack>
             </Stack>
-            {props.buttonCallback ? (
-                <Button variant="contained" onClick={props.buttonCallback}>
-                    Use Devfile
-                </Button>
-            ) : (
-                <></>
-            )}
         </Stack>
     );
 }
