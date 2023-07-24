@@ -34,6 +34,8 @@ type Message = {
     data: any;
 };
 
+let tmpFolder: Uri;
+
 export default class CreateComponentLoader {
     static panel: WebviewPanel;
 
@@ -71,6 +73,7 @@ export default class CreateComponentLoader {
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
+            fs.rmdir(tmpFolder?.fsPath, { recursive: true });
         });
 
         panel.iconPath = Uri.file(
@@ -191,7 +194,7 @@ export default class CreateComponentLoader {
              * The panel requested to get the receommended devfile given the selected project.
              */
             case 'getRecommendedDevfileFromGit': {
-                const tmpFolder: Uri = Uri.parse(await promisify(tmp.dir)());
+                tmpFolder = Uri.parse(await promisify(tmp.dir)());
                 const cloneProcess: CloneProcess = await clone(message.data.url, tmpFolder.fsPath, message.data.branch);
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
@@ -238,8 +241,8 @@ export default class CreateComponentLoader {
                             strategy = 'fromGitRepo';
                             componentFolder = path.join(message.data.gitDestinationPath, componentName);
                             await fs.mkdir(componentFolder);
-                            await fse.copy(message.data.tmpDirUri.fsPath, componentFolder);
-                            await fs.rm(message.data.tmpDirUri.fsPath, { force: true, recursive: true });
+                            await fse.copy(tmpFolder.fsPath, componentFolder);
+                            await fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
                         await OdoImpl.Instance.createComponentFromLocation(devfileType, componentName, Uri.file(componentFolder));
@@ -273,6 +276,7 @@ export default class CreateComponentLoader {
                         data: err.message,
                     });
                 }
+                break;
             }
             /**
              * The panel requested to validate the git repository URL.
@@ -286,6 +290,13 @@ export default class CreateComponentLoader {
              */
             case 'validateFolderPath': {
                 await validateFolderPath(message.data);
+                break;
+            }
+            /**
+             * The git import workflow was cancelled, delete the cloned git repo in the temp directory.
+             */
+            case 'deleteClonedRepo': {
+                await fs.rmdir(tmpFolder.fsPath, { recursive: true });
                 break;
             }
         }
@@ -346,8 +357,7 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: {
-                    devfile: devfile,
-                    tmpDir: uri
+                    devfile: devfile
                 }
             });
         }
