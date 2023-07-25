@@ -127,22 +127,6 @@ export class Command {
         return new CommandText('oc version');
     }
 
-    static addHelmRepo(): CommandText {
-       return new CommandText('helm repo add openshift https://charts.openshift.io/');
-    }
-
-    static updateHelmRepo(): CommandText {
-        return new CommandText('helm repo update');
-     }
-
-    static installHelmChart(name: string, chartName: string, version: string): CommandText {
-        return new CommandText(`helm install ${name} openshift/${chartName} --version ${version}`);
-    }
-
-    static unInstallHelmChart(name: string): CommandText {
-        return new CommandText(`helm uninstall ${name}`);
-    }
-
     static printOcVersionJson(): CommandText {
         return new CommandText('oc version -ojson');
     }

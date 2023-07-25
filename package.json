@@ -1477,7 +1477,7 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
 				},
 				{
 					"command": "openshift.resource.unInstall",
