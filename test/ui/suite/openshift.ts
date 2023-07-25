@@ -6,6 +6,19 @@ import { expect } from 'chai';
 import { ActivityBar, By, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench, waitForAttributeValue } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 
+async function collapse(section: ViewSection){
+    try {
+        await section.collapse();
+    } catch {
+        if (await section.isExpanded()) {
+            const mainPanel = await section.findElement(By.className('pane-header'));
+            const arrowPanel = await section.findElement(By.className('codicon'));
+            await arrowPanel.click();
+            await section.getDriver().wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
+        }
+    }
+}
+
 export function checkOpenshiftView() {
     describe('OpenShift View', () => {
         let view: SideBarView;
@@ -19,21 +32,12 @@ export function checkOpenshiftView() {
 
         it('Displays all view sections', async function () {
             this.timeout(10_000);
-            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions];
+            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions];
             const content = view.getContent();
             for (const sectionTitle of expected) {
                 const section = await content.getSection(sectionTitle);
                 expect(await section.getTitle()).to.eq(sectionTitle);
-                try {
-                    await section.collapse();
-                } catch {
-                    if(await section.isExpanded()){
-                        const mainPanel = await section.findElement(By.className('pane-header'));
-                        const arrowPanel = await section.findElement(By.className('codicon'));
-                        await arrowPanel.click();
-                        await section.getDriver().wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
-                    }
-                }
+                await collapse(section);
             }
         });
 
@@ -46,7 +50,7 @@ export function checkOpenshiftView() {
                 await explorer.expand();
                 welcome = await explorer.findWelcomeContent();
 
-                for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions]) {
+                for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions]) {
                     await (await view.getContent().getSection(item)).collapse();
                 }
             });
@@ -78,6 +82,8 @@ export function checkOpenshiftView() {
             let welcome: WelcomeContentSection;
 
             before(async () => {
+                section = await view.getContent().getSection(VIEWS.appExplorer);
+                await collapse(section);
                 section = await view.getContent().getSection(VIEWS.components);
                 await section.expand();
                 welcome = await section.findWelcomeContent();
