@@ -35,10 +35,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         return (
             <div className='mainContainer margin'>
                 <div className='title'>
-                    <Typography variant='h5'>Serverless Function</Typography>
+                    <Typography variant='h5'>OpenShift Serveless Functions</Typography>
                 </div>
                 <div className='subTitle'>
-                    <Typography>The OpenShift Serverless Functions enables developers to easily create, build, run, invoke and deploy stateless, event-driven functions as Knative Services through the guided workflow via the extension</Typography>
+                    <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
                 </div>
                 <Container maxWidth='md' sx={{
                     border: '1px groove var(--vscode-activityBar-activeBorder)',
@@ -46,9 +46,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                     color: '#99CCF3'
                 }}>
                     <Box
-                        display="flex"
-                        alignItems="center"
-                        maxWidth={'md'}
+                        display='flex'
                         flexDirection={'column'}
                     >
                         <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
