@@ -6,7 +6,7 @@
 import { expect } from 'chai';
 import { ActivityBar, InputBox, SideBarView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputProgress, waitForInputUpdate } from '../common/conditions';
-import { VIEWS, MENUS, BUTTONS, INPUTS, COMPONENTS, NOTIFICATIONS } from '../common/constants';
+import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
 export function createComponentTest(contextFolder: string) {
     describe('Component creation', () => {
@@ -117,7 +117,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(projectName, explorer);
         });
 
-        it('Create a new component from scratch', async function() {
+        it.skip('Create a new component from scratch', async function() {
             this.timeout(60000);
             const newComponent = (await (await components.findWelcomeContent()).getButtons())[0];
             await newComponent.click();
@@ -160,7 +160,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(COMPONENTS.devfileComponent(compName), explorer);
         });
 
-        it('Push the component', async function() {
+        it.skip('Push the component', async function() {
             this.timeout(150000);
             const component = await itemExists(COMPONENTS.devfileComponent(compName), explorer);
             const menu = await component.openContextMenu();

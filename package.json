@@ -620,11 +620,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentType.newComponent",
-				"title": "New Component",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.explorer.addCluster.openLaunchSandboxPage",
 				"title": "Launch Developer Sandbox",
 				"category": "OpenShift"
@@ -977,10 +972,6 @@
 				},
 				{
 					"command": "openshift.component.log.palette",
-					"when": "false"
-				},
-				{
-					"command": "openshift.componentType.newComponent",
 					"when": "false"
 				},
 				{
@@ -1396,18 +1387,6 @@
 						},
 						"completionEvents": [
 							"onCommand:openshift.componentTypesView.registry.openInView"
-						]
-					},
-					{
-						"id": "createComponent",
-						"title": "Create a Component using local workspace",
-						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.openCreateComponent)",
-						"media": {
-							"image": "images/walkthrough/createComponent.gif",
-							"altText": "create component"
-						},
-						"completionEvents": [
-							"onCommand:openshift.componentType.newComponent"
 						]
 					},
 					{
