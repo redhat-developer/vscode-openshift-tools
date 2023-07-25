@@ -49,9 +49,10 @@ export class Welcome extends React.Component<DefaultProps, {
         });
     }
 
-    openGetStarted = (): void => {
+    openGetStarted = (name: string): void => {
         VSCodeMessage.postMessage({
-            'action': 'callGetStartedPage'
+            action: 'callGetStartedPage',
+            method: name
         });
         return;
     }
@@ -269,8 +270,13 @@ export class Welcome extends React.Component<DefaultProps, {
                                     <a
                                         className='button button--flat'
                                         title='Open the Get Started with OpenShift Toolkit walkthrough'
-                                        onClick={this.openGetStarted}
+                                        onClick={() => this.openGetStarted('openshiftWalkthrough')}
                                     >Get Started Walkthrough</a>
+                                    <a
+                                        className='button button--flat'
+                                        title='Open the Get Started with OpenShift Toolkit Serverless Functions walkthrough'
+                                        onClick={() => this.openGetStarted('serverlessFunctionWalkthrough')}
+                                    >Get Started Serverless Function Walkthrough</a>
                                 </div>
                             </div>
                         </div>
