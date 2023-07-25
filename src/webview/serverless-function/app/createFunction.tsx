@@ -189,8 +189,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         const filter = createFilterOptions<string>();
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
-            <Stack direction='column' spacing={4} margin='auto'
-                marginTop={5} marginBottom={5} marginLeft={5} marginRight={5}>
+            <Stack direction='column' spacing={4} margin={5}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
