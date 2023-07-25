@@ -71,7 +71,7 @@ export default class CreateComponentLoader {
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
-            fs.rmdir(tmpFolder?.fsPath, { recursive: true });
+            fs.rm(tmpFolder?.fsPath, { force: true, recursive: true });
         });
 
         panel.iconPath = Uri.file(
@@ -236,7 +236,6 @@ export default class CreateComponentLoader {
                             componentFolder = path.join(message.data.gitDestinationPath, componentName);
                             await fs.mkdir(componentFolder);
                             await fse.copy(tmpFolder.fsPath, componentFolder);
-                            await fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
                         }
                         await OdoImpl.Instance.createComponentFromLocation(getDevfileType(message.data.devfileDisplayName), componentName, Uri.file(componentFolder));
                     }
@@ -287,7 +286,7 @@ export default class CreateComponentLoader {
              * The git import workflow was cancelled, delete the cloned git repo in the temp directory.
              */
             case 'deleteClonedRepo': {
-                await fs.rmdir(tmpFolder.fsPath, { recursive: true });
+                await fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
                 break;
             }
         }
