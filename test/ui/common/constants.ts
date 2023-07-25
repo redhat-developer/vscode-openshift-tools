@@ -13,6 +13,7 @@ export const VIEWS = {
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
     devFileRegistry: 'DefaultDevfileRegistry',
+    serverlessFunctions: 'Serverless Functions',
 };
 
 export const BUTTONS = {

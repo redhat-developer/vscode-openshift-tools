@@ -19,7 +19,7 @@ export function checkOpenshiftView() {
 
         it('Displays all view sections', async function () {
             this.timeout(10_000);
-            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions];
+            const expected = [VIEWS.appExplorer, VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions];
             const content = view.getContent();
             for (const sectionTitle of expected) {
                 const section = await content.getSection(sectionTitle);
@@ -46,7 +46,7 @@ export function checkOpenshiftView() {
                 await explorer.expand();
                 welcome = await explorer.findWelcomeContent();
 
-                for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.debugSessions]) {
+                for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions]) {
                     await (await view.getContent().getSection(item)).collapse();
                 }
             });
