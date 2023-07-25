@@ -276,7 +276,7 @@ export class Welcome extends React.Component<DefaultProps, {
                                         className='button button--flat'
                                         title='Open the Get Started with OpenShift Toolkit Serverless Functions walkthrough'
                                         onClick={() => this.openGetStarted('serverlessFunctionWalkthrough')}
-                                    >Get Started Serverless Function Walkthrough</a>
+                                    >OpenShift Serverless Function Walkthrough</a>
                                 </div>
                             </div>
                         </div>
