@@ -189,15 +189,15 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         const filter = createFilterOptions<string>();
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
-            <>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 200 }}>
-                        <Button variant='contained'
-                            disabled={true}
-                            className='labelStyle'>
-                            Function Name *
-                        </Button>
-                    </FormControl>
+            <Stack direction='column' spacing={4} margin='auto'
+                marginTop={5} marginBottom={5} marginLeft={5} marginRight={5}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Function Name *
+                    </Button>
                     <TextField
                         type='string'
                         variant='outlined'
@@ -216,15 +216,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             }
                         }}
                         helperText={functionData.helpText} />
-                </FormControl>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 200 }}>
-                        <Button variant='contained'
-                            disabled={true}
-                            className='labelStyle'>
-                            Build Image *
-                        </Button>
-                    </FormControl>
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Build Image *
+                    </Button>
                     <Autocomplete
                         defaultValue={imageData.name}
                         onChange={(_event, value: string) => {
@@ -282,15 +281,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                 placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
                         )}
                     />
-                </FormControl>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 200 }}>
-                        <Button variant='contained'
-                            disabled={true}
-                            className='labelStyle'>
-                            Language *
-                        </Button>
-                    </FormControl>
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Language *
+                    </Button>
                     <Autocomplete
                         value={language}
                         id='language-dropdown'
@@ -318,16 +316,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             <TextField {...params} placeholder='Select the Language Runtime' />
                         )}
                     />
-                </FormControl>
-                <FormControl sx={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 0.2 }}>
-                    <FormControl sx={{ width: 200 }}>
-                        <Button variant='contained'
-                            disabled={true}
-                            className='labelStyle'>
-                            Template *
-                        </Button>
-                    </FormControl>
-
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Template *
+                    </Button>
                     <Autocomplete
                         value={template}
                         id='template-dropdown'
@@ -349,15 +345,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             <TextField {...params} placeholder='Select the Function template' />
                         )}
                     />
-                </FormControl>
-                <FormControl style={{ margin: '2rem 0 0 2rem', flexFlow: 'row', width: 650, gap: 1.2 }}>
-                    <FormControl sx={{ width: 200 }}>
-                        <Button variant='contained'
-                            disabled={true}
-                            className='labelStyle'>
-                            Folder *
-                        </Button>
-                    </FormControl>
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Folder *
+                    </Button>
                     <Autocomplete
                         value={wsFolderPath ? wsFolderPath.fsPath : ''}
                         id='folder-dropdown'
@@ -377,14 +372,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                 <Stack direction='row' alignItems='center' gap={1}>
                                     {
                                         typeof option === 'string' ?
-                                        <>
-                                        <AddIcon />
-                                        <Typography variant='body1'>{option}</Typography>
-                                        </> :
-                                        <>
-                                        <FolderOpenIcon />
-                                        <Typography variant='body1'>{option.fsPath}</Typography>
-                                        </>
+                                            <>
+                                                <AddIcon />
+                                                <Typography variant='body1'>{option}</Typography>
+                                            </> :
+                                            <>
+                                                <FolderOpenIcon />
+                                                <Typography variant='body1'>{option.fsPath}</Typography>
+                                            </>
                                     }
                                 </Stack>
                             </li>
@@ -395,8 +390,8 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                             <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
                         )}
                     />
-                </FormControl>
-                <FormControl sx={{ margin: '2rem 0 2rem 2rem', width: 650 }}>
+                </Stack>
+                <Stack direction='column' spacing={0.2}>
                     <Button variant='contained'
                         disabled={this.handleCreateBtnDisable()}
                         className='buttonStyle'
@@ -404,8 +399,8 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         onClick={() => this.createFunction()}>
                         Create
                     </Button>
-                </FormControl>
-            </>
+                </Stack>
+            </Stack>
         )
     }
 }

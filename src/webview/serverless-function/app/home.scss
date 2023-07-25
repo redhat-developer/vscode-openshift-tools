@@ -133,8 +133,6 @@ button {
 
 .MuiFormControl-root {
     border: none;
-    max-width: 70%;
-
     &:hover {
         border: none;
     }
@@ -167,10 +165,6 @@ button {
 
 .Mui-active {
     color: var(--vscode-button-hoverBackground) !important;
-}
-
-.MuiOutlinedInput-input {
-    width: 70% !important;
 }
 
 .MuiAutocomplete-noOptions {
