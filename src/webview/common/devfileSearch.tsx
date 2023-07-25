@@ -450,6 +450,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
                         {/* 5em is the padding at the top of the page */}
                         <Stack
+                            id="devfileList"
                             direction="column"
                             sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
                             divider={<Divider />}

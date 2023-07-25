@@ -70,6 +70,7 @@ function DevfileListContent(props: DevfileListItemProps) {
             >
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Typography
+                        id="devfileName"
                         variant="body1"
                         sx={{
                             whiteSpace: 'nowrap',
