@@ -71,7 +71,9 @@ export default class CreateComponentLoader {
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
-            fs.rm(tmpFolder?.fsPath, { force: true, recursive: true });
+            if (tmpFolder) {
+                fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
+            }
         });
 
         panel.iconPath = Uri.file(
