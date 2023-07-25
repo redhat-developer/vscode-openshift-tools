@@ -1611,7 +1611,7 @@
 						"title": "Create Function",
 						"description": "Creates a Function in the mentioned directory with the specified language/runtime selected and handles HTTP events. \n[Create Function](command:openshift.Serverless.createFunction)",
 						"media": {
-							"image": "https://raw.githubusercontent.com/wiki/redhat-developer/vscode-openshift-tools/walkthrough/serverless-function/create.gif",
+							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/create.gif",
 							"altText": "Create function"
 						},
 						"completionEvents": [
@@ -1623,7 +1623,7 @@
 						"title": "Build Function",
 						"description": "Build a function project (source code in the workspace) as a container image and push to a registry.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/wiki/redhat-developer/vscode-openshift-tools/walkthrough/serverless-function/build.gif",
+							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/build.gif",
 						  	"altText": "Build function"
 						}
 					  },
@@ -1632,7 +1632,7 @@
 						"title": "Run the Function locally",
 						"description": "Run your function to see how it works locally before to push it on your cluster.\nOnly a function which has the source code opened in the IDE can be run. Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Run\". The output channel will show up with run command where you can see the logs.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/wiki/redhat-developer/vscode-openshift-tools/walkthrough/serverless-function/run.gif",
+							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/run.gif",
 						  	"altText": "Run function"
 						}
 					  }
