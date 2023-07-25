@@ -1628,7 +1628,7 @@
 						}
 					  },
 					  {
-						"id": "Run Function",
+						"id": "runFunction",
 						"title": "Run the Function locally",
 						"description": "Run your function to see how it works locally before to push it on your cluster.\nOnly a function which has the source code opened in the IDE can be run. Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Run\". The output channel will show up with run command where you can see the logs.",
 						"media": {
