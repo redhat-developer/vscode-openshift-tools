@@ -143,6 +143,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                     },
                     {
                         label: 'Getting Started Walkthrough'
+                    },
+                    {
+                        label: 'Getting Started Serverless Function Walkthrough'
                     }
                 ]);
             switch (selection?.label) {
@@ -168,7 +171,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                     await commands.executeCommand('openshift.welcome');
                     break;
                 case 'Getting Started Walkthrough':
-                    await commands.executeCommand('openshift.getStarted');
+                    await commands.executeCommand('openshift.getStarted', 'openshiftWalkthrough');
+                    break;
+                case 'Getting Started Serverless Function Walkthrough':
+                    await commands.executeCommand('openshift.getStarted', 'serverlessFunctionWalkthrough');
                     break;
                 default:
                     break;

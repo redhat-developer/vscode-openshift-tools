@@ -19,11 +19,10 @@ export class WelcomePage {
         await WelcomeViewLoader.loadView('Welcome - OpenShift Toolkit');
     }
 
-
     @vsCommand('openshift.getStarted')
-    static async showGetStarted(): Promise<void> {
+    static async showGetStarted(name: string): Promise<void> {
         await vscode.commands.executeCommand('workbench.action.openWalkthrough', {
-            category: 'redhat.vscode-openshift-connector#openshiftWalkthrough'
+            category: `redhat.vscode-openshift-connector#${name}`
         }, false);
     }
 }

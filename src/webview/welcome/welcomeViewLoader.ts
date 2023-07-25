@@ -29,7 +29,7 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             }).catch(e => undefined);
             break;
         case 'callGetStartedPage':
-            vscode.commands.executeCommand('openshift.getStarted');
+            vscode.commands.executeCommand('openshift.getStarted', event.method);
             break;
         case 'open':
             await vscode.commands.executeCommand('vscode.open', event.param);
