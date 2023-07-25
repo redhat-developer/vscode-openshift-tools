@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as YAML from 'yaml';
 import { OpenShiftExplorer } from '../../explorer';
-import { ComponentTypesView } from '../../registriesView';
+import * as Helm from '../../helm/helm';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
@@ -36,7 +36,7 @@ export class HelmCommand {
                 chartName: event.chartName,
                 show: true
             });
-            await ComponentTypesView.instance.installHelmChart(event.name, event.chartName, event.version);
+            await Helm.installHelmChart(event.name, event.chartName, event.version);
             vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
             OpenShiftExplorer.getInstance().refresh();
             panel.webview.postMessage({
@@ -120,8 +120,8 @@ export default class HelmChartLoader {
 
 async function getHelmCharts(eventName: string): Promise<void> {
     if (helmRes.length === 0) {
-        await ComponentTypesView.instance.addHelmRepo();
-        await ComponentTypesView.instance.updateHelmRepo();
+        await Helm.addHelmRepo();
+        await Helm.updateHelmRepo();
         const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
             method: 'GET'
         });

@@ -3,38 +3,33 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Context, KubernetesObject } from '@kubernetes/client-node';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
-    Disposable,
+    commands, Disposable,
     Event,
-    EventEmitter,
-    ThemeIcon,
+    EventEmitter, extensions, ThemeIcon,
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
     TreeView,
-    Uri,
-    commands,
-    extensions,
-    version,
-    window,
+    Uri, version,
+    window
 } from 'vscode';
-
-import * as fs from 'fs';
-import * as path from 'path';
-import { Platform } from './util/platform';
-
-import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { CliChannel } from './cli';
+import * as Helm from './helm/helm';
 import { Command } from './odo/command';
-import { Odo3, newInstance } from './odo3';
+import { newInstance, Odo3 } from './odo3';
 import { KubeConfigUtils } from './util/kubeUtils';
+import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
-type ExplorerItem = KubernetesObject | Context | TreeItem;
+type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem;
 
 type PackageJSON = {
   version: string;
@@ -142,8 +137,18 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             };
         }
 
-        // otherwise it is a KubernetesObject instance
+        // It's a Helm installation
+        if ('chart' in element) {
+            return {
+                contextValue: 'openshift.k8sObject.helm',
+                label: element.name,
+                collapsibleState: TreeItemCollapsibleState.None,
+                description: 'Helm Release',
+                iconPath: path.resolve(__dirname, '../../images/context/helm.png'),
+            };
+        }
 
+        // otherwise it is a KubernetesObject instance
         if ('kind' in element) {
             if (element.kind === 'project') {
                 return {
@@ -154,8 +159,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
             return {
-                contextValue: element.metadata.labels['helm.sh/chart'] ? 'openshift.k8sObject.helm': 'openshift.k8sObject',
+                contextValue: 'openshift.k8sObject',
                 label: element.metadata.name,
+                description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
                 collapsibleState: TreeItemCollapsibleState.None,
                 iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
                 command: {
@@ -229,7 +235,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else {
-            result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments()];
+            result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments(), ...await Helm.getHelmReleases()];
         }
         // don't show Open In Developer Dashboard if not openshift cluster
         const openshiftResources = await CliChannel.getInstance().executeTool(Command.isOpenshiftCluster());
@@ -260,9 +266,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     @vsCommand('openshift.resource.unInstall')
-    public static async unInstallHelmChart(component: KubernetesObject) {
-        return Progress.execFunctionWithProgress(`Uninstalling ${component.metadata.name}`, async () => {
-            await CliChannel.getInstance().executeTool(Command.unInstallHelmChart(component.metadata.name));
+    public static async unInstallHelmChart(release: Helm.HelmRelease) {
+        return Progress.execFunctionWithProgress(`Uninstalling ${release.name}`, async () => {
+            await Helm.unInstallHelmChart(release.name);
             OpenShiftExplorer.getInstance().refresh();
         });
     }
