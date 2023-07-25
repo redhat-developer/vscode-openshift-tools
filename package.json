@@ -35,6 +35,8 @@
 	"keywords": [
 		"OpenShift",
 		"Kubernetes",
+        "Serverless",
+        "Functions",
 		"Red Hat",
 		"devsandbox",
 		"kubernetes-extension-cloud-provider",
