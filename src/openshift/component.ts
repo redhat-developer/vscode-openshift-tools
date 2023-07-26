@@ -338,7 +338,6 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.exitDevMode')
-    @clusterRequired()
     static exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState) {
@@ -349,7 +348,6 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.forceExitDevMode')
-    @clusterRequired()
     static forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState && componentState.devTerminal) {

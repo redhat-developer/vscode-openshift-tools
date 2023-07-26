@@ -147,7 +147,21 @@ class OpenShiftTerminal {
     }
 
     startPty() {
-        this._pty = ptyInstance.spawn(this._file, this._args, this._options);
+        if (platform() === 'win32') {
+            const escapedArgs = Array.isArray(this._args)
+                ? this._args.join(' ')
+                : this._args;
+            this._pty = ptyInstance.spawn(
+                'C:\\WINDOWS\\system32\\cmd.EXE',
+                [
+                    '/c',
+                    `${this._file} ${escapedArgs}`,
+                ],
+                this._options,
+            );
+        } else {
+            this._pty = ptyInstance.spawn(this._file, this._args, this._options);
+        }
         this._disposables.push(
             this._pty.onData((data) => {
                 if (this._terminalRendering) {
