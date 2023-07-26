@@ -98,7 +98,10 @@
 		"tree-kill": "^1.2.2",
 		"unzip-stream": "^0.3.1",
 		"validator": "^13.7.0",
-		"vscode-kubernetes-tools-api": "^1.3.0"
+		"vscode-kubernetes-tools-api": "^1.3.0",
+		"xterm": "^5.1.0",
+		"xterm-addon-serialize": "^0.9.0",
+		"xterm-headless": "^5.1.0"
 	},
 	"devDependencies": {
 		"@devfile/api": "^2.2.0-alpha-1666195451",
@@ -176,13 +179,18 @@
 		"source-map-support": "^0.5.21",
 		"survey-react-ui": "^1.9.109",
 		"typescript": "^5.2.2",
-		"vscode-extension-tester": "^5.0.0 <5.7.0"
+		"vscode-extension-tester": "^5.0.0 <5.7.0",
+		"xterm-addon-fit": "^0.7.0",
+		"xterm-addon-web-links": "^0.8.0",
+		"xterm-addon-webgl": "^0.14.0"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
 		"onView:openshiftComponentTypesView",
 		"onView:kubernetes.cloudExplorer",
+		"onView:openShiftTerminalPanel",
+		"onView:openshiftView",
 		"onCommand:openshift.welcome",
 		"onCommand:openshift.getStarted",
 		"onCommand:openshift.about",
@@ -890,6 +898,13 @@
 					"title": "OpenShift",
 					"icon": "images/openshift_view.svg"
 				}
+			],
+			"panel": [
+				{
+					"icon": "images/openshift_view.svg",
+					"id": "openShiftTerminalPanel",
+					"title": "OpenShift Terminal"
+				}
 			]
 		},
 		"views": {
@@ -913,6 +928,13 @@
 				{
 					"id": "openshiftDebugView",
 					"name": "Debug Sessions"
+				}
+			],
+			"openShiftTerminalPanel": [
+				{
+					"id": "openShiftTerminalView",
+					"name": "OpenShift Terminal",
+					"type": "webview"
 				}
 			]
 		},
@@ -1507,7 +1529,7 @@
 				},
 				{
 					"command": "openshift.component.exitDevMode",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-(?:str)|(?:run).*/",
 					"group": "c1@3"
 				},
 				{

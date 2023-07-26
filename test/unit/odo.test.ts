@@ -6,7 +6,6 @@
 import * as chai from 'chai';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
@@ -15,7 +14,6 @@ import { CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
-import { WindowUtil } from '../../src/util/windowUtils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -105,24 +103,6 @@ suite('odo', () => {
             const result = await odoCli.execute(command, null, false);
 
             expect(result).deep.equals({ error: err, stdout: '', stderr: '' });
-        });
-
-        test('executeInTerminal send command to terminal and shows it', async () => {
-            const termFake: any = {
-                name:  'name',
-                processId: Promise.resolve(1),
-                sendText: sinon.stub(),
-                show: sinon.stub(),
-                hide: sinon.stub(),
-                dispose: sinon.stub()
-            };
-            toolsStub.restore();
-            toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves(path.join('segment1', 'segment2'));
-            const ctStub = sandbox.stub(WindowUtil, 'createTerminal').returns(termFake);
-            await odoCli.executeInTerminal(new CommandText('cmd'));
-            expect(termFake.sendText).calledOnce;
-            expect(termFake.show).calledOnce;
-            expect(ctStub).calledWith('OpenShift', process.cwd());
         });
     });
 

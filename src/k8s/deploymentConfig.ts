@@ -8,7 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Progress } from '../util/progress';
-import { vsCommand, VsCommandError } from '../vscommand';
+import { VsCommandError, vsCommand } from '../vscommand';
 import * as common from './common';
 
 export class DeploymentConfig {
@@ -93,7 +93,7 @@ export class DeploymentConfig {
     static async rcShowLog(context: { impl: any }): Promise<string> {
         const replica = await DeploymentConfig.selectReplica(context, 'Select a Replica to see the logs');
         if (replica) {
-            await DeploymentConfig.cli.executeInTerminal(DeploymentConfig.command.showLog(replica), undefined, `OpenShift: Show '${replica}' Replica Log`);
+            await DeploymentConfig.cli.executeInTerminal(DeploymentConfig.command.showLog(replica), undefined, `Show '${replica}' Replica Log`);
         }
         return replica;
     }

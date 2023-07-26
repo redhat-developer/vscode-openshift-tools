@@ -17,14 +17,16 @@ export function checkAboutCommand() {
             await activateCommand(command);
         })
 
-        it('New terminal opens', async function() {
+        // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
+        it.skip('New terminal opens', async function() {
             this.timeout(60000);
             await new Promise(res => setTimeout(res, 6000));
             const terminalName = await new TerminalView().getCurrentChannel();
             expect(terminalName).to.include(expectedTerminalName);
         });
 
-        it('Terminal shows according information', async function() {
+        // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
+        it.skip('Terminal shows according information', async function() {
             this.timeout(60000);
             const terminalText = await new TerminalView().getText();
             expect(terminalText).to.include(odoVersion);

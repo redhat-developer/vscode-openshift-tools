@@ -6,12 +6,13 @@ import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { CommandText } from '../../base/command';
+import { CliChannel } from '../../cli';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ChildProcessUtil } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
-import { WindowUtil } from '../../util/windowUtils';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 
@@ -257,11 +258,8 @@ export default class ClusterViewLoader {
     }
 
     @vsCommand('openshift.explorer.addCluster.crcSetup')
-    static crcSetup(event: any): Promise<void> {
-        const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
-        terminal.sendText(`"${event.data.tool}" setup`);
-        terminal.show();
-        return Promise.resolve();
+    static async crcSetup(event: any) {
+        await CliChannel.getInstance().executeInTerminal(new CommandText(`${event.data.tool} setup`), undefined, 'OpenShift Local Setup');
     }
 
     @vsCommand('openshift.explorer.addCluster.crcStart')

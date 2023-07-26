@@ -21,6 +21,7 @@ const webviews = [
     'serverless-function',
     'serverless-manage-repository',
     'add-service-binding',
+    'openshift-terminal',
 ];
 
 function kebabToCamel(text) {
@@ -40,7 +41,6 @@ await Promise.all([
             sourcemap: true,
             loader: {
                 '.png': 'file',
-                '.svg': 'file',
             },
             plugins: [
                 sassPlugin(),
