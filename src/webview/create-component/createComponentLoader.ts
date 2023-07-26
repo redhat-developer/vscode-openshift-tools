@@ -119,10 +119,16 @@ export default class CreateComponentLoader {
                     let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(
                         (wsFolder) => wsFolder.uri,
                     );
-                    workspaceFolderUris.filter((uri) => !isDevfileExists(uri));
+                    const filteredWorkspaceUris = [];
+                    for (const workspaceFolderUri of workspaceFolderUris) {
+                        const hasDevfile = await isDevfileExists(workspaceFolderUri);
+                        if (!hasDevfile) {
+                            filteredWorkspaceUris.push(workspaceFolderUri);
+                        }
+                    }
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'workspaceFolders',
-                        data: workspaceFolderUris,
+                        data: filteredWorkspaceUris,
                     });
                 }
                 break;
@@ -202,12 +208,9 @@ export default class CreateComponentLoader {
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'cloneFailed',
                     });
-                    vscode.window.showErrorMessage(
-                        'Cloning git project failed with message:\n' + cloneProcess.error,
-                    );
-                    break;
+                } else {
+                    CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 }
-                CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 break;
             }
             /**
@@ -430,8 +433,8 @@ function validateGitURL(event: any) {
                 CreateComponentLoader.panel?.webview.postMessage({
                     action: event.action,
                     data: {
-                        isValid: true,
-                        helpText: 'URL is valid but cannot be reached.'
+                        isValid: false,
+                        helpText: 'URL is missing organization or repo name.'
                     }
                 });
             }
@@ -448,7 +451,7 @@ function validateGitURL(event: any) {
 }
 
 function isGitURL(host: string): boolean {
-    return ['github.com', 'bitbucket.org', 'gitlab.com'].includes(host);
+    return ['github.com', 'bitbucket.org', 'gitlab.com', 'git.sr.ht', 'codeberg.org', 'gitea.com'].includes(host);
 }
 
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {

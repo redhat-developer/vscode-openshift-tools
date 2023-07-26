@@ -76,12 +76,13 @@ export interface StarterProject {
 }
 
 export interface Git {
+    checkoutFrom?: {
+        remote: string;
+    }
     remotes: Remotes;
 }
 
-export interface Remotes {
-    origin: string;
-}
+export type Remotes = {[key: string]: string};
 
 export interface ContainerItem  {
     name: string;

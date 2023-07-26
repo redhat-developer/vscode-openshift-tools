@@ -53,13 +53,13 @@ export function FromExistingGitRepo({ setCurrentView }) {
         switch (message.action) {
             case 'recommendedDevfile': {
                 if (!message.data.devfile) {
-                    setCloneFailed(true);
                     setRecommendedDevfile((prevState) => ({ ...prevState, noRecommendation: true }));
-                    break;
+                    setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
+                } else {
+                    setRecommendedDevfile((prevState) => ({ ...prevState, devfile: message.data.devfile }));
+                    setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
+                    setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                 }
-                setRecommendedDevfile((prevState) => ({ ...prevState, devfile: message.data.devfile }));
-                setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
-                setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
                 break;
             }
             case 'validateGitURL': {
@@ -201,21 +201,43 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 sx={{ marginRight: 'auto' }}>
                                                 BACK
                                             </Button>
-                                            <Button
-                                                variant='text'
-                                                disabled={cloneFailed}
-                                                onClick={() => {
-                                                    setCloneFailed(false);
-                                                    setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
-                                                    setCurrentPage('selectDifferentDevfile');
-                                                }}>
-                                                SELECT A DIFFERENT DEVFILE
-                                            </Button>
-                                        </Stack >
-                                    </Stack >
+                                        </Stack>
+                                    </Stack>
                                 )}
                             </>
-                        ) : (
+                        ) : recommendedDevfile.noRecommendation ?
+                            <>
+                                <Alert severity="warning">
+                                    Unable to detect a suitable devfile. Please try again or manually select a devfile.
+                                </Alert>
+                                <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
+                                    <Button
+                                        variant='text'
+                                        onClick={() => {
+                                            setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: false }));
+                                            setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
+                                            setSelectedDevfile(undefined);
+                                            setCloneFailed(false);
+                                            window['vscodeApi'].postMessage({
+                                                action: 'deleteClonedRepo'
+                                            });
+                                        }}
+                                        sx={{ marginRight: 'auto' }}>
+                                        BACK
+                                    </Button>
+                                    <Button
+                                        variant='contained'
+                                        disabled={cloneFailed}
+                                        onClick={() => {
+                                            setCloneFailed(false);
+                                            setRecommendedDevfile((prevState) => ({ ...prevState, showRecommendation: true }));
+                                            setCurrentPage('selectDifferentDevfile');
+                                        }}>
+                                        SELECT A DEVFILE
+                                    </Button>
+                                </Stack>
+                            </>
+                         : (
                             <>
                                 <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                 <Stack direction='column'>
@@ -225,7 +247,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         </Typography>
                                         <DevfileRecommendationInfo />
                                     </Stack>
-                                    <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />
+                                    {!recommendedDevfile.noRecommendation &&
+                                    <DevfileListItem devfile={selectedDevfile ? (selectedDevfile) : (recommendedDevfile.devfile)} />}
                                     <Stack direction='row' justifyContent='flex-end' marginTop={2} spacing={1}>
                                         <Button
                                             variant='text'

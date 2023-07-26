@@ -198,6 +198,21 @@ const SelectTemplateProject = React.forwardRef(
                 break;
         }
 
+        const projectUrl = React.useMemo(() => {
+            if (!selectedTemplateProject) {
+                return undefined;
+            }
+            const fullSelectedTemplateProject = starterProjects.find(
+                (starterProject) => starterProject.name === selectedTemplateProject,
+            );
+            if (fullSelectedTemplateProject.git.checkoutFrom?.remote) {
+                const remote = fullSelectedTemplateProject.git.checkoutFrom.remote;
+                return fullSelectedTemplateProject.git.remotes[remote];
+            } else {
+                return fullSelectedTemplateProject.git.remotes['origin']
+            }
+        }, [selectedTemplateProject]);
+
         const isError = !starterProjects.length || (isInteracted && !selectedTemplateProject);
 
         return (
@@ -253,15 +268,7 @@ const SelectTemplateProject = React.forwardRef(
                             <FormHelperText error={isError}>{helperText}</FormHelperText>
                             <Stack direction="row" marginTop={1} spacing={2}>
                                 <LinkButton
-                                    href={
-                                        !selectedTemplateProject
-                                            ? undefined
-                                            : starterProjects.find(
-                                                  (starterProject) =>
-                                                      starterProject.name ===
-                                                      selectedTemplateProject,
-                                              ).git.remotes.origin
-                                    }
+                                    href={projectUrl}
                                     disabled={!selectedTemplateProject}
                                 >
                                     Open Project in Browser
@@ -380,9 +387,8 @@ export function DevfileSearch(props: DevfileSearchProps) {
                 enabled: true,
             });
         }
-        console.log('Ran "update registry enabled" effect');
         setRegistryEnabled((_) => enabledArray);
-    }, [devfileRegistries.length]);
+    }, [devfileRegistries.length, ...devfileRegistries]);
 
     React.useEffect(() => {
         props.setSelectedDevfile(selectedDevfile);
@@ -401,7 +407,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     React.useEffect(() => {
         setCurrentPage((_) => 1);
-    }, [registryEnabled]);
+    }, [registryEnabled, searchText]);
 
     if (!devfileRegistries) {
         return <LoadScreen title="Retrieving list of Devfiles" />;
