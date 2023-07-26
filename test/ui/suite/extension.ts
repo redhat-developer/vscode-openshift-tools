@@ -17,7 +17,7 @@ export function checkExtension() {
             this.timeout(15_000);
             const btn = await new ActivityBar().getViewControl(VIEWS.extensions);
             await btn.openView();
-            extView = await new SideBarView().getContent().getSection(VIEWS.installed);
+            extView = await new SideBarView().getContent().getSection(VIEWS.installed) as ExtensionsViewSection;
             item = await extView.findItem(`@installed ${pjson.displayName}`);
         });
 

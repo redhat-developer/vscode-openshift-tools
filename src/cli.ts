@@ -5,12 +5,11 @@
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
-import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
-import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
+import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
 export class CliChannel {
 
@@ -66,15 +65,9 @@ export class CliChannel {
         return result;
     }
 
-    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env, isFuncionCLI = false): Promise<void> {
-        const commandStr = command.toString();
-        const [cmd, ...params] = commandStr.split(' ');
-        const toolLocation = await ToolsConfig.detect(cmd);
-        const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
-        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
-        terminal.sendText(toolLocation === cmd ? commandStr :
-            isFuncionCLI ? toolLocation.concat(' ', ...params.join(' ')) : toolLocation.concat(' ', ...params), true);
-        terminal.show();
+    async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {} as {[key : string]: string} ): Promise<void> {
+        const merged = Object.fromEntries([...Object.entries(addEnv), ...Object.entries(CliChannel.createTelemetryEnv()), ...Object.entries(process.env)]);
+        await OpenShiftTerminalManager.getInstance().createTerminal(command, name, cwd, merged);
     }
 
     async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {

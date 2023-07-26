@@ -10,7 +10,7 @@ import { loadWebviewHtml } from '../common-ext/utils';
 export default class CreateServiceViewLoader {
 
     static get extensionPath(): string {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath
+        return vscode.extensions.getExtension(ExtensionID).extensionPath;
     }
 
     static async loadView(title: string, listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>): Promise<vscode.WebviewPanel> {

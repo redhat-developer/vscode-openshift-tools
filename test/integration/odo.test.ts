@@ -6,12 +6,11 @@
 import { V1Deployment } from '@kubernetes/client-node';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
+import * as JSYAML from 'js-yaml';
 import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
-import { Uri, window, workspace } from 'vscode';
-import * as JSYAML from 'js-yaml';
-import { CommandText } from '../../src/base/command';
+import { Uri, workspace } from 'vscode';
 import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
 import { Project } from '../../src/odo/project';
@@ -311,12 +310,6 @@ suite('odo integration', function () {
             const componentTypes = await odo.getCompTypesJson();
             expect(componentTypes).to.not.be.empty;
         });
-    });
-
-    test('executeInTerminal()', async function () {
-        const numTerminals = window.terminals.length;
-        await odo.executeInTerminal(new CommandText('odo', 'version'));
-        expect(window.terminals).length(numTerminals + 1);
     });
 
 });

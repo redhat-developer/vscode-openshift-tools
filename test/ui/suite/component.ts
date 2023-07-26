@@ -160,6 +160,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(compName, components, 30_000);
         });
 
+        // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
         it.skip('Start the component in dev mode', async function() {
             this.timeout(180000);
             const component = await itemExists(compName, components, 30_000);
