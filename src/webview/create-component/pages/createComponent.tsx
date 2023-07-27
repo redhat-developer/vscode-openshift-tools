@@ -5,8 +5,9 @@
 import { AccountTree } from '@mui/icons-material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { Container, Theme, ThemeProvider, Typography } from '@mui/material';
+import { Container, Stack, Theme, ThemeProvider, Typography } from '@mui/material';
 import * as React from 'react';
+import { DevfileExplanation } from '../../common/devfileExplanation';
 import { FromTemplateProject } from '../../common/fromTemplateProject';
 import OptionCard from '../../common/optionCard';
 import { createVSCodeTheme } from '../../common/vscode-theme';
@@ -23,40 +24,47 @@ interface VSCodeMessage {
 function SelectStrategy({ setCurrentView }) {
     return (
         <>
-            <div style={{ position: 'relative' }}>
+            <Stack spacing={3}>
                 <Typography variant="h5">Create Component</Typography>
-            </div>
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '4em',
-                    justifyContent: 'center',
-                    marginTop: '5em',
-                }}
-            >
-                <OptionCard
-                    pageId="fromLocalCodeBase"
-                    description="Create component from an existing codebase on your local machine."
-                    setCurrentView={setCurrentView}
-                    title="From Existing Local Codebase"
-                    icon={FolderOpenIcon}
-                />
-                <OptionCard
-                    pageId="fromExistingGitRepo"
-                    description="Create component by importing code from an existing Git repository."
-                    setCurrentView={setCurrentView}
-                    title="From Existing Remote Git Repository"
-                    icon={GitHubIcon}
-                />
-                <OptionCard
-                    pageId="fromTemplateProject"
-                    description="Create component by selecting a devfile and template project."
-                    setCurrentView={setCurrentView}
-                    title="From Template Project"
-                    icon={AccountTree}
-                />
-            </div>
+                <Typography variant="body1">
+                    This wizard allows you to configure your existing projects with a Devfile so
+                    that you can run them on OpenShift or Kubernetes using VS Code OpenShift
+                    Toolkit. You can also create brand new projects from a template that are ready
+                    to use with VS Code OpenShift.
+                </Typography>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '4em',
+                        marginTop: '4em',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <OptionCard
+                        pageId="fromLocalCodeBase"
+                        description="Create component from an existing codebase on your local machine."
+                        setCurrentView={setCurrentView}
+                        title="From Existing Local Codebase"
+                        icon={FolderOpenIcon}
+                    />
+                    <OptionCard
+                        pageId="fromExistingGitRepo"
+                        description="Create component by importing code from an existing Git repository."
+                        setCurrentView={setCurrentView}
+                        title="From Existing Remote Git Repository"
+                        icon={GitHubIcon}
+                    />
+                    <OptionCard
+                        pageId="fromTemplateProject"
+                        description="Create component by selecting a devfile and template project."
+                        setCurrentView={setCurrentView}
+                        title="From Template Project"
+                        icon={AccountTree}
+                    />
+                </div>
+                <DevfileExplanation />
+            </Stack>
         </>
     );
 }
