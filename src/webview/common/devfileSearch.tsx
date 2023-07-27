@@ -27,6 +27,7 @@ import {
     Typography,
     useMediaQuery,
 } from '@mui/material';
+import { every } from 'lodash';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -421,10 +422,11 @@ export function DevfileSearch(props: DevfileSearchProps) {
         .filter((devfileRegistry) => activeRegistries.includes(devfileRegistry.name)) //
         .flatMap((devfileRegistry) => devfileRegistry.devfiles) //
         .filter((devfile) => {
-            return (
-                devfile.name.toLowerCase().includes(searchText) ||
-                devfile.tags.find((tag) => tag.toLowerCase().includes(searchText))
-            );
+            const searchTerms = searchText.split(/\s+/);
+            return every(searchTerms.map((searchTerm) =>
+                    devfile.name.toLowerCase().includes(searchTerm) ||
+                    devfile.tags.find((tag) => tag.toLowerCase().includes(searchTerm))
+            ));
         });
     devfiles.sort((a, b) => (a.name < b.name ? -1 : 1));
 

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Check, Close } from '@mui/icons-material';
-import { Box, Chip, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
 
@@ -22,17 +22,20 @@ export function DevfileListItem(props: DevfileListItemProps) {
                         padding: '1em',
                         '&:hover': {
                             backgroundColor: 'var(--vscode-editor-hoverHighlightBackground)',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         },
-                    }}>
-                    <DevfileListContent devfile={props.devfile} buttonCallback={props.buttonCallback} />
-                </Box >
+                    }}
+                >
+                    <DevfileListContent
+                        devfile={props.devfile}
+                        buttonCallback={props.buttonCallback}
+                    />
+                </Box>
             ) : (
                 <>
                     <DevfileListContent devfile={props.devfile} />
                 </>
-            )
-            }
+            )}
         </>
     );
 }
@@ -41,12 +44,7 @@ function DevfileListContent(props: DevfileListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
     return (
-        <Stack
-            direction="row"
-            spacing={3}
-            sx={{ width: 'calc(100% - 16px)' }}
-            alignItems="center"
-        >
+        <Stack direction="row" spacing={3} sx={{ width: 'calc(100% - 16px)' }} alignItems="center">
             <Box
                 sx={{
                     display: 'flex',
@@ -58,10 +56,7 @@ function DevfileListContent(props: DevfileListItemProps) {
                     borderRadius: '4px',
                 }}
             >
-                <img
-                    src={props.devfile.logoUrl}
-                    style={{ maxWidth: '6em', maxHeight: '6em' }}
-                />
+                <img src={props.devfile.logoUrl} style={{ maxWidth: '6em', maxHeight: '6em' }} />
             </Box>
             <Stack
                 direction="column"
@@ -110,7 +105,9 @@ function DevfileListContent(props: DevfileListItemProps) {
                         return <Chip size="small" label={tag} key={tag} />;
                     })}
                     {props.devfile.tags.length > 4 && (
-                        <Chip size="small" label="..." key="ellipsis" />
+                        <Tooltip title={props.devfile.tags.slice(4).join(', ')}>
+                            <Chip size="small" label="• • •" />
+                        </Tooltip>
                     )}
                 </Stack>
             </Stack>
