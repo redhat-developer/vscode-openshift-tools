@@ -72,8 +72,13 @@ export default class CreateComponentLoader {
             await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
         });
 
+        const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
+            sendUpdatedRegistries();
+        });
+
         panel.onDidDispose(() => {
             sendTelemetry('newComponentClosed');
+            registriesSubscription.unsubscribe();
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
@@ -527,6 +532,16 @@ async function validateFolderPath(path: string) {
                 isValid: isValid,
                 helpText: helpText,
             },
+        });
+    }
+}
+
+function sendUpdatedRegistries() {
+    if (CreateComponentLoader.panel) {
+        let registries = getDevfileRegistries();
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'devfileRegistries',
+            data: registries,
         });
     }
 }

@@ -37,7 +37,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'getDevfileRegistries':
             RegistryViewLoader.sendUpdatedRegistries();
             break;
-        case 'createComponentFromTemplateProject': {
+        case 'createComponent': {
             const { projectFolder, componentName } = event.data;
             const templateProject: TemplateProjectIdentifier = event.data.templateProject;
             const componentFolder = path.join(projectFolder, componentName);
@@ -51,12 +51,12 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                     templateProject.templateProjectName,
                 );
                 panel.dispose();
-                const ADD_TO_WORKSPACE = 'Add to workspace';
-                const selection = await vscode.window.showInformationMessage(
-                    `Component '${componentName} was created.`,
-                    ADD_TO_WORKSPACE,
-                );
-                if (selection === ADD_TO_WORKSPACE) {
+                if (
+                    event.data.addToWorkspace &&
+                    !vscode.workspace.workspaceFolders?.some(
+                        (workspaceFolder) => workspaceFolder.uri.fsPath === componentFolder,
+                    )
+                ) {
                     vscode.workspace.updateWorkspaceFolders(
                         vscode.workspace.workspaceFolders
                             ? vscode.workspace.workspaceFolders.length
@@ -65,6 +65,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                         { uri: vscode.Uri.file(componentFolder) },
                     );
                 }
+                void vscode.commands.executeCommand('openshift.componentsView.refresh');
             } catch (e) {
                 void vscode.window.showErrorMessage(e);
             }
