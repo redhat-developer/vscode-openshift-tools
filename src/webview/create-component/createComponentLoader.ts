@@ -326,6 +326,16 @@ export default class CreateComponentLoader {
                 await fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
                 break;
             }
+
+            /**
+             * Send a telemetry message
+             */
+            case 'sendTelemetry': {
+                const actionName: string = message.data.actionName;
+                const properties: {[key: string]: string} = message.data.properties;
+                void sendTelemetry(actionName, properties);
+                break;
+            }
         }
     }
 

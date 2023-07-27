@@ -50,7 +50,7 @@ function SelectStrategy({ setCurrentView }) {
                     icon={GitHubIcon}
                 />
                 <OptionCard
-                    pageId="devfileSearch"
+                    pageId="fromTemplateProject"
                     description="Create component by selecting a devfile and template project."
                     setCurrentView={setCurrentView}
                     title="From Template Project"
@@ -61,9 +61,11 @@ function SelectStrategy({ setCurrentView }) {
     );
 }
 
+type PageId = 'home' | 'fromLocalCodeBase' | 'fromExistingGitRepo' | 'fromTemplateProject';
+
 export default function CreateComponent() {
     const [theme, setTheme] = React.useState<Theme>(createVSCodeTheme('light'));
-    const [currentView, setCurrentView] = React.useState('home');
+    const [currentView, setCurrentView] = React.useState<PageId>('home');
 
     const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
         if (message.data.action === 'setTheme') {
@@ -97,7 +99,7 @@ export default function CreateComponent() {
                         <FromExistingGitRepo setCurrentView={setCurrentView} />
                     </div>
                 );
-            case 'devfileSearch':
+            case 'fromTemplateProject':
                 return (
                     <FromTemplateProject
                         titleText="Select Template Project from Devfile"
@@ -112,7 +114,7 @@ export default function CreateComponent() {
     return (
         <ThemeProvider theme={theme}>
             <Container
-                maxWidth='lg'
+                maxWidth="lg"
                 sx={{
                     height: '100%',
                     paddingTop: '5em',

@@ -30,7 +30,18 @@ export default function OptionCard(props: OptionCardProps) {
                 </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: 'center', height: '5em' }}>
-                <Button variant='contained' onClick={() => { props.setCurrentView(props.pageId) }} size='large' sx={{ marginBottom: '1em' }}>
+                <Button variant='contained' onClick={() => {
+                    window.vscodeApi.postMessage({
+                        action: 'sendTelemetry',
+                        data: {
+                            actionName: 'newComponentSelectStrategy',
+                            properties: {
+                                strategy: props.pageId,
+                            }
+                        }
+                    })
+                    props.setCurrentView(props.pageId);
+                     }} size='large' sx={{ marginBottom: '1em' }}>
                     CREATE
                 </Button>
             </CardActions>

@@ -51,12 +51,15 @@ type Message = {
     data: any;
 };
 
-function LinkButton(props: { href: string; disabled: boolean; children }) {
+function LinkButton(props: { href: string; disabled: boolean; onClick: () => void; children }) {
     return (
         <Link href={props.disabled ? undefined : props.href} underline="none">
             <Button
                 variant="text"
                 onClick={(e) => {
+                    if (props.onClick) {
+                        props.onClick();
+                    }
                     e.preventDefault();
                 }}
                 endIcon={<Launch />}
@@ -276,6 +279,18 @@ const SelectTemplateProject = React.forwardRef(
                                 <LinkButton
                                     href={projectUrl}
                                     disabled={!projectUrl}
+                                    onClick={() => {
+                                        window.vscodeApi.postMessage({
+                                            action: 'sendTelemetry',
+                                            data: {
+                                                actionName: 'newComponentOpenProjectInBrowser',
+                                                properties: {
+                                                    component_type: props.devfile.name,
+                                                    starter_project: selectedTemplateProject,
+                                                },
+                                            },
+                                        });
+                                    }}
                                 >
                                     Open Project in Browser
                                 </LinkButton>
@@ -302,6 +317,16 @@ const SelectTemplateProject = React.forwardRef(
                             <CopyToClipboard
                                 text={props.devfile.yaml}
                                 onCopy={() => {
+                                    window.vscodeApi.postMessage({
+                                        action: 'sendTelemetry',
+                                        data: {
+                                            actionName: 'newComponentCopiedYaml',
+                                            properties: {
+                                                component_type: props.devfile.name,
+                                                starter_project: selectedTemplateProject,
+                                            },
+                                        },
+                                    });
                                     setYamlCopied((_) => true);
                                 }}
                             >
@@ -429,10 +454,13 @@ export function DevfileSearch(props: DevfileSearchProps) {
         .flatMap((devfileRegistry) => devfileRegistry.devfiles) //
         .filter((devfile) => {
             const searchTerms = searchText.split(/\s+/);
-            return every(searchTerms.map((searchTerm) =>
-                    devfile.name.toLowerCase().includes(searchTerm) ||
-                    devfile.tags.find((tag) => tag.toLowerCase().includes(searchTerm))
-            ));
+            return every(
+                searchTerms.map(
+                    (searchTerm) =>
+                        devfile.name.toLowerCase().includes(searchTerm) ||
+                        devfile.tags.find((tag) => tag.toLowerCase().includes(searchTerm)),
+                ),
+            );
         });
 
     devfiles.sort((a, b) => {
