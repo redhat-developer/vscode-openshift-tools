@@ -415,8 +415,8 @@
 				"title": "Create Component",
 				"category": "OpenShift",
 				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
+					"light": "images/title/light/add-cluster.svg",
+					"dark": "images/title/dark/add-cluster.svg"
 				}
 			},
 			{
@@ -862,7 +862,7 @@
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[Create Component](command:openshift.component.openCreateComponent)",
+				"contents": "You have no OpenShift Components in your workspace yet.\nYou can create an OpenShift component from a local codebase, a remote git repository, or a template project.\n[Create Component](command:openshift.component.openCreateComponent)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],

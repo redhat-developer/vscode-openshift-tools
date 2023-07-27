@@ -26,7 +26,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
         setCurrentPage((_) => 'setNameAndFolder');
     }
 
-    function createComponent(projectFolder: string, componentName: string) {
+    function createComponent(projectFolder: string, componentName: string, addToWorkspace: boolean) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
@@ -34,6 +34,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                 projectFolder,
                 componentName,
                 isFromTemplateProject: true,
+                addToWorkspace
             },
         });
     }

@@ -178,7 +178,7 @@ const SelectTemplateProject = React.forwardRef(
         const isWideEnough = useMediaQuery('(min-width: 900px)');
 
         React.useEffect(() => {
-            if (props.devfile.starterProjects && props.devfile.starterProjects.length === 1) {
+            if (props.devfile.starterProjects && props.devfile.starterProjects.length > 0) {
                 setSelectedTemplateProject((_) => props.devfile.starterProjects[0].name);
             }
         }, []);
@@ -206,12 +206,17 @@ const SelectTemplateProject = React.forwardRef(
             const fullSelectedTemplateProject = starterProjects.find(
                 (starterProject) => starterProject.name === selectedTemplateProject,
             );
-            if (fullSelectedTemplateProject.git.checkoutFrom?.remote) {
-                const remote = fullSelectedTemplateProject.git.checkoutFrom.remote;
-                return fullSelectedTemplateProject.git.remotes[remote];
-            } else {
-                return fullSelectedTemplateProject.git.remotes['origin']
+            if (fullSelectedTemplateProject.git) {
+                if (fullSelectedTemplateProject.git.checkoutFrom?.remote) {
+                    const remote = fullSelectedTemplateProject.git.checkoutFrom.remote;
+                    return fullSelectedTemplateProject.git.remotes[remote];
+                } else {
+                    return fullSelectedTemplateProject.git.remotes['origin'];
+                }
+            } else if (fullSelectedTemplateProject.zip) {
+                return fullSelectedTemplateProject.zip.location;
             }
+            return undefined;
         }, [selectedTemplateProject]);
 
         const isError = !starterProjects.length || (isInteracted && !selectedTemplateProject);
@@ -270,7 +275,7 @@ const SelectTemplateProject = React.forwardRef(
                             <Stack direction="row" marginTop={1} spacing={2}>
                                 <LinkButton
                                     href={projectUrl}
-                                    disabled={!selectedTemplateProject}
+                                    disabled={!projectUrl}
                                 >
                                     Open Project in Browser
                                 </LinkButton>
@@ -361,6 +366,7 @@ export type DevfileSearchProps = {
 
 export function DevfileSearch(props: DevfileSearchProps) {
     const ITEMS_PER_PAGE = 6;
+    const QUARKUS_REGEX = /[Qq]uarkus/;
 
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -428,7 +434,24 @@ export function DevfileSearch(props: DevfileSearchProps) {
                     devfile.tags.find((tag) => tag.toLowerCase().includes(searchTerm))
             ));
         });
-    devfiles.sort((a, b) => (a.name < b.name ? -1 : 1));
+
+    devfiles.sort((a, b) => {
+        const aQuarkus = QUARKUS_REGEX.test(a.name);
+        const bQuarkus = QUARKUS_REGEX.test(b.name);
+        if (aQuarkus && !bQuarkus) {
+            return -1;
+        } else if (bQuarkus && !aQuarkus) {
+            return 1;
+        }
+
+        if (a.supportsDebug && !b.supportsDebug) {
+            return -1;
+        } else if (b.supportsDebug && !a.supportsDebug) {
+            return 1;
+        }
+
+        return a.name < b.name ? -1 : 1;
+    });
 
     return (
         <>

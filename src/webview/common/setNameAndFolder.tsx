@@ -4,7 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 import {
     Button,
+    Checkbox,
     FormControl,
+    FormControlLabel,
     FormHelperText,
     Paper,
     Stack,
@@ -25,7 +27,7 @@ type Message = {
 
 type SetNameAndFolderProps = {
     goBack: () => void;
-    createComponent: (projectFolder: string, componentName: string) => void;
+    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean) => void;
     devfile: Devfile;
     templateProject?: string;
     initialComponentName?: string;
@@ -42,6 +44,8 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
     const [isFolderFieldInteracted, setFolderFieldInteracted] = React.useState(false);
+
+    const [isAddToWorkspace, setAddToWorkspace] = React.useState(true);
 
     const [isLoading, setLoading] = React.useState(false);
 
@@ -144,7 +148,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                             value={componentParentFolder}
                         />
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             sx={{ whiteSpace: 'nowrap' }}
                             onClick={(e) => {
                                 window['vscodeApi'].postMessage({
@@ -165,6 +169,18 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     )}
                 </FormControl>
 
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={isAddToWorkspace}
+                            onClick={(_) => {
+                                setAddToWorkspace((oldAddToWorkspace) => !oldAddToWorkspace);
+                            }}
+                        />
+                    }
+                    label="Add component to workspace"
+                />
+
                 <Stack direction="row" justifyContent="space-between">
                     <Button variant="text" onClick={props.goBack}>
                         {props.templateProject ? 'Use Different Template Project' : 'Back'}
@@ -172,6 +188,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     <CreateComponentButton
                         componentName={componentName}
                         componentParentFolder={componentParentFolder}
+                        addToWorkspace={isAddToWorkspace}
                         isComponentNameFieldValid={isComponentNameFieldValid}
                         isFolderFieldValid={isFolderFieldValid}
                         isLoading={isLoading}

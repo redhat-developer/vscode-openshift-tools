@@ -10,10 +10,11 @@ import * as React from 'react';
 export type CreateComponentButtonProps = {
     componentName: string;
     componentParentFolder: string;
+    addToWorkspace: boolean;
     isComponentNameFieldValid: boolean;
     isFolderFieldValid: boolean;
     isLoading: boolean;
-    createComponent: (projectFolder: string, componentName: string) => void;
+    createComponent: (projectFolder: string, componentName: string, isAddToWorkspace: boolean) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -22,7 +23,7 @@ export function CreateComponentButton(props: CreateComponentButtonProps) {
         <LoadingButton
             variant="contained"
             onClick={() => {
-                props.createComponent(props.componentParentFolder, props.componentName);
+                props.createComponent(props.componentParentFolder, props.componentName, props.addToWorkspace);
                 props.setLoading(true);
             }}
             disabled={!props.isComponentNameFieldValid || !props.isFolderFieldValid || props.isLoading}

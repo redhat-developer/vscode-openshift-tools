@@ -20,13 +20,17 @@ import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { gitUrlParse } from '../../util/gitParse';
 import { selectWorkspaceFolder } from '../../util/workspace';
-import { getDevfileRegistries, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
+import {
+    getDevfileRegistries,
+    isValidProjectFolder,
+    validateComponentName
+} from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 
 interface CloneProcess {
-    status: boolean,
-    error: string | undefined
+    status: boolean;
+    error: string | undefined;
 }
 
 type Message = {
@@ -149,15 +153,17 @@ export default class CreateComponentLoader {
              */
             case 'selectProjectFolder': {
                 const workspaceUri: Uri = await selectWorkspaceFolder(true);
-                let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri) : [];
+                let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders
+                    ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
+                    : [];
                 workspaceFolderUris.push(workspaceUri);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
-                    data: await isDevfileExists(workspaceUri)
+                    data: await isDevfileExists(workspaceUri),
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
-                    data: workspaceFolderUris
+                    data: workspaceFolderUris,
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
@@ -203,7 +209,11 @@ export default class CreateComponentLoader {
              */
             case 'getRecommendedDevfileFromGit': {
                 tmpFolder = Uri.parse(await promisify(tmp.dir)());
-                const cloneProcess: CloneProcess = await clone(message.data.url, tmpFolder.fsPath, message.data.branch);
+                const cloneProcess: CloneProcess = await clone(
+                    message.data.url,
+                    tmpFolder.fsPath,
+                    message.data.branch,
+                );
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'cloneFailed',
@@ -223,7 +233,8 @@ export default class CreateComponentLoader {
                     if (message.data.isFromTemplateProject) {
                         // from template project
                         const { projectFolder } = message.data;
-                        const templateProject: TemplateProjectIdentifier = message.data.templateProject;
+                        const templateProject: TemplateProjectIdentifier =
+                            message.data.templateProject;
                         componentFolder = path.join(projectFolder, componentName);
                         await fs.mkdir(componentFolder);
                         await OdoImpl.Instance.createComponentFromTemplateProject(
@@ -233,7 +244,11 @@ export default class CreateComponentLoader {
                             templateProject.registryName,
                             templateProject.templateProjectName,
                         );
-                        await sendTelemetry('newComponentCreated', { strategy: 'fromTemplateProject', component_type: templateProject.devfileId, starter_project: templateProject.templateProjectName});
+                        await sendTelemetry('newComponentCreated', {
+                            strategy: 'fromTemplateProject',
+                            component_type: templateProject.devfileId,
+                            starter_project: templateProject.templateProjectName,
+                        });
                     } else {
                         let strategy: string;
                         // from local codebase or existing git repo
@@ -244,36 +259,44 @@ export default class CreateComponentLoader {
                         } else if (message.data.gitDestinationPath) {
                             // move the cloned git repo to selected project path
                             strategy = 'fromGitRepo';
-                            componentFolder = path.join(message.data.gitDestinationPath, componentName);
+                            componentFolder = path.join(
+                                message.data.gitDestinationPath,
+                                componentName,
+                            );
                             await fs.mkdir(componentFolder);
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
-                        await OdoImpl.Instance.createComponentFromLocation(devfileType, componentName, Uri.file(componentFolder));
-                        await sendTelemetry('newComponentCreated', { strategy, component_type: devfileType});
+                        await OdoImpl.Instance.createComponentFromLocation(
+                            devfileType,
+                            componentName,
+                            Uri.file(componentFolder),
+                        );
+                        await sendTelemetry('newComponentCreated', {
+                            strategy,
+                            component_type: devfileType,
+                        });
                     }
                     CreateComponentLoader.panel.dispose();
-                    if (vscode.workspace.workspaceFolders?.some(folder => folder.uri.path === componentFolder)) {
-                        vscode.commands.executeCommand('openshift.componentsView.refresh');
-                        vscode.window.showInformationMessage(`Component '${componentName}' was successfully created. Perform actions on it from Components View.`);
-                    } else {
-                        const ADD_TO_WORKSPACE = 'Add to workspace';
-                        const selection = await vscode.window.showInformationMessage(
-                            `Component '${componentName}' was successfully created.`,
-                            ADD_TO_WORKSPACE,
+                    if (
+                        message.data.addToWorkspace &&
+                        !vscode.workspace.workspaceFolders?.some(
+                            (workspaceFolder) => workspaceFolder.uri.fsPath === componentFolder,
+                        )
+                    ) {
+                        vscode.workspace.updateWorkspaceFolders(
+                            vscode.workspace.workspaceFolders
+                                ? vscode.workspace.workspaceFolders.length
+                                : 0,
+                            null,
+                            { uri: Uri.file(componentFolder) },
                         );
-                        if (selection === ADD_TO_WORKSPACE) {
-                            vscode.workspace.updateWorkspaceFolders(
-                                vscode.workspace.workspaceFolders
-                                    ? vscode.workspace.workspaceFolders.length
-                                    : 0,
-                                null,
-                                { uri: Uri.file(componentFolder) },
-                            );
-                        }
                     }
+                    void vscode.commands.executeCommand('openshift.componentsView.refresh');
                 } catch (err) {
-                    await sendTelemetry('newComponentCreationFailed', { error: JSON.stringify(err) });
+                    await sendTelemetry('newComponentCreationFailed', {
+                        error: JSON.stringify(err),
+                    });
                     void vscode.window.showErrorMessage(err);
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'createComponentFailed',
@@ -314,9 +337,6 @@ export default class CreateComponentLoader {
             compDescriptions = getCompDescription(analyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
-                CreateComponentLoader.panel?.webview.postMessage({
-                    action: 'devfileFailed',
-                });
                 const actions: Array<string> = ['Yes', 'Cancel'];
                 const devfileRegenerate = await vscode.window.showInformationMessage(
                     'We have detected that the repo contains configuration based on devfile v1. The extension does not support devfile v1, will you be okay to regenerate a new devfile v2?',
@@ -353,16 +373,18 @@ export default class CreateComponentLoader {
             }
         } finally {
             const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
-            const allDevfiles: Devfile[] = devfileRegistry
-                .flatMap((registry) => registry.devfiles);
-            const devfile: Devfile = compDescriptions.length !== 0 ? allDevfiles.find(
-                (devfile) => devfile.name === compDescriptions[0].displayName,
-            ) : undefined;
+            const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
+            const devfile: Devfile =
+                compDescriptions.length !== 0
+                    ? allDevfiles.find(
+                          (devfile) => devfile.name === compDescriptions[0].displayName,
+                      )
+                    : undefined;
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: {
-                    devfile: devfile
-                }
+                    devfile: devfile,
+                },
             });
         }
     }
@@ -384,8 +406,11 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
 }
 
 function getDevfileType(devfileDisplayName: string): string {
-    const compDescriptions: Set<ComponentTypeDescription> = ComponentTypesView.instance.getCompDescriptions();
-    const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find((description) => description.displayName === devfileDisplayName);
+    const compDescriptions: Set<ComponentTypeDescription> =
+        ComponentTypesView.instance.getCompDescriptions();
+    const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find(
+        (description) => description.displayName === devfileDisplayName,
+    );
     return devfileDescription.name;
 }
 
@@ -406,13 +431,13 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
 }
 
 function validateGitURL(event: any) {
-    if ((typeof event.data) === 'string' && (event.data as string).trim().length === 0) {
+    if (typeof event.data === 'string' && (event.data as string).trim().length === 0) {
         CreateComponentLoader.panel?.webview.postMessage({
             action: event.action,
             data: {
                 isValid: false,
-                helpText: 'Please enter a Git URL.'
-            }
+                helpText: 'Please enter a Git URL.',
+            },
         });
     } else {
         try {
@@ -426,16 +451,16 @@ function validateGitURL(event: any) {
                     action: event.action,
                     data: {
                         isValid: true,
-                        helpText: 'The git repo URL is valid.'
-                    }
+                        helpText: 'The git repo URL is valid.',
+                    },
                 });
             } else {
                 CreateComponentLoader.panel?.webview.postMessage({
                     action: event.action,
                     data: {
                         isValid: false,
-                        helpText: 'URL is missing organization or repo name.'
-                    }
+                        helpText: 'URL is missing organization or repo name.',
+                    },
                 });
             }
         } catch (e) {
@@ -443,15 +468,22 @@ function validateGitURL(event: any) {
                 action: event.action,
                 data: {
                     isValid: false,
-                    helpText: 'Invalid Git URL.'
-                }
+                    helpText: 'Invalid Git URL.',
+                },
             });
         }
     }
 }
 
 function isGitURL(host: string): boolean {
-    return ['github.com', 'bitbucket.org', 'gitlab.com', 'git.sr.ht', 'codeberg.org', 'gitea.com'].includes(host);
+    return [
+        'github.com',
+        'bitbucket.org',
+        'gitlab.com',
+        'git.sr.ht',
+        'codeberg.org',
+        'gitea.com',
+    ].includes(host);
 }
 
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
@@ -460,11 +492,13 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
     let command: string = `${git} clone ${url} ${location}`;
     command = branch ? command + ` --branch ${branch}` : command;
     // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) => (cp.exec(command,
-        (error: cp.ExecException) => {
-            error ? resolve({ status: false, error: error.message }) : resolve({ status: true, error: undefined });
-        }
-    )));
+    return new Promise((resolve, reject) =>
+        cp.exec(command, (error: cp.ExecException) => {
+            error
+                ? resolve({ status: false, error: error.message })
+                : resolve({ status: true, error: undefined });
+        }),
+    );
 }
 
 async function validateFolderPath(path: string) {
@@ -481,8 +515,8 @@ async function validateFolderPath(path: string) {
             action: 'validatedFolderPath',
             data: {
                 isValid: isValid,
-                helpText: helpText
-            }
+                helpText: helpText,
+            },
         });
     }
 }

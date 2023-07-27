@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import ConstructionIcon from '@mui/icons-material/Construction';
+import { AccountTree } from '@mui/icons-material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { Container, Theme, ThemeProvider, Typography } from '@mui/material';
@@ -54,7 +54,7 @@ function SelectStrategy({ setCurrentView }) {
                     description="Create component by selecting a devfile and template project."
                     setCurrentView={setCurrentView}
                     title="From Template Project"
-                    icon={ConstructionIcon}
+                    icon={AccountTree}
                 />
             </div>
         </>

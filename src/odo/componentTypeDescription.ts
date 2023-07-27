@@ -70,7 +70,10 @@ export function isStarterProject(prj: any): prj is StarterProject {
 
 export interface StarterProject {
     name: string;
-    git: Git;
+    git?: Git;
+    zip?: {
+        location: string;
+    }
     description?: string;
     typeName?: string;
 }
