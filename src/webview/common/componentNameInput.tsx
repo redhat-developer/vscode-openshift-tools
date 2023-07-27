@@ -26,7 +26,7 @@ export function ComponentNameInput(props: ComponentNameInputProps) {
                     action: 'validateComponentName',
                     data: e.target.value
                 });
-                props.setComponentName(e.target.value as string);
+                props.setComponentName(e.target.value);
             }}
         />
     );
