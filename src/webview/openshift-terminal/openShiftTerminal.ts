@@ -9,15 +9,12 @@ import type * as pty from 'node-pty';
 import { platform } from 'os';
 import {
     CancellationToken,
-    ColorTheme,
-    Disposable,
+    ColorTheme, commands, Disposable,
     Webview,
     WebviewView,
     WebviewViewProvider,
-    WebviewViewResolveContext,
-    commands,
-    window,
-    workspace,
+    WebviewViewResolveContext, window,
+    workspace
 } from 'vscode';
 import { SerializeAddon } from 'xterm-addon-serialize';
 import { Terminal } from 'xterm-headless';
@@ -56,6 +53,11 @@ export interface OpenShiftTerminalApi {
      * @param text the text to input into the terminal
      */
     sendText: (text: string) => void;
+
+    /**
+     * Close the terminal by sending `\u0003` (`^C`).
+     */
+    kill: () => void;
 
     /**
      * Close the terminal. If the extension is not running on Windows, the process will be terminated using SIGABRT.
@@ -522,9 +524,6 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         await commands.executeCommand('openShiftTerminalView.focus');
         // wait until the webview is ready to receive requests to create terminals
         await this.webviewResolved;
-        // issue request to create terminal in the webview
-        const newTermUUID = randomUUID();
-        await this.sendMessage({ kind: 'createTerminal', data: { uuid: newTermUUID, name } });
 
         const [cmd, ...args] = `${commandText}`.split(' ');
         let toolLocation: string | undefined;
@@ -546,6 +545,8 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
             void window.showErrorMessage(msg);
             throw new Error(msg);
         }
+
+        const newTermUUID = randomUUID();
 
         // create the object that manages the headless terminal and the pty.
         // the process is run as a child process under node.
@@ -569,10 +570,14 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
             ),
         );
 
+        // issue request to create terminal in the webview
+        await this.sendMessage({ kind: 'createTerminal', data: { uuid: newTermUUID, name } });
+
         return {
             sendText: (text: string) => this.openShiftTerminals.get(newTermUUID).write(text),
             focusTerminal: () =>
                 void this.sendMessage({ kind: 'switchToTerminal', data: { uuid: newTermUUID } }),
+            kill: () => this.openShiftTerminals.get(newTermUUID).write('\u0003'),
             forceKill: () => this.openShiftTerminals.get(newTermUUID).forceKill(),
         };
     }

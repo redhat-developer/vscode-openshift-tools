@@ -3,17 +3,16 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ChildProcess, SpawnOptions } from 'child_process';
 import validator from 'validator';
-import { EventEmitter, Terminal, Uri, commands, window } from 'vscode';
+import { Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { OdoImpl } from '../odo';
-import { CliExitData } from '../util/childProcessUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
+import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { multiStep } from './multiStepInput';
-import { ClusterVersion, FunctionContent, FunctionObject, FunctionView, InvokeFunction, RunResponse } from './types';
+import { ClusterVersion, FunctionContent, FunctionObject, FunctionView, InvokeFunction } from './types';
 
 export class Functions {
 
@@ -21,10 +20,8 @@ export class Functions {
 
     protected static readonly cli = CliChannel.getInstance();
 
-    private buildTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
-    public runTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
-    private buildEmiterMap: Map<string, EventEmitter<string>> = new Map<string, EventEmitter<string>>();
-    private buildPrcessMap: Map<Terminal, ChildProcess> = new Map<Terminal, ChildProcess>();
+    private buildTerminalMap = new Map<string, OpenShiftTerminalApi>();
+    public runTerminalMap = new Map<string, OpenShiftTerminalApi>();
 
     public static imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
 
@@ -51,40 +48,33 @@ export class Functions {
         }
     }
 
+    private pollForBuildTerminalDead(resolve: () => void, functionUri: Uri, timeout: number) {
+        return () => {
+            if (!this.buildTerminalMap.get(`build-${functionUri.fsPath}`)) {
+                resolve();
+            } else {
+                setTimeout(this.pollForBuildTerminalDead(resolve, functionUri, timeout * 2), timeout * 2);
+            }
+        }
+    }
+
     public async build(context: FunctionObject, view: FunctionView): Promise<void> {
-        const exisitingTerminal = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
-        const outputEmitter = this.buildEmiterMap.get(`build-${context.folderURI.fsPath}`);
-        if (exisitingTerminal) {
-            let exisitingProcess = this.buildPrcessMap.get(exisitingTerminal);
+        const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
+
+        if (existingTerminal) {
             void window.showWarningMessage(`Do you want to restart ${context.name} build ?`, 'Yes', 'No').then(async (value: string) => {
                 if (value === 'Yes') {
-                    exisitingTerminal.show(true);
-                    await commands.executeCommand('workbench.action.terminal.clear')
-                    outputEmitter.fire(`Start Building ${context.name} \r\n`);
-                    exisitingProcess.kill('SIGINT')
-                    this.buildPrcessMap.delete(exisitingTerminal);
-                    const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
-                    const buildImage = await this.getImage(context.folderURI);
-                    const opt: SpawnOptions = { cwd: context.folderURI.fsPath };
-                    void CliChannel.getInstance().spawnTool(ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, clusterVersion), opt).then((cp) => {
-                        exisitingProcess = cp;
-                        this.buildPrcessMap.set(exisitingTerminal, cp);
-                        exisitingProcess.on('error', (err) => {
-                            void window.showErrorMessage(err.message);
-                        });
-                        exisitingProcess.stdout.on('data', (chunk) => {
-                            outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
-                        });
-                        exisitingProcess.stderr.on('data', (errChunk) => {
-                            outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
-                            void window.showErrorMessage(`${errChunk as string}`);
-                        });
-                        exisitingProcess.on('exit', () => {
-                            context.hadBuilt = true;
-                            view.refresh(context);
-                            outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-                        });
+                    existingTerminal.focusTerminal();
+                    existingTerminal.kill();
+
+                    // wait for old build to exit using polling with a back off
+                    await new Promise<void>((resolve) => {
+                        const INIT_TIMEOUT = 100;
+                        setTimeout(this.pollForBuildTerminalDead(resolve, context.folderURI, INIT_TIMEOUT), INIT_TIMEOUT);
                     });
+
+                    // start new build
+                    await this.buildProcess(context, view);
                 }
             });
         } else {
@@ -95,127 +85,48 @@ export class Functions {
     private async buildProcess(context: FunctionObject, view: FunctionView) {
         const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
-        const outputEmitter = new EventEmitter<string>();
-        let devProcess: ChildProcess;
-        let terminal = window.createTerminal({
-            name: `Build ${context.name}`,
-            pty: {
-                onDidWrite: outputEmitter.event,
-                open: () => {
-                    outputEmitter.fire(`Start Building ${context.name} \r\n`);
-                    const opt: SpawnOptions = { cwd: context.folderURI.fsPath };
-                    void CliChannel.getInstance().spawnTool(ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, clusterVersion), opt).then((cp) => {
-                        this.buildPrcessMap.set(terminal, cp);
-                        devProcess = cp;
-                        devProcess.on('spawn', () => {
-                            terminal.show();
-                        });
-                        devProcess.on('error', (err) => {
-                            void window.showErrorMessage(err.message);
-                        });
-                        devProcess.stdout.on('data', (chunk) => {
-                            outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
-                        });
-                        devProcess.stderr.on('data', (errChunk) => {
-                            outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
-                        });
-                        devProcess.on('exit', () => {
-                            context.hadBuilt = true;
-                            view.refresh(context);
-                            outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-                        });
-                    });
-                },
-                close: () => {
-                    if (devProcess && devProcess.exitCode === null) { // if process is still running and user closed terminal
-                        devProcess.kill('SIGINT');
-                    }
-                    this.buildTerminalMap.delete(`build-${context.folderURI.fsPath}`);
-                    this.buildEmiterMap.delete(`build-${context.folderURI.fsPath}`);
-                    this.buildPrcessMap.delete(terminal);
-                    terminal = undefined;
-                },
-                handleInput: ((data: string) => {
-                    if (!devProcess) { // if any key pressed after process ends
-                        terminal.dispose();
-                    } else { // ctrl+C processed only once when there is no cleaning process
-                        outputEmitter.fire('^C\r\n');
-                        devProcess.kill('SIGINT');
-                        terminal.dispose();
-                    }
-                })
-            },
-        });
-        this.buildTerminalMap.set(`build-${context.folderURI.fsPath}`, terminal);
-        this.buildEmiterMap.set(`build-${context.folderURI.fsPath}`, outputEmitter);
+        const terminalKey = `build-${context.folderURI.fsPath}`;
+
+        const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, clusterVersion),
+            `Build ${context.name}`,
+            context.folderURI.fsPath,
+            process.env,
+            true,
+            {
+                onExit: () => {
+                    this.buildTerminalMap.delete(terminalKey)
+                }
+            }
+        );
+
+        this.buildTerminalMap.set(terminalKey, terminal);
     }
 
-    public run(context: FunctionObject, runBuild = false) {
-        const outputEmitter = new EventEmitter<string>();
-        let runProcess: ChildProcess;
-        let terminal = window.createTerminal({
-            name: `Run ${context.name}`,
-            pty: {
-                onDidWrite: outputEmitter.event,
-                open: () => {
-                    outputEmitter.fire(`Running ${context.name} \r\n`);
-                    const opt: SpawnOptions = { cwd: context.folderURI.fsPath };
-                    void CliChannel.getInstance().spawnTool(ServerlessCommand.runFunction(context.folderURI.fsPath, runBuild), opt).then((cp) => {
-                        runProcess = cp;
-                        runProcess.on('spawn', () => {
-                            terminal.show();
-                        });
-                        runProcess.on('error', (err) => {
-                            void window.showErrorMessage(err.message);
-                        });
-                        runProcess.stdout.on('data', (chunk) => {
-                            outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
-                            try {
-                                const json = JSON.parse(`${chunk as string}`) as RunResponse;
-                                if (json.msg?.indexOf('Server listening at') !== -1) {
-                                    outputEmitter.fire(`\n\n Press ctrl+C for stop running ${context.name}`);
-                                }
-                            } catch (err) {
-                                // no action
-                            }
-                            void commands.executeCommand('openshift.Serverless.refresh');
-                        });
-                        runProcess.stderr.on('data', (errChunk) => {
-                            outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
-                        });
-                        runProcess.on('exit', () => {
-                            outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-                        });
-                    });
+    public async run(context: FunctionObject, runBuild = false) {
+        const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
+            ServerlessCommand.runFunction(context.folderURI.fsPath, runBuild),
+            `${runBuild ? 'Build and ' : ''}Run ${context.name}`,
+            context.folderURI.fsPath,
+            process.env,
+            false,
+            {
+                onSpawn: () => {
+                    void commands.executeCommand('openshift.Serverless.refresh', context);
                 },
-                close: () => {
-                    if (runProcess && runProcess.exitCode === null) { // if process is still running and user closed terminal
-                        runProcess.kill('SIGINT');
-                    }
+                onExit: () => {
                     this.runTerminalMap.delete(`run-${context.folderURI.fsPath}`);
-                    terminal = undefined;
-                    void commands.executeCommand('openshift.Serverless.refresh');
-                },
-                handleInput: ((data: string) => {
-                    if (data.charCodeAt(0) === 3 || data.charCodeAt(0) === 94) {
-                        if (!runProcess) {
-                            terminal.dispose();
-                        } else {
-                            outputEmitter.fire('^C\r\n');
-                            runProcess.kill('SIGINT');
-                            terminal.dispose()
-                        }
-                    }
-                })
-            },
-        });
+                    void commands.executeCommand('openshift.Serverless.refresh', context);
+                }
+            }
+        );
         this.runTerminalMap.set(`run-${context.folderURI.fsPath}`, terminal);
     }
 
     public stop(context: FunctionObject) {
         const terminal = this.runTerminalMap.get(`run-${context.folderURI.fsPath}`);
         if (terminal) {
-            terminal.sendText('^C\r\n');
+            terminal.kill();
         }
     }
 
@@ -230,12 +141,12 @@ export class Functions {
         });
     }
 
-    public async getTemplates(): Promise<CliExitData> {
+    public async getTemplates(): Promise<any[]> {
         const result = await OdoImpl.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
         if (result.error) {
             void window.showErrorMessage(result.error.message);
         }
-        return JSON.parse(result.stdout);
+        return JSON.parse(result.stdout) as any[];
     }
 
     public async deploy(context: FunctionObject) {
@@ -263,124 +174,55 @@ export class Functions {
         }
         const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
-        const outputEmitter = new EventEmitter<string>();
-        let deployProcess: ChildProcess;
-        let terminal = window.createTerminal({
-            name: `Deploying the function ${context.name}`,
-            pty: {
-                onDidWrite: outputEmitter.event,
-                open: () => {
-                    outputEmitter.fire(`Deploying ${context.name} \r\n`);
-                    const opt: SpawnOptions = { cwd: context.folderURI.fsPath };
-                    void CliChannel.getInstance().spawnTool(ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, clusterVersion), opt).then((cp) => {
-                        deployProcess = cp;
-                        deployProcess.on('spawn', () => {
-                            terminal.show();
-                        });
-                        deployProcess.on('error', (err) => {
-                            void window.showErrorMessage(err.message);
-                        });
-                        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                        deployProcess.stdout.on('data', async (chunk) => {
-                            const response = `${chunk as string}`.replaceAll('\n', '\r\n');
-                            if (response.includes('Please provide credentials for image registry')) {
-                                response.replace(/Please provide credentials for image registry/gm, '');
-                                await this.provideUserNameAndPassword(deployProcess, 'Please provide credentials for image registry.');
-                            }
-                            if (response.includes('Incorrect credentials, please try again')) {
-                                response.replace(/Incorrect credentials, please try again/gm, '');
-                                await this.provideUserNameAndPassword(deployProcess, 'Please provide credentials for image registry.', true);
-                            }
-                            outputEmitter.fire(response);
-                        });
-                        deployProcess.stderr.on('data', (errChunk) => {
-                            outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
-                        });
 
-                        deployProcess.on('exit', () => {
-                            void commands.executeCommand('openshift.Serverless.refresh');
-                            outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-                        });
-                    });
-                },
-                close: () => {
-                    if (deployProcess && deployProcess.exitCode === null) { // if process is still running and user closed terminal
-                        deployProcess.kill('SIGINT');
+        // fail after two failed login attempts
+        let triedLoginTwice = false;
+
+        const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
+            ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, clusterVersion),
+            `Deploy ${context.name}`,
+            context.folderURI.fsPath,
+            undefined,
+            false,
+            {
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onText: (text) => {
+                    if (text.includes('Please provide credentials for image registry')) {
+                        void this.provideUserNameAndPassword(terminal, 'Please provide credentials for image registry.');
                     }
-                    terminal = undefined;
+                    if (text.includes('Incorrect credentials, please try again')) {
+                        if (triedLoginTwice) {
+                            terminal.kill();
+                        } else {
+                            triedLoginTwice = true;
+                            void this.provideUserNameAndPassword(terminal, 'Please provide credentials for image registry.', true);
+                        }
+                    }
+                },
+                onExit() {
                     void commands.executeCommand('openshift.Serverless.refresh');
                 },
-                handleInput: ((_data: string) => {
-                    if (!deployProcess) {
-                        terminal.dispose();
-                    } else {
-                        outputEmitter.fire('^C\r\n');
-                        deployProcess.kill('SIGINT');
-                        terminal.dispose()
-                    }
-                })
-            },
-        });
+            }
+        );
     }
 
     public async invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
-        return new Promise<void>((resolve, _reject) => {
-            const outputEmitter = new EventEmitter<string>();
-            let runProcess: ChildProcess;
-            let terminal = window.createTerminal({
-                name: `Invoke ${functionName}`,
-                pty: {
-                    onDidWrite: outputEmitter.event,
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(ServerlessCommand.invokeFunction(invokeFunData)).then((cp) => {
-                            runProcess = cp;
-                            runProcess.on('spawn', () => {
-                                terminal.show();
-                            });
-                            runProcess.on('error', (err) => {
-                                void window.showErrorMessage(err.message);
-                            });
-                            runProcess.stdout.on('data', (chunk) => {
-                                outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
-                            });
-                            runProcess.stderr.on('data', (errChunk) => {
-                                outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
-                            });
-                            runProcess.on('exit', () => {
-                                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
-                                resolve();
-                            });
-                        });
-                    },
-                    close: () => {
-                        if (runProcess && runProcess.exitCode === null) { // if process is still running and user closed terminal
-                            runProcess.kill('SIGINT');
-                        }
-                        terminal = undefined;
-                    },
-                    handleInput: ((data: string) => {
-                        if (data.charCodeAt(0) > 0) {
-                            if (!runProcess) {
-                                terminal.dispose();
-                            } else {
-                                outputEmitter.fire('^C\r\n');
-                                runProcess.kill('SIGINT');
-                                terminal.dispose()
-                            }
-                        }
-                    })
-                },
-            });
-        });
+        await OpenShiftTerminalManager.getInstance().createTerminal(
+            ServerlessCommand.invokeFunction(invokeFunData),
+            `Invoke ${functionName}`,
+            undefined,
+            undefined,
+            false
+            );
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
         await Functions.cli.executeInTerminal(ServerlessCommand.config(context.folderURI.fsPath, mode, isAdd),
-            context.folderURI.fsPath, title, process.env);
+            context.folderURI.fsPath, title);
     }
 
     private async provideUserNameAndPassword(
-        process: ChildProcess,
+        openshiftTerminalApi: OpenShiftTerminalApi,
         message: string,
         reattemptForLogin?: boolean,
     ): Promise<void> {
@@ -393,16 +235,18 @@ export class Functions {
             reattemptForLogin,
         );
         if (!userName) {
-            process.stdin.end();
+            openshiftTerminalApi.kill();
             return null;
         }
         const passMessage = 'Provide password for image registry.';
         const userPassword = await this.getUsernameOrPassword(message, passMessage, true, 'Provide a password for image registry.');
         if (!userPassword) {
-            process.stdin.end();
+            openshiftTerminalApi.kill();
             return null;
         }
-        process.stdin.write(`${userName}\n${userPassword}\n`);
+        openshiftTerminalApi.sendText(`${userName}\n`);
+        await new Promise(resolve => {setTimeout(resolve, 100)});
+        openshiftTerminalApi.sendText(`${userPassword}\n`);
     }
 
     private async getUsernameOrPassword(

@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Context, KubernetesObject } from '@kubernetes/client-node';
+import * as path from 'path';
 import {
     Command,
     Disposable,
@@ -17,10 +19,6 @@ import {
     window,
     workspace
 } from 'vscode';
-
-import * as path from 'path';
-
-import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { vsCommand } from '../vscommand';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
