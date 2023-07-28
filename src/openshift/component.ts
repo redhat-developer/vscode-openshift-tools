@@ -342,7 +342,7 @@ export class Component extends OpenShiftItem {
         const componentState = Component.componentStates.get(component.contextPath)
         if (componentState) {
             componentState.devTerminal.focusTerminal();
-            componentState.devTerminal.sendText('\u0003');
+            componentState.devTerminal.kill();
         }
         return;
     }
@@ -836,7 +836,7 @@ export class Component extends OpenShiftItem {
                     command,
                     `Component ${componentName}: Run '${componentCommand.id}' Command`,
                     componentFolder.contextPath,
-                    );
+                );
             }
         } else {
             void window.showErrorMessage(`No Command found in Component '${componentName}`);
