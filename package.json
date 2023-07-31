@@ -827,6 +827,28 @@
 				"command": "openshift.Serverless.stopRun",
 				"title": "Stop",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.exposeAsRoute",
+				"title": "Expose service as Route",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.unexpose",
+				"title": "Remove Route for service",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.openUrl",
+				"title": "Open Service Url",
+				"category": "OpenShift",
+				"icon": "$(link-external)"
+			},
+			{
+				"command": "openshift.resource.copyUrl",
+				"title": "Copy Service Url",
+				"category": "OpenShift",
+				"icon": "$(link)"
 			}
 		],
 		"keybindings": [
@@ -1153,8 +1175,23 @@
 				{
 					"command": "openshift.Serverless.stopRun",
 					"when": "false"
+				},
+				{
+					"command": "openshift.resource.exposeAsRoute",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.unexpose",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.openUrl",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.copyUrl",
+					"when": "false"
 				}
-
 			],
 			"view/title": [
 				{
@@ -1477,11 +1514,29 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route)"
 				},
 				{
 					"command": "openshift.resource.unInstall",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.helm"
+				},
+				{
+					"command": "openshift.resource.exposeAsRoute",
+					"when": "view == openshiftProjectExplorer && isOpenshiftCluster && viewItem == openshift.k8sObject"
+				},
+				{
+					"command": "openshift.resource.unexpose",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.route"
+				},
+				{
+					"command": "openshift.resource.openUrl",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.route",
+					"group": "inline"
+				},
+				{
+					"command": "openshift.resource.copyUrl",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.route",
+					"group": "inline"
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
