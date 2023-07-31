@@ -7,14 +7,16 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { Uri, window, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
-import { ServerlessFunctionView } from './view';
 import { ServerlessCommand, Utils } from './commands';
 import { OdoImpl } from '../odo';
 import { BuildAndDeploy } from './build-run-deploy';
 import { stringify } from 'yaml';
-import { CliExitData } from '../cli';
+import { CliChannel, CliExitData } from '../cli';
 import * as cp from 'child_process';
 import { VsCommandError } from '../vscommand';
+import { CommandText } from '../base/command';
+import { DeploymentConfig } from '../k8s/deploymentConfig';
+import { ServerlessFunctionView } from './view';
 
 export interface ServerlessFunction {
     getLocalFunctions(): Promise<FunctionObject[]>;
@@ -32,16 +34,18 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return ServerlessFunctionImpl.instance;
     }
 
-    /*private async getListItems<T>(command: CommandText, fail = false) {
+    private async getListItems(command: CommandText, fail = false) {
         const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
-        const result = loadItems<T>(listCliExitData.stdout);
-        return result;
+        try {
+             return JSON.parse(listCliExitData.stdout) as FunctionObject[];
+        } catch(err) {
+            return [];
+        }
     }
 
     private async getDeployedFunctions(): Promise<FunctionObject[]> {
-        //set context value to deploy
-        return this.getListItems<FunctionObject>(DeploymentConfig.command.getDeploymentFunctions());
-    }*/
+        return this.getListItems(DeploymentConfig.command.getDeploymentFunctions());
+    }
 
     async createFunction(language: string, template: string, location: string, image: string): Promise<CliExitData> {
         let funnctionResponse: CliExitData;
@@ -78,9 +82,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
     }
 
     async getLocalFunctions(): Promise<FunctionObject[]> {
-        //const deployedFunctions = await this.getDeployedFunctions();
-        const folders: Uri[] = [];
         const functionList: FunctionObject[] = [];
+        const folders: Uri[] = [];
         if (workspace.workspaceFolders) {
             // eslint-disable-next-line no-restricted-syntax
             for (const wf of workspace.workspaceFolders) {
@@ -89,40 +92,48 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                 }
             }
         }
-        const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
-        // eslint-disable-next-line no-console
-        console.log(currentNamespace);
-        for (const folderUri of folders) {
-            const funcStatus = FunctionStatus.LOCALONLY;
-            const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-            /*if (
-                functionTreeView.has(funcData?.name) &&
-                (!funcData?.deploy?.namespace || getCurrentNamespace === funcData?.deploy?.namespace)
-              ) {
-                funcStatus = FunctionStatus.CLUSTERLOCALBOTH;
-              }
-              fs.watch(folderUri.fsPath, (eventName, filename) => {
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                //functionExplorer.refresh();
-              });
-              if (funcData?.name) {
-                const url =
-                  func.contextValue !== FunctionContextType.FAILNAMESPACENODE && funcData?.image.trim()
-                    ? functionTreeView.get(funcData?.name)?.url
-                    : undefined;
-                functionTreeView.set(funcData?.name, this.createFunctionNodeImpl(func, funcData, folderUri, funcStatus, url));
-              }*/
-            const functionNode: FunctionObject = {
-                name: funcData.name,
-                runtime: funcData.runtime,
-                folderURI: folderUri,
-                context: funcStatus,
-                hasImage: await this.checkImage(folderUri),
-                isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
+        const deployedFunctions = await this.getDeployedFunctions();
+        if (folders.length > 0) {
+            for (const folderUri of folders) {
+                const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
+                const funcStatus = this.getFunctionStatus(funcData, deployedFunctions);
+                const functionNode: FunctionObject = {
+                    name: funcData.name,
+                    runtime: funcData.runtime,
+                    folderURI: folderUri,
+                    context: funcStatus,
+                    hasImage: await this.checkImage(folderUri),
+                    isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
+                }
+                functionList.push(functionNode);
+                fs.watchFile(path.join(folderUri.fsPath, 'func.yaml'), (_eventName, _filename) => {
+                    ServerlessFunctionView.getInstance().refresh();
+                });
             }
-            functionList.push(functionNode);
+        }
+        if (deployedFunctions.length > 0) {
+            for (const deployedFunction of deployedFunctions) {
+                if (functionList.filter((functionParam) => functionParam.name !== deployedFunction.name).length > 0) {
+                    const functionNode: FunctionObject = {
+                        name: deployedFunction.name,
+                        runtime: deployedFunction.runtime,
+                        context: FunctionStatus.CLUSTERONLY
+                    }
+                    functionList.push(functionNode);
+                }
+            }
         }
         return functionList;
+    }
+
+    getFunctionStatus(funcData: FunctionContent, deployedFunctions: FunctionObject[]): FunctionStatus {
+        if (deployedFunctions.length > 0) {
+            const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
+            if (func) {
+                return FunctionStatus.CLUSTERLOCALBOTH;
+            }
+        }
+        return FunctionStatus.LOCALONLY;
     }
 
     async checkImage(folderUri: Uri): Promise<boolean> {

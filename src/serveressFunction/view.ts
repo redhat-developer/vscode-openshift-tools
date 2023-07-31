@@ -117,11 +117,18 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     getContext(functionObj: FunctionObject): string {
-        if (functionObj.hasImage) {
-            if(BuildAndDeploy.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
+        if (functionObj.hadBuilt || functionObj.hasImage) {
+            if (BuildAndDeploy.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
                 return FunctionContextType.RUNNING;
+            } else if (functionObj.context === FunctionStatus.CLUSTERLOCALBOTH) {
+                return FunctionContextType.LOCALDEPLOYFUNCTION
             }
             return FunctionContextType.LOCAlFUNCTIONSWithBuild;
+        }
+        if (functionObj.context === FunctionStatus.CLUSTERONLY) {
+            return FunctionContextType.DEPLOYFUNCTION;
+        } else if (functionObj.context === FunctionStatus.CLUSTERLOCALBOTH) {
+            return FunctionContextType.LOCALDEPLOYFUNCTION
         }
         return FunctionContextType.LOCAlFUNCTIONS;
     }
@@ -131,7 +138,17 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     getTooltip(functionObj: FunctionObject): string {
-        return `Name: ${functionObj.name}\nRuntime: ${functionObj.runtime}\nContext: ${functionObj.folderURI.fsPath}`;
+        let text = '';
+        if (functionObj.name) {
+            text = `Name: ${functionObj.name}\n`;
+        }
+        if (functionObj.runtime) {
+            text += `Runtime: ${functionObj.name}\n`;
+        }
+        if (functionObj.folderURI) {
+            text += `Name: ${functionObj.folderURI.fsPath}\n`;
+        }
+        return text;
     }
 
     getDescription(context: string): string {
@@ -188,12 +205,12 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.refresh')
     static refresh(target?: ExplorerItem) {
-        ServerlessFunctionView.getInstance().refresh(target);
+    ServerlessFunctionView.getInstance().refresh(target);
     }
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().buildFunction(context.name, context.folderURI);
+        await BuildAndDeploy.getInstance().buildFunction(context);
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')
@@ -213,12 +230,17 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.deploy')
     static deployFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().deployFunction(context);
+        void BuildAndDeploy.getInstance().deployFunction(context);
+    }
+
+    @vsCommand('openshift.Serverless.undeploy')
+    static undeployFunction(context: FunctionObject) {
+        BuildAndDeploy.getInstance().undeployFunction(context);
     }
 
     @vsCommand('openshift.Serverless.openFunction')
     static openFunction(context: FunctionObject) {
-        if (!context) {
+        if (!context || !context.folderURI) {
             return null;
         }
         const uriPath = Uri.file(path.join(context.folderURI.fsPath, 'func.yaml'));
