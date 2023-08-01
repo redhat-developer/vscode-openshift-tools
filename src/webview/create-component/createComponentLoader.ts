@@ -128,16 +128,17 @@ export default class CreateComponentLoader {
                     let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(
                         (wsFolder) => wsFolder.uri,
                     );
-                    const filteredWorkspaceUris = [];
+                    const filteredWorkspaceUris: Uri[] = [];
                     for (const workspaceFolderUri of workspaceFolderUris) {
                         const hasDevfile = await isDevfileExists(workspaceFolderUri);
                         if (!hasDevfile) {
                             filteredWorkspaceUris.push(workspaceFolderUri);
                         }
                     }
+                    const filteredWorkspacePaths = filteredWorkspaceUris.map(uri => uri.fsPath);
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'workspaceFolders',
-                        data: filteredWorkspaceUris,
+                        data: filteredWorkspacePaths,
                     });
                 }
                 break;
@@ -162,13 +163,14 @@ export default class CreateComponentLoader {
                     ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
                     : [];
                 workspaceFolderUris.push(workspaceUri);
+                const workspacePaths = workspaceFolderUris.map(uri => uri.fsPath);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
                     data: await isDevfileExists(workspaceUri),
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'workspaceFolders',
-                    data: workspaceFolderUris,
+                    data: workspacePaths,
                 });
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',

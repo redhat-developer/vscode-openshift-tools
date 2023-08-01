@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import { OdoImpl } from '../../odo';
 import { Registry } from '../../odo/componentType';
 import { ComponentTypesView } from '../../registriesView';
+import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
@@ -96,6 +97,17 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             });
             break;
         }
+
+        /**
+         * Send a telemetry message
+         */
+        case 'sendTelemetry': {
+            const actionName: string = event.data.actionName;
+            const properties: {[key: string]: string} = event.data.properties;
+            void sendTelemetry(actionName, properties);
+            break;
+        }
+
         default: {
             void vscode.window.showErrorMessage(`OpenShift: Unexpected message in registry view loader ${event?.action}`);
         }

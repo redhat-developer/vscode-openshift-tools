@@ -49,7 +49,7 @@ type RecommendedDevfileState = {
 
 export function FromLocalCodebase({ setCurrentView }) {
     const [currentPage, setCurrentPage] = React.useState<CurrentPage>('fromLocalCodeBase');
-    const [workspaceFolders, setWorkspaceFolders] = React.useState<Uri[]>([]);
+    const [workspaceFolders, setWorkspaceFolders] = React.useState<string[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
     const [componentName, setComponentName] = React.useState('');
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
@@ -189,9 +189,9 @@ export function FromLocalCodebase({ setCurrentView }) {
                                     }
                                 >
                                     {workspaceFolders.length !== 0 &&
-                                        workspaceFolders.map((uri) => (
-                                            <MenuItem key={uri.path} value={uri.path}>
-                                                {uri.path}
+                                        workspaceFolders.map((folder) => (
+                                            <MenuItem key={folder} value={folder}>
+                                                {folder}
                                             </MenuItem>
                                         ))}
                                 </Select>

@@ -27,10 +27,10 @@ In addition to generic command's usage data (see above) `New Component` command 
     * `strategy` - indicates whether the component was created from an existing local codebase, an existing git repository, or a template project
     * `component_type` - name of the devfile used
     * `starter_project` - name of the template project used for components created from a template project
-* `newComponentCopiedYaml` - sent when the "Copy YAML" button on the "Select Template Project" page is clicked, with the following properties:
+* `devfileSearchCopiedYaml` - sent when the "Copy YAML" button on the "Select Template Project" page is clicked, with the following properties:
     * `component_type` - name of the devfile whose YAML was copied
     * `starter_project` - name of the template project currently selected
-* `newComponentOpenProjectInBrowser` - sent when the "Open Project in Browser" button on the "Select Template Project" page is clicked, with the following properties:
+* `devfileSearchOpenProjectInBrowser` - sent when the "Open Project in Browser" button on the "Select Template Project" page is clicked, with the following properties:
     * `component_type` - name of the devfile whose YAML was copied
     * `starter_project` - name of the template project currently selected
 * `newComponentSelectStrategy` - sent when you pick between "Existing Local Code Base", "Existing Remote Git Repo", and "Template Project", with the following properties:
@@ -41,6 +41,17 @@ In addition to generic command's usage data (see above) `New Component` command 
 * `webviewRenderError` - sent when the UI crashes
     * `error` - the error message
     * `stackTrace` - the stack trace, indicating which part of the UI failed
+
+#### OpenShift: Open Registry View
+
+In addition to generic command's usage data (see above), the `Open Registry View` command and view also reports the following:
+
+* `devfileSearchCopiedYaml` - sent when the "Copy YAML" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
+* `devfileSearchOpenProjectInBrowser` - sent when the "Open Project in Browser" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
 
 #### OpenShift: Login
 

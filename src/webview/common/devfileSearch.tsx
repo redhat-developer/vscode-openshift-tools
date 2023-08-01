@@ -283,7 +283,7 @@ const SelectTemplateProject = React.forwardRef(
                                         window.vscodeApi.postMessage({
                                             action: 'sendTelemetry',
                                             data: {
-                                                actionName: 'newComponentOpenProjectInBrowser',
+                                                actionName: 'devfileSearchOpenProjectInBrowser',
                                                 properties: {
                                                     component_type: props.devfile.name,
                                                     starter_project: selectedTemplateProject,
@@ -320,7 +320,7 @@ const SelectTemplateProject = React.forwardRef(
                                     window.vscodeApi.postMessage({
                                         action: 'sendTelemetry',
                                         data: {
-                                            actionName: 'newComponentCopiedYaml',
+                                            actionName: 'devfileSearchCopiedYaml',
                                             properties: {
                                                 component_type: props.devfile.name,
                                                 starter_project: selectedTemplateProject,
