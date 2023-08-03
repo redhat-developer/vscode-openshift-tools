@@ -11,8 +11,6 @@ import { LogViewContext } from './context';
 
 class LogView extends React.Component {
     private toggleAutoScroll = () => {
-        // eslint-disable-next-line no-console
-        console.log('toggling autoscroll')
         this.setState({
             autoScroll: !this.state.autoScroll,
         });

@@ -49,10 +49,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     handleCreateSubmit = (name: string, language: string, template: string, location: Uri, image: string): void => {
         VSCodeMessage.postMessage({
             action: 'createFunction',
-            name: name,
+            name,
             folderPath: location,
-            language: language,
-            template: template,
+            language,
+            template,
             selectedImage: image
         });
     }
@@ -61,18 +61,18 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         type: string, data: string, file: string, enableUrl: boolean, invokeURL: string): void => {
         VSCodeMessage.postMessage({
             action: 'invokeFunction',
-            name: name,
-            instance: instance,
-            id: id,
-            path: path,
-            contentType: contentType,
-            format: format,
-            source: source,
-            type: type,
-            data: data,
-            file: file,
+            name,
+            instance,
+            id,
+            path,
+            contentType,
+            format,
+            source,
+            type,
+            data,
+            file,
             enableURL: enableUrl,
-            invokeURL: invokeURL
+            invokeURL
         });
     }
 

@@ -9,21 +9,19 @@ import {
     AccordionSummary,
     Alert,
     Box,
-    Button,
-    CircularProgress,
+    Button, CircularProgress,
     Divider,
     Stack,
     TextField,
-    Typography,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
-import { Uri } from 'vscode';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
-import { SetNameAndFolder } from '../../common/setNameAndFolder';
 import { DevfileSearch } from '../../common/devfileSearch';
 import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { SetNameAndFolder } from '../../common/setNameAndFolder';
 
 type Message = {
     action: string;
@@ -107,6 +105,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setCloneFailed(true);
                 break;
             }
+            default:
+                break;
         }
     }
 
@@ -139,7 +139,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 devfileDisplayName: selectedDevfile
                     ? selectedDevfile.name
                     : recommendedDevfile.devfile.name,
-                componentName: componentName,
+                componentName,
                 gitDestinationPath: projectFolder,
                 isFromTemplateProject: false,
                 addToWorkspace,
@@ -260,7 +260,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     }));
                                                     setSelectedDevfile(undefined);
                                                     setCloneFailed(false);
-                                                    window['vscodeApi'].postMessage({
+                                                    window.vscodeApi.postMessage({
                                                         action: 'deleteClonedRepo',
                                                     });
                                                 }}
@@ -294,7 +294,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             }));
                                             setSelectedDevfile(undefined);
                                             setCloneFailed(false);
-                                            window['vscodeApi'].postMessage({
+                                            window.vscodeApi.postMessage({
                                                 action: 'deleteClonedRepo',
                                             });
                                         }}
@@ -370,7 +370,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     ...prevState,
                                                     showRecommendation: false,
                                                 }));
-                                                window['vscodeApi'].postMessage({
+                                                window.vscodeApi.postMessage({
                                                     action: 'deleteClonedRepo',
                                                 });
                                             }}
@@ -431,5 +431,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     )}
                 </>
             );
+        default:
+            break;
     }
 }

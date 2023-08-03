@@ -93,6 +93,8 @@ export default function Header() {
                     }
                 });
                 break;
+            default:
+                break;
         }
     };
 

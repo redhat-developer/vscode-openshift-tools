@@ -6,19 +6,7 @@ public/lib
 node_modules
 Godeps
 test-resources
-src/webview/log
-src/webview/describe
-src/webview/cluster
 out
-src/webview/common
-src/webview/create-service
-src/webview/create-component
-src/webview/devfile-registry
-src/webview/welcome
-src/webview/helm-chart
-src/webview/feedback
-src/webview/serverless-function
-src/webview/serverless-manage-repository
+test/sandbox-registration
 # vendored from https://github.com/IonicaBizau/git-url-parse, see https://github.com/IonicaBizau/git-url-parse/pull/159
 src/util/gitParse.ts
-test/sandbox-registration

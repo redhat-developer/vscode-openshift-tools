@@ -1,3 +1,7 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
 import Form, { IChangeEvent } from '@rjsf/core';
 import Validator from '@rjsf/validator-ajv8';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -5,7 +9,6 @@ import * as React from 'react';
 import 'react-dom';
 
 export function CreateForm(props) {
-    console.log('creating form again');
     let changed = false;
     const [baseSchema, setBaseSchema] = React.useState({});
     const [uiSchema, setUiSchema] = React.useState({});

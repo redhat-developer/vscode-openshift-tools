@@ -40,7 +40,7 @@ export default class ManageRepositoryViewLoader {
             path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'serverlessManageRepositoryViewer'),
         );
 
-        let panel = vscode.window.createWebviewPanel('manageRepositoryView', title, vscode.ViewColumn.One, {
+        const panel = vscode.window.createWebviewPanel('manageRepositoryView', title, vscode.ViewColumn.One, {
             enableScripts: true,
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true,
@@ -68,71 +68,79 @@ export default class ManageRepositoryViewLoader {
     static async messageHandler(message: Message) {
         const action = message.action;
         switch (action) {
-            case 'validateGitURL':
+            case 'validateGitURL': {
                 const data = validateGitURL(message);
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
+                void ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action,
                     url: data.url,
                     error: data.error,
                     helpText: data.helpText
                 });
                 break;
+            }
             case 'validateName':
-            case 'validateNewName':
+            case 'validateNewName':{
                 const flag = validateName(message.data);
                 const repoList = await ManageRepository.getInstance().list();
                 if (repoList.includes(message.data)) {
-                    ManageRepositoryViewLoader.panel?.webview.postMessage({
-                        action: action,
+                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
+                        action,
                         name: message.data,
                         error: true,
                         helpText: `Repository ${message.data} already exists`
                     });
                 } else {
-                    ManageRepositoryViewLoader.panel?.webview.postMessage({
-                        action: action,
+                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
+                        action,
                         name: message.data,
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag
                     });
                 }
                 break;
-            case 'addRepo':
+            }
+            case 'addRepo': {
                 let addRepoStatus: boolean;
                 await Progress.execFunctionWithProgress(`Adding repository ${message.data.name}`, async () => {
                     addRepoStatus = await ManageRepository.getInstance().addRepo(message.data.name, message.data.url);
                 });
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
-                    action: action,
+                void ManageRepositoryViewLoader.panel?.webview.postMessage({
+                    action,
                     status: addRepoStatus
                 });
                 break;
-            case 'getRepositoryList':
+            }
+            case 'getRepositoryList': {
                 const repositories = await ManageRepository.getInstance().list();
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
-                    action: action,
-                    repositories: repositories
+                void ManageRepositoryViewLoader.panel?.webview.postMessage({
+                    action,
+                    repositories
                 });
                 break;
-            case 'deleteRepo':
+            }
+            case 'deleteRepo': {
                 const status = await ManageRepository.getInstance().deleteRepo(message.data.name);
                 if (status) {
                     const repositories = await ManageRepository.getInstance().list();
-                    ManageRepositoryViewLoader.panel?.webview.postMessage({
+                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
                         action: 'getRepositoryList',
-                        repositories: repositories
+                        repositories
                     });
                 }
                 break;
-            case 'renameRepo':
+            }
+            case 'renameRepo': {
                 const renameRepoStatus = await ManageRepository.getInstance().renameRepo(message.data.oldName, message.data.newName);
                 if (renameRepoStatus) {
                     const repositories = await ManageRepository.getInstance().list();
-                    ManageRepositoryViewLoader.panel?.webview.postMessage({
+                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
                         action: 'getRepositoryList',
-                        repositories: repositories
+                        repositories
                     });
                 }
+                break;
+            }
+            default:
                 break;
         }
     }

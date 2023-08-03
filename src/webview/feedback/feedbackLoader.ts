@@ -2,18 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
+import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
-import sendTelemetry from '../../telemetry';
 
 let panel: vscode.WebviewPanel | undefined;
 
-async function feedbackMessageListener(event: any): Promise<any> {
+function feedbackMessageListener(event: any): void {
     switch (event?.action) {
         case 'postFeedback':
-            sendTelemetry('feedback', event.data);
+            void sendTelemetry('feedback', event.data);
             break;
         default:
             break;

@@ -4,8 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import { Close, FileCopy, Launch, Search } from '@mui/icons-material';
 import {
-    Box,
-    Button,
+    Box, Button,
     Checkbox,
     Divider,
     FormControl,
@@ -25,7 +24,7 @@ import {
     TextField,
     Tooltip,
     Typography,
-    useMediaQuery,
+    useMediaQuery
 } from '@mui/material';
 import { every } from 'lodash';
 import * as React from 'react';
@@ -213,9 +212,8 @@ const SelectTemplateProject = React.forwardRef(
                 if (fullSelectedTemplateProject.git.checkoutFrom?.remote) {
                     const remote = fullSelectedTemplateProject.git.checkoutFrom.remote;
                     return fullSelectedTemplateProject.git.remotes[remote];
-                } else {
-                    return fullSelectedTemplateProject.git.remotes['origin'];
                 }
+                return fullSelectedTemplateProject.git.remotes.origin;
             } else if (fullSelectedTemplateProject.zip) {
                 return fullSelectedTemplateProject.zip.location;
             }
@@ -254,7 +252,7 @@ const SelectTemplateProject = React.forwardRef(
                         <Select
                             value={selectedTemplateProject}
                             onChange={(event) => {
-                                setSelectedTemplateProject(event.target.value as string);
+                                setSelectedTemplateProject(event.target.value);
                             }}
                             onClick={(_e) => {
                                 setInteracted(true);
@@ -285,7 +283,9 @@ const SelectTemplateProject = React.forwardRef(
                                             data: {
                                                 actionName: 'devfileSearchOpenProjectInBrowser',
                                                 properties: {
+                                                    // eslint-disable-next-line camelcase
                                                     component_type: props.devfile.name,
+                                                    // eslint-disable-next-line camelcase
                                                     starter_project: selectedTemplateProject,
                                                 },
                                             },
@@ -322,7 +322,9 @@ const SelectTemplateProject = React.forwardRef(
                                         data: {
                                             actionName: 'devfileSearchCopiedYaml',
                                             properties: {
+                                                // eslint-disable-next-line camelcase
                                                 component_type: props.devfile.name,
+                                                // eslint-disable-next-line camelcase
                                                 starter_project: selectedTemplateProject,
                                             },
                                         },
@@ -406,13 +408,16 @@ export function DevfileSearch(props: DevfileSearchProps) {
         switch (message.action) {
             case 'devfileRegistries': {
                 setDevfileRegistries((_devfileRegistries) => message.data);
+                break;
             }
+            default:
+                break;
         }
     }
 
     React.useEffect(() => {
         const enabledArray = [];
-        for (let registry of devfileRegistries) {
+        for (const registry of devfileRegistries) {
             enabledArray.push({
                 registryName: registry.name,
                 registryUrl: registry.url,

@@ -11,25 +11,27 @@ import { loadWebviewHtml } from '../common-ext/utils';
 
 let panel: vscode.WebviewPanel;
 
-async function welcomeViewerMessageListener(event: any): Promise<any> {
+async function welcomeViewerMessageListener(event: any): Promise<void> {
     switch (event?.action) {
         case 'getOpenShiftVersion':
-            fetch('https://api.github.com/repos/redhat-developer/vscode-openshift-tools/releases/latest',
-            {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-                }
-            }).then((response) => {
-                return response.json();
-            }).then((data) => {
-                panel?.webview.postMessage({
+            try {
+                const response = await fetch('https://api.github.com/repos/redhat-developer/vscode-openshift-tools/releases/latest',
+                {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+                    }
+                });
+                const data = await response.json();
+                void panel?.webview.postMessage({
                     'action': 'getOpenShiftVersion',
                     'param': data.name
                 });
-            }).catch(e => undefined);
+            } catch (e) {
+                // do nothing
+            }
             break;
         case 'callGetStartedPage':
-            vscode.commands.executeCommand('openshift.getStarted', event.method);
+            void vscode.commands.executeCommand('openshift.getStarted', event.method);
             break;
         case 'open':
             await vscode.commands.executeCommand('vscode.open', event.param);
@@ -41,22 +43,24 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
             await vscode.commands.executeCommand('openshift.componentTypesView.registry.openInView');
             break;
         case 'getShowWelcomePageConfig':
-            panel.webview.postMessage({
+            void panel.webview.postMessage({
                 'action': 'getShowWelcomePageConfig',
                 'param': vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')
             });
-        case 'updateShowWelcomePageConfig':
+            break;
+        case 'updateShowWelcomePageConfig': {
             const checkboxValue: boolean = event.param;
-            let telemetryProps: WelcomePageProps = {
+            const telemetryProps: WelcomePageProps = {
                 showWelcomePage: checkboxValue
             };
-            sendTelemetry('welcomePage', telemetryProps);
-            if (checkboxValue != vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
-                return vscode.workspace.getConfiguration().update('openshiftToolkit.showWelcomePage', checkboxValue, vscode.ConfigurationTarget.Global);
+            await sendTelemetry('welcomePage', telemetryProps);
+            if (checkboxValue !== vscode.workspace.getConfiguration('openshiftToolkit').get('showWelcomePage')) {
+                await vscode.workspace.getConfiguration().update('openshiftToolkit.showWelcomePage', checkboxValue, vscode.ConfigurationTarget.Global);
             }
             break;
+        }
         default:
-            panel.webview.postMessage(
+            void panel.webview.postMessage(
                 {
                     error: 'Invalid command'
                 }
@@ -66,12 +70,11 @@ async function welcomeViewerMessageListener(event: any): Promise<any> {
 }
 
 export default class WelcomeViewLoader {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'out', 'welcomeViewer'));
         const images = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images'));

@@ -65,7 +65,7 @@ export class ExtCommandTelemetryEvent {
             identifier: this.commandId,
             duration: Date.now() - this.startTime,
         };
-        sendTelemetry('command', eventProps);
+        void sendTelemetry('command', eventProps);
     }
 
     sendError(error: string) {

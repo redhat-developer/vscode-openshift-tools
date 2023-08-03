@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { vsCommand } from '../vscommand';
-import { CliChannel } from '../cli';
 
 export class Console {
     static cli = CliChannel.getInstance()
@@ -34,7 +34,7 @@ export class Console {
     static async openBuildConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage('Cannot load the build config');
+            void vscode.window.showErrorMessage('Cannot load the build config');
             return;
         }
         const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
@@ -51,7 +51,7 @@ export class Console {
     static async openDeploymentConfig(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage('Cannot load the deployment config');
+            void vscode.window.showErrorMessage('Cannot load the deployment config');
             return;
         }
         const project = Console.getCurrentProject();
@@ -68,7 +68,7 @@ export class Console {
     static async openImageStream(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage('Cannot load the image stream');
+            void vscode.window.showErrorMessage('Cannot load the image stream');
             return;
         }
         const project = Console.getCurrentProject();
@@ -85,7 +85,7 @@ export class Console {
     static async openProject(context: { name: string}): Promise<unknown> {
         let url = '';
         if (!context) {
-            vscode.window.showErrorMessage('Cannot load the Project');
+            void vscode.window.showErrorMessage('Cannot load the Project');
             return;
         }
         const project = Console.getCurrentProject();

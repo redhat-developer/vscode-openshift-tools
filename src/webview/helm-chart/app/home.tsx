@@ -50,7 +50,7 @@ const HomeItem: React.FC<HelmChartHomePageProps> = ({
             <ImageGalleryList className='devfileGalleryGrid' style={{ margin: '1rem' }}>
                 {
                     helmEntries.map((helmEntry: ChartResponse, index: number) => (
-                        <ImageListItem key={`imageList-` + index}>
+                        <ImageListItem key={`imageList-${index}`}>
                             <CardItem key={helmEntry.displayName} helmEntry={helmEntry}
                                 cardItemStyle={cardItemStyle}
                                 themeKind={themeKind} />
@@ -62,7 +62,7 @@ const HomeItem: React.FC<HelmChartHomePageProps> = ({
     );
 };
 
-export const Home: React.FC<DefaultProps> = ({ }) => {
+export const Home: React.FC<DefaultProps> = () => {
     const [helmCharts, setHelmCharts] = React.useState([]);
     const [filteredHelmCharts, setFilteredHelmCharts] = React.useState([]);
     const [searchValue, setSearchValue] = React.useState('');

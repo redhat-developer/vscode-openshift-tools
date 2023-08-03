@@ -8,13 +8,12 @@ import './home.scss';
 import { ShowRepositories } from './showRepositories';
 import { VSCodeMessage } from './vsCodeMessage';
 
-export class ManageRepository extends React.Component<DefaultProps, {
-}> {
+export class ManageRepository extends React.Component<DefaultProps, object> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         VSCodeMessage.postMessage({
-            action: `getRepositoryList`
+            action: 'getRepositoryList'
         });
     }
 
