@@ -226,7 +226,7 @@ export default function addSandboxView(props): JSX.Element {
 
         const handleRequestVerificationCode = () => {
             const rawPhoneNumber = phoneNumber.slice(countryCode.length);
-            const fullCountryCode = '+' + countryCode;
+            const fullCountryCode = `+${countryCode}`;
 
             setInProgress(true);
             postMessage('sandboxRequestVerificationCode', { rawPhoneNumber, fullCountryCode });

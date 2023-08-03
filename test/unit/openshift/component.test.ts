@@ -314,7 +314,7 @@ suite('OpenShift/Component', function () {
         let showWarningMessageStub: sinon.SinonStub<any[], any> | sinon.SinonStub<unknown[], unknown>;
 
         const onDidFake = (listener): vscode.Disposable => {
-            Promise.resolve().then(() => { listener(undefined); });
+            void Promise.resolve().then(() => { listener(undefined); });
             return {
                 dispose: sandbox.stub()
             };
@@ -550,9 +550,9 @@ suite('OpenShift/Component', function () {
                         },
                         on: (event: string, cb: (data?: any) => Promise<void>) => {
                             if (event === 'exit') {
-                                cb(exitCode);
+                                void cb(exitCode);
                             } else if (event !== 'error') {
-                                cb();
+                                void cb();
                             }
                         },
                     }),

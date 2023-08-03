@@ -9,6 +9,7 @@
             "../../node_modules/@types",
             "@types"
         ],
+        "experimentalDecorators": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "noEmit": true,

@@ -8,7 +8,7 @@ import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Progress } from '../util/progress';
-import { vsCommand, VsCommandError } from '../vscommand';
+import { VsCommandError, vsCommand } from '../vscommand';
 import * as common from './common';
 
 export class Build {
@@ -108,7 +108,7 @@ export class Build {
     static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, 'Select a Build to see the logs');
         if (build) {
-            Build.cli.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
+            void Build.cli.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
         }
         return null;
     }
@@ -125,7 +125,7 @@ export class Build {
             }
         }
         if (resourceId) {
-            Build.cli.executeInTerminal(Build.command.rebuildFrom(resourceId), undefined, `OpenShift: Rebuild '${resourceId}' Build`);
+            void Build.cli.executeInTerminal(Build.command.rebuildFrom(resourceId), undefined, `OpenShift: Rebuild '${resourceId}' Build`);
         }
         return null;
     }
@@ -134,7 +134,7 @@ export class Build {
     static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, 'Select a build to follow the logs');
         if (build) {
-            Build.cli.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
+            void Build.cli.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
         }
         return null;
     }

@@ -166,7 +166,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     reveal(item: Registry): void {
-        this.treeView.reveal(item);
+        void this.treeView.reveal(item);
     }
 
     refresh(cleanCache = true): void {

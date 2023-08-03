@@ -15,7 +15,7 @@ import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import 'survey-core/defaultV2.css';
 import './feedback.css'
 
-export const FeedbackComponent: React.FC<DefaultProps> = ({ }) => {
+export const FeedbackComponent: React.FC<DefaultProps> = () => {
 
     const feedbackModal = new Model(json);
 

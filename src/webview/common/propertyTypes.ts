@@ -2,10 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+
+import { Uri } from 'vscode';
 import { ComponentTypeDescription, Registry } from '../../odo/componentType';
 import { StarterProject } from '../../odo/componentTypeDescription';
 import { ChartResponse } from '../helm-chart/helmChartType';
-import { Uri } from 'vscode';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -18,7 +19,7 @@ export interface ClusterViewProps extends DefaultProps {
 }
 
 export interface StarterProjectDisplayProps extends DefaultProps {
-    project: StarterProject | any;
+    project: StarterProject;
 }
 
 export interface SearchBarProps extends DefaultProps {

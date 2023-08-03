@@ -86,13 +86,15 @@ export default function CreateComponent() {
                 break;
             }
             case 'initFromRootFolder': {
-                if (message.data.rootFolder != undefined) {
+                if (message.data.rootFolder !== undefined) {
                     setCurrentView('fromLocalCodeBase');
                     setFolderPath(message.data.rootFolder);
                 }
                 setInitialized(true);
                 break;
             }
+            default:
+                break;
         }
     };
 
@@ -144,6 +146,8 @@ export default function CreateComponent() {
                         }}
                     />
                 );
+            default:
+                break;
         }
     };
 

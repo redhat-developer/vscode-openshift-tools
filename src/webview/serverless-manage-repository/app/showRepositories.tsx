@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
 import { Add, Cancel, Delete, Done, Edit } from '@mui/icons-material';
-import { VSCodeMessage } from './vsCodeMessage';
+import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, IconButton, Stack, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TablePagination, TableRow, TextField, Tooltip, Typography } from '@mui/material';
+import * as React from 'react';
 import { DefaultProps } from '../../common/propertyTypes';
-import { Typography, Stack, Button, Dialog, DialogActions, DialogContent, TextField, TableCell, TableRow, Table, TableContainer, TableHead, styled, tableCellClasses, TableBody, Box, TablePagination, IconButton, Container, CircularProgress, Tooltip } from '@mui/material';
 import { AddRepository } from './addRepository';
+import { VSCodeMessage } from './vsCodeMessage';
 
 export class ShowRepositories extends React.Component<DefaultProps, {
     repositories: string[],
@@ -61,7 +61,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                     openAddDialog: false
                 });
                 VSCodeMessage.postMessage({
-                    action: `getRepositoryList`
+                    action: 'getRepositoryList'
                 });
             }
         });
@@ -89,7 +89,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
     delete = (repo: string): void => {
         this.CloseDialog();
         VSCodeMessage.postMessage({
-            action: `deleteRepo`,
+            action: 'deleteRepo',
             data: {
                 name: repo
             }
@@ -124,7 +124,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
 
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
-            action: `validateNewName`,
+            action: 'validateNewName',
             data: value
         });
     }
@@ -136,7 +136,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
     rename(oldName: string, newName: string): void {
         this.CloseDialog();
         VSCodeMessage.postMessage({
-            action: `renameRepo`,
+            action: 'renameRepo',
             data: {
                 oldName,
                 newName
@@ -154,7 +154,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         },
     }));
 
-    StyledTableRow = styled(TableRow)(({ }) => ({
+    StyledTableRow = styled(TableRow)(() => ({
         '&:nth-of-type(odd)': {
             backgroundColor: 'var(--vscode-button-secondaryBackground)'
         },

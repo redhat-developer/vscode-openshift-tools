@@ -15,14 +15,14 @@ import { ChartResponse } from './helmChartType';
 import fetch = require('make-fetch-happen');
 
 let panel: vscode.WebviewPanel;
-let helmRes: ChartResponse[] = [];
+const helmRes: ChartResponse[] = [];
 let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
 
 vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
     if (themeKind !== editor.kind) {
         themeKind = editor.kind;
         if (panel) {
-            panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
+            void panel.webview.postMessage({ action: 'setTheme', themeValue: themeKind });
         }
     }
 });
@@ -31,23 +31,24 @@ export class HelmCommand {
     @vsCommand('openshift.componentTypesView.registry.helmChart.install')
     static async installHelmChart(event: any) {
         try {
-            panel.webview.postMessage({
+            await panel.webview.postMessage({
                 action: 'loadScreen',
                 chartName: event.chartName,
                 show: true
             });
             await Helm.installHelmChart(event.name, event.chartName, event.version);
-            vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
+            void vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
             OpenShiftExplorer.getInstance().refresh();
-            panel.webview.postMessage({
+            void panel.webview.postMessage({
                 action: 'loadScreen',
                 show: false,
                 isError: false,
                 isInstalled: true
             });
         } catch (e) {
-            vscode.window.showErrorMessage(`Installation failed: ${e.message.substring(e.message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
-            panel.webview.postMessage({
+            const message: string = e.message;
+            void vscode.window.showErrorMessage(`Installation failed: ${message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
+            void panel.webview.postMessage({
                 action: 'loadScreen',
                 chartName: event.chartName,
                 show: false,
@@ -58,22 +59,23 @@ export class HelmCommand {
     }
 
     @vsCommand('openshift.componentTypesView.registry.helmChart.open')
-    static async openedHelmChart(chartName: any) {
+    static async openedHelmChart(chartName: any): Promise<void> {
         const openedHelmChart = new ExtCommandTelemetryEvent('openshift.componentTypesView.registry.helmChart.open');
         openedHelmChart.send(chartName);
+        return Promise.resolve();
     }
 }
 
-async function helmChartMessageListener(event: any): Promise<any> {
+function helmChartMessageListener(event: any): void {
     switch (event?.action) {
         case 'install':
-            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
+            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
             break;
         case 'openChart':
-            vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
+            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
             break;
         default:
-            panel.webview.postMessage(
+            void panel.webview.postMessage(
                 {
                     error: 'Invalid command'
                 }
@@ -108,7 +110,7 @@ export default class HelmChartLoader {
             });
             panel.webview.onDidReceiveMessage(helmChartMessageListener);
         }
-        getHelmCharts('getHelmCharts');
+        await getHelmCharts('getHelmCharts');
         return panel;
     }
 
@@ -128,7 +130,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
         const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
         const entries = yamlResponse.entries;
         Object.keys(entries).forEach((key) => {
-            let res: ChartResponse = {
+            const res: ChartResponse = {
                 chartName: '',
                 chartVersions: [],
                 displayName: ''
@@ -139,12 +141,11 @@ async function getHelmCharts(eventName: string): Promise<void> {
             helmRes.push(res);
         })
     }
-    panel?.webview.postMessage(
+    void panel?.webview.postMessage(
         {
             action: eventName,
-            helmRes: helmRes,
+            helmRes,
             themeValue: themeKind,
         }
     );
 }
-

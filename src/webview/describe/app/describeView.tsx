@@ -39,16 +39,6 @@ const theme = createTheme({
 export default function describeView(props: any): JSX.Element {
 
     const classes = useStyles();
-    // const [state, setState] = React.useState({
-    //   togglejson: true,
-    // });
-
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //   setState({ ...state, [event.target.name]: event.target.checked });
-    //   const vscode = window.acquireVsCodeApi();
-    //   vscode.postMessage({action: 'rawdata'});
-    // };
 
     return (
         <ThemeProvider theme={theme}>
@@ -58,19 +48,6 @@ export default function describeView(props: any): JSX.Element {
                       <Typography variant="h6" className={classes.title}>
                       Describe Component
                       </Typography>
-                      {/* <FormGroup row>
-                          <FormControlLabel
-                            control={
-                              <Switch
-                                checked={state.togglejson}
-                                onChange={handleChange}
-                                name="togglejson"
-                                size="small"
-                              />
-                            }
-                          label={<Typography variant="h6" className={classes.title}>Show Json</Typography>}
-                        />
-                      </FormGroup> */}
                   </Toolbar>
               </AppBar>
           </div>

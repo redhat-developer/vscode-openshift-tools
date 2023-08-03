@@ -64,7 +64,7 @@ async function registerKubernetesCloudProvider(): Promise<void> {
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
-    WelcomePage.createOrShow();
+    void WelcomePage.createOrShow();
     await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
@@ -190,13 +190,13 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     }
 
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
-    extendClusterExplorer();
+    void extendClusterExplorer();
 
     await ComponentTypesView.instance.getAllComponents();
 
     await registerKubernetesCloudProvider();
 
-    startTelemetry(extensionContext);
+    void startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
 
     return {

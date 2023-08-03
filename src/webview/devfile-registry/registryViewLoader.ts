@@ -161,8 +161,9 @@ export default class RegistryViewLoader {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     @vsCommand('openshift.componentTypesView.registry.closeView')
-    static async closeRegistryInWebview(): Promise<void> {
+    static closeRegistryInWebview(): Promise<void> {
         panel?.dispose();
+        return Promise.resolve();
     }
 
     static sendUpdatedRegistries() {

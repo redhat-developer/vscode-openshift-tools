@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig } from '@kubernetes/client-node';
-import { Uri, commands } from 'vscode';
+import { commands, Uri } from 'vscode';
 import { vsCommand, VsCommandError } from '../vscommand';
 import { asJson } from './common';
 
@@ -35,6 +35,6 @@ import { asJson } from './common';
             throw new VsCommandError('Cannot find current context in Kubernetes configuration.')
         }
         const url = await Route.getUrl(currentContextObj.namespace, context.name)
-        commands.executeCommand('vscode.open', Uri.parse(url));
+        await commands.executeCommand('vscode.open', Uri.parse(url));
     }
  }

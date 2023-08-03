@@ -12,10 +12,10 @@ import { getInstance } from '../odo';
 import { Command } from '../odo/command';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { getOpenAPISchemaFor } from '../util/swagger';
-import { VsCommandError, vsCommand } from '../vscommand';
+import { vsCommand, VsCommandError } from '../vscommand';
 import CreateServiceViewLoader from '../webview/create-service/createServiceViewLoader';
 import * as common from './common';
-import { CRDDescription, ClusterServiceVersionKind, CustomResourceDefinitionKind } from './olm/types';
+import { ClusterServiceVersionKind, CRDDescription, CustomResourceDefinitionKind } from './olm/types';
 import { DEFAULT_K8S_SCHEMA, generateDefaults, getUISchema, randomString } from './utils';
 
 class CsvNode implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterExplorerExtensionNode {
@@ -90,11 +90,11 @@ export class ClusterServiceVersion extends OpenShiftItem {
 
                 try {
                     await OpenShiftItem.odo.createService(event.formData);
-                    window.showInformationMessage(`Service ${event.formData.metadata.name} successfully created.` );
+                    void window.showInformationMessage(`Service ${event.formData.metadata.name} successfully created.` );
                     panel.dispose();
                 } catch (err) {
-                    window.showErrorMessage(err);
-                    panel.webview.postMessage({action: 'error'});
+                    void window.showErrorMessage(err);
+                    await panel.webview.postMessage({action: 'error'});
                 }
             }
         }

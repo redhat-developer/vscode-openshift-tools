@@ -26,7 +26,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
     if (event.action?.startsWith('sandbox')) {
         sessionCheck = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
         if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
-            panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+            void panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             return;
         }
     }
@@ -42,23 +42,23 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             break;
 
         case 'crcSaveSettings':
-            ClusterViewLoader.crcSaveSettings(event);
+            void ClusterViewLoader.crcSaveSettings(event);
             break;
 
-        case 'checksetting':
-            const binaryFromSetting:string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+        case 'checksetting': {
+            const binaryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
             if (binaryFromSetting) {
-                panel.webview.postMessage({action: 'crcsetting'});
-                ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
+                await panel.webview.postMessage({action: 'crcsetting'});
+                void ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
             }
             break;
-
+        }
         case 'checkcrcstatus':
-            ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
-            break
+            await ClusterViewLoader.checkCrcStatus(event.data, 'crcstatus', panel);
+            break;
 
         case 'crcLogin':
-            vscode.commands.executeCommand(
+            void vscode.commands.executeCommand(
                 'openshift.explorer.login.credentialsLogin',
                 true,
                 event.url,
@@ -67,46 +67,48 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             );
             break;
         case 'sandboxCheckAuthSession':
-            panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+            void panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
             break;
-        case 'sandboxRequestSignup':
+        case 'sandboxRequestSignup': {
             const telemetryEventSignup = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxRequestSignup');
             try {
                 const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
-                panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                 if (!signupResponse) {
-                    vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                    void vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
                     telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox failed.');
                 } else {
                     telemetryEventSignup.send();
                 }
             } catch(ex) {
-                vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                void vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
                 telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox timed out.');
             }
             break;
-        case 'sandboxLoginRequest':
+        }
+        case 'sandboxLoginRequest': {
             const telemetryEventLogin = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginRequest');
             try {
                 const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
                 if (session) {
-                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                    await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                 } else {
-                    panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                    await panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
                 }
                 telemetryEventLogin.send();
             } catch (ex) {
-                panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
+                await panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
                 telemetryEventLogin.sendError('Request for authentication session failed.');
             }
             break;
-        case 'sandboxDetectStatus':
+        }
+        case 'sandboxDetectStatus': {
             const telemetryEventDetect = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxDetectStatus');
             try {
                 const signupStatus = await sandboxAPI.getSignUpStatus((sessionCheck as any).idToken);
                 if (!signupStatus) {
                     // User does not signed up for sandbox, show sign up for sandbox page
-                    panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
+                    await panel.webview.postMessage({action: 'sandboxPageRequestSignup'});
                 } else {
                     if (signupStatus.status.ready) {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
@@ -114,45 +116,46 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                         if (!Cluster.validateLoginToken(await vscode.env.clipboard.readText())) {
                             errCode = 'invalidToken';
                         }
-                        panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
-                        pollClipboard(signupStatus);
+                        await panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
+                        await pollClipboard(signupStatus);
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
-                            panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                            await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                         } else {
                             // user phone number verified
                             //
                             if (signupStatus.status.reason === 'PendingApproval') {
-                                panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
+                                await panel.webview.postMessage({action: 'sandboxPageWaitingForApproval'});
                             } else {
-                                panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
+                                await panel.webview.postMessage({action: 'sandboxPageWaitingForProvision'})
                             }
                         }
                     }
                 }
                 telemetryEventDetect.send();
-            } catch(ex) {
-                vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
-                panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
+            } catch (ex) {
+                void vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
+                await panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
                 telemetryEventDetect.sendError('OpenShift Sandbox status request timed out.');
             }
             break;
+        }
         case 'sandboxRequestVerificationCode': {
             const telemetryEventRequestCode = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxRequestVerificationCode');
             try {
                 const requestStatus = await sandboxAPI.requestVerificationCode((sessionCheck as any).idToken, event.payload.fullCountryCode, event.payload.rawPhoneNumber);
                 if (requestStatus.ok) {
-                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
+                    await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
                     telemetryEventRequestCode.send();
                 } else {
-                    vscode.window.showErrorMessage(`Request for verification code failed: ${requestStatus.json.details}`);
-                    panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                    void vscode.window.showErrorMessage(`Request for verification code failed: ${requestStatus.json.details}`);
+                    await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     telemetryEventRequestCode.sendError('Request for verification code failed.');
                 }
             } catch (ex) {
-                vscode.window.showErrorMessage('Request for verification code timed out, please try again.');
-                panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
+                void vscode.window.showErrorMessage('Request for verification code timed out, please try again.');
+                await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                 telemetryEventRequestCode.sendError('Request for verification code timed out.');
             }
             break;
@@ -162,30 +165,34 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             try {
                 const requestStatus = await sandboxAPI.validateVerificationCode((sessionCheck as any).idToken, event.payload.verificationCode);
                 if (requestStatus) {
-                    panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
+                    await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                     telemetryEventValidateCode.send();
                 } else {
-                    vscode.window.showErrorMessage('Verification code does not match, please try again.');
-                    panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
+                    void vscode.window.showErrorMessage('Verification code does not match, please try again.');
+                    await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                     telemetryEventValidateCode.sendError('Verification code does not match');
                 }
             } catch(ex) {
-                vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
-                panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
+                void vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
+                await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                 telemetryEventValidateCode.sendError('Verification code validation request failed');
             }
             break;
         }
-        case 'sandboxLoginUsingDataInClipboard':
+        case 'sandboxLoginUsingDataInClipboard': {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
                 const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
-                if (result) vscode.window.showInformationMessage(`${result}`);
+                if (result) void vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
-                vscode.window.showErrorMessage(err.message);
+                void vscode.window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
             }
+            break;
+        }
+        default:
+            void vscode.window.showErrorMessage(`Unexpected message from webview: '${event.action}'`);
             break;
     }
 }
@@ -201,7 +208,7 @@ async function pollClipboard(signupStatus) {
             if (!Cluster.validateLoginToken(currentContent)){
                 errCode = 'invalidToken';
             }
-            panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode});
+            void panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode});
         }
     }
 }
@@ -235,13 +242,13 @@ export default class ClusterViewLoader {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.openCrcAddClusterPage');
             crc = '',
             crcOpenShift = '';
-            vscode.window.showErrorMessage(err.message);
+            void vscode.window.showErrorMessage(err.message);
             telemetryEventLoginToSandbox.sendError('Unable to fetch CRC and OpenshiftCRC version');
         } finally {
-            panel.webview.postMessage(
+            await panel.webview.postMessage(
                 {
                     action: 'openCrcAddClusterPage',
-                    crc: crc,
+                    crc,
                     openShiftCRC: crcOpenShift
                 });
         }
@@ -250,21 +257,22 @@ export default class ClusterViewLoader {
     }
 
     @vsCommand('openshift.explorer.addCluster.crcSetup')
-    static async crcSetup(event: any) {
+    static crcSetup(event: any): Promise<void> {
         const terminal: vscode.Terminal = WindowUtil.createTerminal('OpenShift: CRC Setup', undefined);
         terminal.sendText(`"${event.data.tool}" setup`);
         terminal.show();
+        return Promise.resolve();
     }
 
     @vsCommand('openshift.explorer.addCluster.crcStart')
-    static async crcStart(event: any) {
+    static crcStart(event: any): Promise<void> {
         let startProcess: ChildProcess;
         channel.show();
         if (event.isSetting) {
-            const binaryFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
-            const pullSecretFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcPullSecretPath');
-            const cpuFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcCpuCores');
-            const memoryFromSetting = vscode.workspace.getConfiguration('openshiftToolkit').get('crcMemoryAllocated');
+            const binaryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+            const pullSecretFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcPullSecretPath');
+            const cpuFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcCpuCores');
+            const memoryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcMemoryAllocated');
             const nameserver = vscode.workspace.getConfiguration('openshiftToolkit').get<string>('crcNameserver');
             const nameserverOption = nameserver ? ['-n', nameserver] : [];
             const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o', 'json'];
@@ -287,20 +295,21 @@ export default class ClusterViewLoader {
             const message = `'crc start' exited with code ${code}`;
             channel.append(message);
             if (code !== 0) {
-                vscode.window.showErrorMessage(message);
+                void vscode.window.showErrorMessage(message);
             }
             const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation'): event.crcLoc;
-            ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
+            void ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
         startProcess.on('error', (err) => {
             const message = `'crc start' execution failed with error: '${err.message}'`;
             channel.append(message);
-            vscode.window.showErrorMessage(message);
+            void vscode.window.showErrorMessage(message);
         });
+        return Promise.resolve();
     }
 
     @vsCommand('openshift.explorer.addCluster.crcStop')
-    static async crcStop(event) {
+    static crcStop(event): Promise<void> {
         let filePath: string;
         channel.show();
         if (event.data.tool === '') {
@@ -322,15 +331,16 @@ export default class ClusterViewLoader {
             const message = `'crc stop' exited with code ${code}`;
             channel.append(message);
             if (code !== 0) {
-                vscode.window.showErrorMessage(message);
+                void vscode.window.showErrorMessage(message);
             }
-            ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
+            void ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
         });
         stopProcess.on('error', (err) => {
             const message = `'crc stop' execution filed with error: '${err.message}'`;
             channel.append(message);
-            vscode.window.showErrorMessage(message);
+            void vscode.window.showErrorMessage(message);
         });
+        return Promise.resolve();
     }
 
     @vsCommand('openshift.explorer.addCluster')
@@ -364,7 +374,7 @@ export default class ClusterViewLoader {
             });
             panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
             panel.webview.html = await loadWebviewHtml('clusterViewer', panel);
-            panel.webview.postMessage({action: 'cluster', data: ''});
+            await panel.webview.postMessage({action: 'cluster', data: ''});
             panel.onDidDispose(()=> {
                 panel = undefined;
             });
@@ -382,9 +392,9 @@ export default class ClusterViewLoader {
         channel.append(`\n\n"${filePath}" status -o json\n`);
         channel.append(result.stdout);
         if (result.error || crcVerInfo.error) {
-            p.webview.postMessage({action: postCommand, errorStatus: true});
+            await p.webview.postMessage({action: postCommand, errorStatus: true});
         } else {
-            p.webview.postMessage({
+            await p.webview.postMessage({
                 action: postCommand,
                 status: JSON.parse(result.stdout),
                 errorStatus: false,

@@ -67,21 +67,21 @@ export class AddRepository extends React.Component<DefaultProps, {
 
     validateGitURL = (value: string): void => {
         VSCodeMessage.postMessage({
-            action: `validateGitURL`,
+            action: 'validateGitURL',
             data: value
         })
     }
 
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
-            action: `validateName`,
+            action: 'validateName',
             data: value
         })
     }
 
     addRepo = (): void => {
         VSCodeMessage.postMessage({
-            action: `addRepo`,
+            action: 'addRepo',
             data: {
                 name: this.state.input.name,
                 url: this.state.repo.url

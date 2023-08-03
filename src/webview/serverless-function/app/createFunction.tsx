@@ -2,11 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import AddIcon from '@mui/icons-material/Add';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { Autocomplete, Box, Button, Container, createFilterOptions, Paper, Stack, SvgIcon, TextField, Typography } from '@mui/material';
 import React, { FunctionComponent, SVGAttributes } from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Button, Paper, Stack, SvgIcon, TextField, Typography, createFilterOptions, Box, Container } from '@mui/material';
-import { VSCodeMessage } from './vsCodeMessage';
-import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import GoIcon from '../../../../images/serverlessfunctions/go.svg';
 import NodeIcon from '../../../../images/serverlessfunctions/node.svg';
 import PythonIcon from '../../../../images/serverlessfunctions/python.svg';
@@ -14,9 +14,9 @@ import QuarkusIcon from '../../../../images/serverlessfunctions/quarkus.svg';
 import RustIcon from '../../../../images/serverlessfunctions/rust.svg';
 import SpringBootIcon from '../../../../images/serverlessfunctions/spring boot.svg';
 import TypeScriptIcon from '../../../../images/serverlessfunctions/typescript.svg';
-import AddIcon from '@mui/icons-material/Add';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
+import { VSCodeMessage } from './vsCodeMessage';
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
@@ -50,7 +50,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             imageData: {
                 name: '',
                 error: false,
-                helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
+                helpText: 'Image name should be in the form of \'[registry]/[namespace]/[name]:[tag]\''
             },
             images: [],
             baseTemplates: [],
@@ -68,7 +68,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
-            action: `validateName`,
+            action: 'validateName',
             name: value
         })
     }
@@ -252,7 +252,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                                     imageData: {
                                                         name: '',
                                                         error: true,
-                                                        helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
+                                                        helpText: 'Image name should be in the form of \'[registry]/[namespace]/[name]:[tag]\''
                                                     }
                                                 });
                                             } else {
