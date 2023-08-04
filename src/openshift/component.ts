@@ -485,6 +485,23 @@ export class Component extends OpenShiftItem {
     }
 
     /**
+     * Create a component from the root folder in workspace through command palette
+     *
+     */
+    @vsCommand('openshift.component.createFromRootWorkspaceFolder')
+    static async createFromRootWorkspaceFolderPalette(): Promise<void> {
+        const devFileLocation = path.join(workspace.workspaceFolders[0].uri.fsPath, 'devfile.yaml');
+        try {
+            await fs.access(devFileLocation);
+            await window.showErrorMessage('The selected folder already contains a devfile.');
+            return;
+        } catch (e) {
+            // do nothing
+        }
+        await CreateComponentLoader.loadView('Create Component', workspace.workspaceFolders[0].uri.fsPath);
+    }
+
+    /**
      * Create a component
      *
      * @param folder The folder to use as component context folder
@@ -496,7 +513,6 @@ export class Component extends OpenShiftItem {
      * @throws VsCommandError or Error in case of error in cli or code
      */
 
-    @vsCommand('openshift.component.createFromRootWorkspaceFolder')
     static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], opts: {
         componentTypeName?: string,
         projectName?: string,

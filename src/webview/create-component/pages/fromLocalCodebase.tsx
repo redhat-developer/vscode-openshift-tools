@@ -15,7 +15,6 @@ import {
     Typography
 } from '@mui/material';
 import * as React from 'react';
-import { Uri } from 'vscode';
 import { ComponentNameInput } from '../../common/componentNameInput';
 import {
     CreateComponentButton,
@@ -47,7 +46,12 @@ type RecommendedDevfileState = {
     isDevfileExistsInFolder: boolean;
 };
 
-export function FromLocalCodebase({ setCurrentView }) {
+type FromLocalCodebaseProps = {
+    setCurrentView: React.Dispatch<React.SetStateAction<string>>;
+    rootFolder?: string;
+};
+
+export function FromLocalCodebase(props: FromLocalCodebaseProps) {
     const [currentPage, setCurrentPage] = React.useState<CurrentPage>('fromLocalCodeBase');
     const [workspaceFolders, setWorkspaceFolders] = React.useState<string[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
@@ -128,6 +132,15 @@ export function FromLocalCodebase({ setCurrentView }) {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
+        if (props.rootFolder && props.rootFolder.length != 0) {
+            setProjectFolder(props.rootFolder);
+            const componentNameFromFolder: string = props.rootFolder.substring(props.rootFolder.lastIndexOf('/') + 1);
+            setComponentName(componentNameFromFolder);
+            window.vscodeApi.postMessage({
+                action: 'validateComponentName',
+                data: componentNameFromFolder,
+            });
+        }
     }, []);
 
     function handleNext() {
@@ -225,14 +238,11 @@ export function FromLocalCodebase({ setCurrentView }) {
                         {!isLoaded ? (
                             <>
                                 <Stack direction="row" spacing={1} marginTop={2}>
-                                    <Button
-                                        variant="text"
-                                        onClick={() => {
-                                            setCurrentView('home');
-                                        }}
-                                    >
-                                        BACK
-                                    </Button>
+                                    {(!props.rootFolder || props.rootFolder.length == 0) &&
+                                        <Button variant='text' onClick={() => { props.setCurrentView('home') }}>
+                                            BACK
+                                        </Button>
+                                    }
                                     <Button
                                         variant="contained"
                                         disabled={
@@ -312,19 +322,19 @@ export function FromLocalCodebase({ setCurrentView }) {
                                         </Button>
                                         {(recommendedDevfile.showRecommendation ||
                                             selectedDevfile) && (
-                                            <CreateComponentButton
-                                                componentName={componentName}
-                                                componentParentFolder={projectFolder}
-                                                addToWorkspace={true}
-                                                isComponentNameFieldValid={
-                                                    isComponentNameFieldValid
-                                                }
-                                                isFolderFieldValid={true}
-                                                isLoading={isLoading}
-                                                createComponent={createComponentFromLocalCodebase}
-                                                setLoading={setLoading}
-                                            />
-                                        )}
+                                                <CreateComponentButton
+                                                    componentName={componentName}
+                                                    componentParentFolder={projectFolder}
+                                                    addToWorkspace={true}
+                                                    isComponentNameFieldValid={
+                                                        isComponentNameFieldValid
+                                                    }
+                                                    isFolderFieldValid={true}
+                                                    isLoading={isLoading}
+                                                    createComponent={createComponentFromLocalCodebase}
+                                                    setLoading={setLoading}
+                                                />
+                                            )}
                                     </Stack>
                                     <CreateComponentErrorAlert
                                         createComponentErrorMessage={createComponentErrorMessage}

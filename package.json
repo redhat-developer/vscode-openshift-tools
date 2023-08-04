@@ -422,7 +422,7 @@
 			},
 			{
 				"command": "openshift.component.createFromRootWorkspaceFolder",
-				"title": "New OpenShift Component",
+				"title": "Create Component From Folder",
 				"category": "OpenShift"
 			},
 			{
@@ -1521,6 +1521,15 @@
 						"completionEvents": [
 							"onCommand:openshift.componentTypesView.registry.openInView"
 						]
+					},
+					{
+						"id": "createComponentFromWorkspaceFolder",
+						"title": "Create Component from workspace folder",
+						"description": "Use the `Create Component From Folder` option from the command palette in your root workspace folder to create a component from that folder directly.",
+						"media": {
+							"image": "images/walkthrough/createComponentFromWorkspaceFolder.gif",
+							"altText": "create component from workspace folder"
+						}
 					},
 					{
 						"id": "helmChart",
