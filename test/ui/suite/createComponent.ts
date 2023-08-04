@@ -3,11 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { DevfileRegistry } from './devfileRegistry';
+export function testCreateComponent() {
+    describe('Create Component Wizard', function () {
 
-ReactDOM.render(
-    <DevfileRegistry/>,
-    document.getElementById('root'),
-);
+        it('Create component from git URL');
+
+        it('Create component from local folder');
+
+        it('Create component from template project');
+
+    });
+}

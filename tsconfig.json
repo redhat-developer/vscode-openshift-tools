@@ -30,6 +30,8 @@
         "src/webview/describe/app",
         "src/webview/cluster/app",
         "src/webview/create-service/app",
+        "src/webview/create-component/app",
+        "src/webview/create-component/pages",
         "src/webview/devfile-registry/app",
         "src/webview/welcome/app",
         "src/webview/git-import/app",

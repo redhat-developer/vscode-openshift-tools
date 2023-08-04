@@ -4,8 +4,13 @@
         <base href="%BASE_URL%" />
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Git Import</title>
+        <title>Create Component</title>
         <!-- meta http-equiv="Content-Security-Policy" -->
+        <script>
+            if (typeof acquireVsCodeApi !== 'undefined') {
+                window.vscodeApi = acquireVsCodeApi();
+            }
+        </script>
         <style>
             html,
             body {
@@ -47,6 +52,5 @@
     <body>
         <div class="box" id="root"></div>
         <script src="%SCRIPT%" ></script>
-        <link rel="stylesheet" href="%STYLE%"></link>
     </body>
 </html>

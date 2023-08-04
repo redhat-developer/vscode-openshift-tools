@@ -5,14 +5,12 @@
 
 import * as path from 'path';
 import {
-    ExtensionContext,
-    QuickPickItemKind,
-    StatusBarAlignment,
-    StatusBarItem,
     authentication,
     commands,
-    env,
-    window,
+    env, ExtensionContext,
+    QuickPickItemKind,
+    StatusBarAlignment,
+    StatusBarItem, window,
     workspace
 } from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
@@ -126,13 +124,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                         kind: QuickPickItemKind.Separator
                     },
                     {
-                        label: 'Create Component from Workspace'
-                    },
-                    {
-                        label: 'Create Component from devfile registry'
-                    },
-                    {
-                        label: 'Import from Git',
+                        label: 'Create Component'
                     },
                     {
                         label: '',
@@ -158,14 +150,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                 case 'Switch Kubernetes Context':
                     await commands.executeCommand('openshift.explorer.switchContext');
                     break;
-                case 'Create Component from Workspace':
-                    await commands.executeCommand('openshift.component.createFromLocal');
-                    break;
-                case 'Create Component from devfile registry':
-                    await commands.executeCommand('openshift.componentTypesView.registry.openInView');
-                    break;
-                case 'Import from Git':
-                    await commands.executeCommand('openshift.component.openImportFromGit');
+                case 'Create Component':
+                    await commands.executeCommand('openshift.component.openCreateComponent');
                     break;
                 case 'Open Welcome Page':
                     await commands.executeCommand('openshift.welcome');

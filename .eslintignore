@@ -12,10 +12,12 @@ src/webview/cluster
 out
 src/webview/common
 src/webview/create-service
+src/webview/create-component
 src/webview/devfile-registry
 src/webview/welcome
-src/webview/git-import
 src/webview/helm-chart
 src/webview/feedback
 src/webview/serverless-function
+# vendored from https://github.com/IonicaBizau/git-url-parse, see https://github.com/IonicaBizau/git-url-parse/pull/159
+src/util/gitParse.ts
 test/sandbox-registration
