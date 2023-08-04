@@ -43,11 +43,13 @@ let tmpFolder: Uri;
 export default class CreateComponentLoader {
     static panel: WebviewPanel;
 
+    static initFromRootFolderPath: string;
+
     static get extensionPath() {
         return extensions.getExtension(ExtensionID).extensionPath;
     }
 
-    static async loadView(title: string): Promise<WebviewPanel> {
+    static async loadView(title: string, folderPath?: string): Promise<WebviewPanel> {
         if (CreateComponentLoader.panel) {
             CreateComponentLoader.panel.reveal();
             return;
@@ -92,6 +94,9 @@ export default class CreateComponentLoader {
         );
         panel.webview.html = await loadWebviewHtml('createComponentViewer', panel);
         CreateComponentLoader.panel = panel;
+
+        CreateComponentLoader.initFromRootFolderPath = folderPath;
+
         return panel;
     }
 
@@ -107,6 +112,10 @@ export default class CreateComponentLoader {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'setTheme',
                     themeValue: vscode.window.activeColorTheme.kind,
+                });
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'initFromRootFolder',
+                    rootFolder: CreateComponentLoader.initFromRootFolderPath,
                 });
                 break;
             }
@@ -300,6 +309,7 @@ export default class CreateComponentLoader {
                         );
                     }
                     void vscode.commands.executeCommand('openshift.componentsView.refresh');
+                    void vscode.window.showInformationMessage('Component has been successfully created. You can now run `Start Dev` from the components view.');
                 } catch (err) {
                     await sendTelemetry('newComponentCreationFailed', {
                         error: JSON.stringify(err),

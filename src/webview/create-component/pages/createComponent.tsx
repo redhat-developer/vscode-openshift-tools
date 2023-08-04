@@ -5,7 +5,7 @@
 import { AccountTree } from '@mui/icons-material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { Container, Stack, Theme, ThemeProvider, Typography } from '@mui/material';
+import { CircularProgress, Container, Stack, Theme, ThemeProvider, Typography } from '@mui/material';
 import * as React from 'react';
 import { DevfileExplanation } from '../../common/devfileExplanation';
 import { FromTemplateProject } from '../../common/fromTemplateProject';
@@ -19,6 +19,7 @@ interface VSCodeMessage {
     themeValue?: number;
     availableServices?: string[];
     componentName?: string;
+    rootFolder?: string;
 }
 
 function SelectStrategy({ setCurrentView }) {
@@ -75,10 +76,23 @@ export default function CreateComponent() {
 
     const [theme, setTheme] = React.useState<Theme>(createVSCodeTheme('light'));
     const [currentView, setCurrentView] = React.useState<PageId>('home');
+    const [folderPath, setFolderPath] = React.useState<string>(undefined);
+    const [isInitialized, setInitialized] = React.useState<boolean>(false);
 
     const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
-        if (message.data.action === 'setTheme') {
-            setTheme(createVSCodeTheme(message.data.themeValue === 1 ? 'light' : 'dark'));
+        switch (message.data.action) {
+            case 'setTheme': {
+                setTheme(createVSCodeTheme(message.data.themeValue === 1 ? 'light' : 'dark'));
+                break;
+            }
+            case 'initFromRootFolder': {
+                if (message.data.rootFolder != undefined) {
+                    setCurrentView('fromLocalCodeBase');
+                    setFolderPath(message.data.rootFolder);
+                }
+                setInitialized(true);
+                break;
+            }
         }
     };
 
@@ -94,13 +108,25 @@ export default function CreateComponent() {
     }, []);
 
     const renderComponent = () => {
+
+        if (!isInitialized) {
+            return (
+                <Stack direction="column" spacing={3} alignItems="center">
+                    <CircularProgress />
+                    <Typography variant="body2">
+                        Loading Page...
+                    </Typography>
+                </Stack>
+            );
+        }
+
         switch (currentView) {
             case 'home':
                 return <SelectStrategy setCurrentView={setCurrentView} />;
             case 'fromLocalCodeBase':
                 return (
                     <div style={{ marginRight: '5em' }}>
-                        <FromLocalCodebase setCurrentView={setCurrentView} />
+                        <FromLocalCodebase setCurrentView={setCurrentView} rootFolder={folderPath} />
                     </div>
                 );
             case 'fromExistingGitRepo':
