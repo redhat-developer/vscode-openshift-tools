@@ -420,7 +420,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
             });
         }
         setRegistryEnabled((_) => enabledArray);
-    }, [devfileRegistries.length, ...devfileRegistries]);
+    }, [devfileRegistries]);
 
     React.useEffect(() => {
         props.setSelectedDevfile(selectedDevfile);
