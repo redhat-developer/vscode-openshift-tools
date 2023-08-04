@@ -32,7 +32,7 @@ export const DevfileRegistry = () => {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'init' });
-    });
+    }, []);
 
     return (
         <ThemeProvider theme={theme}>

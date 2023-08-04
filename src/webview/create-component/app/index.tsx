@@ -5,11 +5,11 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import CreateComponent from '../pages/createComponent';
-import { ErrorBoundary } from '../../common/errorBoundary';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 ReactDOM.render(
-    <ErrorBoundary webviewName="createComponent">
+    <WebviewErrorBoundary webviewName="createComponent">
         <CreateComponent />
-    </ErrorBoundary>,
+    </WebviewErrorBoundary>,
     document.getElementById('root'),
 );

@@ -72,6 +72,7 @@ function SelectStrategy({ setCurrentView }) {
 type PageId = 'home' | 'fromLocalCodeBase' | 'fromExistingGitRepo' | 'fromTemplateProject';
 
 export default function CreateComponent() {
+
     const [theme, setTheme] = React.useState<Theme>(createVSCodeTheme('light'));
     const [currentView, setCurrentView] = React.useState<PageId>('home');
 
@@ -90,7 +91,8 @@ export default function CreateComponent() {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'init' });
-    });
+    }, []);
+
     const renderComponent = () => {
         switch (currentView) {
             case 'home':
