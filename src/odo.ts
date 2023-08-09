@@ -19,7 +19,7 @@ import { CommandText } from './base/command';
 import * as cliInstance from './cli';
 import { CliExitData } from './cli';
 import { Command } from './odo/command';
-import { AnalyzeResponse, ComponentType, ComponentTypeAdapter, DevfileComponentType, Registry } from './odo/componentType';
+import { AnalyzeResponse, ComponentType, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './odo/componentType';
 import { ComponentDescription } from './odo/componentTypeDescription';
 import { Project } from './odo/project';
 import { ToolsConfig } from './tools';
@@ -115,6 +115,15 @@ export interface Odo {
      * @param location the location of the local codebase
      */
     createComponentFromLocation(devfileName: string, componentName: string, location: Uri): Promise<void>;
+
+    /**
+     * Returns the description of the given devfile.
+     *
+     * @param componentName the name of the devfile to get the description of
+     * @param registryName the name of the registry that the devfile is in
+     * @returns the description of the given devfile
+     */
+    describeCatalogComponent(componentName: string, registryName: string): Promise<ComponentTypeDescription>
 }
 
 export class OdoImpl implements Odo {
@@ -392,6 +401,12 @@ export class OdoImpl implements Odo {
             //ignore
         }
         return false;
+    }
+
+    public async describeCatalogComponent(componentName: string, registryName: string): Promise<ComponentTypeDescription> {
+        const result = await this.execute(Command.describeCatalogComponent(componentName, registryName));
+        const [componentDescription] = JSON.parse(result.stdout) as ComponentTypeDescription[];
+        return componentDescription;
     }
 }
 

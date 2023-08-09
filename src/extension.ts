@@ -192,7 +192,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     extendClusterExplorer();
 
-    await ComponentTypesView.instance.getAllComponents();
+    void ComponentTypesView.instance.refreshDevfileDescriptions();
 
     await registerKubernetesCloudProvider();
 

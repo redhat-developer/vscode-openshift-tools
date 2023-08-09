@@ -10,9 +10,7 @@ import {
     EventEmitter, TreeDataProvider,
     TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
-import { CliExitData } from './cli';
 import { getInstance, Odo, OdoImpl } from './odo';
-import { Command } from './odo/command';
 import {
     ComponentTypeDescription,
     DevfileComponentType,
@@ -110,41 +108,35 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getAllComponents(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            let isError = false;
-            this.compDescriptions.clear();
-            void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
-                await this.getRegistries();
-                devFileComponentTypes.forEach((component: DevfileComponentType) => {
-                    getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        const [component] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
+    public async refreshDevfileDescriptions(): Promise<void> {
+        this.compDescriptions.clear();
+        try {
+            const [devfileComponentTypes] = await Promise.all([getInstance().getCompTypesJson(), this.getRegistries()]);
 
-                        // eslint-disable-next-line max-nested-callbacks
-                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
-                            starter.typeName = component.name;
-                        });
-                        this.compDescriptions.add(component);
-
-                        if (devFileComponentTypes.length === this.compDescriptions.size) {
-                            this.subject.next('refresh');
-                            resolve();
-                        }
-                    }).catch(() => {
-                        isError = true;
-                    }).finally(() => {
-                        if (isError && !this.subject.closed) {
-                            this.subject.next('refresh');
-                            resolve();
-                        }
+            try {
+                const componentDescriptions = await Promise.all(devfileComponentTypes.map(async (component: DevfileComponentType): Promise<ComponentTypeDescription> => {
+                    const componentDescription = await getInstance().describeCatalogComponent(component.name, component.registry.name);
+                    componentDescription.devfileData.devfile?.starterProjects.forEach(starterProject => {
+                        starterProject.typeName = component.name;
                     });
-                });
-            }).catch(() => {
-                this.subject.next('error');
-                resolve();
-            });
-        });
+                    return componentDescription;
+                }));
+
+                for (const componentDescription of componentDescriptions) {
+                    this.compDescriptions.add(componentDescription);
+                }
+
+                this.subject.next('refresh');
+
+            } catch (e) {
+                if (!this.subject.closed) {
+                    this.subject.next('refresh');
+                }
+            }
+
+        } catch (e) {
+            this.subject.next('error');
+        }
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -304,7 +296,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
                     const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
                     ComponentTypesView.instance.addRegistry(newRegistry);
-                    await ComponentTypesView.instance.getAllComponents();
+                    await ComponentTypesView.instance.refreshDevfileDescriptions();
                     ComponentTypesView.instance.refresh(false);
                 })
             }
@@ -324,7 +316,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             await OdoImpl.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
-                await ComponentTypesView.instance.getAllComponents();
+                await ComponentTypesView.instance.refreshDevfileDescriptions();
             }
         }
     }
