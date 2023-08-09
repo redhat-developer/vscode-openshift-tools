@@ -57,7 +57,8 @@ export class ServerlessCommand {
         clusterVersion: ClusterVersion | null): CommandText {
         const commandText = new CommandText('func', 'deploy', [
             new CommandOption('-p', location),
-            new CommandOption('-i', image)
+            new CommandOption('-i', image),
+            new CommandOption('-v')
         ]);
         if (namespace){
             commandText.addOption(new CommandOption('-n', namespace))

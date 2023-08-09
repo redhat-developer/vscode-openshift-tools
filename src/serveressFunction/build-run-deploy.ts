@@ -316,7 +316,7 @@ export class BuildAndDeploy {
     }
 
     private async provideUserNameAndPassword(
-        startProcess: ChildProcess,
+        process: ChildProcess,
         message: string,
         reattemptForLogin?: boolean,
     ): Promise<void> {
@@ -329,16 +329,16 @@ export class BuildAndDeploy {
             reattemptForLogin,
         );
         if (!userName) {
-            startProcess.stdin.end();
+            process.stdin.end();
             return null;
         }
         const passMessage = 'Provide password for image registry.';
         const userPassword = await this.getUsernameOrPassword(message, passMessage, true, 'Provide a password for image registry.');
         if (!userPassword) {
-            startProcess.stdin.end();
+            process.stdin.end();
             return null;
         }
-        startProcess.stdin.write(`${userName}\n${userPassword}\n`);
+        process.stdin.write(`${userName}\n${userPassword}\n`);
     }
 
     private async getUsernameOrPassword(

@@ -1510,7 +1510,7 @@
 				},
 				{
 					"command": "openshift.Serverless.deploy",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions|deployFunctions)$/"
 				},
 				{
 					"command": "openshift.Serverless.undeploy",

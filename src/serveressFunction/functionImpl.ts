@@ -113,7 +113,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         }
         if (deployedFunctions.length > 0) {
             for (const deployedFunction of deployedFunctions) {
-                if (functionList.filter((functionParam) => functionParam.name !== deployedFunction.name).length > 0) {
+                if (functionList.filter((functionParam) => functionParam.name === deployedFunction.name).length === 0) {
                     const functionNode: FunctionObject = {
                         name: deployedFunction.name,
                         runtime: deployedFunction.runtime,
