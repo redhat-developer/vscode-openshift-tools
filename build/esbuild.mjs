@@ -11,9 +11,9 @@ import * as fs from 'fs/promises';
 const webviews = [
     'cluster',
     'create-service',
+    'create-component',
     'describe',
     'devfile-registry',
-    'git-import',
     'helm-chart',
     'log',
     'welcome',

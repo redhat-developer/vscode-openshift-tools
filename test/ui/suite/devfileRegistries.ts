@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, VSBrowser, ViewSection, WebDriver, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, ViewSection, VSBrowser, WebDriver, Workbench } from 'vscode-extension-tester';
+import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { RegistryWebViewEditor } from '../common/ui/webview/registryWebViewEditor';
-import { notificationExists } from '../common/conditions';
 
 export function testDevfileRegistries() {
     describe('Devfile Registries', () => {
@@ -126,7 +126,7 @@ export function testDevfileRegistries() {
             // initialize web view editor
             const webView = new RegistryWebViewEditor('Devfile Registry - DefaultDevfileRegistry');
             await webView.initializeEditor();
-            expect(await webView.getRegistryStackNames()).to.include.members(['Quarkus Java', 'Node.js Runtime', 'Python', 'Maven Java', 'Vert.x Java', 'Go Runtime', 'React']);
+            expect(await webView.getRegistryStackNames()).to.include.members(['Quarkus Java', 'Django', 'Maven Java', 'Node.js Runtime', 'Open Liberty Gradle', 'Open Liberty Maven']);
         });
 
         after(async function context() {

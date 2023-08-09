@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { checkAboutCommand } from './suite/command-about';
+import { testCreateComponent } from './suite/createComponent';
 import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkFocusOnCommands } from './suite/focusOn';
-import { testImportFromGit } from './suite/import-from-git';
 import { checkOpenshiftView } from './suite/openshift';
 
 require('source-map-support').install();
@@ -18,5 +18,5 @@ describe('Extension public-facing UI tests', function() {
     checkAboutCommand();
     testDevfileRegistries();
     checkFocusOnCommands();
-    testImportFromGit();
+    testCreateComponent();
 });

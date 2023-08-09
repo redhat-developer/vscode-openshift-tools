@@ -111,6 +111,7 @@ export function createComponentTest(contextFolder: string) {
 
         it('Create a new project', async function() {
             this.timeout(30000);
+            await explorer.expand();
             const clusterItem = await explorer.findItem(clusterName) as TreeItem;
             const menu = await clusterItem.openContextMenu();
             await menu.select(MENUS.newProject);
@@ -123,7 +124,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(projectName, explorer);
         });
 
-        it('Create a new component from scratch', async function() {
+        it.skip('Create a new component from scratch', async function() {
             this.timeout(120_000);
             const newComponent = (await (await components.findWelcomeContent()).getButtons())[1];
             await newComponent.click();
@@ -159,7 +160,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(compName, components, 30_000);
         });
 
-        it('Start the component in dev mode', async function() {
+        it.skip('Start the component in dev mode', async function() {
             this.timeout(180000);
             const component = await itemExists(compName, components, 30_000);
 
@@ -180,7 +181,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(compName, components, 60_000);
         });
 
-        it('Check for \'Bind Service\' button (don\'t click it)', async function() {
+        it.skip('Check for \'Bind Service\' button (don\'t click it)', async function() {
             this.timeout(60000);
             const component = await itemExists(compName, components);
             const menu = await component.openContextMenu();

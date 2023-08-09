@@ -21,14 +21,37 @@ When a command contributed by extension is executed, telemetry event sent with f
 
 #### OpenShift: New Component
 
-In addition to generic command's usage data (see above) `New Component` command also reports:
+In addition to generic command's usage data (see above) `New Component` command and wizard also reports the following:
 
-* cancellation_step - step name where New Component command was cancelled (value examples: ComponentName, ApplicationName, ContextFolder)
-* component_kind - devfile or S2I (Software to Image)
-* component_type - name of the component type from devfile registry or catalog
-* component_version - version (for S2I components)
-* starter_project - name of a starter project used (for devfile components)
-* use_existing_devfile - boolean attribute to indicate if an existing devfile was used rather than one from registry
+* `newComponentCreated` - sent when a new component is created, with the following properties:
+    * `strategy` - indicates whether the component was created from an existing local codebase, an existing git repository, or a template project
+    * `component_type` - name of the devfile used
+    * `starter_project` - name of the template project used for components created from a template project
+* `devfileSearchCopiedYaml` - sent when the "Copy YAML" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
+* `devfileSearchOpenProjectInBrowser` - sent when the "Open Project in Browser" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
+* `newComponentSelectStrategy` - sent when you pick between "Existing Local Code Base", "Existing Remote Git Repo", and "Template Project", with the following properties:
+    * `strategy` - which of the above strategies you picked
+* `newComponentCreateFailed` - sent if there is an error during component creation, with the following properties:
+    * `error` - the error that occurred during component creation
+* `newComponentClosed` - sent when the create component UI is closed
+* `webviewRenderError` - sent when the UI crashes
+    * `error` - the error message
+    * `stackTrace` - the stack trace, indicating which part of the UI failed
+
+#### OpenShift: Open Registry View
+
+In addition to generic command's usage data (see above), the `Open Registry View` command and view also reports the following:
+
+* `devfileSearchCopiedYaml` - sent when the "Copy YAML" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
+* `devfileSearchOpenProjectInBrowser` - sent when the "Open Project in Browser" button on the "Select Template Project" page is clicked, with the following properties:
+    * `component_type` - name of the devfile whose YAML was copied
+    * `starter_project` - name of the template project currently selected
 
 #### OpenShift: Login
 

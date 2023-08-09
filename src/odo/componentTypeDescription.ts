@@ -70,18 +70,22 @@ export function isStarterProject(prj: any): prj is StarterProject {
 
 export interface StarterProject {
     name: string;
-    git: Git;
+    git?: Git;
+    zip?: {
+        location: string;
+    }
     description?: string;
     typeName?: string;
 }
 
 export interface Git {
+    checkoutFrom?: {
+        remote: string;
+    }
     remotes: Remotes;
 }
 
-export interface Remotes {
-    origin: string;
-}
+export type Remotes = {[key: string]: string};
 
 export interface ContainerItem  {
     name: string;
@@ -116,7 +120,8 @@ export interface Volume {
 }
 
 export interface Command {
-    exec: Exec;
+    exec?: Exec;
+    composite?: Composite;
     id: string;
 }
 
@@ -126,6 +131,11 @@ export interface Exec {
     workingDir: string;
     group?: Group;
     hotReloadCapable?: boolean;
+}
+
+export type Composite = {
+    commands: string[];
+    group: Group;
 }
 
 export interface Group {

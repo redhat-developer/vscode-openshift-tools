@@ -2,32 +2,26 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { Subject } from 'rxjs';
+import validator from 'validator';
 import * as vscode from 'vscode';
 import {
-    TreeDataProvider,
-    TreeItem,
-    Event,
-    EventEmitter,
-    TreeView,
-    window,
-    Uri,
-    TreeItemCollapsibleState,
-    commands,
+    commands, Event,
+    EventEmitter, TreeDataProvider,
+    TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
+import { CliExitData } from './cli';
 import { getInstance, Odo, OdoImpl } from './odo';
+import { Command } from './odo/command';
 import {
     ComponentTypeDescription,
     DevfileComponentType,
-    Registry,
+    Registry
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
-import { vsCommand, VsCommandError } from './vscommand';
-import validator from 'validator';
-import { Command } from './odo/command';
-import { CliExitData } from './cli';
-import { Subject } from 'rxjs';
-import fetch = require('make-fetch-happen');
 import { Progress } from './util/progress';
+import { vsCommand, VsCommandError } from './vscommand';
+import fetch = require('make-fetch-happen');
 
 type ComponentType = Registry;
 
@@ -114,26 +108,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     public getListOfRegistries(): Registry[] {
         return this.registries;
-    }
-
-    public async addHelmRepo(): Promise<CliExitData> {
-        const response = await getInstance().execute(Command.addHelmRepo());
-        return response;
-    }
-
-    public async updateHelmRepo(): Promise<CliExitData> {
-        const response = await getInstance().execute(Command.updateHelmRepo());
-        return response;
-    }
-
-    public async installHelmChart(name: string, chartName: string, version: string): Promise<CliExitData> {
-        const data = await getInstance().execute(Command.installHelmChart(name, chartName, version));
-        return data;
-    }
-
-    public async unInstallHelmChart(name: string): Promise<CliExitData> {
-        const data = await getInstance().execute(Command.unInstallHelmChart(name));
-        return data;
     }
 
     public async getAllComponents(): Promise<void> {

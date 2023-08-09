@@ -35,8 +35,8 @@
 	"keywords": [
 		"OpenShift",
 		"Kubernetes",
-        "Serverless",
-        "Functions",
+		"Serverless",
+		"Functions",
 		"Red Hat",
 		"devsandbox",
 		"kubernetes-extension-cloud-provider",
@@ -168,6 +168,7 @@
 		"react": "^17.0.2",
 		"react-copy-to-clipboard": "^5.1.0",
 		"react-dom": "^17.0.2",
+		"react-error-boundary": "^4.0.10",
 		"react-lazylog": "^4.5.3",
 		"react-loader-spinner": "^4.0.0",
 		"react-phone-input-2": "^2.14.0",
@@ -212,8 +213,7 @@
 		"onCommand:openshift.project.create",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
-		"onCommand:openshift.component.createFromLocal",
-		"onCommand:openshift.component.openImportFromGit",
+		"onCommand:openshift.component.openCreateComponent",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.openInBrowser",
@@ -412,21 +412,12 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.component.openImportFromGit",
-				"title": "Import from Git",
+				"command": "openshift.component.openCreateComponent",
+				"title": "Create Component",
 				"category": "OpenShift",
 				"icon": {
-					"light": "images/title/light/git-branch.svg",
-					"dark": "images/title/dark/git-branch.svg"
-				}
-			},
-			{
-				"command": "openshift.component.createFromLocal",
-				"title": "New Component",
-				"category": "OpenShift",
-				"icon": {
-					"light": "images/title/light/workspace-new.svg",
-					"dark": "images/title/dark/workspace-new.svg"
+					"light": "images/title/light/add-cluster.svg",
+					"dark": "images/title/dark/add-cluster.svg"
 				}
 			},
 			{
@@ -635,11 +626,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentType.newComponent",
-				"title": "New Component",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.explorer.addCluster.openLaunchSandboxPage",
 				"title": "Launch Developer Sandbox",
 				"category": "OpenShift"
@@ -754,11 +740,6 @@
 			{
 				"command": "openshift.openStatusBar",
 				"title": "OpenShift",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.importFromGit",
-				"title": "Import Component from git repository",
 				"category": "OpenShift"
 			},
 			{
@@ -882,12 +863,12 @@
 		"viewsWelcome": [
 			{
 				"view": "openshiftProjectExplorer",
-				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "Cluster is not accessible or you are not logged in.\n[Login](command:openshift.explorer.login)\n[Select Kubernetes Context](command:openshift.explorer.switchContext)\n[Add OpenShift Cluster](command:openshift.explorer.addCluster)",
 				"enablement": "openshift.app.explorer.init"
 			},
 			{
 				"view": "openshiftComponentsView",
-				"contents": "You have no OpenShift Components in your workspace yet.\n[$(git-branch) Import from Git](command:openshift.component.openImportFromGit)\n[Create Component](command:openshift.component.createFromLocal)",
+				"contents": "You have no OpenShift Components in your workspace yet.\nYou can create an OpenShift component from a local codebase, a remote git repository, or a template project.\n[Create Component](command:openshift.component.openCreateComponent)",
 				"enablement": "openshift.component.explorer.init"
 			}
 		],
@@ -1052,10 +1033,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentType.newComponent",
-					"when": "false"
-				},
-				{
 					"command": "openshift.component.revealContextInExplorer",
 					"when": "false"
 				},
@@ -1112,10 +1089,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.component.importFromGit",
-					"when": "false"
-				},
-				{
 					"command": "openshift.component.deleteConfigurationFiles",
 					"when": "false"
 				},
@@ -1163,7 +1136,6 @@
 					"command": "openshift.Serverless.stopRun",
 					"when": "false"
 				}
-
 			],
 			"view/title": [
 				{
@@ -1217,16 +1189,6 @@
 					"group": "navigation@5"
 				},
 				{
-					"command": "openshift.component.createFromLocal",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-				{
-					"command": "openshift.component.openImportFromGit",
-					"when": "view == openshiftComponentsView",
-					"group": "navigation"
-				},
-				{
 					"command": "openshift.Serverless.createFunction",
 					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@0"
@@ -1235,19 +1197,24 @@
 					"command": "openshift.Serverless.refresh",
 					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@1"
+				},
+				{
+					"command": "openshift.component.openCreateComponent",
+					"when": "view == openshiftComponentsView",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
-                {
-                    "command": "openshift.sandbox.signup",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.none"
-                },
-                {
-                    "command": "openshift.sandbox.open.dashboard",
-                    "category": "1@1",
-                    "when": "viewItem == openshift.sandbox.status.ready"
-                },
+				{
+					"command": "openshift.sandbox.signup",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.none"
+				},
+				{
+					"command": "openshift.sandbox.open.dashboard",
+					"category": "1@1",
+					"when": "viewItem == openshift.sandbox.status.ready"
+				},
 				{
 					"command": "clusters.openshift.csv.create",
 					"group": "1@1",
@@ -1486,7 +1453,7 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.helm"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
 				},
 				{
 					"command": "openshift.resource.unInstall",
@@ -1556,18 +1523,6 @@
 						]
 					},
 					{
-						"id": "createComponent",
-						"title": "Create a Component using local workspace",
-						"description": "Create a component in the local workspace using the selected starter project and associated `devfile.yaml` configuration. Devfile is a manifest file that contains information about various resources (URL, Storage, Services, etc.) that correspond to your component. \n[Create Component](command:openshift.component.createFromLocal)",
-						"media": {
-							"image": "images/walkthrough/createComponent.gif",
-							"altText": "create component"
-						},
-						"completionEvents": [
-							"onCommand:openshift.componentType.newComponent"
-						]
-					},
-					{
 						"id": "helmChart",
 						"title": "Work with Helm Charts",
 						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.componentTypesView.registry.openHelmChartsInView)",
@@ -1577,18 +1532,6 @@
 						},
 						"completionEvents": [
 							"onCommand:openshift.componentTypesView.registry.openHelmChartsInView"
-						]
-					},
-					{
-						"id": "importFromGit",
-						"title": "Create a Component from git repository",
-						"description": "Create a component directly from git repository. The guided workflow will detect the repository and recommend the deployment `devfile` for it. Users can also provide their own custom devfile. \n[Import from Git](command:openshift.component.openImportFromGit)",
-						"media": {
-							"image": "images/walkthrough/git-import-walkthrough.gif",
-							"altText": "create component from git"
-						},
-						"completionEvents": [
-							"onCommand:openshift.component.openImportFromGit"
 						]
 					},
 					{
@@ -1643,16 +1586,16 @@
 						"description": "Build a function project (source code in the workspace) as a container image and push to a registry.",
 						"media": {
 							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/build.gif",
-						  	"altText": "Build function"
+							"altText": "Build function"
 						}
-					  },
-					  {
+					},
+					{
 						"id": "runFunction",
 						"title": "Run the Function locally",
 						"description": "Run your function to see how it works locally before to push it on your cluster.\nOnly a function which has the source code opened in the IDE can be run. Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Run\". The output channel will show up with run command where you can see the logs.",
 						"media": {
 							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/run.gif",
-						  	"altText": "Run function"
+							"altText": "Run function"
 						}
 					  },
 					  {
@@ -1663,7 +1606,7 @@
 						  "image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/deploy.gif",
 						  "altText": "Deploy function"
 						}
-					  }
+					}
 				]
 			}
 		],
