@@ -51,6 +51,29 @@ export class ServerlessCommand {
         return commandText;
     }
 
+    static deployFunction(location: string,
+        image: string,
+        namespace: string,
+        clusterVersion: ClusterVersion | null): CommandText {
+        const commandText = new CommandText('func', 'deploy', [
+            new CommandOption('-p', location),
+            new CommandOption('-i', image),
+            new CommandOption('-v')
+        ]);
+        if (namespace){
+            commandText.addOption(new CommandOption('-n', namespace))
+        }
+        if (clusterVersion) {
+            commandText.addOption(new CommandOption('-r', ''))
+        }
+        return commandText;
+    }
+
+    static undeployFunction(name: string): CommandText {
+        const commandText = new CommandText('func', `delete ${name}`);
+        return commandText
+    }
+
     static getClusterVersion(): CommandText {
         return new CommandText('oc get clusterversion', undefined, [
             new CommandOption('-o', 'josn')

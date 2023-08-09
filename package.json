@@ -795,6 +795,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.undeploy",
+				"title": "UnDeploy",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.buildAndRun",
 				"title": "Build and Run",
 				"category": "OpenShift"
@@ -1113,6 +1118,10 @@
 				},
 				{
 					"command": "openshift.Serverless.deploy",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.undeploy",
 					"when": "false"
 				},
 				{
@@ -1456,15 +1465,23 @@
 				},
 				{
 					"command": "openshift.Serverless.build",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
 				},
 				{
 					"command": "openshift.Serverless.buildAndRun",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
 				},
 				{
 					"command": "openshift.Serverless.run",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/"
+				},
+				{
+					"command": "openshift.Serverless.deploy",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions|deployFunctions)$/"
+				},
+				{
+					"command": "openshift.Serverless.undeploy",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localDeployFunctions|deployFunctions)$/"
 				},
 				{
 					"command": "openshift.Serverless.stopRun",
@@ -1579,6 +1596,15 @@
 						"media": {
 							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/run.gif",
 							"altText": "Run function"
+						}
+					  },
+					  {
+						"id": "deployFunction",
+						"title": "Deploy the Function",
+						"description": "Deploys a function to the currently configured Knative-enabled cluster from your IDE.\nOnly a function which has the source code opened in the IDE can be pushed. Right-click on the function you want to deploy (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Deploy\". The Output Channel will show up with the deploy command where you can see the logs.",
+						"media": {
+						  "image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/deploy.gif",
+						  "altText": "Deploy function"
 						}
 					}
 				]

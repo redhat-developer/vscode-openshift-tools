@@ -25,7 +25,22 @@ export interface FunctionObject {
     ready?: string;
     context: string;
     hasImage?: boolean;
+    hadBuilt?: boolean;
     isRunning?: boolean;
+}
+
+export interface GitModel {
+    readonly remoteUrl: string;
+    readonly branchName: string;
+}
+
+export interface RunResponse {
+    level: number,
+    time: number,
+    pid: number,
+    hostname: string,
+    node_version: string,
+    msg: string
 }
 
 export interface ImageAndBuild {
@@ -36,15 +51,15 @@ export interface ImageAndBuild {
 
 export interface ClusterVersion {
     items: [
-      {
-        status: {
-          desired: {
-            version: string;
-          };
-        };
-      },
+        {
+            status: {
+                desired: {
+                    version: string;
+                };
+            };
+        },
     ];
-  }
+}
 
 // eslint-disable-next-line no-shadow
 export enum FunctionContextType {
