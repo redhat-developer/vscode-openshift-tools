@@ -21,14 +21,14 @@ The OpenShift Toolkit extends Visual Studio Code to provide all of the power and
 
 OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
  - Developers can easily create, deploy and live debug container applications running on OpenShift, podman and Hybrid cloud.
+    - Convert local codebases and git repositories into components that can be debugged on OpenShift through the _Create Component_ guided workflow.
+    - Create new [devfile](https://devfile.io) based components from a template project using the _Create Component_ or _Devfile Registries View_ guided workflows.
  - Browse & Install [Helm Charts](https://helm.sh/) on to the cluster directly from IDE.
- - Create [devfile](https://devfile.io) based components directly from _Devfile Registries View_.
- - Deploy git repositories directly on OpenShift through _Import from Git_ guided workflow.
  - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs.
  - Run local instance of OpenShift 4.x using [OpenShift Local](https://crc.dev/crc/) directly from IDE
  - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance without leaving the IDE
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/create-component-demo.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/create-component-demo.gif)
 ## Getting Started
 
 ### Install
@@ -39,9 +39,9 @@ The OpenShift Toolkit extension provides multiple views to the user once it is l
 
 <code>1. Application Explorer View</code>: Showcases the cluster connected to and the resources present in the cluster. The cluster URL, Project, Deployment and Deployment Configs are shown in the tree view.
 
-<code>2. Components View</code>: Displays the components created and also the actions associated with the component based on the state in which it is( running or stopped). Allows user to create components from local workspace or directly from git repository.
+<code>2. Components View</code>: Displays the components created and also the actions associated with the component based on the state in which it is (running or stopped). Allows user to create components from an existing local codebase, from an existing git repository, or from a template project.
 
-<code>3. Devfile Registries View</code>: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can their own custom registry to the view and create components.
+<code>3. Devfile Registries View</code>: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can add their own custom registry to the view and create components.
 
 <code>4. Debug Sessions View</code>: Once the debug session is active, the associate component is displayed in this view.
 
@@ -71,11 +71,16 @@ To install OpenShift Container Platform 4 in the public cloud, in your datacente
 ## Quick Start - Showcasing Component Creation
 
 Users can create components in a faster and intuitive way in few clicks using the following workflows:
-### **Import From Git**
+### **Create Component**
 
-Users can directly deploy the git repo code on top of OpenShift/Kubernetes cluster. The guided workflow allows them to provide git repository and the extension detects the files in the repo and recoommends a deployment strategy to deploy on cluster. Users can also provide their own custom deployment strategy and create a component directly from the webview. This provides a One-click deployment from Git to OpenShift
+This guided workflow allows you to configure a project so that it can be run and debugged on OpenShift/Kubernetes.
+You can use an existing local code base,
+an existing code base on a remote git repository,
+or create a new project from a template.
+This workflow generates a file called `devfile.yaml` (a [Devfile](https://devfile.io/)) that contains instructions on how to deploy the project to OpenShift/Kubernetes based on the project's language or framework.
+Once you have this set up, you can debug your project on OpenShift/Kubernetes by right clicking on the project in the Components in the OpenShift sidebar, then selecting 'Start Dev'.
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/git-import.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/create-component-demo.gif)
 
 ### **Create component from devfile registry**
 
