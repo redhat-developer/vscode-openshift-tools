@@ -170,10 +170,10 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             result = [{
                 kind: 'project',
                 metadata: {
-                    name: this.kubeContext.namespace,
+                    name: this.kubeContext?.namespace,
                 },
             } as KubernetesObject];
-            this.setCurrentNameSpace(this.kubeContext.namespace);
+            this.setCurrentNameSpace(this.kubeContext?.namespace);
         } else if ('kind' in element) {
             if (element.kind === 'project') {
                 result = [...await this.serverlessFunction.getLocalFunctions()]

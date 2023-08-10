@@ -10,7 +10,7 @@ import { QuickPickItem, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
 import { Odo, OpenShiftObject, getInstance } from '../odo';
 import { Project } from '../odo/project';
-import { ServerlessFunctionView } from '../serveressFunction/view';
+import { ServerlessFunctionView } from '../serverlessFunction/view';
 
 export class QuickPickCommand implements QuickPickItem {
     constructor (public label: string,

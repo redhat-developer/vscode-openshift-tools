@@ -23,7 +23,7 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
-import { ServerlessFunctionView } from './serveressFunction/view';
+import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
