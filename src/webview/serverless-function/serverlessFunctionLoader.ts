@@ -2,17 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { ChildProcess } from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionID } from '../../util/constants';
-import { loadWebviewHtml } from '../common-ext/utils';
 import { CliExitData } from '../../cli';
-import { BuildAndDeploy } from '../../serveressFunction/build-run-deploy';
-import { serverlessInstance } from '../../serveressFunction/functionImpl';
+import { BuildAndDeploy } from '../../serverlessFunction/build-run-deploy';
+import { serverlessInstance } from '../../serverlessFunction/functionImpl';
+import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
+import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
-import { ChildProcess } from 'child_process';
 
 let panel: vscode.WebviewPanel
 
