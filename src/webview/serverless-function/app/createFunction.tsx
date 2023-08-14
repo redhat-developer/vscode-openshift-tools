@@ -124,7 +124,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     }
 
     convert = (value: string): string => {
-        return value.replace('/\s+/g', '').toLowerCase();
+        return value.replace(/\s+/g, '').toLowerCase();
     }
 
     handleDropDownChange = (_event: any, value: string, isLang = false): void => {
