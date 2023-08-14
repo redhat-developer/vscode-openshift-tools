@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { workspace, QuickPickItem, window, Uri, WorkspaceFolder } from 'vscode';
+import { commands, Disposable, QuickPickItem, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import { Platform } from './platform';
-
 import path = require('path');
 import fs = require('fs-extra');
 
@@ -99,4 +98,38 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
         workspacePath = (choice as WorkspaceFolderItem).uri;
     }
     return workspacePath;
+}
+
+/**
+ * Update `ext.folderContainsDevfile` according to the opened folders and devfiles
+ *
+ * @param _ ignored
+ */
+async function updateDevfileContext(_: unknown) {
+    const folders = workspace.workspaceFolders ? workspace.workspaceFolders : [];
+    const devfileFolders: WorkspaceFolder[] = [];
+    await Promise.all(
+        folders.map(async (folder) => {
+            const devfilePath = path.join(folder.uri.fsPath, 'devfile.yaml');
+            if (await fs.pathExists(devfilePath)) {
+                devfileFolders.push(folder);
+            }
+        }),
+    );
+    const foldersArray = devfileFolders.map(folder => folder.name);
+    void commands.executeCommand('setContext', 'ext.folderContainsDevfile', foldersArray);
+}
+
+/**
+ * Sets up the context `ext.folderContainsDevfile` for use in package.json.
+ *
+ * Updates the context when folders are added to the workspace or devfiles are created/deleted.
+ */
+export function setupWorkspaceDevfileContext(): Disposable {
+    void updateDevfileContext(undefined);
+    const devfileWatcher = workspace.createFileSystemWatcher('**/*devfile.yaml');
+    devfileWatcher.onDidCreate(updateDevfileContext);
+    devfileWatcher.onDidDelete(updateDevfileContext);
+    workspace.onDidChangeWorkspaceFolders(updateDevfileContext);
+    return devfileWatcher;
 }
