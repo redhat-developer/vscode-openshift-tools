@@ -47,7 +47,6 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             break;
         case 'createFunction':
             const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(functionPath.fsPath, functionName));
-            panel.title = `Serverless Function - Create - ${functionName}`;
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {
