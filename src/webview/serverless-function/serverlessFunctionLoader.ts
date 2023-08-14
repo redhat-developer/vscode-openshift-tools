@@ -12,9 +12,6 @@ import { serverlessInstance } from '../../serveressFunction/functionImpl';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { validateName } from '../common/utils';
-import { ChildProcess } from 'child_process';
-
-let panel: vscode.WebviewPanel
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
@@ -23,7 +20,7 @@ export interface ServiceBindingFormResponse {
 
 async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
     let response: CliExitData;
-    const eventName =   event.action;
+    const eventName = event.action;
     const functionName = event.name;
     const functionPath: vscode.Uri = event.folderPath ? vscode.Uri.from(event.folderPath) : undefined;
     switch (eventName) {
@@ -73,7 +70,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
 
 export default class ServerlessFunctionViewLoader {
 
-    public static processMap: Map<string, ChildProcess> = new Map();
+    public static  invokePanelMap: Map<string, vscode.WebviewPanel> = new Map<string, vscode.WebviewPanel>();
 
     private static get extensionPath(): string {
         return vscode.extensions.getExtension(ExtensionID).extensionPath;
@@ -89,13 +86,24 @@ export default class ServerlessFunctionViewLoader {
      * @return the webview as a promise
      */
     static async loadView(
-        title: string
+        title: string,
+        invoke = false
     ): Promise<vscode.WebviewPanel | null> {
-        if (panel) {
+        if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
+            const panel = ServerlessFunctionViewLoader.invokePanelMap.get(title);
             panel.reveal(vscode.ViewColumn.One);
             return null;
         } else {
-            return this.createView(title);
+            if (invoke) {
+                const panel = await this.createView(title);
+                ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
+                void panel.webview.postMessage({
+                    action: 'invoke'
+                });
+                return panel;
+            } else if (!invoke) {
+                return await this.createView(title);
+            }
         }
     }
 
@@ -128,9 +136,12 @@ export default class ServerlessFunctionViewLoader {
         panel.webview.onDidReceiveMessage((e) => gitImportMessageListener(panel, e));
 
         panel.onDidDispose(() => {
-
+            if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
+                ServerlessFunctionViewLoader.invokePanelMap.delete(title);
+            }
             panel = undefined;
         });
+
         return Promise.resolve(panel);
     }
 }

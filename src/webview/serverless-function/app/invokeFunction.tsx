@@ -18,7 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import './home.scss';
 
-export class CreateFunction extends React.Component<CreateFunctionPageProps, {
+export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
         name?: string,
         error?: boolean,
@@ -52,7 +52,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
             },
             images: [],
-            templates: [],
+            templates: ['Cloud Events', 'HTTP'],
             language: '',
             template: '',
             wsFolderItems: [],
@@ -195,7 +195,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Function Name *
+                        ID *
                     </Button>
                     <TextField
                         type='string'
@@ -207,7 +207,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         error={functionData.error}
                         onChange={(e) => this.validateName(e.target.value)}
                         id='function-name'
-                        placeholder='Provide name of the function to be created'
+                        placeholder='ID'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
@@ -221,107 +221,57 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Build Image *
+                        Path *
                     </Button>
-                    <Autocomplete
-                        defaultValue={imageData.name}
-                        onChange={(_event, value: string) => {
-                            if (value) {
-                                if (!imageRegex.test(value)) {
-                                    this.setState({
-                                        imageData: {
-                                            name: '',
-                                            error: true,
-                                            helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
-                                        }
-                                    });
-                                } else {
-                                    if (!images.includes(value)) {
-                                        images.push(value);
-                                    }
-                                    this.setState({
-                                        imageData: {
-                                            name: value,
-                                            error: false,
-                                            helpText: ''
-                                        }
-                                    });
-                                }
-                            }
-                        }}
-                        filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
-
-                            const { inputValue } = params;
-                            // Suggest the creation of a new value
-                            const isExisting = options.some((option) => inputValue === option);
-                            if (inputValue !== '' && !isExisting) {
-                                filtered.push(`${inputValue}`);
-                            }
-
-                            return filtered;
-                        }}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        id='image-dropdown'
-                        options={images}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
-                        clearOnBlur
-                        disableClearable
+                    <TextField
+                        type='string'
+                        variant='outlined'
+                        required
+                        autoFocus
                         fullWidth
-                        renderInput={(params) => (
-                            <TextField {...params}
-                                placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
-                        )}
-                    />
+                        defaultValue={functionData.name}
+                        error={functionData.error}
+                        onChange={(e) => this.validateName(e.target.value)}
+                        id='function-name'
+                        placeholder='Path'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                height: '7px !important',
+                            }
+                        }}
+                        helperText={functionData.helpText} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Language *
+                        Content-type
                     </Button>
-                    <Autocomplete
-                        value={language}
-                        id='language-dropdown'
-                        options={languages}
-                        onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        renderOption={(params, option) =>
-                            <li {...params}>
-                                <Stack direction='row' alignItems='center' gap={1}>
-                                    <SvgIcon component={this.getIcon(option)} inheritViewBox />
-                                    <Typography variant='body1'>{option}</Typography>
-                                </Stack>
-                            </li>
-                        }
+                    <TextField
+                        type='string'
+                        variant='outlined'
+                        required
+                        autoFocus
                         fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the Language Runtime' />
-                        )}
-                    />
+                        defaultValue={'text/plain'}
+                        id='content-type'
+                        placeholder='Path'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                height: '7px !important',
+                            }
+                        }}
+                        helperText={functionData.helpText} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Template *
+                        Format *
                     </Button>
                     <Autocomplete
                         value={template}
@@ -350,45 +300,46 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Folder *
+                        Source
                     </Button>
-                    <Autocomplete
-                        value={wsFolderPath ? wsFolderPath.fsPath : ''}
-                        id='folder-dropdown'
-                        options={folders}
-                        onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        getOptionLabel={(option: string | Uri) => typeof option === 'string' ? option : option.fsPath}
-                        renderOption={(props, option) =>
-                            <li {...props}>
-                                <Stack direction='row' alignItems='center' gap={1}>
-                                    {
-                                        typeof option === 'string' ?
-                                            <>
-                                                <AddIcon />
-                                                <Typography variant='body1'>{option}</Typography>
-                                            </> :
-                                            <>
-                                                <FolderOpenIcon />
-                                                <Typography variant='body1'>{option.fsPath}</Typography>
-                                            </>
-                                    }
-                                </Stack>
-                            </li>
-                        }
+                    <TextField
+                        type='string'
+                        variant='outlined'
+                        required
+                        autoFocus
                         fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
-                        )}
-                    />
+                        defaultValue={'/boson/fn'}
+                        id='source'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                height: '7px !important',
+                            }
+                        }}
+                        helperText={functionData.helpText} />
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                    <Button variant='contained'
+                        disabled={true}
+                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                        className='labelStyle'>
+                        Type
+                    </Button>
+                    <TextField
+                        type='string'
+                        variant='outlined'
+                        required
+                        autoFocus
+                        fullWidth
+                        defaultValue={'boson.fn'}
+                        id='type'
+                        sx={{
+                            input: {
+                                color: 'var(--vscode-settings-textInputForeground)',
+                                height: '7px !important',
+                            }
+                        }}
+                        helperText={functionData.helpText} />
                 </Stack>
                 <Stack direction='column' spacing={0.2}>
                     <Button variant='contained'
@@ -396,7 +347,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         className='buttonStyle'
                         style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
                         onClick={() => this.createFunction()}>
-                        Create
+                        Invoke
                     </Button>
                 </Stack>
             </Stack>

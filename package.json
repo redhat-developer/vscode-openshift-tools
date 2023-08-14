@@ -813,6 +813,11 @@
 				"command": "openshift.Serverless.stopRun",
 				"title": "Stop",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.invoke",
+				"title": "Invoke",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -1134,6 +1139,10 @@
 				},
 				{
 					"command": "openshift.Serverless.stopRun",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.invoke",
 					"when": "false"
 				}
 			],
@@ -1473,6 +1482,10 @@
 				},
 				{
 					"command": "openshift.Serverless.run",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/"
+				},
+				{
+					"command": "openshift.Serverless.invoke",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/"
 				},
 				{
