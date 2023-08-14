@@ -35,7 +35,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         return (
             <div className='mainContainer margin'>
                 <div className='title'>
-                    <Typography variant='h5'>OpenShift Serveless Functions</Typography>
+                    <Typography variant='h5'>OpenShift Serverless Functions</Typography>
                 </div>
                 <div className='subTitle'>
                     <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
