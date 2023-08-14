@@ -876,7 +876,7 @@
 			"explorer/context": [
 				{
 					"command": "openshift.component.createFromRootWorkspaceFolder",
-					"when": "explorerResourceIsFolder && explorerResourceIsRoot"
+					"when": "explorerResourceIsFolder && explorerResourceIsRoot && resourceFilename not in ext.folderContainsDevfile"
 				}
 			],
 			"commandPalette": [
