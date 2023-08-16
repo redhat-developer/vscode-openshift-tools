@@ -9,6 +9,7 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE)
 
 
+[Walthrough Running a Demo App](./doc/wild-west-demo-app-walkthrough.md) •
 [Getting Started](#getting-started) •
 [Quick Start Guide](#quick-start---showcasing-component-creation) •
 [Commands and Features](#commands-and-features) •
