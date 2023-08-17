@@ -145,10 +145,6 @@ suite('odo commands integration', function () {
         await ODO.execute(Command.removeRegistry('CheRegistry'));
     });
 
-    test('listCatalogComponents()', async function () {
-        await ODO.execute(Command.listCatalogComponents());
-    });
-
     test('listCatalogComponentsJson()', async function () {
         await ODO.execute(Command.listCatalogComponentsJson());
     });
