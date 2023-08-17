@@ -235,6 +235,10 @@ export default class CreateComponentLoader {
                         action: 'cloneFailed',
                     });
                 } else {
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'devfileExists',
+                        data: await isDevfileExists(tmpFolder),
+                    });
                     CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 }
                 break;
@@ -283,11 +287,13 @@ export default class CreateComponentLoader {
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
-                        await OdoImpl.Instance.createComponentFromLocation(
-                            devfileType,
-                            componentName,
-                            Uri.file(componentFolder),
-                        );
+                        if (!await isDevfileExists(Uri.file(componentFolder))) {
+                            await OdoImpl.Instance.createComponentFromLocation(
+                                devfileType,
+                                componentName,
+                                Uri.file(componentFolder),
+                            );
+                        }
                         await sendTelemetry('newComponentCreated', {
                             strategy,
                             component_type: devfileType,
