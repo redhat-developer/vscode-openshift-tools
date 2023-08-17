@@ -27,7 +27,9 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
     if (process.env.OST_DISABLE_COVERAGE !== 'yes' && fs.existsSync(coverConfigPath)) {
-        coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
+        const coverageConfig = JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions;
+        coverageConfig.relativeCoverageDir = paths.join(coverageConfig.relativeCoverageDir, 'unit');
+        coverageRunner = new CoverageRunner(coverageConfig, testsRoot);
     }
     return coverageRunner;
 }
@@ -72,13 +74,20 @@ export async function run(): Promise<void> {
                     failed = failures;
                 }
             }).on('end', () => {
-                coverageRunner && coverageRunner.reportCoverage();
-                if (failed > 0) {
-                    reject (`Test failures: ${failed}`);
-                } else {
-                    resolve();
+                let coverageReported = Promise.resolve();
+                if (coverageRunner) {
+                    coverageReported = coverageRunner.reportCoverage();
                 }
-                resolve();
+                coverageReported.then(() => {
+                    if (failed > 0) {
+                        reject (`Test failures: ${failed}`);
+                    } else {
+                        resolve();
+                    }
+                    resolve();
+                }).catch((e) => {
+                    reject(e);
+                })
             }).on('fail', () => {
                 failed++;
             });

@@ -10,6 +10,7 @@ import { Command as ProjectCommand } from '../../src/openshift/project';
 
 suite('openshift/project.ts', function () {
 
+    const isOpenShift = process.env.IS_OPENSHIFT || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -20,7 +21,7 @@ suite('openshift/project.ts', function () {
     const ODO = getInstance();
 
     suiteSetup(async function () {
-        if (await ODO.requireLogin()) {
+        if (isOpenShift && await ODO.requireLogin()) {
             await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
         }
         try {

@@ -89,7 +89,7 @@ export class CliChannel implements Cli {
         this.odoChannel.show();
     }
 
-    async execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
+    execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = 2 * 1024 * 1024;
@@ -139,7 +139,7 @@ export class CliChannel implements Cli {
         return optsCopy;
     }
 
-    async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = false): Promise<CliExitData> {
+    async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = true): Promise<CliExitData> {
         const commandActual = command.toString();
         const commandPrivacy = command.privacyMode(true).toString();
         const [cmd] = commandActual.split(' ');
