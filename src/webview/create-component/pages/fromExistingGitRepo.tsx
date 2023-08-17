@@ -8,6 +8,7 @@ import {
     AccordionDetails,
     AccordionSummary,
     Alert,
+    Box,
     Button,
     CircularProgress,
     Divider,
@@ -331,17 +332,21 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 ? 'Selected Devfile'
                                                 : 'Recommended Devfile'}
                                         </Typography>
-                                        <DevfileRecommendationInfo />
+                                        {recommendedDevfile.isDevfileExistsInRepo ? (
+                                            <Alert severity="info">
+                                                The Devfile that exists in the repo will be used
+                                            </Alert>
+                                        ) : (
+                                            <DevfileRecommendationInfo />
+                                        )}
                                     </Stack>
-                                    {!recommendedDevfile.noRecommendation && (
-                                        <DevfileListItem
-                                            devfile={
-                                                selectedDevfile
-                                                    ? selectedDevfile
-                                                    : recommendedDevfile.devfile
-                                            }
-                                        />
-                                    )}
+                                    <DevfileListItem
+                                        devfile={
+                                            selectedDevfile
+                                                ? selectedDevfile
+                                                : recommendedDevfile.devfile
+                                        }
+                                    />
                                     <Stack
                                         direction="row"
                                         justifyContent="flex-end"
@@ -369,15 +374,17 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         >
                                             BACK
                                         </Button>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => {
-                                                setSelectedDevfile(undefined);
-                                                setCurrentPage('selectDifferentDevfile');
-                                            }}
-                                        >
-                                            SELECT A DIFFERENT DEVFILE
-                                        </Button>
+                                        {!recommendedDevfile.isDevfileExistsInRepo && (
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => {
+                                                    setSelectedDevfile(undefined);
+                                                    setCurrentPage('selectDifferentDevfile');
+                                                }}
+                                            >
+                                                SELECT A DIFFERENT DEVFILE
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="contained"
                                             onClick={() => {
