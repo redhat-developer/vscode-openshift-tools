@@ -11,6 +11,7 @@ There are only a few guidelines that we need contributors to follow.
    * [Node.js](https://nodejs.org/) v16.17.0 or higher
      * It is recommended to set up `nvm` to manage different versions of node, which can be installed by following the instructions [here](https://github.com/nvm-sh/nvm#installing-and-updating).
      * To use the current recommended version for this project (in`./nvmrc`), run `nvm use`.
+   * [Red Hat Authentication](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-redhat-account) VS Code plugin (VS Code will prompt to install this when you launch the extension if you don't have it)
 
 2. Fork and clone the repository
 3. `cd vscode-openshift-tools`
@@ -20,6 +21,55 @@ There are only a few guidelines that we need contributors to follow.
 	$ npm install
 	```
 5. Open the folder in VS Code
+
+## Getting a cluster to use with the extension
+
+In order to use many of the features of the extension,
+you will need an OpenShift or Kubernetes cluster.
+Here is a list of the clusters that are known to work well with the extension,
+along with the tradeoffs in using them:
+- **[OpenShift Local](https://developers.redhat.com/products/openshift-local/overview) (formerly `crc`)**
+  - Pros:
+    - Fully featured OpenShift cluster
+    - You have admin access to the cluster
+    - The binary used to set up the cluster is bundled in VS Code OpenShift Toolkit
+  - Cons:
+    - Requires a lot of disk space, memory, and CPU
+    - Takes a while to start up
+    - Some Operators that are set up on OpenShift Dev Sandbox by default are not present on the cluster
+    - You might need to [tweak the settings in order to allocate more RAM](https://crc.dev/crc/getting_started/getting_started/configuring/#_configuring_the_instance) to the cluster in order to get it working
+- **[OpenShift Dev Sandbox](https://developers.redhat.com/developer-sandbox)**
+  - Pros:
+    - Fully featured OpenShift cluster
+    - High availability
+    - Doesn't run on your computer
+    - Many of the Operators you need are installed by default
+    - You can expose applications deployed to the cluster publicly
+  - Cons:
+    - Free trial that ends after 30 days, after which you must pay or your cluster gets wiped
+    - No admin access
+    - You can only access one namespace
+    - Logging in to the cluster is a bit more involved than with a local cluster
+- **[Minikube](https://minikube.sigs.k8s.io/docs/)**
+  - Pros:
+    - Lightweight compared to OpenShift Local (`crc`)
+    - No username/password system, so you don't need to login to use the cluster. The binary sets up the credentials in your `~/.kube/config`.
+  - Cons:
+    - Not OpenShift, so it can't be used to test OpenShift-specific features
+    - Some features require additional commands to set up, eg. [dashboard](https://minikube.sigs.k8s.io/docs/handbook/dashboard/)
+- **[kind](https://kind.sigs.k8s.io/)**
+  - Pros:
+    - Even more lightweight than Minikube
+    - No username/password system, so you don't need to login to use the cluster. The binary sets up the credentials in your `~/.kube/config`.
+  - Cons:
+    - Requires a functioning `docker` or `podman` installation
+    - Not OpenShift, so it can't be used to test OpenShift-specific features
+    - Some features require additional commands to set up eg. [dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+
+Here are some Kubernetes clusters that currently don't work well with VS Code OpenShift Toolkit
+(see [this issue on odo](https://github.com/redhat-developer/odo/issues/7032)):
+- MicroShift (or crc MicroShift)
+- k3s
 
 ## Run and debug the extension locally
 
@@ -76,6 +126,11 @@ It will look something like this:
 Then, you can modify the CSS and attributes of elements in order to experiment with the layout of the webview.
 
 ## Running the tests
+
+There are four test suites, each of which require a separate `npm` command to run.
+This is the case, since we separated the tests that require a cluster from those that don't.
+We also separated the UI tests from the non-UI tests,
+since the UI tests tend to take much longer to run and are more flaky than the non-UI tests.
 
 ### Running the unit test suite
 
