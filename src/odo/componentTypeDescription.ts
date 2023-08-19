@@ -125,6 +125,10 @@ export interface Command {
     id: string;
 }
 
+export interface CommandProvider {
+    getCommand() : Command | undefined
+}
+
 export interface Exec {
     commandLine: string;
     component: string;

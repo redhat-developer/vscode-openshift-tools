@@ -496,6 +496,12 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.commands.command.run",
+				"title": "Run Command",
+				"category": "OpenShift",
+				"icon": "$(notebook-execute)"
+			},
+			{
 				"command": "openshift.open.developerConsole",
 				"title": "Open Console Dashboard",
 				"category": "OpenShift"
@@ -989,6 +995,10 @@
 				{
 					"command": "openshift.component.followLog",
 					"when": "view == openshiftProjectExplorer"
+				},
+				{
+					"command": "openshift.component.commands.command.run",
+					"when": "view == openshiftComponentsView"
 				},
 				{
 					"command": "openshift.open.developerConsole",
@@ -1622,6 +1632,11 @@
 					"submenu": "serverlessfunction/removeConfig",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@2"
+				},
+				{
+					"command": "openshift.component.commands.command.run",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\-component-command.*\\.dev-run.*/",
+					"group": "inline"
 				}
 			]
 		},

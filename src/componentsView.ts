@@ -7,17 +7,142 @@ import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
+import { Command, CommandProvider } from './odo/componentTypeDescription';
 import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
+import { ThemeIcon } from 'vscode';
+
+interface ComponentInfo extends ComponentWorkspaceFolder {
+    getParent(): ComponentInfo;
+
+    getChildren() : ComponentInfo[];
+
+    toTreeItem() : ComponentWorkspaceFolderTreeItem;
+}
+
+abstract class ComponentInfo implements ComponentInfo {
+    parent : ComponentInfo | null;
+
+    constructor(parent : ComponentInfo, folder : ComponentWorkspaceFolder) {
+        this.parent = parent;
+        this.component = folder.component;
+        this.contextPath = folder.contextPath;
+    }
+
+    getParent(): ComponentInfo {
+        return this.parent;
+    }
+
+    getChildren(): ComponentInfo[] {
+        return [];
+    }
+}
+
+class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
+    command :Command;
+
+    private static icon = new ThemeIcon('terminal-view-icon');
+
+    constructor(parent : ComponentInfo, command : Command) {
+        super(parent, parent);
+        this.command = command;
+    }
+
+    getCommand(): Command {
+        return this.command;
+    }
+
+    toTreeItem() : ComponentWorkspaceFolderTreeItem {
+        return {
+            label: this.command.id,
+            workspaceFolder: this,
+            tooltip: `Command: ${this.command.id}`,
+            contextValue: `openshift-component-command${Component.generateContextStateSuffixValue(this)}`,
+            iconPath: ComponentInfoCommand.icon,
+            collapsibleState: vsc.TreeItemCollapsibleState.None
+        };
+    }
+}
+
+class ComponentInfoCommands extends ComponentInfo {
+    private children : ComponentInfo[];
+
+    constructor (parent : ComponentInfo)  {
+        super(parent, parent);
+    }
+
+    getChildren(): ComponentInfo[] {
+        if (!this.children) {
+            const thisCommands = this.component.devfileData.devfile.commands;
+            if (thisCommands === undefined) {
+                this.children = [];
+            } else {
+                this.children = thisCommands.flatMap(c => new ComponentInfoCommand(this, c) );
+            }
+        }
+        return this.children;
+    }
+
+    toTreeItem() : ComponentWorkspaceFolderTreeItem {
+        return {
+            label: 'Commands',
+            workspaceFolder: this,
+            tooltip: 'Commands',
+            contextValue: 'openshift-component-commands',
+            collapsibleState: vsc.TreeItemCollapsibleState.Collapsed
+        };
+    }
+}
+
+class ComponentInfoRoot extends ComponentInfo {
+    private children : ComponentInfo[];
+
+    constructor (folder : ComponentWorkspaceFolder) {
+        super(null, folder);
+    }
+
+    getParent(): ComponentInfo {
+        return this;
+    }
+
+    getChildren(): ComponentInfo[] {
+        if (!this.children) {
+            const thisCommands = this.component.devfileData.devfile.commands;
+            if (thisCommands === undefined) {
+                this.children = [];
+            } else {
+                this.children = [ new ComponentInfoCommands(this) ];
+            }
+        }
+        return this.children;
+    }
+
+    toTreeItem() : ComponentWorkspaceFolderTreeItem {
+        const tooltip = ['Component',
+            `Name: ${this.component.devfileData.devfile.metadata.name}`,
+            `Context: ${this.contextPath}`,
+        ].join('\n');
+
+        return {
+            label: Component.renderLabel(this),
+            workspaceFolder: this,
+            tooltip,
+            contextValue: Component.generateContextValue(this),
+            iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png')),
+            collapsibleState: vsc.TreeItemCollapsibleState.Collapsed
+        };
+    }
+}
 
 export interface ComponentWorkspaceFolderTreeItem extends vsc.TreeItem {
     workspaceFolder: ComponentWorkspaceFolder;
 }
 
-export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWorkspaceFolder> {
+export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentInfo> {
 
     static dataProviderInstance: ComponentsTreeDataProvider;
     public odoWorkspace = new OdoWorkspace();
+    private children : ComponentInfo[];
 
     private constructor() {
         super();
@@ -30,8 +155,9 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
     private refresh(contextPath?: string): void {
         if (contextPath) {
             const folder = this.odoWorkspace.findComponent(vsc.workspace.getWorkspaceFolder(vsc.Uri.parse(contextPath)));
-            this.onDidChangeTreeDataEmitter.fire(folder)
+            this.onDidChangeTreeDataEmitter.fire(new ComponentInfoRoot(folder));
         } else {
+            this.children = undefined; // Invalidate children cache so they wll be re-created
             this.odoWorkspace.reset();
             this.onDidChangeTreeDataEmitter.fire(undefined);
         }
@@ -48,7 +174,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
         await vsc.commands.executeCommand('revealInExplorer', vsc.Uri.parse(context.contextPath));
     }
 
-    createTreeView(id: string): vsc.TreeView<ComponentWorkspaceFolder> {
+    createTreeView(id: string): vsc.TreeView<ComponentInfo> {
         if (!this.treeView) {
             this.treeView = vsc.window.createTreeView(id, {
                 treeDataProvider: this,
@@ -64,25 +190,24 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentWo
         return ComponentsTreeDataProvider.dataProviderInstance;
     }
 
-    getTreeItem(element: ComponentWorkspaceFolder): ComponentWorkspaceFolderTreeItem {
-        const tooltip = ['Component',
-            `Name: ${element.component.devfileData.devfile.metadata.name}`,
-            `Context: ${element.contextPath}`,
-        ].join('\n');
-        return {
-            label: Component.renderLabel(element),
-            workspaceFolder: element,
-            tooltip,
-            contextValue: Component.generateContextValue(element),
-            iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png'))
-        };
+    getTreeItem(element: ComponentInfo): ComponentWorkspaceFolderTreeItem {
+        return element.toTreeItem();
     }
 
-    getChildren(element?: ComponentWorkspaceFolder): vsc.ProviderResult<ComponentWorkspaceFolder[]> {
-        const result = element ? [] : this.odoWorkspace.getComponents();
+    getChildren(element?: ComponentInfo): vsc.ProviderResult<ComponentInfo[]> {
+        if (element) {
+            return Promise.resolve(element.getChildren());
+        }
+
+        if (this.children) {
+            return Promise.resolve(this.children);
+        }
+
+        const result = this.odoWorkspace.getComponents();
         return Promise.resolve(result).then(async result1 => {
             await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', !result1?.length && result1.length === 0);
-            return result;
+            this.children = result1.flatMap(f => new ComponentInfoRoot(f));
+            return this.children;
         })
     }
 }
