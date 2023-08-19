@@ -13,7 +13,7 @@ import * as YAML from 'yaml';
 import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription } from '../odo/componentType';
-import { StarterProject } from '../odo/componentTypeDescription';
+import { StarterProject, CommandProvider } from '../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import * as odo3 from '../odo3';
 import sendTelemetry, { NewComponentCommandProps } from '../telemetry';
@@ -121,7 +121,7 @@ export class Component extends OpenShiftItem {
         return state;
     }
 
-    public static generateContextValue(folder: ComponentWorkspaceFolder): string {
+    public static generateContextStateSuffixValue(folder: ComponentWorkspaceFolder): string {
         const state = Component.componentStates.get(folder.contextPath);
         let contextSuffix = '';
         if (state.devStatus) {
@@ -133,7 +133,11 @@ export class Component extends OpenShiftItem {
         if (state.deployStatus) {
             contextSuffix = contextSuffix.concat('.').concat(state.deployStatus);
         }
-        return `openshift.component${contextSuffix}`;
+        return contextSuffix;
+   }
+
+    public static generateContextValue(folder: ComponentWorkspaceFolder): string {
+        return `openshift.component${this.generateContextStateSuffixValue(folder)}`;
     }
 
     public static renderLabel(folder: ComponentWorkspaceFolder) {
@@ -864,4 +868,24 @@ export class Component extends OpenShiftItem {
             }
         }
     }
+
+    @vsCommand('openshift.component.commands.command.run', true)
+    static runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
+        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        if ('getCommand' in componentFolder) {
+            const componentCommand = (<CommandProvider>componentFolder).getCommand();
+            const command = Command.runComponentCommand(componentCommand.id);
+            if (Component.isUsingWebviewEditor()) {
+                DescribeViewLoader.loadView(`Component ${componentName}: Run '${componentCommand.id}' Command`, command, componentFolder);
+            } else {
+                void Component.odo.executeInTerminal(
+                    command,
+                    componentFolder.contextPath,
+                    `OpenShift: Component ${componentName}: Run '${componentCommand.id}' Command`);
+            }
+        } else {
+            void window.showErrorMessage(`No Command found in Component '${componentName}`);
+        }
+        return;
+   }
 }
