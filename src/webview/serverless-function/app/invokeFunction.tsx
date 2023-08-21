@@ -2,219 +2,250 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React, { FunctionComponent, SVGAttributes } from 'react';
-import { Uri } from 'vscode';
-import { Autocomplete, Button, Paper, Stack, SvgIcon, TextField, Typography, createFilterOptions } from '@mui/material';
+import React from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, Checkbox, FormControlLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
-import { CreateFunctionPageProps } from '../../common/propertyTypes';
-import GoIcon from '../../../../images/serverlessfunctions/go.svg';
-import NodeIcon from '../../../../images/serverlessfunctions/node.svg';
-import PythonIcon from '../../../../images/serverlessfunctions/python.svg';
-import QuarkusIcon from '../../../../images/serverlessfunctions/quarkus.svg';
-import RustIcon from '../../../../images/serverlessfunctions/rust.svg';
-import SpringBootIcon from '../../../../images/serverlessfunctions/spring boot.svg';
-import TypeScriptIcon from '../../../../images/serverlessfunctions/typescript.svg';
-import AddIcon from '@mui/icons-material/Add';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import { InvokeFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
 
-export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
-    functionData: {
-        name?: string,
-        error?: boolean,
-        helpText?: string
-    },
-    imageData: {
-        name?: string,
-        error?: boolean,
-        helpText?: string
-    },
-    images: string[],
-    templates: string[],
-    language: string,
-    template: string,
-    wsFolderItems: Uri[],
-    wsFolderPath: Uri,
-    showLoadScreen: boolean,
+export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
+    id: string,
+    instance: string,
+    multiInstance: boolean,
+    contentType: string,
+    source: string,
+    type: string,
+    format: string,
+    input: string,
+    inputFilePath: string,
+    mode: string,
+    enableInvokeURL: boolean,
+    invokeURL: string
 }> {
 
-    constructor(props: CreateFunctionPageProps | Readonly<CreateFunctionPageProps>) {
+    constructor(props: InvokeFunctionPageProps | Readonly<InvokeFunctionPageProps>) {
         super(props);
         this.state = {
-            functionData: {
-                name: '',
-                error: false,
-                helpText: ''
-            },
-            imageData: {
-                name: '',
-                error: false,
-                helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
-            },
-            images: [],
-            templates: ['Cloud Events', 'HTTP'],
-            language: '',
-            template: '',
-            wsFolderItems: [],
-            wsFolderPath: undefined,
-            showLoadScreen: false
+            id: props.id,
+            instance: 'local',
+            multiInstance: props.instance === 'clusterLocalBoth' ? true : false,
+            contentType: 'text/plain',
+            source: '/boson/fn',
+            type: 'boson.fn',
+            format: 'HTTP',
+            input: 'Hello World',
+            inputFilePath: '',
+            mode: 'text',
+            enableInvokeURL: false,
+            invokeURL: props.invokeURL
         }
-        VSCodeMessage.postMessage({
-            action: 'selectFolder'
-        });
-    }
-
-    validateName = (value: string): void => {
-        VSCodeMessage.postMessage({
-            action: `validateName`,
-            name: value
-        })
     }
 
     componentDidMount(): void {
         VSCodeMessage.onMessage((message) => {
-            if (message.data.action === 'validateName') {
+            if (message.data.action === 'selectFile') {
                 this.setState({
-                    functionData: {
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText,
-                    },
-                    imageData: {
-                        name: '',
-                        error: false,
-                        helpText: ''
-                    },
-                    images: message.data.images
-                });
-            } else if (message.data.action === 'selectFolder') {
-                if (message.data.wsFolderItems === null || message.data.wsFolderItems[0] === null) {
-                    VSCodeMessage.postMessage('close');
-                } else {
-                    if (message.data.wsFolderItems.length > 0) {
-                        this.setState({ wsFolderPath: message.data.wsFolderItems[0] });
-                    }
-                    this.setState({
-                        wsFolderItems: message.data.wsFolderItems
-                    });
-                }
+                    inputFilePath: message.data.filePath
+                })
             }
         });
-    }
-
-    selectFolder = (): void => {
-        VSCodeMessage.postMessage({
-            action: 'selectFolder',
-            noWSFolder: true,
-            name: this.state.functionData.name
-        });
-    }
-
-    handleWsFolderDropDownChange = (_e: any, value: Uri | string): void => {
-        if (typeof value === 'string' && value === 'New Folder') {
-            VSCodeMessage.postMessage({
-                action: 'selectFolder',
-                noWSFolder: true
-            });
-        } else if (typeof value === 'object') {
-            this.setState({
-                wsFolderPath: value
-            });
-        }
     }
 
     convert = (value: string): string => {
         return value.replace('/\s+/g', '').toLowerCase();
     }
 
-    handleDropDownChange = (_event: any, value: string, isLang = false): void => {
-        if (isLang) {
-            if (value !== 'Python') {
-                this.setState({
-                    templates: ['Cloud Events', 'HTTP']
-                });
-            } else {
-                this.setState({
-                    templates: ['Cloud Events', 'Flask', 'HTTP', 'WSGI']
-                })
-            }
+    handleDropDownChange = (_event: React.SyntheticEvent<Element, Event>, value: string, isContent = false): void => {
+        if (!isContent) {
             this.setState({
-                language: value,
-                template: ''
+                format: value
             });
         } else {
             this.setState({
-                template: value
+                contentType: value
             });
         }
     }
 
-    handleCreateBtnDisable(): boolean {
-        return !this.state.functionData || this.state.functionData.name.length === 0 || this.state.functionData.error
-            || !this.state.imageData || this.state.imageData.name.length === 0 || this.state.imageData.error
-            || !this.state.wsFolderPath || this.state.language.length === 0 || this.state.template.length === 0;
-    }
-
-    createFunction = (): void => {
-        this.props.onCreateSubmit(this.state.functionData.name,
-            this.convert(this.state.language), this.convert(this.state.template), this.state.wsFolderPath, this.state.imageData.name)
-    }
-
-    getIcon = (option: string): FunctionComponent<SVGAttributes<SVGElement>> => {
-        switch (option.toLowerCase()) {
-            case 'go':
-                return GoIcon;
-            case 'node':
-                return NodeIcon;
-            case 'python':
-                return PythonIcon;
-            case 'quarkus':
-                return QuarkusIcon;
-            case 'spring boot':
-                return SpringBootIcon;
-            case 'rust':
-                return RustIcon;
-            case 'typescript':
-                return TypeScriptIcon;
-            default:
-                return undefined;
+    handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>, isInstance = false): void => {
+        if (!isInstance) {
+            this.setState({
+                mode: event.target.value
+            });
+            if (event.target.value === 'text') {
+                this.setState({
+                    input: 'Hello World'
+                });
+            }
+        } else {
+            this.setState({
+                instance: event.target.value
+            });
         }
     }
 
+    handleBtnDisable = (): boolean => {
+        return this.state.source.length === 0 || this.state.type.length === 0
+            || this.state.input.length === 0 || (this.state.mode === 'text' ? this.state.input.length === 0 : this.state.inputFilePath.length === 0);
+    }
+
+    invokeFunction = (): void => {
+        this.props.onInvokeSubmit(this.state.instance, this.state.id, this.props.uri.fsPath, this.state.contentType,
+            this.convert(this.state.format), this.state.source, this.state.type, this.state.input, this.state.inputFilePath, this.state.enableInvokeURL, this.state.invokeURL)
+    }
+
+    selectFile = (): void => {
+        VSCodeMessage.postMessage({
+            action: 'selectFile'
+        });
+    }
+
+    setValue = (value: string, mode: string): void => {
+        switch (mode) {
+            case 'id':
+                this.setState({
+                    id: value
+                });
+                break;
+            case 'type':
+                this.setState({
+                    type: value
+                });
+                break;
+            case 'source':
+                this.setState({
+                    source: value
+                });
+                break;
+            case 'input':
+                this.setState({
+                    input: value
+                });
+                break;
+            case 'invokeURL':
+                this.setState({
+                    invokeURL: value
+                });
+                break;
+        }
+    }
+
+    handleCheckBox = (_e: React.SyntheticEvent<Element, Event>): void => {
+        this.setState({
+            enableInvokeURL: !this.state.enableInvokeURL
+        })
+    }
+
     render(): React.ReactNode {
-        const { wsFolderItems, wsFolderPath, functionData, templates, language, template, images, imageData } = this.state;
-        const languages = ['Go', 'Node', 'Python', 'Quarkus', 'Rust', 'Spring Boot', 'TypeScript'];
-        const folders: any[] = ['New Folder'];
-        folders.push(...wsFolderItems);
-        const filter = createFilterOptions<string>();
-        const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
+        const { contentType, format, source, type, mode, id, input, instance, inputFilePath, multiInstance, enableInvokeURL, invokeURL } = this.state;
+        const contentTypes: string[] = [
+            'udio/aac',
+            'application/x-abiword',
+            'application/x-freearc',
+            'image/avif',
+            'video/x-msvideo',
+            'application/vnd.amazon.ebook',
+            'application/octet-stream',
+            'image/bmp',
+            'application/x-bzip',
+            'application/x-bzip2',
+            'application/x-cdf',
+            'application/x-csh',
+            'text/css',
+            'text/csv',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-fontobject',
+            'application/epub+zip',
+            'application/gzip',
+            'image/gif',
+            'text/html',
+            'image/vnd.microsoft.icon',
+            'text/calendar',
+            'image/jpg',
+            'image/jpeg',
+            'text/javascript',
+            'application/json',
+            'application/ld+json',
+            'audio/midi',
+            'audio/mpeg',
+            'video/mp4',
+            'video/mpeg',
+            'application/vnd.oasis.opendocument.presentation',
+            'application/vnd.oasis.opendocument.spreadsheet',
+            'application/vnd.oasis.opendocument.text',
+            'audio/ogg',
+            'video/ogg',
+            'application/ogg',
+            'audio/opus',
+            'image/png',
+            'application/pdf',
+            'application/x-httpd-php',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.rar',
+            'application/rtf',
+            'application/x-sh',
+            'image/svg+xml',
+            'application/x-tar',
+            'image/tiff',
+            'text/plain',
+            'audio/wav',
+            'audio/webm',
+            'video/webm',
+            'image/webp',
+            'application/xhtml+xml',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/xml',
+            'application/zip',
+            'video/3gpp',
+            'video/3gpp2',
+            'application/x-7z-compressed',
+        ];
+        const templates = ['HTTP', 'Cloud Events'];
         return (
-            <Stack direction='column' spacing={4} margin={5}>
+            <Stack direction='column' spacing={2} margin={5}>
+                {multiInstance &&
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <Button variant='contained'
+                            disabled={true}
+                            sx={{ width: { xs: 'auto', sm: '160px' } }}
+                            className='labelStyle'>
+                            Invoke Instance
+                        </Button>
+                        <RadioGroup
+                            row
+                            value={instance}
+                            onChange={(e) => this.handleRadioChange(e, true)}
+                        >
+                            <FormControlLabel value='local' control={<Radio />} label='Local' />
+                            <FormControlLabel value='remote' control={<Radio />} label='Remote' />
+                        </RadioGroup>
+                    </Stack>
+                }
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        ID *
+                        ID
                     </Button>
                     <TextField
                         type='string'
                         variant='outlined'
-                        required
-                        autoFocus
                         fullWidth
-                        defaultValue={functionData.name}
-                        error={functionData.error}
-                        onChange={(e) => this.validateName(e.target.value)}
-                        id='function-name'
-                        placeholder='ID'
+                        defaultValue={id}
+                        id='invoke-id'
+                        onChange={(e) => this.setValue(e.target.value, 'id')}
+                        placeholder='Automatically genearated (optional)'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
+                                height: '7px !important'
                             }
-                        }}
-                        helperText={functionData.helpText} />
+                        }} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
@@ -226,45 +257,43 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                     <TextField
                         type='string'
                         variant='outlined'
-                        required
-                        autoFocus
+                        disabled
                         fullWidth
-                        defaultValue={functionData.name}
-                        error={functionData.error}
-                        onChange={(e) => this.validateName(e.target.value)}
-                        id='function-name'
-                        placeholder='Path'
+                        defaultValue={this.props.uri?.fsPath}
+                        id='function-path'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
+                                height: '7px !important'
                             }
-                        }}
-                        helperText={functionData.helpText} />
+                        }} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Content-type
+                        Content-type *
                     </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        required
-                        autoFocus
+                    <Autocomplete
+                        defaultValue={contentType}
+                        id='contet-type-dropdown'
+                        options={contentTypes}
+                        onChange={(e, v) => this.handleDropDownChange(e, v, true)}
+                        PaperComponent={({ children }) => (
+                            <Paper sx={{
+                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                {children}
+                            </Paper>
+                        )}
+                        renderOption={(props, option) => <li {...props}>{option}</li>}
                         fullWidth
-                        defaultValue={'text/plain'}
-                        id='content-type'
-                        placeholder='Path'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
-                            }
-                        }}
-                        helperText={functionData.helpText} />
+                        disableClearable
+                        renderInput={(params) => (
+                            <TextField {...params} />
+                        )} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
@@ -274,10 +303,9 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                         Format *
                     </Button>
                     <Autocomplete
-                        value={template}
-                        id='template-dropdown'
+                        defaultValue={format}
+                        id='format-dropdown'
                         options={templates}
-                        disabled={language?.length === 0}
                         onChange={(e, v) => this.handleDropDownChange(e, v)}
                         PaperComponent={({ children }) => (
                             <Paper sx={{
@@ -291,16 +319,15 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                         fullWidth
                         disableClearable
                         renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the Function template' />
-                        )}
-                    />
+                            <TextField {...params} />
+                        )} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Source
+                        Source *
                     </Button>
                     <TextField
                         type='string'
@@ -308,7 +335,7 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                         required
                         autoFocus
                         fullWidth
-                        defaultValue={'/boson/fn'}
+                        value={source}
                         id='source'
                         sx={{
                             input: {
@@ -316,14 +343,17 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                                 height: '7px !important',
                             }
                         }}
-                        helperText={functionData.helpText} />
+                        onChange={(e) => this.setValue(e.target.value, 'source')}
+                        error={source.length === 0}
+                        placeholder='Sender name for the request'
+                        helperText={source.length === 0 ? 'Required source' : ''} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                     <Button variant='contained'
                         disabled={true}
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
-                        Type
+                        Type *
                     </Button>
                     <TextField
                         type='string'
@@ -331,22 +361,148 @@ export class InvokeFunction extends React.Component<CreateFunctionPageProps, {
                         required
                         autoFocus
                         fullWidth
-                        defaultValue={'boson.fn'}
+                        value={type}
                         id='type'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
+                                height: '7px !important'
                             }
                         }}
-                        helperText={functionData.helpText} />
+                        onChange={(e) => this.setValue(e.target.value, 'type')}
+                        error={type.length === 0}
+                        placeholder='Type for the request'
+                        helperText={type.length === 0 ? 'Required type' : ''} />
                 </Stack>
-                <Stack direction='column' spacing={0.2}>
+                {
+                    instance === 'remote' &&
+                    <Accordion className='accordion' sx={{
+                        border: '1px groove var(--vscode-activityBar-activeBorder)',
+                        borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                        color: 'var(--vscode-settings-textInputForeground)'
+                    }}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography>Function Instance to invoke</Typography>
+                        </AccordionSummary><AccordionDetails>
+                            <Stack direction='column' spacing={2}>
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                    <FormControlLabel onChange={(e) => this.handleCheckBox(e)}
+                                        control={<Checkbox />} label='Target this custom URL when invoking the function' />
+                                </Stack>
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                    <Button variant='contained'
+                                        disabled={true}
+                                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                        className='labelStyle'>
+                                        URL
+                                    </Button>
+                                    <TextField
+                                        type='string'
+                                        variant='outlined'
+                                        disabled={!enableInvokeURL}
+                                        required
+                                        autoFocus
+                                        fullWidth
+                                        value={invokeURL}
+                                        id='invokeURL'
+                                        sx={{
+                                            input: {
+                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                height: '7px !important',
+                                            }
+                                        }}
+                                        onChange={(e) => this.setValue(e.target.value, 'invokeURL')}/>
+
+                                </Stack>
+                            </Stack>
+                        </AccordionDetails>
+                    </Accordion>
+                }
+                <Accordion className='accordion' sx={{
+                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                    color: 'var(--vscode-settings-textInputForeground)'
+                }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>Data (content) for this request. (default 'Hello World')</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Stack direction='column' spacing={2}>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '160px' } }}
+                                    className='labelStyle'>
+                                    Mode
+                                </Button>
+                                <RadioGroup
+                                    row
+                                    value={mode}
+                                    onChange={(e) => this.handleRadioChange(e)}
+                                >
+                                    <FormControlLabel value='text' control={<Radio />} label='Text' />
+                                    <FormControlLabel value='file' control={<Radio />} label='File' />
+                                </RadioGroup>
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Content *
+                                </Button>
+                                {mode === 'text' ? <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    required
+                                    autoFocus
+                                    fullWidth
+                                    value={input}
+                                    id='data'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important',
+                                        }
+                                    }}
+                                    onChange={(e) => this.setValue(e.target.value, 'input')}
+                                    error={input.length === 0}
+                                    placeholder='Data to send in the request'
+                                    helperText={input.length === 0 ? 'Required data' : ''} /> :
+                                    <>
+                                        <TextField
+                                            type='string'
+                                            variant='outlined'
+                                            required
+                                            autoFocus
+                                            fullWidth
+                                            value={inputFilePath || ''}
+                                            placeholder='Provide file path to be used as data'
+                                            id='type'
+                                            sx={{
+                                                input: {
+                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                    height: '7px !important',
+                                                }
+                                            }} />
+                                        <Button variant='contained'
+                                            className='buttonStyle'
+                                            style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                            onClick={() => this.selectFile()}>
+                                            Browse
+                                        </Button>
+                                    </>}
+
+                            </Stack>
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+                <Stack direction='column'>
                     <Button variant='contained'
-                        disabled={this.handleCreateBtnDisable()}
+                        disabled={this.handleBtnDisable()}
                         className='buttonStyle'
-                        style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
-                        onClick={() => this.createFunction()}>
+                        style={{ backgroundColor: this.handleBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                        onClick={() => this.invokeFunction()}>
                         Invoke
                     </Button>
                 </Stack>

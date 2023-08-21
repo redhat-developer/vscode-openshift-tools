@@ -37,8 +37,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
     private async getListItems(command: CommandText, fail = false) {
         const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
         try {
-             return JSON.parse(listCliExitData.stdout) as FunctionObject[];
-        } catch(err) {
+            return JSON.parse(listCliExitData.stdout) as FunctionObject[];
+        } catch (err) {
             return [];
         }
     }
@@ -96,12 +96,13 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         if (folders.length > 0) {
             for (const folderUri of folders) {
                 const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-                const funcStatus = this.getFunctionStatus(funcData, deployedFunctions);
+                const [funcStatus, functionURL] = this.getFunctionStatus(funcData, deployedFunctions);
                 const functionNode: FunctionObject = {
                     name: funcData.name,
                     runtime: funcData.runtime,
                     folderURI: folderUri,
                     context: funcStatus,
+                    url: functionURL,
                     hasImage: await this.checkImage(folderUri),
                     isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
                 }
@@ -126,14 +127,14 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return functionList;
     }
 
-    getFunctionStatus(funcData: FunctionContent, deployedFunctions: FunctionObject[]): FunctionStatus {
+    getFunctionStatus(funcData: FunctionContent, deployedFunctions: FunctionObject[]): [FunctionStatus, string] {
         if (deployedFunctions.length > 0) {
             const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
             if (func) {
-                return FunctionStatus.CLUSTERLOCALBOTH;
+                return [FunctionStatus.CLUSTERLOCALBOTH, func.url];
             }
         }
-        return FunctionStatus.LOCALONLY;
+        return [FunctionStatus.LOCALONLY, ''];
     }
 
     async checkImage(folderUri: Uri): Promise<boolean> {

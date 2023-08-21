@@ -18,6 +18,7 @@ export interface FunctionContent {
 }
 
 export interface FunctionObject {
+    url?: string;
     name: string;
     namespace?: string;
     runtime?: string;
@@ -59,6 +60,22 @@ export interface ClusterVersion {
             };
         },
     ];
+}
+
+
+
+export interface InvokeFunction {
+    instance: string;
+    id: string;
+    path: string;
+    contentType: string;
+    format: string;
+    source: string;
+    type: string;
+    data: string;
+    file: string;
+    enableURL: boolean;
+    invokeURL: string;
 }
 
 // eslint-disable-next-line no-shadow

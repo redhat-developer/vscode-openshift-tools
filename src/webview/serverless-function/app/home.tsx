@@ -12,13 +12,21 @@ import { InvokeFunction } from './invokeFunction';
 import './home.scss';
 
 export class ServerlessFunction extends React.Component<DefaultProps, {
-    invoke: boolean
+    invoke: boolean,
+    id: any,
+    folderURI: Uri,
+    instance: string,
+    invokeURL: string
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
-            invoke: false
+            invoke: false,
+            id: undefined,
+            folderURI: undefined,
+            instance: '',
+            invokeURL: ''
         }
     }
 
@@ -26,7 +34,11 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         VSCodeMessage.onMessage((message) => {
             if (message.data.action === 'invoke') {
                 this.setState({
-                    invoke: true
+                    invoke: true,
+                    id: message.data.id,
+                    folderURI: message.data.uri,
+                    instance: message.data.instance,
+                    invokeURL: message.data.url
                 })
             }
         });
@@ -43,15 +55,30 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
+    handleInvokeSubmit = (instance: string, id: string, path: string, contentType: string, format: string, source: string,
+        type: string, data: string, file: string, enableUrl: boolean, invokeURL: string): void => {
+        VSCodeMessage.postMessage({
+            action: 'invokeFunction',
+            instance: instance,
+            id: id,
+            path: path,
+            contentType: contentType,
+            format: format,
+            source: source,
+            type: type,
+            data: data,
+            file: file,
+            enableURL: enableUrl,
+            invokeURL: invokeURL
+        });
+    }
+
     render(): React.ReactNode {
         return (
             this.state.invoke ?
                 <div className='mainContainer margin'>
                     <div className='title'>
-                        <Typography variant='h5'>OpenShift Serveless Functions</Typography>
-                    </div>
-                    <div className='subTitle'>
-                        <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
+                        <Typography variant='h5'>Invoke Function</Typography>
                     </div>
                     <Container maxWidth='md' sx={{
                         border: '1px groove var(--vscode-activityBar-activeBorder)',
@@ -62,7 +89,8 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                             display='flex'
                             flexDirection={'column'}
                         >
-                            <InvokeFunction onCreateSubmit={this.handleCreateSubmit} />
+                            <InvokeFunction instance={this.state.instance} uri={this.state.folderURI}
+                                invokeURL={this.state.invokeURL} id={this.state.id} onInvokeSubmit={this.handleInvokeSubmit} />
                         </Box>
                     </Container>
                 </div>

@@ -58,6 +58,15 @@ export interface CreateFunctionPageProps extends DefaultProps {
     onCreateSubmit: (name: string, language: string, template: string, location: Uri, image: string) => void;
 }
 
+export interface InvokeFunctionPageProps extends DefaultProps {
+    id: any;
+    uri: Uri;
+    instance: string;
+    invokeURL: string;
+    onInvokeSubmit: (instance: string, id: string, path: string, contentType: string, format: string, source: string,
+        type: string, data: string, file: string, enableUrl: boolean, invokeURL: string) => void;
+}
+
 export interface BuildFunctionPageProps extends DefaultProps {
     name: string;
     loadScreen: boolean;

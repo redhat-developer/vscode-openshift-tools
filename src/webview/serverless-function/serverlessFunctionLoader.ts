@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { v4 as uuidv4 } from 'uuid';
 import { CliExitData } from '../../cli';
 import { BuildAndDeploy } from '../../serverlessFunction/build-run-deploy';
 import { serverlessInstance } from '../../serverlessFunction/functionImpl';
@@ -12,6 +13,9 @@ import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
+import { InvokeFunction } from '../../serverlessFunction/types';
+import { OdoImpl } from '../../odo';
+import { ServerlessCommand } from '../../serverlessFunction/commands';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
@@ -34,6 +38,21 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 name: functionName,
                 images: defaultImages
             });
+            break;
+        case 'selectFile':
+            const options: vscode.OpenDialogOptions = {
+                canSelectMany: false,
+                openLabel: 'Select',
+                canSelectFiles: true,
+                canSelectFolders: false
+            };
+            const file = await vscode.window.showOpenDialog(options);
+            if (file && file[0]) {
+                panel?.webview.postMessage({
+                    action: eventName,
+                    filePath: file[0].fsPath
+                });
+            }
             break;
         case 'selectFolder':
             const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Function Folder', functionName) : selectWorkspaceFolders();
@@ -62,6 +81,30 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 await vscode.commands.executeCommand('openshift.Serverless.refresh');
             }
             break;
+        case 'invokeFunction':
+            const invokeFunData: InvokeFunction = {
+                instance: event.instance,
+                id: event.id,
+                path: event.path,
+                contentType: event.contentType,
+                format: event.format,
+                source: event.source,
+                type: event.type,
+                data: event.data,
+                file: event.file,
+                enableURL: event.enableURL,
+                invokeURL: event.invokeURL
+            }
+            void Progress.execFunctionWithProgress('Invoke the function', async () => {
+                const result = await OdoImpl.Instance.execute(ServerlessCommand.invokeFunction(invokeFunData));
+                if (result.error) {
+                    void vscode.window.showErrorMessage(result.error.message);
+                } else if (result.stdout) {
+                    void vscode.window.showInformationMessage(result.stdout);
+                }
+                panel.dispose();
+            });
+            break;
         default:
             break;
     }
@@ -69,7 +112,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
 
 export default class ServerlessFunctionViewLoader {
 
-    public static  invokePanelMap: Map<string, vscode.WebviewPanel> = new Map<string, vscode.WebviewPanel>();
+    public static invokePanelMap: Map<string, vscode.WebviewPanel> = new Map<string, vscode.WebviewPanel>();
 
     private static get extensionPath(): string {
         return vscode.extensions.getExtension(ExtensionID).extensionPath;
@@ -86,7 +129,10 @@ export default class ServerlessFunctionViewLoader {
      */
     static async loadView(
         title: string,
-        invoke = false
+        invoke = false,
+        status?: string,
+        folderURI?: vscode.Uri,
+        url?: string
     ): Promise<vscode.WebviewPanel | null> {
         if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
             const panel = ServerlessFunctionViewLoader.invokePanelMap.get(title);
@@ -95,9 +141,14 @@ export default class ServerlessFunctionViewLoader {
         } else {
             if (invoke) {
                 const panel = await this.createView(title);
+                const getEnvFuncId = uuidv4();
                 ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
                 void panel.webview.postMessage({
-                    action: 'invoke'
+                    action: 'invoke',
+                    instance: status,
+                    id: getEnvFuncId,
+                    uri: folderURI,
+                    url: url
                 });
                 return panel;
             } else if (!invoke) {

@@ -205,7 +205,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.refresh')
     static refresh(target?: ExplorerItem) {
-    ServerlessFunctionView.getInstance().refresh(target);
+        ServerlessFunctionView.getInstance().refresh(target);
     }
 
     @vsCommand('openshift.Serverless.build')
@@ -240,7 +240,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.invoke')
     static async invokeFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView(`${context.folderURI.fsPath} - ${context.name} - Invoke`, true);
+        await ServerlessFunctionViewLoader.loadView(`${context.folderURI.fsPath} - Invoke`, true, context.context, context.folderURI, context.url);
     }
 
     @vsCommand('openshift.Serverless.openFunction')
