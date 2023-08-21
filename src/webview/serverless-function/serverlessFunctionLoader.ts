@@ -4,13 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionID } from '../../util/constants';
-import { loadWebviewHtml } from '../common-ext/utils';
 import { CliExitData } from '../../cli';
-import { BuildAndDeploy } from '../../serveressFunction/build-run-deploy';
-import { serverlessInstance } from '../../serveressFunction/functionImpl';
+import { BuildAndDeploy } from '../../serverlessFunction/build-run-deploy';
+import { serverlessInstance } from '../../serverlessFunction/functionImpl';
+import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
+import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
 
 export interface ServiceBindingFormResponse {
@@ -44,7 +44,6 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             break;
         case 'createFunction':
             const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(functionPath.fsPath, functionName));
-            panel.title = `Serverless Function - Create - ${functionName}`;
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {

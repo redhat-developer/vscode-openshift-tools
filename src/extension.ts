@@ -6,9 +6,7 @@
 import * as path from 'path';
 import {
     authentication,
-    commands,
-    env, ExtensionContext,
-    QuickPickItemKind,
+    commands, env, ExtensionContext, QuickPickItemKind,
     StatusBarAlignment,
     StatusBarItem, window,
     workspace
@@ -23,11 +21,12 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
-import { ServerlessFunctionView } from './serveressFunction/view';
+import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
 import { Platform } from './util/platform';
+import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
 import { WelcomePage } from './welcomePage';
 
@@ -96,6 +95,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ServerlessFunctionView.getInstance(),
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
+        setupWorkspaceDevfileContext(),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 

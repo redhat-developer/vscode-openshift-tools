@@ -2,7 +2,7 @@
 	"name": "vscode-openshift-connector",
 	"displayName": "OpenShift Toolkit",
 	"description": "Fast iterative application development on Red Hat OpenShift and Kubernetes",
-	"version": "1.6.0",
+	"version": "1.7.0",
 	"license": "MIT",
 	"publisher": "redhat",
 	"author": "Red Hat",
@@ -422,7 +422,7 @@
 			},
 			{
 				"command": "openshift.component.createFromRootWorkspaceFolder",
-				"title": "New OpenShift Component",
+				"title": "Create Component From Folder",
 				"category": "OpenShift"
 			},
 			{
@@ -881,7 +881,7 @@
 			"explorer/context": [
 				{
 					"command": "openshift.component.createFromRootWorkspaceFolder",
-					"when": "explorerResourceIsFolder && explorerResourceIsRoot"
+					"when": "explorerResourceIsFolder && explorerResourceIsRoot && resourceFilename not in ext.folderContainsDevfile"
 				}
 			],
 			"commandPalette": [
@@ -1524,9 +1524,27 @@
 						]
 					},
 					{
+						"id": "createComponentWizard",
+						"title": "Create Component",
+						"description": "By clicking on the '+' in the Components view in the OpenShift sidebar, you can configure a project so that it can be run on OpenShift/Kubernetes. You can import an existing local codebase, import an existing remote git repository, or create a new project from a template.\n[Create Component](command:openshift.component.openCreateComponent)",
+						"media": {
+							"image": "images/walkthrough/create-component-demo.gif",
+							"altText": "Screencast of creating a component from a git repository"
+						}
+					},
+					{
+						"id": "createComponentFromWorkspaceFolder",
+						"title": "Create Component from workspace folder",
+						"description": "If you right click on a root folder in the explorer, you can use the `Create Component From Folder` option to create a component from that folder directly.",
+						"media": {
+							"image": "images/walkthrough/createComponentFromWorkspaceFolder.gif",
+							"altText": "create component from workspace folder"
+						}
+					},
+					{
 						"id": "showRegistries",
 						"title": "Create Component from Devfile registries webview",
-						"description": "Select a specific devfile registry to create a component directly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
+						"description": "Select a specific devfile registry to create a component from a template project more quickly.\n[Browse Devfile Registries](command:openshift.componentTypesView.registry.openInView)",
 						"media": {
 							"image": "images/walkthrough/showRegistries.gif",
 							"altText": "show registry"

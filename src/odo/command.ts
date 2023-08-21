@@ -131,15 +131,6 @@ export class Command {
         return new CommandText('oc version -ojson');
     }
 
-    static listServiceInstances(namespace: string): CommandText {
-        return new CommandText('odo list service',
-            undefined, [
-            new CommandOption('--namespace', namespace),
-            new CommandOption('-o', 'json', false)
-        ]
-        );
-    }
-
     static printOdoVersion(): CommandText {
         return new CommandText('odo version');
     }

@@ -267,10 +267,6 @@ suite('odo commands integration', function () {
             await ODO.execute(Command.ocCreate(serviceFile));
         });
 
-        test('listServiceInstances()', async function() {
-            await ODO.execute(Command.listServiceInstances(projectName));
-        });
-
     });
 
     suite('component', function() {
