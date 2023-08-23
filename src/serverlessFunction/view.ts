@@ -263,41 +263,41 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.addEnv')
     static async addEnv(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add environment variables '${context.name}'`, context, 'envs');
+        await Functions.getInstance().config(`Add environment variables '${context.name}'`, context, 'envs');
     }
 
     @vsCommand('openshift.Serverless.addLabel')
     static async addLabel(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Labels '${context.name}'`, context, 'labels');
+        await Functions.getInstance().config(`Add Labels '${context.name}'`, context, 'labels');
     }
 
     @vsCommand('openshift.Serverless.addVolume')
     static async addVolume(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
+        await Functions.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
     }
 
     @vsCommand('openshift.Serverless.addGit')
     static async addGit(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Git '${context.name}'`, context, 'git');
+        await Functions.getInstance().config(`Add Git '${context.name}'`, context, 'git');
     }
 
     @vsCommand('openshift.Serverless.removeEnv')
     static removeEnv(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
+        void Functions.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
     }
 
     @vsCommand('openshift.Serverless.removeLabel')
     static removeLabel(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().config(`Remove Labels '${context.name}'`, context, 'labels', false);
+        void Functions.getInstance().config(`Remove Labels '${context.name}'`, context, 'labels', false);
     }
 
     @vsCommand('openshift.Serverless.removeVolume')
     static async removeVolume(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
+        await Functions.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
     }
 
     @vsCommand('openshift.Serverless.removeGit')
     static async removeGit(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Remove Git '${context.name}'`, context, 'git', false);
+        await Functions.getInstance().config(`Remove Git '${context.name}'`, context, 'git', false);
     }
 }
