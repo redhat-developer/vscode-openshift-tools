@@ -830,6 +830,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.addGit",
+				"title": "Git",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.removeEnv",
 				"title": "Environment Variables",
 				"category": "OpenShift"
@@ -842,6 +847,11 @@
 			{
 				"command": "openshift.Serverless.removeVolume",
 				"title": "Volumes",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeGit",
+				"title": "Git",
 				"category": "OpenShift"
 			}
 		],
@@ -1189,6 +1199,10 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.Serverless.addGit",
+					"when": "false"
+				},
+				{
 					"command": "openshift.Serverless.removeEnv",
 					"when": "false"
 				},
@@ -1198,6 +1212,10 @@
 				},
 				{
 					"command": "openshift.Serverless.removeVolume",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeGit",
 					"when": "false"
 				}
 			],
@@ -1270,36 +1288,46 @@
 			],
 			"serverlessfunction/addConfig": [
 				{
-					"command": "openshift.Serverless.addLabel",
+					"command": "openshift.Serverless.addEnv",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@0"
+				},
+				{
+					"command": "openshift.Serverless.addGit",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@1"
+				},
+				{
+					"command": "openshift.Serverless.addLabel",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@2"
 				},
 				{
 					"command": "openshift.Serverless.addVolume",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
-					"group": "c1@2"
-				},
-				{
-				  "command": "openshift.Serverless.addEnv",
-				  "when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
-				  "group": "c1@3"
+					"group": "c1@3"
 				}
 			],
 			"serverlessfunction/removeConfig": [
 				{
-					"command": "openshift.Serverless.removeLabel",
+					"command": "openshift.Serverless.removeEnv",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@0"
+				},
+				{
+					"command": "openshift.Serverless.removeGit",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@1"
 				},
 				{
-					"command": "openshift.Serverless.removeVolume",
+					"command": "openshift.Serverless.removeLabel",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@2"
 				},
 				{
-				  "command": "openshift.Serverless.removeEnv",
-				  "when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
-				  "group": "c1@3"
+					"command": "openshift.Serverless.removeVolume",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@3"
 				}
 			],
 			"view/item/context": [
