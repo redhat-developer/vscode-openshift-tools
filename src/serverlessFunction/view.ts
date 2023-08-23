@@ -255,4 +255,34 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             (err) => window.showErrorMessage(`Error loading document: ${err}`),
         );
     }
+
+    @vsCommand('openshift.Serverless.addEnv')
+    static async addEnv(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Add environment variables '${context.name}'`, context, 'envs');
+    }
+
+    @vsCommand('openshift.Serverless.addLabel')
+    static async addLabel(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Add Labels '${context.name}'`, context, 'labels');
+    }
+
+    @vsCommand('openshift.Serverless.addVolume')
+    static async addVolume(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
+    }
+
+    @vsCommand('openshift.Serverless.removeEnv')
+    static removeEnv(context: FunctionObject) {
+        void BuildAndDeploy.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
+    }
+
+    @vsCommand('openshift.Serverless.removeLabel')
+    static removeLabel(context: FunctionObject) {
+        void BuildAndDeploy.getInstance().config(`Remove Labels '${context.name}'`, context, 'labels', false);
+    }
+
+    @vsCommand('openshift.Serverless.removeVolume')
+    static async removeVolume(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
+    }
 }
