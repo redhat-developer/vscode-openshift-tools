@@ -60,10 +60,11 @@ export interface CreateFunctionPageProps extends DefaultProps {
 
 export interface InvokeFunctionPageProps extends DefaultProps {
     id: any;
+    name: string;
     uri: Uri;
     instance: string;
     invokeURL: string;
-    onInvokeSubmit: (instance: string, id: string, path: string, contentType: string, format: string, source: string,
+    onInvokeSubmit: (name: string, instance: string, id: string, path: string, contentType: string, format: string, source: string,
         type: string, data: string, file: string, enableUrl: boolean, invokeURL: string) => void;
 }
 

@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import { CliExitData } from '../../cli';
-import { BuildAndDeploy } from '../../serverlessFunction/build-run-deploy';
+import { Functions } from '../../serverlessFunction/functions';
 import { serverlessInstance } from '../../serverlessFunction/functionImpl';
 import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
@@ -14,8 +14,6 @@ import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/worksp
 import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
 import { InvokeFunction } from '../../serverlessFunction/types';
-import { OdoImpl } from '../../odo';
-import { ServerlessCommand } from '../../serverlessFunction/commands';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
@@ -30,7 +28,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
     switch (eventName) {
         case 'validateName':
             const flag = validateName(functionName);
-            const defaultImages = !flag ? BuildAndDeploy.getInstance().getDefaultImages(functionName) : [];
+            const defaultImages = !flag ? Functions.getInstance().getDefaultImages(functionName) : [];
             panel?.webview.postMessage({
                 action: eventName,
                 error: !flag ? false : true,
@@ -95,15 +93,8 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 enableURL: event.enableURL,
                 invokeURL: event.invokeURL
             }
-            void Progress.execFunctionWithProgress('Invoke the function', async () => {
-                const result = await OdoImpl.Instance.execute(ServerlessCommand.invokeFunction(invokeFunData));
-                if (result.error) {
-                    void vscode.window.showErrorMessage(result.error.message);
-                } else if (result.stdout) {
-                    void vscode.window.showInformationMessage(result.stdout);
-                }
-                panel.dispose();
-            });
+            await Functions.getInstance().invoke(functionName, invokeFunData);
+            panel.dispose();
             break;
         default:
             break;
@@ -146,6 +137,7 @@ export default class ServerlessFunctionViewLoader {
                 void panel.webview.postMessage({
                     action: 'invoke',
                     instance: status,
+                    name: title.substring(0, title.indexOf('-')).trim(),
                     id: getEnvFuncId,
                     uri: folderURI,
                     url: url

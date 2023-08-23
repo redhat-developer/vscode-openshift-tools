@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { EventEmitter, Terminal, Uri, commands, window } from 'vscode';
-import { ClusterVersion, FunctionContent, FunctionObject, RunResponse } from './types';
+import { ClusterVersion, FunctionContent, FunctionObject, InvokeFunction, RunResponse } from './types';
 import validator from 'validator';
 import { ServerlessCommand, Utils } from './commands';
 import { Platform } from '../util/platform';
@@ -15,9 +15,9 @@ import { ServerlessFunctionView } from './view';
 import { multiStep } from './multiStepInput';
 import { Progress } from '../util/progress';
 
-export class BuildAndDeploy {
+export class Functions {
 
-    private static instance: BuildAndDeploy;
+    private static instance: Functions;
 
     private buildTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
     public runTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
@@ -26,11 +26,11 @@ export class BuildAndDeploy {
 
     public static imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
 
-    static getInstance(): BuildAndDeploy {
-        if (!BuildAndDeploy.instance) {
-            BuildAndDeploy.instance = new BuildAndDeploy();
+    static getInstance(): Functions {
+        if (!Functions.instance) {
+            Functions.instance = new Functions();
         }
-        return BuildAndDeploy.instance;
+        return Functions.instance;
     }
 
     checkRunning(fsPath: string): boolean {
@@ -49,7 +49,7 @@ export class BuildAndDeploy {
         }
     }
 
-    public async buildFunction(context: FunctionObject): Promise<void> {
+    public async build(context: FunctionObject): Promise<void> {
         const exisitingTerminal = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
         const outputEmitter = this.buildEmiterMap.get(`build-${context.folderURI.fsPath}`);
         if (exisitingTerminal) {
@@ -148,7 +148,7 @@ export class BuildAndDeploy {
         this.buildEmiterMap.set(`build-${context.folderURI.fsPath}`, outputEmitter);
     }
 
-    public runFunction(context: FunctionObject, runBuild = false) {
+    public run(context: FunctionObject, runBuild = false) {
         const outputEmitter = new EventEmitter<string>();
         let runProcess: ChildProcess;
         let terminal = window.createTerminal({
@@ -210,14 +210,14 @@ export class BuildAndDeploy {
         this.runTerminalMap.set(`run-${context.folderURI.fsPath}`, terminal);
     }
 
-    public stopFunction(context: FunctionObject) {
+    public stop(context: FunctionObject) {
         const terminal = this.runTerminalMap.get(`run-${context.folderURI.fsPath}`);
         if (terminal) {
             terminal.sendText('^C\r\n');
         }
     }
 
-    public undeployFunction(context: FunctionObject) {
+    public undeploy(context: FunctionObject) {
         void Progress.execFunctionWithProgress(`Undeploying the function ${context.name}`, async () => {
             const result = await OdoImpl.Instance.execute(ServerlessCommand.undeployFunction(context.name));
             if (result.error) {
@@ -228,7 +228,7 @@ export class BuildAndDeploy {
         });
     }
 
-    public async deployFunction(context: FunctionObject) {
+    public async deploy(context: FunctionObject) {
         const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
@@ -249,7 +249,7 @@ export class BuildAndDeploy {
     }
 
     private async deployProcess(context: FunctionObject, deployedNamespace: string, yamlContent: FunctionContent) {
-        if (!yamlContent.image || !BuildAndDeploy.imageRegex.test(yamlContent.image)) {
+        if (!yamlContent.image || !Functions.imageRegex.test(yamlContent.image)) {
             void window.showErrorMessage(`Function ${context.name} has invalid imaage`)
             return;
         }
@@ -315,6 +315,57 @@ export class BuildAndDeploy {
         });
     }
 
+    public async invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
+        return new Promise<void>((resolve, _reject) => {
+            const outputEmitter = new EventEmitter<string>();
+            let runProcess: ChildProcess;
+            let terminal = window.createTerminal({
+                name: `Invoke ${functionName}`,
+                pty: {
+                    onDidWrite: outputEmitter.event,
+                    open: () => {
+                        void CliChannel.getInstance().spawnTool(ServerlessCommand.invokeFunction(invokeFunData)).then((cp) => {
+                            runProcess = cp;
+                            runProcess.on('spawn', () => {
+                                terminal.show();
+                            });
+                            runProcess.on('error', (err) => {
+                                void window.showErrorMessage(err.message);
+                            });
+                            runProcess.stdout.on('data', (chunk) => {
+                                outputEmitter.fire(`${chunk as string}`.replaceAll('\n', '\r\n'));
+                            });
+                            runProcess.stderr.on('data', (errChunk) => {
+                                outputEmitter.fire(`\x1b[31m${errChunk as string}\x1b[0m`.replaceAll('\n', '\r\n'));
+                            });
+                            runProcess.on('exit', () => {
+                                outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
+                                resolve();
+                            });
+                        });
+                    },
+                    close: () => {
+                        if (runProcess && runProcess.exitCode === null) { // if process is still running and user closed terminal
+                            runProcess.kill('SIGINT');
+                        }
+                        terminal = undefined;
+                    },
+                    handleInput: ((data: string) => {
+                        if (data.charCodeAt(0) > 0) {
+                            if (!runProcess) {
+                                terminal.dispose();
+                            } else {
+                                outputEmitter.fire('^C\r\n');
+                                runProcess.kill('SIGINT');
+                                terminal.dispose()
+                            }
+                        }
+                    })
+                },
+            });
+        });
+    }
+
     private async provideUserNameAndPassword(
         process: ChildProcess,
         message: string,
@@ -375,7 +426,7 @@ export class BuildAndDeploy {
 
     public async getImage(folderURI: Uri): Promise<string> {
         const yamlContent = await Utils.getFuncYamlContent(folderURI.fsPath);
-        if (yamlContent?.image && BuildAndDeploy.imageRegex.test(yamlContent.image)) {
+        if (yamlContent?.image && Functions.imageRegex.test(yamlContent.image)) {
             return yamlContent.image
         }
         return null;

@@ -91,7 +91,7 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
     }
 
     invokeFunction = (): void => {
-        this.props.onInvokeSubmit(this.state.instance, this.state.id, this.props.uri.fsPath, this.state.contentType,
+        this.props.onInvokeSubmit(this.props.name, this.state.instance, this.state.id, this.props.uri.fsPath, this.state.contentType,
             this.convert(this.state.format), this.state.source, this.state.type, this.state.input, this.state.inputFilePath, this.state.enableInvokeURL, this.state.invokeURL)
     }
 

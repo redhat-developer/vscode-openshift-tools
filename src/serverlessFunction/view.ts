@@ -27,7 +27,7 @@ import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { ServerlessFunction, serverlessInstance } from './functionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
-import { BuildAndDeploy } from './build-run-deploy';
+import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
@@ -118,7 +118,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     getContext(functionObj: FunctionObject): string {
         if (functionObj.hadBuilt || functionObj.hasImage) {
-            if (BuildAndDeploy.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
+            if (Functions.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
                 return FunctionContextType.RUNNING;
             } else if (functionObj.context === FunctionStatus.CLUSTERLOCALBOTH) {
                 return FunctionContextType.LOCALDEPLOYFUNCTION
@@ -210,37 +210,37 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().buildFunction(context);
+        await Functions.getInstance().build(context);
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')
     static buildAndRunFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().runFunction(context, true);
+        Functions.getInstance().run(context, true);
     }
 
     @vsCommand('openshift.Serverless.run')
     static runFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().runFunction(context);
+        Functions.getInstance().run(context);
     }
 
     @vsCommand('openshift.Serverless.stopRun')
     static stopRunFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().stopFunction(context);
+        Functions.getInstance().stop(context);
     }
 
     @vsCommand('openshift.Serverless.deploy')
     static deployFunction(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().deployFunction(context);
+        void Functions.getInstance().deploy(context);
     }
 
     @vsCommand('openshift.Serverless.undeploy')
     static undeployFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().undeployFunction(context);
+        Functions.getInstance().undeploy(context);
     }
 
     @vsCommand('openshift.Serverless.invoke')
     static async invokeFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView(`${context.folderURI.fsPath} - Invoke`, true, context.context, context.folderURI, context.url);
+        await ServerlessFunctionViewLoader.loadView(`${context.name} - Invoke`, true, context.context, context.folderURI, context.url);
     }
 
     @vsCommand('openshift.Serverless.openFunction')

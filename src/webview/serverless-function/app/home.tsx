@@ -13,6 +13,7 @@ import './home.scss';
 
 export class ServerlessFunction extends React.Component<DefaultProps, {
     invoke: boolean,
+    name: string,
     id: any,
     folderURI: Uri,
     instance: string,
@@ -23,6 +24,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         super(props);
         this.state = {
             invoke: false,
+            name: '',
             id: undefined,
             folderURI: undefined,
             instance: '',
@@ -35,6 +37,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             if (message.data.action === 'invoke') {
                 this.setState({
                     invoke: true,
+                    name: message.data.name,
                     id: message.data.id,
                     folderURI: message.data.uri,
                     instance: message.data.instance,
@@ -55,10 +58,11 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         });
     }
 
-    handleInvokeSubmit = (instance: string, id: string, path: string, contentType: string, format: string, source: string,
+    handleInvokeSubmit = (name: string, instance: string, id: string, path: string, contentType: string, format: string, source: string,
         type: string, data: string, file: string, enableUrl: boolean, invokeURL: string): void => {
         VSCodeMessage.postMessage({
             action: 'invokeFunction',
+            name: name,
             instance: instance,
             id: id,
             path: path,
@@ -89,7 +93,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                             display='flex'
                             flexDirection={'column'}
                         >
-                            <InvokeFunction instance={this.state.instance} uri={this.state.folderURI}
+                            <InvokeFunction instance={this.state.instance} uri={this.state.folderURI} name={this.state.name}
                                 invokeURL={this.state.invokeURL} id={this.state.id} onInvokeSubmit={this.handleInvokeSubmit} />
                         </Box>
                     </Container>

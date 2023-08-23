@@ -25,7 +25,9 @@ export class Utils {
 export class ServerlessCommand {
 
     static invokeFunction(invokeFunData: InvokeFunction): CommandText {
-        const commandText = new CommandText('func', 'invoke');
+        const commandText = new CommandText('func', 'invoke', [
+            new CommandOption('-v')
+        ]);
         if (invokeFunData.id.length > 0) {
             commandText.addOption(new CommandOption('--id', invokeFunData.id));
         }

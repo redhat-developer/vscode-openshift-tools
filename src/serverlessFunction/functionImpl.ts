@@ -9,7 +9,7 @@ import { Uri, window, workspace } from 'vscode';
 import { FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessCommand, Utils } from './commands';
 import { OdoImpl } from '../odo';
-import { BuildAndDeploy } from './build-run-deploy';
+import { Functions } from './functions';
 import { stringify } from 'yaml';
 import { CliChannel, CliExitData } from '../cli';
 import * as cp from 'child_process';
@@ -104,7 +104,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                     context: funcStatus,
                     url: functionURL,
                     hasImage: await this.checkImage(folderUri),
-                    isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
+                    isRunning: Functions.getInstance().checkRunning(folderUri.fsPath)
                 }
                 functionList.push(functionNode);
                 fs.watchFile(path.join(folderUri.fsPath, 'func.yaml'), (_eventName, _filename) => {
@@ -139,7 +139,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
 
     async checkImage(folderUri: Uri): Promise<boolean> {
         const yamlContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-        return BuildAndDeploy.imageRegex.test(yamlContent?.image);
+        return Functions.imageRegex.test(yamlContent?.image);
     }
 }
 
