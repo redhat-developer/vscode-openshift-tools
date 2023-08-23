@@ -817,6 +817,46 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.addEnv",
+				"title": "Environment Variables",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.addLabel",
+				"title": "Labels",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.addVolume",
+				"title": "Volumes",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.addGit",
+				"title": "Git",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeEnv",
+				"title": "Environment Variables",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeLabel",
+				"title": "Labels",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeVolume",
+				"title": "Volumes",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeGit",
+				"title": "Git",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.invoke",
 				"title": "Invoke",
 				"category": "OpenShift"
@@ -833,6 +873,16 @@
 				"key": "alt+shift+p",
 				"mac": "ctrl+shift+p"
 			}
+		],
+		"submenus": [
+			{
+			  "id": "serverlessfunction/addConfig",
+			  "label": "Add"
+			},
+			{
+				"id": "serverlessfunction/removeConfig",
+				"label": "Remove"
+			  }
 		],
 		"viewsContainers": {
 			"activitybar": [
@@ -1146,6 +1196,38 @@
 				{
 					"command": "openshift.Serverless.invoke",
 					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.addEnv",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.addLabel",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.addVolume",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.addGit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeEnv",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeLabel",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeVolume",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeGit",
+					"when": "false"
 				}
 			],
 			"view/title": [
@@ -1213,6 +1295,50 @@
 					"command": "openshift.component.openCreateComponent",
 					"when": "view == openshiftComponentsView",
 					"group": "navigation"
+				}
+			],
+			"serverlessfunction/addConfig": [
+				{
+					"command": "openshift.Serverless.addEnv",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@0"
+				},
+				{
+					"command": "openshift.Serverless.addGit",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@1"
+				},
+				{
+					"command": "openshift.Serverless.addLabel",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@2"
+				},
+				{
+					"command": "openshift.Serverless.addVolume",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@3"
+				}
+			],
+			"serverlessfunction/removeConfig": [
+				{
+					"command": "openshift.Serverless.removeEnv",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@0"
+				},
+				{
+					"command": "openshift.Serverless.removeGit",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@1"
+				},
+				{
+					"command": "openshift.Serverless.removeLabel",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@2"
+				},
+				{
+					"command": "openshift.Serverless.removeVolume",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@3"
 				}
 			],
 			"view/item/context": [
@@ -1501,6 +1627,16 @@
 				{
 					"command": "openshift.Serverless.stopRun",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(running)$/"
+				},
+				{
+					"submenu": "serverlessfunction/addConfig",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@1"
+				},
+				{
+					"submenu": "serverlessfunction/removeConfig",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@2"
 				}
 			]
 		},

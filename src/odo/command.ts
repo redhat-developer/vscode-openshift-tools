@@ -111,12 +111,8 @@ export class Command {
         return new CommandText('odo preference remove registry', name, [new CommandOption('--force')]);
     }
 
-    static listCatalogComponents(): CommandText {
-        return new CommandText('odo registry');
-    }
-
     static listCatalogComponentsJson(): CommandText {
-        return new CommandText(`${Command.listCatalogComponents().toString()} -o json`);
+        return new CommandText('odo registry -o json');
     }
 
     static listCatalogOperatorBackedServices(): CommandText {
