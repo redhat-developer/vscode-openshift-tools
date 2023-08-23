@@ -79,4 +79,17 @@ export class ServerlessCommand {
             new CommandOption('-o', 'josn')
         ]);
     }
+
+    static config(functionPath: string, mode: string, isAdd: boolean): CommandText {
+        const commandText = new CommandText('func', 'config', [
+            new CommandOption(mode),
+            new CommandOption('-p', functionPath)
+        ]);
+        if (isAdd) {
+            commandText.addOption(new CommandOption('add'));
+        } else {
+            commandText.addOption(new CommandOption('remove'));
+        }
+        return commandText;
+    }
 }

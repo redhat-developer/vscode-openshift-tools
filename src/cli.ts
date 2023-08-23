@@ -152,12 +152,14 @@ export class CliChannel implements Cli {
         return result;
     }
 
-    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env): Promise<void> {
-        const [cmd, ...params] = command.toString().split(' ');
+    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env, isFuncionCLI = false): Promise<void> {
+        const commandStr = command.toString();
+        const [cmd, ...params] = commandStr.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
         const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
-        terminal.sendText(toolLocation === cmd ? command.toString() : toolLocation.concat(' ', ...params), true);
+        terminal.sendText(toolLocation === cmd ? commandStr :
+            isFuncionCLI ? toolLocation.concat(' ', ...params.join(' ')) : toolLocation.concat(' ', ...params), true);
         terminal.show();
     }
 

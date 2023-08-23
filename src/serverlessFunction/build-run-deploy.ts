@@ -19,6 +19,8 @@ export class BuildAndDeploy {
 
     private static instance: BuildAndDeploy;
 
+    protected static readonly cli = CliChannel.getInstance();
+
     private buildTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
     public runTerminalMap: Map<string, Terminal> = new Map<string, Terminal>();
     private buildEmiterMap: Map<string, EventEmitter<string>> = new Map<string, EventEmitter<string>>();
@@ -313,6 +315,11 @@ export class BuildAndDeploy {
                 })
             },
         });
+    }
+
+    public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
+        await BuildAndDeploy.cli.executeInTerminal(ServerlessCommand.config(context.folderURI.fsPath, mode, isAdd),
+            context.folderURI.fsPath, title, process.env, true);
     }
 
     private async provideUserNameAndPassword(
