@@ -86,7 +86,11 @@ export class ServerlessCommand {
             new CommandOption('-p', functionPath)
         ]);
         if (isAdd) {
-            commandText.addOption(new CommandOption('add'));
+            if (mode === 'git') {
+                commandText.addOption(new CommandOption('set'));
+            } else {
+                commandText.addOption(new CommandOption('add'));
+            }
         } else {
             commandText.addOption(new CommandOption('remove'));
         }

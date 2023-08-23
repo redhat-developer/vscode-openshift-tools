@@ -271,6 +271,11 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
         await BuildAndDeploy.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
     }
 
+    @vsCommand('openshift.Serverless.addGit')
+    static async addGit(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Add Git '${context.name}'`, context, 'git');
+    }
+
     @vsCommand('openshift.Serverless.removeEnv')
     static removeEnv(context: FunctionObject) {
         void BuildAndDeploy.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
@@ -284,5 +289,10 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     @vsCommand('openshift.Serverless.removeVolume')
     static async removeVolume(context: FunctionObject) {
         await BuildAndDeploy.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
+    }
+
+    @vsCommand('openshift.Serverless.removeGit')
+    static async removeGit(context: FunctionObject) {
+        await BuildAndDeploy.getInstance().config(`Remove Git '${context.name}'`, context, 'git', false);
     }
 }
