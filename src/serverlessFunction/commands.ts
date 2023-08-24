@@ -60,7 +60,7 @@ export class ServerlessCommand {
             new CommandOption('-i', image),
             new CommandOption('-v')
         ]);
-        if (namespace){
+        if (namespace) {
             commandText.addOption(new CommandOption('-n', namespace))
         }
         if (clusterVersion) {
@@ -94,6 +94,35 @@ export class ServerlessCommand {
         } else {
             commandText.addOption(new CommandOption('remove'));
         }
+        return commandText;
+    }
+
+    static addRepo(name: string, gitURL: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('add'));
+        commandText.addOption(new CommandOption(name));
+        commandText.addOption(new CommandOption(gitURL));
+        return commandText;
+    }
+
+    static deleteRepo(name: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('remove'));
+        commandText.addOption(new CommandOption(name));
+        return commandText;
+    }
+
+    static list(): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('list'));
+        return commandText;
+    }
+
+    static renameRepo(oldName: string, newName: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('rename'));
+        commandText.addOption(new CommandOption(oldName));
+        commandText.addOption(new CommandOption(newName));
         return commandText;
     }
 }
