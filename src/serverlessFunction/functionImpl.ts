@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { Uri, window, workspace } from 'vscode';
-import { FunctionContent, FunctionObject, FunctionStatus } from './types';
+import { DeployedFunction, FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessCommand, Utils } from './commands';
 import { OdoImpl } from '../odo';
 import { Functions } from './functions';
@@ -96,13 +96,13 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         if (folders.length > 0) {
             for (const folderUri of folders) {
                 const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-                const [funcStatus, functionURL] = this.getFunctionStatus(funcData, deployedFunctions);
+                const commanFunction: DeployedFunction = this.getCommanFunction(funcData, deployedFunctions);
                 const functionNode: FunctionObject = {
                     name: funcData.name,
                     runtime: funcData.runtime,
                     folderURI: folderUri,
-                    context: funcStatus,
-                    url: functionURL,
+                    context: commanFunction.status,
+                    url: commanFunction.url,
                     hasImage: await this.checkImage(folderUri),
                     isRunning: Functions.getInstance().checkRunning(folderUri.fsPath)
                 }
@@ -127,14 +127,14 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return functionList;
     }
 
-    getFunctionStatus(funcData: FunctionContent, deployedFunctions: FunctionObject[]): [FunctionStatus, string] {
+    getCommanFunction(funcData: FunctionContent, deployedFunctions: FunctionObject[]): DeployedFunction {
         if (deployedFunctions.length > 0) {
             const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
             if (func) {
-                return [FunctionStatus.CLUSTERLOCALBOTH, func.url];
+                return {status: FunctionStatus.CLUSTERLOCALBOTH, url: func.url} as DeployedFunction
             }
         }
-        return [FunctionStatus.LOCALONLY, ''];
+        return {status: FunctionStatus.LOCALONLY, url: ''} as DeployedFunction
     }
 
     async checkImage(folderUri: Uri): Promise<boolean> {

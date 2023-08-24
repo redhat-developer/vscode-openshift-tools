@@ -50,6 +50,11 @@ export interface ImageAndBuild {
     autoGenerateImage?: boolean;
 }
 
+export interface DeployedFunction {
+    status: FunctionStatus;
+    url: string
+}
+
 export interface ClusterVersion {
     items: [
         {

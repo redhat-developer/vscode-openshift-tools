@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, Checkbox, FormControlLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Box, Button, Checkbox, Container, FormControlLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { InvokeFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
@@ -206,307 +206,323 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
         ];
         const templates = ['HTTP', 'Cloud Events'];
         return (
-            <Stack direction='column' spacing={2} margin={5}>
-                {multiInstance &&
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                        <Button variant='contained'
-                            disabled={true}
-                            sx={{ width: { xs: 'auto', sm: '160px' } }}
-                            className='labelStyle'>
-                            Invoke Instance
-                        </Button>
-                        <RadioGroup
-                            row
-                            value={instance}
-                            onChange={(e) => this.handleRadioChange(e, true)}
-                        >
-                            <FormControlLabel value='local' control={<Radio />} label='Local' />
-                            <FormControlLabel value='remote' control={<Radio />} label='Remote' />
-                        </RadioGroup>
-                    </Stack>
-                }
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        ID
-                    </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        fullWidth
-                        defaultValue={id}
-                        id='invoke-id'
-                        onChange={(e) => this.setValue(e.target.value, 'id')}
-                        placeholder='Automatically genearated (optional)'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important'
-                            }
-                        }} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Path *
-                    </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        disabled
-                        fullWidth
-                        defaultValue={this.props.uri?.fsPath}
-                        id='function-path'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important'
-                            }
-                        }} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Content-type *
-                    </Button>
-                    <Autocomplete
-                        defaultValue={contentType}
-                        id='contet-type-dropdown'
-                        options={contentTypes}
-                        onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
-                        fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} />
-                        )} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Format *
-                    </Button>
-                    <Autocomplete
-                        defaultValue={format}
-                        id='format-dropdown'
-                        options={templates}
-                        onChange={(e, v) => this.handleDropDownChange(e, v)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
-                        fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} />
-                        )} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Source *
-                    </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        required
-                        autoFocus
-                        fullWidth
-                        value={source}
-                        id='source'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
-                            }
-                        }}
-                        onChange={(e) => this.setValue(e.target.value, 'source')}
-                        error={source.length === 0}
-                        placeholder='Sender name for the request'
-                        helperText={source.length === 0 ? 'Required source' : ''} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Type *
-                    </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        required
-                        autoFocus
-                        fullWidth
-                        value={type}
-                        id='type'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important'
-                            }
-                        }}
-                        onChange={(e) => this.setValue(e.target.value, 'type')}
-                        error={type.length === 0}
-                        placeholder='Type for the request'
-                        helperText={type.length === 0 ? 'Required type' : ''} />
-                </Stack>
-                {
-                    instance === 'remote' &&
-                    <Accordion className='accordion' sx={{
-                        border: '1px groove var(--vscode-activityBar-activeBorder)',
-                        borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
-                        color: 'var(--vscode-settings-textInputForeground)'
-                    }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography>Function Instance to invoke</Typography>
-                        </AccordionSummary><AccordionDetails>
-                            <Stack direction='column' spacing={2}>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                    <FormControlLabel onChange={(e) => this.handleCheckBox(e)}
-                                        control={<Checkbox />} label='Target this custom URL when invoking the function' />
-                                </Stack>
+            <div className='mainContainer margin'>
+                <div className='title'>
+                    <Typography variant='h5'>Invoke Function</Typography>
+                </div>
+                <Container maxWidth='md' sx={{
+                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                    color: '#99CCF3'
+                }}>
+                    <Box
+                        display='flex'
+                        flexDirection={'column'}
+                    >
+                        <Stack direction='column' spacing={2} margin={5}>
+                            {multiInstance &&
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                     <Button variant='contained'
                                         disabled={true}
-                                        sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                        sx={{ width: { xs: 'auto', sm: '160px' } }}
                                         className='labelStyle'>
-                                        URL
+                                        Invoke Instance
                                     </Button>
-                                    <TextField
-                                        type='string'
-                                        variant='outlined'
-                                        disabled={!enableInvokeURL}
-                                        required
-                                        autoFocus
-                                        fullWidth
-                                        value={invokeURL}
-                                        id='invokeURL'
-                                        sx={{
-                                            input: {
-                                                color: 'var(--vscode-settings-textInputForeground)',
-                                                height: '7px !important',
-                                            }
-                                        }}
-                                        onChange={(e) => this.setValue(e.target.value, 'invokeURL')}/>
-
+                                    <RadioGroup
+                                        row
+                                        value={instance}
+                                        onChange={(e) => this.handleRadioChange(e, true)}
+                                    >
+                                        <FormControlLabel value='local' control={<Radio />} label='Local' />
+                                        <FormControlLabel value='remote' control={<Radio />} label='Remote' />
+                                    </RadioGroup>
                                 </Stack>
-                            </Stack>
-                        </AccordionDetails>
-                    </Accordion>
-                }
-                <Accordion className='accordion' sx={{
-                    border: '1px groove var(--vscode-activityBar-activeBorder)',
-                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
-                    color: 'var(--vscode-settings-textInputForeground)'
-                }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>Data (content) for this request. (default 'Hello World')</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Stack direction='column' spacing={2}>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                                <Button variant='contained'
-                                    disabled={true}
-                                    sx={{ width: { xs: 'auto', sm: '160px' } }}
-                                    className='labelStyle'>
-                                    Mode
-                                </Button>
-                                <RadioGroup
-                                    row
-                                    value={mode}
-                                    onChange={(e) => this.handleRadioChange(e)}
-                                >
-                                    <FormControlLabel value='text' control={<Radio />} label='Text' />
-                                    <FormControlLabel value='file' control={<Radio />} label='File' />
-                                </RadioGroup>
-                            </Stack>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                            }
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                                 <Button variant='contained'
                                     disabled={true}
                                     sx={{ width: { xs: 'auto', sm: '200px' } }}
                                     className='labelStyle'>
-                                    Content *
+                                    ID
                                 </Button>
-                                {mode === 'text' ? <TextField
+                                <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    fullWidth
+                                    defaultValue={id}
+                                    id='invoke-id'
+                                    onChange={(e) => this.setValue(e.target.value, 'id')}
+                                    placeholder='Automatically genearated (optional)'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important'
+                                        }
+                                    }} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Path *
+                                </Button>
+                                <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    disabled
+                                    fullWidth
+                                    defaultValue={this.props.uri?.fsPath}
+                                    id='function-path'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important'
+                                        }
+                                    }} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Content-type *
+                                </Button>
+                                <Autocomplete
+                                    defaultValue={contentType}
+                                    id='contet-type-dropdown'
+                                    options={contentTypes}
+                                    onChange={(e, v) => this.handleDropDownChange(e, v, true)}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    renderOption={(props, option) => <li {...props}>{option}</li>}
+                                    fullWidth
+                                    disableClearable
+                                    renderInput={(params) => (
+                                        <TextField {...params} />
+                                    )} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Format *
+                                </Button>
+                                <Autocomplete
+                                    defaultValue={format}
+                                    id='format-dropdown'
+                                    options={templates}
+                                    onChange={(e, v) => this.handleDropDownChange(e, v)}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    renderOption={(props, option) => <li {...props}>{option}</li>}
+                                    fullWidth
+                                    disableClearable
+                                    renderInput={(params) => (
+                                        <TextField {...params} />
+                                    )} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Source *
+                                </Button>
+                                <TextField
                                     type='string'
                                     variant='outlined'
                                     required
                                     autoFocus
                                     fullWidth
-                                    value={input}
-                                    id='data'
+                                    value={source}
+                                    id='source'
                                     sx={{
                                         input: {
                                             color: 'var(--vscode-settings-textInputForeground)',
                                             height: '7px !important',
                                         }
                                     }}
-                                    onChange={(e) => this.setValue(e.target.value, 'input')}
-                                    error={input.length === 0}
-                                    placeholder='Data to send in the request'
-                                    helperText={input.length === 0 ? 'Required data' : ''} /> :
-                                    <>
-                                        <TextField
-                                            type='string'
-                                            variant='outlined'
-                                            required
-                                            autoFocus
-                                            fullWidth
-                                            value={inputFilePath || ''}
-                                            placeholder='Provide file path to be used as data'
-                                            id='type'
-                                            sx={{
-                                                input: {
-                                                    color: 'var(--vscode-settings-textInputForeground)',
-                                                    height: '7px !important',
-                                                }
-                                            }} />
-                                        <Button variant='contained'
-                                            className='buttonStyle'
-                                            style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
-                                            onClick={() => this.selectFile()}>
-                                            Browse
-                                        </Button>
-                                    </>}
+                                    onChange={(e) => this.setValue(e.target.value, 'source')}
+                                    error={source.length === 0}
+                                    placeholder='Sender name for the request'
+                                    helperText={source.length === 0 ? 'Required source' : ''} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Type *
+                                </Button>
+                                <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    required
+                                    autoFocus
+                                    fullWidth
+                                    value={type}
+                                    id='type'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important'
+                                        }
+                                    }}
+                                    onChange={(e) => this.setValue(e.target.value, 'type')}
+                                    error={type.length === 0}
+                                    placeholder='Type for the request'
+                                    helperText={type.length === 0 ? 'Required type' : ''} />
+                            </Stack>
+                            {
+                                instance === 'remote' &&
+                                <Accordion className='accordion' sx={{
+                                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                                    color: 'var(--vscode-settings-textInputForeground)'
+                                }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Typography>Function Instance to invoke</Typography>
+                                    </AccordionSummary><AccordionDetails>
+                                        <Stack direction='column' spacing={2}>
+                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                                <FormControlLabel onChange={(e) => this.handleCheckBox(e)}
+                                                    control={<Checkbox />} label='Target this custom URL when invoking the function' />
+                                            </Stack>
+                                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                                <Button variant='contained'
+                                                    disabled={true}
+                                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                                    className='labelStyle'>
+                                                    URL
+                                                </Button>
+                                                <TextField
+                                                    type='string'
+                                                    variant='outlined'
+                                                    disabled={!enableInvokeURL}
+                                                    required
+                                                    autoFocus
+                                                    fullWidth
+                                                    value={invokeURL}
+                                                    id='invokeURL'
+                                                    sx={{
+                                                        input: {
+                                                            color: 'var(--vscode-settings-textInputForeground)',
+                                                            height: '7px !important',
+                                                        }
+                                                    }}
+                                                    onChange={(e) => this.setValue(e.target.value, 'invokeURL')} />
 
+                                            </Stack>
+                                        </Stack>
+                                    </AccordionDetails>
+                                </Accordion>
+                            }
+                            <Accordion className='accordion' sx={{
+                                border: '1px groove var(--vscode-activityBar-activeBorder)',
+                                borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                                color: 'var(--vscode-settings-textInputForeground)'
+                            }}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography>Data (content) for this request. (default 'Hello World')</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Stack direction='column' spacing={2}>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                            <Button variant='contained'
+                                                disabled={true}
+                                                sx={{ width: { xs: 'auto', sm: '160px' } }}
+                                                className='labelStyle'>
+                                                Mode
+                                            </Button>
+                                            <RadioGroup
+                                                row
+                                                value={mode}
+                                                onChange={(e) => this.handleRadioChange(e)}
+                                            >
+                                                <FormControlLabel value='text' control={<Radio />} label='Text' />
+                                                <FormControlLabel value='file' control={<Radio />} label='File' />
+                                            </RadioGroup>
+                                        </Stack>
+                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                            <Button variant='contained'
+                                                disabled={true}
+                                                sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                                className='labelStyle'>
+                                                Content *
+                                            </Button>
+                                            {mode === 'text' ? <TextField
+                                                type='string'
+                                                variant='outlined'
+                                                required
+                                                autoFocus
+                                                fullWidth
+                                                value={input}
+                                                id='data'
+                                                sx={{
+                                                    input: {
+                                                        color: 'var(--vscode-settings-textInputForeground)',
+                                                        height: '7px !important',
+                                                    }
+                                                }}
+                                                onChange={(e) => this.setValue(e.target.value, 'input')}
+                                                error={input.length === 0}
+                                                placeholder='Data to send in the request'
+                                                helperText={input.length === 0 ? 'Required data' : ''} /> :
+                                                <>
+                                                    <TextField
+                                                        type='string'
+                                                        variant='outlined'
+                                                        required
+                                                        autoFocus
+                                                        fullWidth
+                                                        value={inputFilePath || ''}
+                                                        placeholder='Provide file path to be used as data'
+                                                        id='type'
+                                                        sx={{
+                                                            input: {
+                                                                color: 'var(--vscode-settings-textInputForeground)',
+                                                                height: '7px !important',
+                                                            }
+                                                        }} />
+                                                    <Button variant='contained'
+                                                        className='buttonStyle'
+                                                        style={{ backgroundColor: '#EE0000', textTransform: 'none', color: 'white' }}
+                                                        onClick={() => this.selectFile()}>
+                                                        Browse
+                                                    </Button>
+                                                </>}
+
+                                        </Stack>
+                                    </Stack>
+                                </AccordionDetails>
+                            </Accordion>
+                            <Stack direction='column'>
+                                <Button variant='contained'
+                                    disabled={this.handleBtnDisable()}
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: this.handleBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                                    onClick={() => this.invokeFunction()}>
+                                    Invoke
+                                </Button>
                             </Stack>
                         </Stack>
-                    </AccordionDetails>
-                </Accordion>
-                <Stack direction='column'>
-                    <Button variant='contained'
-                        disabled={this.handleBtnDisable()}
-                        className='buttonStyle'
-                        style={{ backgroundColor: this.handleBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
-                        onClick={() => this.invokeFunction()}>
-                        Invoke
-                    </Button>
-                </Stack>
-            </Stack>
+                    </Box>
+                </Container>
+            </div>
         )
     }
 }

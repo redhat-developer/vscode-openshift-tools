@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import { Uri } from 'vscode';
-import { Box, Container, Typography } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
 import { CreateFunction } from './createFunction';
@@ -80,45 +79,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     render(): React.ReactNode {
         return (
             this.state.invoke ?
-                <div className='mainContainer margin'>
-                    <div className='title'>
-                        <Typography variant='h5'>Invoke Function</Typography>
-                    </div>
-                    <Container maxWidth='md' sx={{
-                        border: '1px groove var(--vscode-activityBar-activeBorder)',
-                        borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
-                        color: '#99CCF3'
-                    }}>
-                        <Box
-                            display='flex'
-                            flexDirection={'column'}
-                        >
-                            <InvokeFunction instance={this.state.instance} uri={this.state.folderURI} name={this.state.name}
-                                invokeURL={this.state.invokeURL} id={this.state.id} onInvokeSubmit={this.handleInvokeSubmit} />
-                        </Box>
-                    </Container>
-                </div>
+                <InvokeFunction instance={this.state.instance} uri={this.state.folderURI} name={this.state.name}
+                    invokeURL={this.state.invokeURL} id={this.state.id} onInvokeSubmit={this.handleInvokeSubmit} />
                 :
-                <div className='mainContainer margin'>
-                    <div className='title'>
-                        <Typography variant='h5'>OpenShift Serveless Functions</Typography>
-                    </div>
-                    <div className='subTitle'>
-                        <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
-                    </div>
-                    <Container maxWidth='md' sx={{
-                        border: '1px groove var(--vscode-activityBar-activeBorder)',
-                        borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
-                        color: '#99CCF3'
-                    }}>
-                        <Box
-                            display='flex'
-                            flexDirection={'column'}
-                        >
-                            <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
-                        </Box>
-                    </Container>
-                </div>
+                <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
         )
     }
 }

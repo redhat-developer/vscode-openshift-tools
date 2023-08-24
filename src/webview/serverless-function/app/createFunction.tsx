@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import React, { FunctionComponent, SVGAttributes } from 'react';
 import { Uri } from 'vscode';
-import { Autocomplete, Button, Paper, Stack, SvgIcon, TextField, Typography, createFilterOptions } from '@mui/material';
+import { Autocomplete, Button, Paper, Stack, SvgIcon, TextField, Typography, createFilterOptions, Box, Container } from '@mui/material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import GoIcon from '../../../../images/serverlessfunctions/go.svg';
@@ -189,217 +189,236 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         const filter = createFilterOptions<string>();
         const imageRegex = RegExp('[^/]+\\.[^/.]+\\/([^/.]+)(?:\\/[\\w\\s._-]*([\\w\\s._-]))*(?::[a-z0-9\\.-]+)?$');
         return (
-            <Stack direction='column' spacing={4} margin={5}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Function Name *
-                    </Button>
-                    <TextField
-                        type='string'
-                        variant='outlined'
-                        required
-                        autoFocus
-                        fullWidth
-                        defaultValue={functionData.name}
-                        error={functionData.error}
-                        onChange={(e) => this.validateName(e.target.value)}
-                        id='function-name'
-                        placeholder='Provide name of the function to be created'
-                        sx={{
-                            input: {
-                                color: 'var(--vscode-settings-textInputForeground)',
-                                height: '7px !important',
-                            }
-                        }}
-                        helperText={functionData.helpText} />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Build Image *
-                    </Button>
-                    <Autocomplete
-                        defaultValue={imageData.name}
-                        onChange={(_event, value: string) => {
-                            if (value) {
-                                if (!imageRegex.test(value)) {
-                                    this.setState({
-                                        imageData: {
-                                            name: '',
-                                            error: true,
-                                            helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
+            <div className='mainContainer margin'>
+                <div className='title'>
+                    <Typography variant='h5'>OpenShift Serveless Functions</Typography>
+                </div>
+                <div className='subTitle'>
+                    <Typography>The OpenShift Serverless Functions support enables developers to create, build, run, invoke and deploy serverless functions on OpenShift, providing a seamless development experience with the latest kn and func CLI tool integrated.</Typography>
+                </div>
+                <Container maxWidth='md' sx={{
+                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
+                    color: '#99CCF3'
+                }}>
+                    <Box
+                        display='flex'
+                        flexDirection={'column'}
+                    >
+                        <Stack direction='column' spacing={4} margin={5}>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Function Name *
+                                </Button>
+                                <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    required
+                                    autoFocus
+                                    fullWidth
+                                    defaultValue={functionData.name}
+                                    error={functionData.error}
+                                    onChange={(e) => this.validateName(e.target.value)}
+                                    id='function-name'
+                                    placeholder='Provide name of the function to be created'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important',
                                         }
-                                    });
-                                } else {
-                                    if (!images.includes(value)) {
-                                        images.push(value);
-                                    }
-                                    this.setState({
-                                        imageData: {
-                                            name: value,
-                                            error: false,
-                                            helpText: ''
+                                    }}
+                                    helperText={functionData.helpText} />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Build Image *
+                                </Button>
+                                <Autocomplete
+                                    defaultValue={imageData.name}
+                                    onChange={(_event, value: string) => {
+                                        if (value) {
+                                            if (!imageRegex.test(value)) {
+                                                this.setState({
+                                                    imageData: {
+                                                        name: '',
+                                                        error: true,
+                                                        helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
+                                                    }
+                                                });
+                                            } else {
+                                                if (!images.includes(value)) {
+                                                    images.push(value);
+                                                }
+                                                this.setState({
+                                                    imageData: {
+                                                        name: value,
+                                                        error: false,
+                                                        helpText: ''
+                                                    }
+                                                });
+                                            }
                                         }
-                                    });
-                                }
-                            }
-                        }}
-                        filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
+                                    }}
+                                    filterOptions={(options, params) => {
+                                        const filtered = filter(options, params);
 
-                            const { inputValue } = params;
-                            // Suggest the creation of a new value
-                            const isExisting = options.some((option) => inputValue === option);
-                            if (inputValue !== '' && !isExisting) {
-                                filtered.push(`${inputValue}`);
-                            }
+                                        const { inputValue } = params;
+                                        // Suggest the creation of a new value
+                                        const isExisting = options.some((option) => inputValue === option);
+                                        if (inputValue !== '' && !isExisting) {
+                                            filtered.push(`${inputValue}`);
+                                        }
 
-                            return filtered;
-                        }}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        id='image-dropdown'
-                        options={images}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
-                        clearOnBlur
-                        disableClearable
-                        fullWidth
-                        renderInput={(params) => (
-                            <TextField {...params}
-                                placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
-                        )}
-                    />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Language *
-                    </Button>
-                    <Autocomplete
-                        value={language}
-                        id='language-dropdown'
-                        options={languages}
-                        onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        renderOption={(params, option) =>
-                            <li {...params}>
-                                <Stack direction='row' alignItems='center' gap={1}>
-                                    <SvgIcon component={this.getIcon(option)} inheritViewBox />
-                                    <Typography variant='body1'>{option}</Typography>
-                                </Stack>
-                            </li>
-                        }
-                        fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the Language Runtime' />
-                        )}
-                    />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Template *
-                    </Button>
-                    <Autocomplete
-                        value={template}
-                        id='template-dropdown'
-                        options={templates}
-                        disabled={language?.length === 0}
-                        onChange={(e, v) => this.handleDropDownChange(e, v)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        renderOption={(props, option) => <li {...props}>{option}</li>}
-                        fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the Function template' />
-                        )}
-                    />
-                </Stack>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={true}
-                        sx={{ width: { xs: 'auto', sm: '200px' } }}
-                        className='labelStyle'>
-                        Folder *
-                    </Button>
-                    <Autocomplete
-                        value={wsFolderPath ? wsFolderPath.fsPath : ''}
-                        id='folder-dropdown'
-                        options={folders}
-                        onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
-                        PaperComponent={({ children }) => (
-                            <Paper sx={{
-                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                color: 'var(--vscode-settings-textInputForeground)'
-                            }}>
-                                {children}
-                            </Paper>
-                        )}
-                        getOptionLabel={(option: string | Uri) => typeof option === 'string' ? option : option.fsPath}
-                        renderOption={(props, option) =>
-                            <li {...props}>
-                                <Stack direction='row' alignItems='center' gap={1}>
-                                    {
-                                        typeof option === 'string' ?
-                                            <>
-                                                <AddIcon />
+                                        return filtered;
+                                    }}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    id='image-dropdown'
+                                    options={images}
+                                    renderOption={(props, option) => <li {...props}>{option}</li>}
+                                    clearOnBlur
+                                    disableClearable
+                                    fullWidth
+                                    renderInput={(params) => (
+                                        <TextField {...params}
+                                            placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
+                                    )}
+                                />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Language *
+                                </Button>
+                                <Autocomplete
+                                    value={language}
+                                    id='language-dropdown'
+                                    options={languages}
+                                    onChange={(e, v) => this.handleDropDownChange(e, v, true)}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    renderOption={(params, option) =>
+                                        <li {...params}>
+                                            <Stack direction='row' alignItems='center' gap={1}>
+                                                <SvgIcon component={this.getIcon(option)} inheritViewBox />
                                                 <Typography variant='body1'>{option}</Typography>
-                                            </> :
-                                            <>
-                                                <FolderOpenIcon />
-                                                <Typography variant='body1'>{option.fsPath}</Typography>
-                                            </>
+                                            </Stack>
+                                        </li>
                                     }
-                                </Stack>
-                            </li>
-                        }
-                        fullWidth
-                        disableClearable
-                        renderInput={(params) => (
-                            <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
-                        )}
-                    />
-                </Stack>
-                <Stack direction='column' spacing={0.2}>
-                    <Button variant='contained'
-                        disabled={this.handleCreateBtnDisable()}
-                        className='buttonStyle'
-                        style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
-                        onClick={() => this.createFunction()}>
-                        Create
-                    </Button>
-                </Stack>
-            </Stack>
+                                    fullWidth
+                                    disableClearable
+                                    renderInput={(params) => (
+                                        <TextField {...params} placeholder='Select the Language Runtime' />
+                                    )}
+                                />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Template *
+                                </Button>
+                                <Autocomplete
+                                    value={template}
+                                    id='template-dropdown'
+                                    options={templates}
+                                    disabled={language?.length === 0}
+                                    onChange={(e, v) => this.handleDropDownChange(e, v)}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    renderOption={(props, option) => <li {...props}>{option}</li>}
+                                    fullWidth
+                                    disableClearable
+                                    renderInput={(params) => (
+                                        <TextField {...params} placeholder='Select the Function template' />
+                                    )}
+                                />
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    Folder *
+                                </Button>
+                                <Autocomplete
+                                    value={wsFolderPath ? wsFolderPath.fsPath : ''}
+                                    id='folder-dropdown'
+                                    options={folders}
+                                    onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
+                                    PaperComponent={({ children }) => (
+                                        <Paper sx={{
+                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                            color: 'var(--vscode-settings-textInputForeground)'
+                                        }}>
+                                            {children}
+                                        </Paper>
+                                    )}
+                                    getOptionLabel={(option: string | Uri) => typeof option === 'string' ? option : option.fsPath}
+                                    renderOption={(props, option) =>
+                                        <li {...props}>
+                                            <Stack direction='row' alignItems='center' gap={1}>
+                                                {
+                                                    typeof option === 'string' ?
+                                                        <>
+                                                            <AddIcon />
+                                                            <Typography variant='body1'>{option}</Typography>
+                                                        </> :
+                                                        <>
+                                                            <FolderOpenIcon />
+                                                            <Typography variant='body1'>{option.fsPath}</Typography>
+                                                        </>
+                                                }
+                                            </Stack>
+                                        </li>
+                                    }
+                                    fullWidth
+                                    disableClearable
+                                    renderInput={(params) => (
+                                        <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
+                                    )}
+                                />
+                            </Stack>
+                            <Stack direction='column' spacing={0.2}>
+                                <Button variant='contained'
+                                    disabled={this.handleCreateBtnDisable()}
+                                    className='buttonStyle'
+                                    style={{ backgroundColor: this.handleCreateBtnDisable() ? 'var(--vscode-button-secondaryBackground)' : '#EE0000', textTransform: 'none', color: 'white' }}
+                                    onClick={() => this.createFunction()}>
+                                    Create
+                                </Button>
+                            </Stack>
+                        </Stack>
+                    </Box>
+                </Container>
+            </div>
         )
     }
 }
