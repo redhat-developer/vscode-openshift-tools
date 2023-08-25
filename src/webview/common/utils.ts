@@ -9,7 +9,7 @@ export function validateName(value: string): string | null {
     let validationMessage = OpenShiftItem.emptyName('Required', value.trim());
     if (!validationMessage)
         validationMessage = OpenShiftItem.validateMatches(
-            `Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
+            `Only lower case alphabets and numeric characters or '-', start and ends with only alphabets`,
             value,
         );
     if (!validationMessage)

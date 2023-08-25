@@ -75,12 +75,22 @@ export default class ManageRepositoryViewLoader {
             case 'validateName':
             case 'validateNewName':
                 const flag = validateName(event.name);
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
-                    action: action,
-                    name: event.name,
-                    error: !flag ? false : true,
-                    helpText: !flag ? '' : flag
-                });
+                const repoList = await ManageRepository.getInstance().list();
+                if (repoList.includes(event.name)) {
+                    ManageRepositoryViewLoader.panel?.webview.postMessage({
+                        action: action,
+                        name: event.name,
+                        error: true,
+                        helpText: `Repository ${event.name} already exists`
+                    });
+                } else {
+                    ManageRepositoryViewLoader.panel?.webview.postMessage({
+                        action: action,
+                        name: event.name,
+                        error: !flag ? false : true,
+                        helpText: !flag ? '' : flag
+                    });
+                }
                 break;
             case 'addRepo':
                 const addRepoStatus = await ManageRepository.getInstance().addRepo(event.name, event.url);

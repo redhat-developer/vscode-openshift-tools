@@ -20,7 +20,7 @@ export class ManageRepository {
     }
 
     public async deleteRepo(name: string): Promise<boolean> {
-        const result = await OdoImpl.Instance.execute(ServerlessCommand.deleteRepo(name));
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.deleteRepo(name), '', false);
         if (result.error) {
             void vscode.window.showErrorMessage(result.error.message);
             return false;
@@ -29,7 +29,7 @@ export class ManageRepository {
     }
 
     public async renameRepo(oldName: string, newName: string): Promise<boolean> {
-        const result = await OdoImpl.Instance.execute(ServerlessCommand.renameRepo(oldName, newName));
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.renameRepo(oldName, newName), '', false);
         if (result.error) {
             void vscode.window.showErrorMessage(result.error.message);
             return false;
@@ -40,7 +40,7 @@ export class ManageRepository {
     public addRepo(name: string, url: string): Promise<boolean> {
         return new Promise<boolean>((resolve, _reject) => {
             void Progress.execFunctionWithProgress(`Adding repository ${name}`, async () => {
-                const result = await OdoImpl.Instance.execute(ServerlessCommand.addRepo(name, url));
+                const result = await OdoImpl.Instance.execute(ServerlessCommand.addRepo(name, url), '', false);
                 if (result.error) {
                     void vscode.window.showErrorMessage(result.error.message);
                     resolve(false);
@@ -53,7 +53,7 @@ export class ManageRepository {
     }
 
     public async list(): Promise<string[]> {
-        const result = await OdoImpl.Instance.execute(ServerlessCommand.list());
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.list(), '', false);
         if (result.error) {
             void vscode.window.showErrorMessage(result.error.message);
             return [];

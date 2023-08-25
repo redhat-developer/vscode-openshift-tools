@@ -175,3 +175,11 @@ button {
 li:hover {
     background-color: var(--vscode-button-hoverBackground) !important;
 }
+
+.MuiDialog-paper {
+    border: 1px groove var(--vscode-activityBar-activeBorder) !important;
+    border-radius: 1rem !important;
+    margin: auto !important;
+    background-color: #101418 !important;
+    color: var(--vscode-settings-textInputForeground) !important
+}

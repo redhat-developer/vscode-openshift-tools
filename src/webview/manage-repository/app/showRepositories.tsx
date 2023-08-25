@@ -4,14 +4,16 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { Edit, Delete } from '@mui/icons-material';
+import { Cancel, Delete, Done, Edit } from '@mui/icons-material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
-import { Box, Typography, Stack, Button, Grid, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Box, Typography, Stack, Button, Grid, Dialog, DialogActions, DialogContent, TextField } from '@mui/material';
 
 export class ShowRepositories extends React.Component<DefaultProps, {
     repositories: string[],
-    openDialog: boolean,
+    openEditDialog: boolean,
+    openDeleteDialog: boolean,
+    openedRepo: string,
     newRepoInput: {
         name: string,
         error: boolean,
@@ -22,7 +24,9 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         super(props);
         this.state = {
             repositories: [],
-            openDialog: false,
+            openEditDialog: false,
+            openDeleteDialog: false,
+            openedRepo: '',
             newRepoInput: {
                 name: '',
                 error: false,
@@ -49,30 +53,57 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         });
     }
 
-    handleDelete = (repo: string): void => {
+    handleDialog = (repoName: string, isEdit = true): void => {
+        this.setState({
+            openedRepo: repoName,
+            newRepoInput: {
+                name: repoName,
+                error: false,
+                helpText: ''
+            },
+            openDeleteDialog: isEdit ? false : !this.state.openDeleteDialog,
+            openEditDialog: isEdit ? !this.state.openEditDialog : false
+        });
+    }
+
+    delete = (repo: string): void => {
+        this.CloseDialog();
         VSCodeMessage.postMessage({
             action: `deleteRepo`,
             name: repo
         });
     }
 
-    handleEdit = (): void => {
+    CloseDialog = (): void => {
         this.setState({
-            openDialog: !this.state.openDialog
-        })
+            openEditDialog: false,
+            openDeleteDialog: false,
+            openedRepo: '',
+            newRepoInput: {
+                name: '',
+                error: false,
+                helpText: ''
+            }
+        });
     }
 
-    dialogClose = (): void => {
+    setRepoName = (value: string): boolean => {
         this.setState({
-            openDialog: false
-        })
+            openEditDialog: true,
+            newRepoInput: {
+                name: value,
+                error: false,
+                helpText: ''
+            }
+        });
+        return this.state.openEditDialog;
     }
 
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
             action: `validateNewName`,
             name: value
-        })
+        });
     }
 
     handleDisable = (): boolean => {
@@ -80,15 +111,16 @@ export class ShowRepositories extends React.Component<DefaultProps, {
     }
 
     rename(oldName: string, newName: string): void {
+        this.CloseDialog();
         VSCodeMessage.postMessage({
             action: `renameRepo`,
             oldName: oldName,
             newName: newName
-        })
+        });
     }
 
     render(): React.ReactNode {
-        const { newRepoInput, openDialog, repositories } = this.state;
+        const { newRepoInput, openedRepo, openDeleteDialog, openEditDialog, repositories } = this.state;
         return (
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                 {
@@ -127,7 +159,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                                             size='small'
                                             color='success'
                                             disabled={repoName === 'default'}
-                                            onClick={() => this.handleEdit()}
+                                            onClick={() => this.handleDialog(repoName)}
                                         >
                                             Edit
                                         </Button>
@@ -136,39 +168,81 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                                             size='small'
                                             color='error'
                                             disabled={repoName === 'default'}
-                                            onClick={() => this.handleDelete(repoName)}>
+                                            onClick={() => this.handleDialog(repoName, false)}>
                                             Delete
                                         </Button>
                                     </Stack>
-                                    <Dialog open={openDialog} onClose={() => this.dialogClose()}>
-                                        <DialogTitle>Subscribe</DialogTitle>
-                                        <DialogContent>
-                                            <DialogContentText>
-                                                To subscribe to this website, please enter your email address here. We
-                                                will send updates occasionally.
-                                            </DialogContentText>
-                                            <TextField
-                                                autoFocus
-                                                margin="dense"
-                                                id="name"
-                                                fullWidth
-                                                variant="standard"
-                                                error={newRepoInput.error}
-                                                helperText={newRepoInput.helpText}
-                                                value={repoName}
-                                                onChange={(e) => this.validateName(e.target.value)}
-                                            />
-                                        </DialogContent>
-                                        <DialogActions>
-                                            <Button onClick={() => this.dialogClose()}>Cancel</Button>
-                                            <Button onClick={() => this.rename(repoName, newRepoInput.name)}
-                                                disabled={this.handleDisable()}>Rename</Button>
-                                        </DialogActions>
-                                    </Dialog>
                                 </Stack>
                             </Box>
                         </Grid>
                     ))
+                }
+                {
+                    openedRepo.length > 0 &&
+                    <Dialog open={openDeleteDialog} onClose={() => this.CloseDialog()}>
+                        <DialogContent>
+                            <Typography variant='body1'>
+                                {`Are you sure want to delete the repository '${openedRepo}' ?`}
+                            </Typography>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button variant='contained'
+                                startIcon={<Cancel />}
+                                size='small'
+                                color='secondary'
+                                onClick={() => this.CloseDialog()}> Cancel </Button>
+                            <Button variant='contained'
+                                startIcon={<Done />}
+                                size='small'
+                                color='success'
+                                onClick={() => this.delete(openedRepo)}> Yes </Button>
+                        </DialogActions>
+                    </Dialog>
+                }
+                {
+                    openedRepo.length > 0 &&
+                    <Dialog open={openEditDialog} onClose={() => this.CloseDialog()}>
+                        <DialogContent>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                <Button variant='contained'
+                                    disabled={true}
+                                    sx={{ width: { xs: 'auto', sm: '200px' } }}
+                                    className='labelStyle'>
+                                    New name *
+                                </Button>
+                                <TextField
+                                    type='string'
+                                    variant='outlined'
+                                    required
+                                    autoFocus
+                                    fullWidth
+                                    defaultValue={newRepoInput.name}
+                                    error={newRepoInput.error}
+                                    onChange={(e) => this.validateName(e.target.value)}
+                                    id='repo-new-name'
+                                    sx={{
+                                        input: {
+                                            color: 'var(--vscode-settings-textInputForeground)',
+                                            height: '7px !important',
+                                        }
+                                    }}
+                                    helperText={newRepoInput.helpText} />
+                            </Stack>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button variant='contained'
+                                startIcon={<Cancel />}
+                                size='small'
+                                color='secondary'
+                                onClick={() => this.CloseDialog()}> Cancel </Button>
+                            <Button variant='contained'
+                                startIcon={<Done />}
+                                size='small'
+                                color='success'
+                                disabled={this.handleDisable() || openedRepo === newRepoInput.name}
+                                onClick={() => this.rename(openedRepo, newRepoInput.name)}> Rename </Button>
+                        </DialogActions>
+                    </Dialog>
                 }
             </Grid>
         )

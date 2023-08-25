@@ -21,6 +21,19 @@ export class ManageRepository extends React.Component<DefaultProps, {
         };
     }
 
+    componentDidMount(): void {
+        VSCodeMessage.onMessage((message) => {
+            if (message.data.action === 'addRepo' && message.data.status) {
+                this.setState({
+                    value: 'show'
+                });
+                VSCodeMessage.postMessage({
+                    action: `getRepositoryList`
+                });
+            }
+        });
+    }
+
     handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
 
         this.setState({

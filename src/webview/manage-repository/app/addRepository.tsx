@@ -56,19 +56,6 @@ export class AddRepository extends React.Component<DefaultProps, {
                         helpText: message.data.helpText
                     }
                 })
-            } else if (message.data.action === 'addRepo' && message.data.status) {
-                this.setState({
-                    input: {
-                        name: '',
-                        error: false,
-                        helpText: ''
-                    },
-                    repo: {
-                        url: '',
-                        error: false,
-                        helpText: ''
-                    }
-                })
             }
         });
     }
