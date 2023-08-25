@@ -85,6 +85,7 @@ export interface DevfileData {
 }
 
 export interface AnalyzeResponse {
+    name: string;
     devfile: string;
     devfileRegistry: string;
     devfileVersion: string;

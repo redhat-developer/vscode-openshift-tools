@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 
 import * as fs from 'fs';

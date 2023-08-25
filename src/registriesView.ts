@@ -10,15 +10,14 @@ import {
     EventEmitter, TreeDataProvider,
     TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
-import { getInstance, Odo, OdoImpl } from './odo';
-import { Command } from './odo/command';
 import {
+    ComponentTypeAdapter,
     ComponentTypeDescription,
     DevfileComponentType,
     Registry
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
-import { CliExitData } from './util/childProcessUtil';
+import { Odo } from './odo/odoWrapper';
 import { Progress } from './util/progress';
 import { vsCommand, VsCommandError } from './vscommand';
 import fetch = require('make-fetch-happen');
@@ -43,7 +42,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     readonly onDidChangeTreeData: Event<ComponentType | undefined> =
         this.onDidChangeTreeDataEmitter.event;
 
-    readonly odo: Odo = getInstance();
+    readonly odo = Odo.Instance;
     private registries: Registry[];
     private readonly compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
     public subject: Subject<string> = new Subject<string>();
@@ -114,18 +113,16 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return new Promise<void>((resolve) => {
             let isError = false;
             this.compDescriptions.clear();
-            void getInstance().getCompTypesJson().then(async (devFileComponentTypes: DevfileComponentType[]) => {
+            void Odo.Instance.getComponentTypes().then(async (devFileComponentTypes: ComponentTypeAdapter[]) => {
                 await this.getRegistries();
-                devFileComponentTypes.forEach((component: DevfileComponentType) => {
-                    getInstance().execute(Command.describeCatalogComponent(component.name, component.registry.name)).then((componentDesc: CliExitData) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        const [component] = JSON.parse(componentDesc.stdout) as ComponentTypeDescription[];
-
+                devFileComponentTypes.forEach((component: ComponentTypeAdapter) => {
+                    Odo.Instance.getDetailedComponentInformation(component) //
+                    .then((componentDesc: ComponentTypeDescription) => {
                         // eslint-disable-next-line max-nested-callbacks
-                        component.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
+                        componentDesc.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
                             starter.typeName = component.name;
                         });
-                        this.compDescriptions.add(component);
+                        this.compDescriptions.add(componentDesc);
 
                         if (devFileComponentTypes.length === this.compDescriptions.size) {
                             this.subject.next('refresh');
@@ -302,7 +299,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
             if (componentTypes.length > 0) {
                 void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
-                    const newRegistry = await OdoImpl.Instance.addRegistry(regName, regURL, token);
+                    const newRegistry = await Odo.Instance.addRegistry(regName, regURL, token);
                     ComponentTypesView.instance.addRegistry(newRegistry);
                     await ComponentTypesView.instance.getAllComponents();
                     ComponentTypesView.instance.refresh(false);
@@ -321,7 +318,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             'No',
         );
         if (yesNo === 'Yes') {
-            await OdoImpl.Instance.removeRegistry(registry.name);
+            await Odo.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
             if (!isEdit) {
                 await ComponentTypesView.instance.getAllComponents();

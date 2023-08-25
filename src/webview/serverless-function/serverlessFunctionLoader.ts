@@ -8,7 +8,7 @@ import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { OdoImpl } from '../../odo';
+import { Odo } from '../../odo/odoWrapper';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import { Functions } from '../../serverlessFunction/functions';
 import { InvokeFunction } from '../../serverlessFunction/types';
@@ -236,7 +236,7 @@ export default class ServerlessFunctionViewLoader {
     ): Promise<CliExitData> {
         let functionResponse: CliExitData;
         try {
-            const response = await OdoImpl.Instance.execute(
+            const response = await Odo.Instance.execute(
                 ServerlessCommand.createFunction(language, template, location),
             );
             if (response && !response.error) {

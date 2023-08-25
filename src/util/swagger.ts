@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { JSONSchema7 } from 'json-schema';
-import { Platform } from './platform';
 import * as path from 'path';
+import { Platform } from './platform';
 
 const _ = require('lodash');
 const https = require('https');

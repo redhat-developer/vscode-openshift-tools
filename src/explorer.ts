@@ -7,20 +7,23 @@ import { Context, KubernetesObject } from '@kubernetes/client-node';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-    commands, Disposable,
+    Disposable,
     Event,
-    EventEmitter, extensions, ThemeIcon,
+    EventEmitter,
+    ThemeIcon,
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
     TreeView,
-    Uri, version,
+    Uri,
+    commands,
+    extensions,
+    version,
     window
 } from 'vscode';
-import { CliChannel } from './cli';
 import * as Helm from './helm/helm';
-import { Command } from './odo/command';
-import { newInstance, Odo3 } from './odo3';
+import { Oc } from './oc/ocWrapper';
+import { Odo } from './odo/odoWrapper';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
@@ -59,8 +62,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
-    private odo3: Odo3 = newInstance();
-
     private constructor() {
         try {
             this.kubeConfig = new KubeConfigUtils();
@@ -88,17 +89,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
         });
-    }
-
-    async getCurrentClusterUrl(): Promise<string | undefined> {
-        // print odo version and Server URL if user is logged in
-        const result = await CliChannel.getInstance().executeTool(Command.printOdoVersion());
-        // search for line with 'Server:' substring
-        const clusterLine = result.stdout.trim().split('\n').find((value) => value.includes('Server:'));
-        // if line with Server: is printed out it means user is logged in
-        void commands.executeCommand('setContext', 'isLoggedIn', !!clusterLine);
-        // cut out server url after 'Server:' substring
-        return clusterLine ? clusterLine.substring(clusterLine.indexOf(':') + 1).trim() : undefined;
     }
 
     static getInstance(): OpenShiftExplorer {
@@ -182,7 +172,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         let result: ExplorerItem[] = [];
         if (!element) {
             try {
-                await this.odo3.getNamespaces()
+                await Odo.Instance.getProjects();
                 result = [this.kubeContext];
                 if (this.kubeContext) {
                     const homeDir = this.kubeConfig.findHomeDir();
@@ -205,9 +195,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const namespaces = await this.odo3.getNamespaces();
+            const namespaces = await Odo.Instance.getProjects();
             if (this.kubeContext.namespace) {
-                if (namespaces.find(item => item?.metadata.name === this.kubeContext.namespace)) {
+                if (namespaces.find(item => item.name === this.kubeContext.namespace)) {
                     result = [{
                         kind: 'project',
                         metadata: {
@@ -216,14 +206,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     } as KubernetesObject]
                 } else if (namespaces.length >= 1) {
                     // switch to first accessible namespace
-                    await this.odo3.setNamespace(namespaces[0].metadata.name);
+                    await Odo.Instance.setProject(namespaces[0].name);
                 } else {
                     result = [CREATE_OR_SET_PROJECT_ITEM]
                 }
             } else {
                 // get list of projects or namespaces
                 // find default namespace
-                if (namespaces.find(item => item?.metadata.name === 'default')) {
+                if (namespaces.find(item => item?.name === 'default')) {
                     result = [{
                         kind: 'project',
                         metadata: {
@@ -235,14 +225,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else {
-            result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments(), ...await Helm.getHelmReleases()];
+            result = [
+                ...await Oc.Instance.getKubernetesObjects('DeploymentConfig'),
+                ...await Oc.Instance.getKubernetesObjects('Deployment'),
+                ...await Helm.getHelmReleases()
+            ];
         }
         // don't show Open In Developer Dashboard if not openshift cluster
-        const openshiftResources = await CliChannel.getInstance().executeTool(Command.isOpenshiftCluster(), undefined, false);
-        let isOpenshiftCluster = true;
-        if (openshiftResources.stdout.length === 0){
-            isOpenshiftCluster = false;
-        }
+        const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
         void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
 
         if (!element) {

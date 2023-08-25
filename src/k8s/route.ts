@@ -5,25 +5,18 @@
 
 import { KubeConfig } from '@kubernetes/client-node';
 import { commands, Uri } from 'vscode';
+import { Oc } from '../oc/ocWrapper';
 import { vsCommand, VsCommandError } from '../vscommand';
-import { asJson } from './common';
 
- export class Route {
+export class Route {
 
-    public static command = {
-        getRoute(namespace: string, name: string): string {
-            return `get route ${name} -n ${namespace}`;
+    public static async getUrl(namespace: string, name: string): Promise<string> {
+        const route = await Oc.Instance.getKubernetesObject('route', name, namespace);
+        const hostName = (route as any)?.spec.host;
+        if (hostName === undefined) {
+            throw new VsCommandError(`Cannot identify host name for Route '${name}'`, 'Cannot identify host name for Route');
         }
-    };
-
-    public static getUrl(namespace: string, name: string): Promise<string> {
-        return asJson(Route.command.getRoute(namespace, name)).then((response: any) => {
-            const hostName = response?.spec.host;
-            if (hostName === undefined) {
-                throw new VsCommandError(`Cannot identify host name for Route '${name}'`, 'Cannot identify host name for Route');
-            }
-            return response.spec.tls ? `https://${hostName}` : `http://${hostName}`;
-        });
+        return (route as any).spec.tls ? `https://${hostName}` : `http://${hostName}`;
     }
 
     @vsCommand('clusters.openshift.route.open')
@@ -37,4 +30,5 @@ import { asJson } from './common';
         const url = await Route.getUrl(currentContextObj.namespace, context.name)
         await commands.executeCommand('vscode.open', Uri.parse(url));
     }
- }
+
+}

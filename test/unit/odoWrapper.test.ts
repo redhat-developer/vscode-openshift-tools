@@ -11,15 +11,15 @@ import * as sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
-import * as odo from '../../src/odo';
+import { Odo } from '../../src/odo/odoWrapper';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('odo', () => {
-    const odoCli: odo.Odo = odo.OdoImpl.Instance;
+suite('./odo/odoWrapper.ts', () => {
+    const odoCli = Odo.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
 
@@ -204,7 +204,7 @@ suite('odo', () => {
         };
 
         setup(() => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(componentCatalog);
+            sandbox.stub(Odo.prototype, 'execute').resolves(componentCatalog);
         });
 
     });
@@ -239,7 +239,7 @@ suite('odo', () => {
         };
 
         setup(() => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves(data);
+            sandbox.stub(Odo.prototype, 'execute').resolves(data);
         });
     });
 
@@ -254,28 +254,14 @@ suite('odo', () => {
         ];
 
         test('extension uses odo version to get cluster url', async () => {
-            sandbox.stub(odo.OdoImpl.prototype, 'execute').resolves({
+            sandbox.stub(Odo.prototype, 'execute').resolves({
                 error: undefined,
                 stdout: odoVersionOutLoggedIn.join('\n'),
                 stderr: ''
             });
-            const cluster: string = await odo.getInstance().getActiveCluster();
+            const cluster: string = await odoCli.getActiveCluster();
             expect(cluster).equals(clusterUrl);
         });
 
-        test('extension uses odo version to determine if login is required', async () => {
-            const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
-            const result = await odoCli.requireLogin();
-
-            expect(stub).calledWith(new CommandText('oc', 'whoami'));
-            expect(result).false;
-        });
-
-        test('requireLogin returns true if odo is not logged in to the cluster', async () => {
-            sandbox.stub(odoCli, 'execute').returns(Promise.reject('Not logged in!'));
-            const result = await odoCli.requireLogin();
-
-            expect(result).true;
-        });
     });
 });

@@ -4,15 +4,14 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { getInstance } from './odo';
-import { Command } from './odo/command';
+import { Oc as OcWrapper } from './oc/ocWrapper';
+import { Odo } from './odo/odoWrapper';
 import { clusterRequired } from './openshift/openshiftItem';
-import { ToolsConfig } from './tools';
 import { vsCommand } from './vscommand';
 
-export class Oc {
+export class YamlFileCommands {
 
-    private static odo = getInstance();
+    private static odo = Odo.Instance;
 
     @vsCommand('openshift.create')
     @clusterRequired()
@@ -41,18 +40,10 @@ export class Oc {
             }
         }
 
-        const activeProject = await Oc.odo.getActiveProject();
+        const activeProject = await YamlFileCommands.odo.getActiveProject();
 
         if (!message && !activeProject) {
             message = '\'OpenShift: Create\' requires setting a project as active, and none is currently set.';
-        }
-
-        let toolLocation: string;
-        if (!message) {
-            toolLocation = await ToolsConfig.detect('oc');
-            if (!toolLocation) {
-                message = 'Cannot run \'oc create\'. OKD CLI client tool cannot be found.';
-            }
         }
 
         if (message) {
@@ -60,7 +51,7 @@ export class Oc {
             return null;
         }
 
-        await Oc.odo.execute(Command.ocCreate(document.fileName, activeProject));
+        await OcWrapper.Instance.createKubernetesObjectFromFile(document.fileName);
         return 'Resources were successfully created.';
     }
 }

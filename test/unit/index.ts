@@ -60,6 +60,7 @@ export async function run(): Promise<void> {
     testFiles.push(...await testFinder('**/extension.test.js'));
     testFiles.push(...await testFinder('**/workspace.test.js'));
     testFiles.push(...await testFinder('openshift/component.test.js'));
+    testFiles.push(...await testFinder('openshift/cluster.test.js'));
     testFiles.push(...await testFinder('k8s/*.test.js'));
     testFiles.push(...await testFinder('util/*.test.js'));
 

@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { V220Devfile, V220DevfileCommandsItemsExecGroup } from '@devfile/api';
-import { KubeConfig } from '@kubernetes/client-node';
 import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
@@ -16,19 +15,19 @@ import { promisify } from 'util';
 import { EventEmitter, Terminal, window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
-import { getInstance } from '../../src/odo';
+import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { ComponentDescription } from '../../src/odo/componentTypeDescription';
+import { Odo } from '../../src/odo/odoWrapper';
 
-const ODO = getInstance();
-const kc = new KubeConfig();
+const ODO = Odo.Instance;
 
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
 suite('odo commands integration', function () {
 
-    const isOpenShift = process.env.IS_OPENSHIFT || false;
+    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -36,265 +35,20 @@ suite('odo commands integration', function () {
     suiteSetup(async function() {
         if (isOpenShift) {
             try {
-                await ODO.execute(Command.odoLogout());
+                await Oc.Instance.logout();
             } catch (e) {
                 // do nothing
             }
-            await ODO.execute(
-                Command.odoLoginWithUsernamePassword(
-                    clusterUrl,
-                    username,
-                    password,
-                ),
+            await Oc.Instance.loginWithUsernamePassword(
+                clusterUrl,
+                username,
+                password,
             );
         }
-        kc.loadFromDefault();
-    });
-
-    suite('login/logout', function() {
-        let token: string;
-
-        suiteSetup(async function() {
-            if (isOpenShift) {
-                // get current user token and logout
-                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-                token = (await ODO.execute(Command.getCurrentUserToken())).stdout;
-                await ODO.execute(Command.odoLogout());
-            } else {
-                this.skip();
-            }
-        });
-
-        suiteTeardown(async function() {
-            // log back in for the rest of the tests
-            if (isOpenShift) {
-                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-            }
-        });
-
-        teardown(async function() {
-            await ODO.execute(Command.odoLogout());
-        });
-
-        test('odoLogout()', async function() {
-            try {
-                await ODO.execute(Command.getCurrentUserName())
-                expect.fail('should be unable to get current user, since you are logged out');
-            } catch (_e) {
-                // do nothing
-            }
-        });
-
-        test('odoLoginWithUsernamePassword()', async function () {
-            await ODO.execute(
-                Command.odoLoginWithUsernamePassword(
-                    clusterUrl,
-                    username,
-                    password,
-                ),
-            );
-            const currentUserData = await ODO.execute(Command.getCurrentUserName());
-            expect(currentUserData.stdout).to.equal(username);
-        });
-
-        test('odoLoginWithToken()', async function() {
-            await ODO.execute(Command.odoLoginWithToken(clusterUrl, token));
-            const currentUserData = await ODO.execute(Command.getCurrentUserName());
-            expect(currentUserData.stdout).to.equal(username);
-        });
-
-    });
-
-    test('showServerUrl()', async function() {
-        const cliData = await ODO.execute(Command.showServerUrl());
-        expect(cliData.stdout).to.equal(clusterUrl);
-    });
-
-    test('getCurrentUserName()', async function() {
-        if (isOpenShift) {
-            const cliData = await ODO.execute(Command.getCurrentUserName());
-            expect(cliData.stdout).to.contain(username);
-        } else {
-            this.skip();
-        }
-    });
-
-    test('getCurrentUserToken()', async function() {
-        if (isOpenShift) {
-            await ODO.execute(Command.getCurrentUserToken());
-        } else {
-            this.skip();
-        }
-    });
-
-    suite('project-related commands', function() {
-
-        suiteSetup(async function() {
-            // createProject()
-            await ODO.execute(Command.createProject(newProjectName));
-        });
-
-        suiteTeardown(async function() {
-            // deleteProject()
-            await ODO.execute(Command.deleteProject(newProjectName));
-        });
-
-        test('listProjects()', function () {
-            return ODO.execute(Command.listProjects());
-        });
-
-        test('getDeployments()', async function () {
-            await ODO.execute(Command.getDeployments(newProjectName));
-        });
-
-        test('setNamespace()', async function() {
-            await ODO.execute(Command.setNamespace(newProjectName));
-        });
-
-    });
-
-    test('listRegistries()', async function () {
-        return ODO.execute(Command.listRegistries());
-    });
-
-    test('addRegistry()', async function() {
-        await ODO.execute(Command.addRegistry('CheRegistry', 'https://example.org', undefined));
-    });
-
-    test('removeRegistry()', async function() {
-        await ODO.execute(Command.removeRegistry('CheRegistry'));
-    });
-
-    test('listCatalogComponentsJson()', async function () {
-        await ODO.execute(Command.listCatalogComponentsJson());
-    });
-
-    test('printOcVersion()', async function () {
-        await ODO.execute(Command.printOcVersion());
-    });
-
-    test('printOcVersionJson()', async function() {
-        await ODO.execute(Command.printOcVersionJson());
     });
 
     test('printOdoVersion()', async function () {
         await ODO.execute(Command.printOdoVersion());
-    });
-
-    test('showServerUrl()', async function () {
-        await ODO.execute(Command.showServerUrl());
-    });
-
-    test('showConsoleUrl()', async function () {
-        if (isOpenShift) {
-            const canI = await ODO.execute(
-                new CommandText('oc',
-                'auth can-i get configmap --namespace openshift-config-managed'),
-                undefined,
-                false,
-            ).then((result) => {
-                return !result.stdout.startsWith('no');
-            });
-            if (!canI) {
-                this.skip();
-            } else {
-                await ODO.execute(Command.showConsoleUrl());
-            }
-        } else {
-            this.skip();
-        }
-    });
-
-    test('describeCatalogComponent()', async function () {
-        const types = await ODO.getComponentTypes();
-        const devfileCompType = types[0];
-        if (!devfileCompType) {
-            this.skip();
-        } else {
-            await ODO.execute(
-                Command.describeCatalogComponent(
-                    devfileCompType.name,
-                    devfileCompType.registryName,
-                ),
-            );
-        }
-    });
-
-    test('setOpenShiftContext', async function () {
-        await ODO.execute(Command.setOpenshiftContext(kc.currentContext));
-    });
-
-    test('getBindableServices()', async function() {
-        const result = await ODO.execute(Command.getBindableServices());
-        expect(result.stdout.trim()).to.equal('{}');
-    });
-
-    test.skip('deletePreviouslyPushedResources()');
-    test.skip('listCatalogOperatorBackedServices()');
-    test.skip('addHelmRepo()');
-    test.skip('updateHelmRepo()');
-    test.skip('installHelmChart()');
-    test.skip('unInstallHelmChart()');
-    test.skip('deleteComponentNoContext()');
-    test.skip('deleteContext()');
-    test.skip('deleteCluster()');
-    test.skip('deleteUser()');
-    test.skip('getClusterServiceVersionJson()');
-
-    suite('services', function() {
-
-        const serviceName = 'my-test-service';
-        const projectName = 'my-test-service-project1';
-
-        // taken from https://docs.openshift.com/container-platform/3.11/dev_guide/deployments/kubernetes_deployments.html
-        const serviceFileYaml = //
-            'apiVersion: apps/v1\n' + //
-            'kind: Deployment\n' + //
-            'metadata:\n' + //
-            `  name: ${serviceName}\n` + //
-            'spec:\n' + //
-            '  replicas: 1\n' + //
-            '  selector:\n' + //
-            '    matchLabels:\n' + //
-            '      app: hello-openshift\n' + //
-            '  template:\n' + //
-            '    metadata:\n' + //
-            '      labels:\n' + //
-            '        app: hello-openshift\n' + //
-            '    spec:\n' + //
-            '      containers:\n' + //
-            '      - name: hello-openshift\n' + //
-            '        image: openshift/hello-openshift:latest\n' + //
-            '        ports:\n' + //
-            '        - containerPort: 80\n';
-
-        let serviceFile: string;
-
-        suiteSetup(async function () {
-            serviceFile = await promisify(tmp.file)();
-            await fs.writeFile(serviceFile, serviceFileYaml);
-            if (isOpenShift) {
-                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-            }
-            try {
-                await ODO.execute(Command.createProject(projectName));
-            } catch (e) {
-                // do nothing, it probably already exists
-            }
-            await ODO.execute(Command.setNamespace(projectName));
-        });
-
-        suiteTeardown(async function() {
-            await ODO.execute(new CommandText(`oc delete deployment ${serviceName} --namespace ${projectName}  --force=true`));
-            await fs.rm(serviceFile);
-            // this call fails to exit on kind/minikube during integration tests
-            void ODO.deleteProject(projectName);
-        });
-
-        test('ocCreate()', async function() {
-            await ODO.execute(Command.ocCreate(serviceFile));
-        });
-
     });
 
     suite('component', function() {
@@ -304,11 +58,11 @@ suite('odo commands integration', function () {
         let componentLocation: string;
 
         suiteSetup(async function () {
-            await ODO.execute(Command.createProject(newProjectName));
-            await ODO.execute(Command.setNamespace(newProjectName));
+            await Odo.Instance.createProject(newProjectName);
+            await Odo.Instance.setProject(newProjectName);
             componentLocation = await promisify(tmp.dir)();
             if (isOpenShift) {
-                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
             }
         });
 
@@ -324,7 +78,7 @@ suite('odo commands integration', function () {
                 workspace.updateWorkspaceFolders(toRemove, 1);
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
-            await ODO.execute(Command.deleteProject(newProjectName));
+            await Odo.Instance.deleteProject(newProjectName);
         });
 
         test('createLocalComponent()', async function () {
@@ -344,10 +98,6 @@ suite('odo commands integration', function () {
             await fs.access(path.join(componentLocation, 'devfile.yaml'));
         });
 
-        test('listComponents()', async function () {
-            await ODO.execute(Command.listComponents(newProjectName));
-        });
-
         test('describeComponent()', async function() {
             const res = await ODO.execute(Command.describeComponent(), componentLocation);
             expect(res.stdout).contains(componentName);
@@ -358,13 +108,6 @@ suite('odo commands integration', function () {
             const res = await ODO.execute(Command.describeComponentJson(), componentLocation);
             expect(res.stdout).contains(componentName);
             expect(res.stdout).contains(componentType);
-        });
-
-        test('analyze()', async function() {
-            const res = await ODO.execute(Command.analyze(), componentLocation);
-            const resObj = JSON.parse(res.stdout);
-            expect(resObj[0]?.name).to.equal(path.basename(componentLocation).toLocaleLowerCase());
-            expect(resObj[0]?.devfile).to.equal(componentType);
         });
 
         suite('deploying', function() {
@@ -461,21 +204,6 @@ suite('odo commands integration', function () {
             term.sendText('a');
             term.dispose();
         });
-
-        test('addBinding()', async function() {
-            const result = await ODO.execute(Command.addBinding('default', 'myservice', 'myservice-binding'), componentLocation, false);
-            expect(result.stderr).to.contain('No bindable service instances found in namespace "default"');
-        });
-
-        test('deleteComponentConfiguration', async function() {
-            await ODO.execute(Command.deleteComponentConfiguration(), componentLocation);
-            try {
-                await fs.access(path.join(componentLocation, 'devfile.yaml'));
-                this.fail();
-            } catch (_ignored) {
-                // do nothing
-            }
-        });
     });
 
     suite('component dev', function() {
@@ -486,12 +214,14 @@ suite('odo commands integration', function () {
 
         suiteSetup(async function () {
             if (isOpenShift) {
-                await ODO.execute(
-                    Command.odoLoginWithUsernamePassword(clusterUrl, username, password),
-                );
+                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
             }
-            await ODO.execute(Command.createProject(newProjectName));
-            await ODO.execute(Command.setNamespace(newProjectName));
+            try {
+                await Odo.Instance.createProject(newProjectName);
+            } catch (e) {
+                // do nothing; already exists
+            }
+            await Odo.Instance.setProject(newProjectName);
             componentLocation = await promisify(tmp.dir)();
         });
 
@@ -507,7 +237,7 @@ suite('odo commands integration', function () {
                 workspace.updateWorkspaceFolders(toRemove, 1);
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
-            await ODO.execute(Command.deleteProject(newProjectName));
+            await Odo.Instance.deleteProject(newProjectName);
         });
 
         interface TerminalListener {

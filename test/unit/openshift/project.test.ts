@@ -8,8 +8,7 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../../src/base/command';
-import { OdoImpl } from '../../../src/odo';
-import { Command } from '../../../src/odo/command';
+import { Odo } from '../../../src/odo/odoWrapper';
 import { Project as OdoProject } from '../../../src/odo/project';
 import { Project } from '../../../src/openshift/project';
 
@@ -19,6 +18,8 @@ chai.use(sinonChai);
 suite('OpenShift/Project', () => {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
+    let createProjectStub: sinon.SinonStub;
+    let deleteProjectStub: sinon.SinonStub;
 
     let projectItem: OdoProject;
     const errorMessage = 'ERROR MESSAGE';
@@ -26,9 +27,11 @@ suite('OpenShift/Project', () => {
     setup(() => {
         projectItem = { name: 'project', active: true };
         sandbox = sinon.createSandbox();
-        sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
+        sandbox.stub(Odo.prototype, 'getProjects').resolves([projectItem]);
+        execStub = sandbox.stub(Odo.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
+        createProjectStub = sandbox.stub(Odo.prototype, 'createProject').resolves();
+        deleteProjectStub = sandbox.stub(Odo.prototype, 'deleteProject').resolves();
     });
 
     teardown(() => {
@@ -46,7 +49,7 @@ suite('OpenShift/Project', () => {
             const result = await Project.create();
 
             expect(result).equals(`Project '${projectItem.name}' successfully created`);
-            expect(execStub).calledWith(Command.createProject(projectItem.name));
+            expect(createProjectStub).calledWith(projectItem.name);
         });
 
         test('returns null with no project name selected', async () => {
@@ -146,7 +149,7 @@ suite('OpenShift/Project', () => {
             const result = await Project.del(null);
 
             expect(result).equals(`Project '${projectItem.name}' successfully deleted`);
-            expect(`${execStub.getCall(0).args[0]}`).equals(`${Command.deleteProject(projectItem.name)}`);
+            expect(deleteProjectStub).to.be.calledWith(projectItem.name);
         });
 
         test('returns null when cancelled', async () => {

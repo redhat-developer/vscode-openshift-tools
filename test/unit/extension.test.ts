@@ -14,7 +14,8 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../src/base/command';
-import { OdoImpl } from '../../src/odo';
+import { Oc } from '../../src/oc/ocWrapper';
+import { Odo } from '../../src/odo/odoWrapper';
 import { Project } from '../../src/odo/project';
 import { Progress } from '../../src/util/progress';
 import path = require('path');
@@ -66,7 +67,7 @@ suite('openshift toolkit Extension', () => {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
         // eslint-disable-next-line @typescript-eslint/require-await
-        sandbox.stub(OdoImpl.prototype, 'execute').callsFake(async (cmd: CommandText, cwd: string)=> {
+        sandbox.stub(Odo.prototype, 'execute').callsFake(async (cmd: CommandText, cwd: string)=> {
             if (`${cmd}`.includes('version')) {
                 return { error: undefined, stdout: 'Server: https://api.crc.testing:6443', stderr: '' };
             }
@@ -86,17 +87,11 @@ suite('openshift toolkit Extension', () => {
                     "devfileComponents": []
                   }`, stderr: ''}
             }
-            if (`${cmd}`.includes('all')) {
-                return {
-                    error: undefined,
-                    stdout: '{ "items": [] }',
-                    stderr: ''
-                };
-            }
             return { error: undefined, stdout: '', stderr: ''};
         });
-        sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Oc.prototype, 'getAllKubernetesObjects').resolves([]);
+        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
+        sandbox.stub(Odo.prototype, 'getProjects').resolves([projectItem]);
     });
 
     teardown(() => {

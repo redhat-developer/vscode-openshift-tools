@@ -5,7 +5,8 @@
 
 import { commands, QuickPickItem, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
-import { getInstance, Odo, OpenShiftObject } from '../odo';
+import { Oc } from '../oc/ocWrapper';
+import { Odo } from '../odo/odoWrapper';
 import { Project } from '../odo/project';
 import { ServerlessFunctionView } from '../serverlessFunction/view';
 import * as NameValidator from './nameValidator';
@@ -23,34 +24,21 @@ export class QuickPickCommand implements QuickPickItem {
 }
 
 export default class OpenShiftItem {
-    protected static readonly odo: Odo = getInstance();
+    protected static readonly odo = Odo.Instance;
 
     protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
     protected static readonly serverlessView: ServerlessFunctionView = ServerlessFunctionView.getInstance();
 
-    static validateUniqueName(data: Array<OpenShiftObject>, value: string): string {
-        const openshiftObject =  data.find((item) => item.getName() === value);
-        return openshiftObject && 'This name is already used, please enter different name.';
-    }
-
-    static async getName(message: string, data: Promise<Array<OpenShiftObject>>, offset?: string, defaultValue = ''): Promise<string> {
+    static async getName(message: string, offset?: string, defaultValue = ''): Promise<string> {
         return window.showInputBox({
             value: defaultValue,
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
-            validateInput: async (value: string) => {
+            validateInput: (value: string) => {
                 let validationMessage = NameValidator.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = NameValidator.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = NameValidator.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
-                if (!validationMessage) {
-                    try {
-                        const existingResources = await data;
-                        validationMessage = OpenShiftItem.validateUniqueName(existingResources, value);
-                    } catch (err) {
-                        //ignore to keep other validation to work
-                    }
-                }
                 return validationMessage;
             }
         });
@@ -95,7 +83,7 @@ export function clusterRequired() {
         }
 
         descriptor[fnKey] = async function (...args: any[]): Promise<any> {
-            let hasActiveCluster = await getInstance().canCreatePod();
+            let hasActiveCluster = await Oc.Instance.canCreatePod();
             if (!hasActiveCluster) {
                 const lOrC = await window.showInformationMessage('Login in to a Cluster to run this command.', 'Login', 'Cancel');
                 if (lOrC === 'Login') {
@@ -103,7 +91,7 @@ export function clusterRequired() {
                     if (typeof loginResult === 'string') {
                         void window.showInformationMessage(loginResult);
                     }
-                    hasActiveCluster = await getInstance().canCreatePod();
+                    hasActiveCluster = await Oc.Instance.canCreatePod();
                 }
             }
             if (hasActiveCluster) {

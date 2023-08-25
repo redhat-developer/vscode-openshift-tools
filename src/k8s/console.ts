@@ -5,7 +5,8 @@
 
 import * as vscode from 'vscode';
 import { CliChannel } from '../cli';
-import { Command } from '../odo/command';
+import { Oc } from '../oc/ocWrapper';
+import { ClusterType } from '../oc/types';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { vsCommand } from '../vscommand';
 
@@ -17,84 +18,100 @@ export class Console {
         return project;
     }
 
-    static async fetchOpenshiftConsoleUrl(): Promise<any> {
-        try {
-            return await Console.cli.executeTool(Command.showConsoleUrl());
-        } catch (ignore) {
-            const consoleUrl = await Console.cli.executeTool(Command.showServerUrl());
-            return consoleUrl.stdout;
-        }
-    }
-
-    static openShift4ClusterUrl(consoleUrl: any): string {
-        return JSON.parse(consoleUrl.stdout).data.consoleURL;
-    }
-
     @vsCommand('clusters.openshift.build.openConsole')
-    static async openBuildConfig(context: { name: string}): Promise<unknown> {
-        let url = '';
+    static async openBuildConfig(context: { name: string}): Promise<void> {
         if (!context) {
             void vscode.window.showErrorMessage('Cannot load the build config');
             return;
         }
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
+        const consoleInfo = await Oc.Instance.getConsoleInfo();
         const project = Console.getCurrentProject();
-        if (consoleUrl.stdout) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/buildconfigs/${context.name}`;
-        } else {
-            url = `${consoleUrl}/console/project/${project}/browse/builds/${context.name}?tab=history`;
+
+        let url: string = undefined;
+        switch (consoleInfo.kind) {
+            case ClusterType.Kubernetes: {
+                url = `${consoleInfo.url}/project/${project}/browse/builds/${context.name}?tab=history`;
+                break;
+            }
+            case ClusterType.OpenShift: {
+                url = `${consoleInfo.url}/k8s/ns/${project}/buildconfigs/${context.name}`;
+                break;
+            }
+            default:
+                throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.deployment.openConsole')
-    static async openDeploymentConfig(context: { name: string}): Promise<unknown> {
-        let url = '';
+    static async openDeploymentConfig(context: { name: string}): Promise<void> {
         if (!context) {
             void vscode.window.showErrorMessage('Cannot load the deployment config');
             return;
         }
         const project = Console.getCurrentProject();
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl.stdout) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/deploymentconfigs/${context.name}`;
-        } else {
-            url = `${consoleUrl}/console/project/${project}/browse/dc/${context.name}?tab=history`;
+        const consoleInfo = await Oc.Instance.getConsoleInfo();
+        let url = '';
+        switch (consoleInfo.kind) {
+            case ClusterType.Kubernetes: {
+                url = `${consoleInfo.url}/project/${project}/browse/dc/${context.name}?tab=history`;
+                break;
+            }
+            case ClusterType.OpenShift: {
+                url = `${consoleInfo.url}/k8s/ns/${project}/deploymentconfigs/${context.name}`;
+                break;
+            }
+            default:
+                throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.imagestream.openConsole')
-    static async openImageStream(context: { name: string}): Promise<unknown> {
-        let url = '';
+    static async openImageStream(context: { name: string}): Promise<void> {
         if (!context) {
             void vscode.window.showErrorMessage('Cannot load the image stream');
             return;
         }
         const project = Console.getCurrentProject();
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl.stdout) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/ns/${project}/imagestreams/${context.name}`;
-        } else {
-            url = `${consoleUrl}/console/project/${project}/browse/images/${context.name}`;
+        const consoleInfo = await Oc.Instance.getConsoleInfo();
+        let url = '';
+        switch (consoleInfo.kind) {
+            case ClusterType.Kubernetes: {
+                url = `${consoleInfo.url}/project/${project}/browse/images/${context.name}`;
+                break;
+            }
+            case ClusterType.OpenShift: {
+                url = `${consoleInfo.url}/k8s/ns/${project}/imagestreams/${context.name}`;
+                break;
+            }
+            default:
+                throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.project.openConsole')
-    static async openProject(context: { name: string}): Promise<unknown> {
-        let url = '';
+    static async openProject(context: { name: string}): Promise<void> {
         if (!context) {
             void vscode.window.showErrorMessage('Cannot load the Project');
             return;
         }
         const project = Console.getCurrentProject();
-        const consoleUrl = await Console.fetchOpenshiftConsoleUrl();
-        if (consoleUrl.stdout) {
-            url = `${Console.openShift4ClusterUrl(consoleUrl)}/k8s/cluster/projects/${project}`;
-        } else {
-            url = `${consoleUrl}/console/project/${project}/overview`;
+        const consoleInfo = await Oc.Instance.getConsoleInfo();
+        let url = '';
+        switch (consoleInfo.kind) {
+            case ClusterType.Kubernetes: {
+                url = `${consoleInfo.url}/project/${project}/overview`;
+                break;
+            }
+            case ClusterType.OpenShift: {
+                url = `${consoleInfo.url}/k8s/cluster/projects/${project}`;
+                break;
+            }
+            default:
+                throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
     }
 }
