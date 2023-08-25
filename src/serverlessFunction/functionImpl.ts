@@ -96,13 +96,13 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         if (folders.length > 0) {
             for (const folderUri of folders) {
                 const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-                const commanFunction: DeployedFunction = this.getCommanFunction(funcData, deployedFunctions);
+                const deployFunction: DeployedFunction = this.getDeployFunction(funcData, deployedFunctions);
                 const functionNode: FunctionObject = {
                     name: funcData.name,
                     runtime: funcData.runtime,
                     folderURI: folderUri,
-                    context: commanFunction.status,
-                    url: commanFunction.url,
+                    context: deployFunction.status,
+                    url: deployFunction.url,
                     hasImage: await this.checkImage(folderUri),
                     isRunning: Functions.getInstance().checkRunning(folderUri.fsPath)
                 }
@@ -127,7 +127,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return functionList;
     }
 
-    getCommanFunction(funcData: FunctionContent, deployedFunctions: FunctionObject[]): DeployedFunction {
+    getDeployFunction(funcData: FunctionContent, deployedFunctions: FunctionObject[]): DeployedFunction {
         if (deployedFunctions.length > 0) {
             const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
             if (func) {

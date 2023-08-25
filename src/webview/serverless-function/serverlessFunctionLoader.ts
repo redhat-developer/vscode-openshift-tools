@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 import { CliExitData } from '../../cli';
 import { Functions } from '../../serverlessFunction/functions';
 import { serverlessInstance } from '../../serverlessFunction/functionImpl';
@@ -132,7 +132,7 @@ export default class ServerlessFunctionViewLoader {
         } else {
             if (invoke) {
                 const panel = await this.createView(title);
-                const getEnvFuncId = uuidv4();
+                const getEnvFuncId = crypto.randomUUID();
                 ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
                 void panel.webview.postMessage({
                     action: 'invoke',
