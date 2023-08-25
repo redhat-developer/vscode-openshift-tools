@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { parse } from 'yaml';
 import { CommandText, CommandOption } from '../base/command';
-import { ClusterVersion, FunctionContent } from './types';
+import { ClusterVersion, FunctionContent, InvokeFunction } from './types';
 
 export class Utils {
     static async getFuncYamlContent(dir: string): Promise<FunctionContent> {
@@ -23,6 +23,42 @@ export class Utils {
 }
 
 export class ServerlessCommand {
+
+    static invokeFunction(invokeFunData: InvokeFunction): CommandText {
+        const commandText = new CommandText('func', 'invoke', [
+            new CommandOption('-v')
+        ]);
+        if (invokeFunData.id.length > 0) {
+            commandText.addOption(new CommandOption('--id', invokeFunData.id));
+        }
+        if (invokeFunData.path.length > 0) {
+            commandText.addOption(new CommandOption('-p', invokeFunData.path));
+        }
+        if (invokeFunData.contentType.length > 0) {
+            commandText.addOption(new CommandOption('--content-type', invokeFunData.contentType));
+        }
+        if (invokeFunData.format.length > 0) {
+            commandText.addOption(new CommandOption('-f', invokeFunData.format));
+        }
+        if (invokeFunData.source.length > 0) {
+            commandText.addOption(new CommandOption('--source', invokeFunData.source));
+        }
+        if (invokeFunData.type.length > 0) {
+            commandText.addOption(new CommandOption('--type', invokeFunData.type));
+        }
+        if (invokeFunData.data.length > 0) {
+            commandText.addOption(new CommandOption('--data', invokeFunData.data));
+        }
+        if (invokeFunData.file.length > 0) {
+            commandText.addOption(new CommandOption('--file', invokeFunData.file));
+        }
+        if (invokeFunData.enableURL && invokeFunData.invokeURL.length > 0) {
+            commandText.addOption(new CommandOption('-t', invokeFunData.invokeURL));
+        } else {
+            commandText.addOption(new CommandOption('-t', invokeFunData.instance));
+        }
+        return commandText
+    }
 
     static createFunction(language: string, template: string, location: string): CommandText {
         return new CommandText(`func create ${location}`, undefined, [
@@ -60,7 +96,7 @@ export class ServerlessCommand {
             new CommandOption('-i', image),
             new CommandOption('-v')
         ]);
-        if (namespace){
+        if (namespace) {
             commandText.addOption(new CommandOption('-n', namespace))
         }
         if (clusterVersion) {

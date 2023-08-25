@@ -88,6 +88,7 @@ button {
 
 .MuiTypography-root {
     font-family: var(--vscode-font-family) !important;
+    color: var(--vscode-settings-textInputForeground) !important;
 }
 
 .MuiFormHelperText-root {
@@ -160,7 +161,7 @@ button {
 }
 
 .Mui-disabled {
-    -webkit-text-fill-color: var(--vscode-settings-textInputForeground) !important;
+    -webkit-text-fill-color: var(--vscode-titleBar-inactiveForeground) !important;
 }
 
 .Mui-active {

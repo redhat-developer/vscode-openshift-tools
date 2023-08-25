@@ -2,19 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ChildProcess } from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as crypto from 'crypto';
 import { CliExitData } from '../../cli';
-import { BuildAndDeploy } from '../../serverlessFunction/build-run-deploy';
+import { Functions } from '../../serverlessFunction/functions';
 import { serverlessInstance } from '../../serverlessFunction/functionImpl';
 import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { validateName } from '../common/utils';
-
-let panel: vscode.WebviewPanel
+import { InvokeFunction } from '../../serverlessFunction/types';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
@@ -23,13 +22,13 @@ export interface ServiceBindingFormResponse {
 
 async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
     let response: CliExitData;
-    const eventName =   event.action;
+    const eventName = event.action;
     const functionName = event.name;
     const functionPath: vscode.Uri = event.folderPath ? vscode.Uri.from(event.folderPath) : undefined;
     switch (eventName) {
         case 'validateName':
             const flag = validateName(functionName);
-            const defaultImages = !flag ? BuildAndDeploy.getInstance().getDefaultImages(functionName) : [];
+            const defaultImages = !flag ? Functions.getInstance().getDefaultImages(functionName) : [];
             panel?.webview.postMessage({
                 action: eventName,
                 error: !flag ? false : true,
@@ -37,6 +36,21 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 name: functionName,
                 images: defaultImages
             });
+            break;
+        case 'selectFile':
+            const options: vscode.OpenDialogOptions = {
+                canSelectMany: false,
+                openLabel: 'Select',
+                canSelectFiles: true,
+                canSelectFolders: false
+            };
+            const file = await vscode.window.showOpenDialog(options);
+            if (file && file[0]) {
+                panel?.webview.postMessage({
+                    action: eventName,
+                    filePath: file[0].fsPath
+                });
+            }
             break;
         case 'selectFolder':
             const workspaceFolderItems = event.noWSFolder ? await selectWorkspaceFolder(true, 'Select Function Folder', functionName) : selectWorkspaceFolders();
@@ -65,6 +79,23 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
                 await vscode.commands.executeCommand('openshift.Serverless.refresh');
             }
             break;
+        case 'invokeFunction':
+            const invokeFunData: InvokeFunction = {
+                instance: event.instance,
+                id: event.id,
+                path: event.path,
+                contentType: event.contentType,
+                format: event.format,
+                source: event.source,
+                type: event.type,
+                data: event.data,
+                file: event.file,
+                enableURL: event.enableURL,
+                invokeURL: event.invokeURL
+            }
+            await Functions.getInstance().invoke(functionName, invokeFunData);
+            panel.dispose();
+            break;
         default:
             break;
     }
@@ -72,7 +103,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
 
 export default class ServerlessFunctionViewLoader {
 
-    public static processMap: Map<string, ChildProcess> = new Map();
+    public static invokePanelMap: Map<string, vscode.WebviewPanel> = new Map<string, vscode.WebviewPanel>();
 
     private static get extensionPath(): string {
         return vscode.extensions.getExtension(ExtensionID).extensionPath;
@@ -88,13 +119,33 @@ export default class ServerlessFunctionViewLoader {
      * @return the webview as a promise
      */
     static async loadView(
-        title: string
+        title: string,
+        invoke = false,
+        status?: string,
+        folderURI?: vscode.Uri,
+        url?: string
     ): Promise<vscode.WebviewPanel | null> {
-        if (panel) {
+        if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
+            const panel = ServerlessFunctionViewLoader.invokePanelMap.get(title);
             panel.reveal(vscode.ViewColumn.One);
             return null;
         } else {
-            return this.createView(title);
+            if (invoke) {
+                const panel = await this.createView(title);
+                const getEnvFuncId = crypto.randomUUID();
+                ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
+                void panel.webview.postMessage({
+                    action: 'invoke',
+                    instance: status,
+                    name: title.substring(0, title.indexOf('-')).trim(),
+                    id: getEnvFuncId,
+                    uri: folderURI,
+                    url: url
+                });
+                return panel;
+            } else if (!invoke) {
+                return await this.createView(title);
+            }
         }
     }
 
@@ -127,9 +178,12 @@ export default class ServerlessFunctionViewLoader {
         panel.webview.onDidReceiveMessage((e) => gitImportMessageListener(panel, e));
 
         panel.onDidDispose(() => {
-
+            if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
+                ServerlessFunctionViewLoader.invokePanelMap.delete(title);
+            }
             panel = undefined;
         });
+
         return Promise.resolve(panel);
     }
 }
