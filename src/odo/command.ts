@@ -311,4 +311,8 @@ export class Command {
             undefined,
             [new CommandOption('-o json')]);
     }
+
+    static runComponentCommand(commandId : string): CommandText {
+        return new CommandText('odo run', commandId);
+    }
 }

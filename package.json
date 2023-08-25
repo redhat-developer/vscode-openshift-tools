@@ -496,6 +496,12 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.commands.command.run",
+				"title": "Run Command",
+				"category": "OpenShift",
+				"icon": "$(notebook-execute)"
+			},
+			{
 				"command": "openshift.open.developerConsole",
 				"title": "Open Console Dashboard",
 				"category": "OpenShift"
@@ -859,6 +865,11 @@
 				"command": "openshift.Serverless.removeGit",
 				"title": "Git",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.invoke",
+				"title": "Invoke",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -875,13 +886,13 @@
 		],
 		"submenus": [
 			{
-			  "id": "serverlessfunction/addConfig",
-			  "label": "Add"
+				"id": "serverlessfunction/addConfig",
+				"label": "Add"
 			},
 			{
 				"id": "serverlessfunction/removeConfig",
 				"label": "Remove"
-			  }
+			}
 		],
 		"viewsContainers": {
 			"activitybar": [
@@ -995,6 +1006,10 @@
 				{
 					"command": "openshift.component.followLog",
 					"when": "view == openshiftProjectExplorer"
+				},
+				{
+					"command": "openshift.component.commands.command.run",
+					"when": "view == openshiftComponentsView"
 				},
 				{
 					"command": "openshift.open.developerConsole",
@@ -1190,6 +1205,10 @@
 				},
 				{
 					"command": "openshift.Serverless.stopRun",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.invoke",
 					"when": "false"
 				},
 				{
@@ -1613,8 +1632,12 @@
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/"
 				},
 				{
+					"command": "openshift.Serverless.invoke",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions|running)$/"
+				},
+				{
 					"command": "openshift.Serverless.deploy",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions|deployFunctions)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
 				},
 				{
 					"command": "openshift.Serverless.undeploy",
@@ -1633,6 +1656,11 @@
 					"submenu": "serverlessfunction/removeConfig",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@2"
+				},
+				{
+					"command": "openshift.component.commands.command.run",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\-component-command.*\\.dev-run.*/",
+					"group": "inline"
 				}
 			]
 		},
@@ -1762,14 +1790,23 @@
 							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/run.gif",
 							"altText": "Run function"
 						}
-					  },
-					  {
+					},
+					{
 						"id": "deployFunction",
 						"title": "Deploy the Function",
 						"description": "Deploys a function to the currently configured Knative-enabled cluster from your IDE.\nOnly a function which has the source code opened in the IDE can be pushed. Right-click on the function you want to deploy (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Deploy\". The Output Channel will show up with the deploy command where you can see the logs.",
 						"media": {
-						  "image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/deploy.gif",
-						  "altText": "Deploy function"
+							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/deploy.gif",
+							"altText": "Deploy function"
+						}
+					},
+					{
+						"id": "invokeFunction",
+						"title": "Invoke a Function",
+						"description": "Invokes the function by sending a test request to the currently running function instance, either locally or remote.\nOnly a function which has the source code opened in the IDE can be invoked. Right-click on the function you want to invoke (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Invoke\". Provide all necessary details and click on Invoke. \nNote: The function need to be run before invoke it.",
+						"media": {
+							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/invoke.gif",
+							"altText": "Invoke function"
 						}
 					}
 				]

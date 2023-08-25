@@ -6,10 +6,10 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { Uri, window, workspace } from 'vscode';
-import { FunctionContent, FunctionObject, FunctionStatus } from './types';
+import { DeployedFunction, FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessCommand, Utils } from './commands';
 import { OdoImpl } from '../odo';
-import { BuildAndDeploy } from './build-run-deploy';
+import { Functions } from './functions';
 import { stringify } from 'yaml';
 import { CliChannel, CliExitData } from '../cli';
 import * as cp from 'child_process';
@@ -37,8 +37,8 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
     private async getListItems(command: CommandText, fail = false) {
         const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
         try {
-             return JSON.parse(listCliExitData.stdout) as FunctionObject[];
-        } catch(err) {
+            return JSON.parse(listCliExitData.stdout) as FunctionObject[];
+        } catch (err) {
             return [];
         }
     }
@@ -96,14 +96,15 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         if (folders.length > 0) {
             for (const folderUri of folders) {
                 const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-                const funcStatus = this.getFunctionStatus(funcData, deployedFunctions);
+                const deployFunction: DeployedFunction = this.getDeployFunction(funcData, deployedFunctions);
                 const functionNode: FunctionObject = {
                     name: funcData.name,
                     runtime: funcData.runtime,
                     folderURI: folderUri,
-                    context: funcStatus,
+                    context: deployFunction.status,
+                    url: deployFunction.url,
                     hasImage: await this.checkImage(folderUri),
-                    isRunning: BuildAndDeploy.getInstance().checkRunning(folderUri.fsPath)
+                    isRunning: Functions.getInstance().checkRunning(folderUri.fsPath)
                 }
                 functionList.push(functionNode);
                 fs.watchFile(path.join(folderUri.fsPath, 'func.yaml'), (_eventName, _filename) => {
@@ -126,19 +127,19 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return functionList;
     }
 
-    getFunctionStatus(funcData: FunctionContent, deployedFunctions: FunctionObject[]): FunctionStatus {
+    getDeployFunction(funcData: FunctionContent, deployedFunctions: FunctionObject[]): DeployedFunction {
         if (deployedFunctions.length > 0) {
             const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
             if (func) {
-                return FunctionStatus.CLUSTERLOCALBOTH;
+                return {status: FunctionStatus.CLUSTERLOCALBOTH, url: func.url} as DeployedFunction
             }
         }
-        return FunctionStatus.LOCALONLY;
+        return {status: FunctionStatus.LOCALONLY, url: ''} as DeployedFunction
     }
 
     async checkImage(folderUri: Uri): Promise<boolean> {
         const yamlContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-        return BuildAndDeploy.imageRegex.test(yamlContent?.image);
+        return Functions.imageRegex.test(yamlContent?.image);
     }
 }
 

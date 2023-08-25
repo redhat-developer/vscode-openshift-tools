@@ -65,11 +65,25 @@ along with the tradeoffs in using them:
     - Requires a functioning `docker` or `podman` installation
     - Not OpenShift, so it can't be used to test OpenShift-specific features
     - Some features require additional commands to set up eg. [dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
-
-Here are some Kubernetes clusters that currently don't work well with VS Code OpenShift Toolkit
-(see [this issue on odo](https://github.com/redhat-developer/odo/issues/7032)):
-- MicroShift (or crc MicroShift)
-- k3s
+- **[OpenShift Local with MicroShift](https://crc.dev/crc/getting_started/getting_started/configuring/#_changing_the_selected_preset)**
+  - Pros:
+    - More lightweight than regular OpenShift Local
+    - [Some of the OpenShift features are present](https://github.com/openshift/microshift/blob/main/docs/contributor/enabled_apis.md)
+      (although Routes don't appear to work as expected)
+    - No username/password system
+  - Cons:
+    - You can't create pods in the default namespace
+    - Many OpenShift-specific features are not present in order to reduce the memory and CPU usage,
+      so it can't be used to test OpenShift-specific features
+- **[k3s](https://k3s.io/)**
+  - Pros:
+    - Much more lightweight than OpenShift Local
+    - No username/password system
+  - Cons:
+    - You can't create pods in the default namespace
+    - It doesn't set your kube context to point to the cluster,
+      you must set it up yourself by copying the one it creates in a separate kube config
+    - Not OpenShift, so it can't be used to test OpenShift-specific features
 
 ## Run and debug the extension locally
 

@@ -27,7 +27,7 @@ import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { ServerlessFunction, serverlessInstance } from './functionImpl';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
-import { BuildAndDeploy } from './build-run-deploy';
+import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
 import ManageRepositoryViewLoader from '../webview/manage-repository/manageRepositoryLoader';
 
@@ -119,7 +119,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     getContext(functionObj: FunctionObject): string {
         if (functionObj.hadBuilt || functionObj.hasImage) {
-            if (BuildAndDeploy.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
+            if (Functions.getInstance().checkRunning(functionObj.folderURI.fsPath)) {
                 return FunctionContextType.RUNNING;
             } else if (functionObj.context === FunctionStatus.CLUSTERLOCALBOTH) {
                 return FunctionContextType.LOCALDEPLOYFUNCTION
@@ -211,37 +211,42 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.refresh')
     static refresh(target?: ExplorerItem) {
-    ServerlessFunctionView.getInstance().refresh(target);
+        ServerlessFunctionView.getInstance().refresh(target);
     }
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().buildFunction(context);
+        await Functions.getInstance().build(context);
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')
     static buildAndRunFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().runFunction(context, true);
+        Functions.getInstance().run(context, true);
     }
 
     @vsCommand('openshift.Serverless.run')
     static runFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().runFunction(context);
+        Functions.getInstance().run(context);
     }
 
     @vsCommand('openshift.Serverless.stopRun')
     static stopRunFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().stopFunction(context);
+        Functions.getInstance().stop(context);
     }
 
     @vsCommand('openshift.Serverless.deploy')
     static deployFunction(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().deployFunction(context);
+        void Functions.getInstance().deploy(context);
     }
 
     @vsCommand('openshift.Serverless.undeploy')
     static undeployFunction(context: FunctionObject) {
-        BuildAndDeploy.getInstance().undeployFunction(context);
+        Functions.getInstance().undeploy(context);
+    }
+
+    @vsCommand('openshift.Serverless.invoke')
+    static async invokeFunction(context: FunctionObject) {
+        await ServerlessFunctionViewLoader.loadView(`${context.name} - Invoke`, true, context.context, context.folderURI, context.url);
     }
 
     @vsCommand('openshift.Serverless.openFunction')
@@ -264,41 +269,41 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.addEnv')
     static async addEnv(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add environment variables '${context.name}'`, context, 'envs');
+        await Functions.getInstance().config(`Add environment variables '${context.name}'`, context, 'envs');
     }
 
     @vsCommand('openshift.Serverless.addLabel')
     static async addLabel(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Labels '${context.name}'`, context, 'labels');
+        await Functions.getInstance().config(`Add Labels '${context.name}'`, context, 'labels');
     }
 
     @vsCommand('openshift.Serverless.addVolume')
     static async addVolume(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
+        await Functions.getInstance().config(`Add Volumes '${context.name}'`, context, 'volumes');
     }
 
     @vsCommand('openshift.Serverless.addGit')
     static async addGit(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Add Git '${context.name}'`, context, 'git');
+        await Functions.getInstance().config(`Add Git '${context.name}'`, context, 'git');
     }
 
     @vsCommand('openshift.Serverless.removeEnv')
     static removeEnv(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
+        void Functions.getInstance().config(`Remove environment variables '${context.name}'`, context, 'envs', false);
     }
 
     @vsCommand('openshift.Serverless.removeLabel')
     static removeLabel(context: FunctionObject) {
-        void BuildAndDeploy.getInstance().config(`Remove Labels '${context.name}'`, context, 'labels', false);
+        void Functions.getInstance().config(`Remove Labels '${context.name}'`, context, 'labels', false);
     }
 
     @vsCommand('openshift.Serverless.removeVolume')
     static async removeVolume(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
+        await Functions.getInstance().config(`Remove Volumes '${context.name}'`, context, 'volumes', false);
     }
 
     @vsCommand('openshift.Serverless.removeGit')
     static async removeGit(context: FunctionObject) {
-        await BuildAndDeploy.getInstance().config(`Remove Git '${context.name}'`, context, 'git', false);
+        await Functions.getInstance().config(`Remove Git '${context.name}'`, context, 'git', false);
     }
 }
