@@ -6,16 +6,10 @@
 import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { CommandOption, CommandText } from '../base/command';
+import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
-
-export const Command = {
-    getResourceList(name: string) {
-        return new CommandText('oc', `get ${name}`, [ new CommandOption('-o', 'json')]);
-    }
-}
 
 function convertItemToQuickPick(item: any): QuickPickItem {
     const qp = item;
@@ -47,33 +41,4 @@ export async function getChildrenNode(command: CommandText, kind: string, abbrev
         return builds;
     }
     return [];
-}
-
-export async function asJson<T>(command: string): Promise<T> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const result = await kubectl.api.invokeCommand(`${command} -o json`);
-        return JSON.parse(result.stdout) as T;
-    }
-    return;
-}
-
-export async function execKubectl(command: string) {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const result = await kubectl.api.invokeCommand(`${command}`);
-        return result;
-    }
-    throw new Error('Cannot find kubectl command.');
-}
-
-export function loadItems<I>(json: string, fetch: (data) => I[] = (data): I[] => data.items): I[] {
-    let data: I[] = [];
-    try {
-        const items = fetch(JSON.parse(json));
-        if (items) data = items;
-    } catch (ignore) {
-        // ignore parse errors and return empty array
-    }
-    return data;
 }

@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { EventEmitter, workspace, WorkspaceFolder } from 'vscode';
-import * as odo3 from '../odo3';
 import { ComponentDescription } from './componentTypeDescription';
+import { Odo } from './odoWrapper';
 
 export interface ComponentWorkspaceFolder {
     contextPath: string;
@@ -19,7 +19,7 @@ export interface ComponentsChangeEvent {
 
 async function mapFoldersToComponents(folders: readonly WorkspaceFolder[]): Promise<ComponentWorkspaceFolder[]> {
     const descriptions = folders.map(
-        (folder) => odo3.newInstance().describeComponent(folder.uri.fsPath)
+        (folder) => Odo.Instance.describeComponent(folder.uri.fsPath)
             .then((component: ComponentDescription) => {
                 return {
                     contextPath: folder.uri.fsPath,

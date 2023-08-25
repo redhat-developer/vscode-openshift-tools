@@ -7,16 +7,16 @@ import { expect } from 'chai';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import * as Helm from '../../src/helm/helm';
-import { getInstance } from '../../src/odo';
-import { Command } from '../../src/odo/command';
+import { Oc } from '../../src/oc/ocWrapper';
+import { Odo } from '../../src/odo/odoWrapper';
 
 suite('helm integration', function () {
-    const isOpenShift = process.env.IS_OPENSHIFT || false;
+    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
-    const odo = getInstance();
+    const odo = Odo.Instance;
 
     const RELEASE_NAME = 'my-helm-release';
     const CHART_NAME = 'fredco-samplechart';
@@ -25,7 +25,7 @@ suite('helm integration', function () {
 
     suiteSetup(async function () {
         if (isOpenShift) {
-            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
         }
         try {
             await odo.deleteProject(HELM_NAMESPACE);
@@ -44,7 +44,7 @@ suite('helm integration', function () {
         // this call fails to exit on minikube/kind
         void odo.deleteProject(HELM_NAMESPACE);
         if (isOpenShift) {
-            await odo.execute(Command.odoLogout());
+            await Oc.Instance.logout();
         }
     });
 

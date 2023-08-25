@@ -7,11 +7,12 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { window } from 'vscode';
-import { Oc } from '../../src/oc';
-import { getInstance } from '../../src/odo';
+import { Oc } from '../../src/oc/ocWrapper';
+import { Odo } from '../../src/odo/odoWrapper';
 import { Project } from '../../src/odo/project';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
+import { YamlFileCommands } from '../../src/yamlFileCommands';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -44,11 +45,11 @@ suite('Oc', function() {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');
-        getActiveProjectStub = sandbox.stub(getInstance(), 'getActiveProject').resolves('my-project');
+        getActiveProjectStub = sandbox.stub(Odo.Instance, 'getActiveProject').resolves('my-project');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
-        sandbox.stub(getInstance(), 'getActiveCluster').resolves('cluster');
-        sandbox.stub(getInstance(), 'getProjects').resolves([projectItem]);
-        sandbox.stub(getInstance(), 'canCreatePod').resolves(true);
+        sandbox.stub(Odo.Instance, 'getActiveCluster').resolves('cluster');
+        sandbox.stub(Odo.Instance, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Oc.Instance, 'canCreatePod').resolves(true);
     });
 
     teardown(function() {
@@ -56,7 +57,7 @@ suite('Oc', function() {
     });
 
     test('show warning message if file is not json or yaml', async function() {
-        await Oc.create();
+        await YamlFileCommands.create();
         expect(warnStub).is.calledOnce;
     });
 
@@ -68,18 +69,7 @@ suite('Oc', function() {
             },
         });
         detectOrDownloadStub.onFirstCall().resolves(undefined);
-        await Oc.create();
-        expect(warnStub).is.calledOnce;
-    });
-
-    test('show warning message if oc command not found', async function() {
-        sandbox.stub(window, 'activeTextEditor').value({
-            document: {
-                fileName: 'manifests.yaml',
-            },
-        });
-        detectOrDownloadStub.onFirstCall().resolves(undefined);
-        await Oc.create();
+        await YamlFileCommands.create();
         expect(warnStub).is.calledOnce;
     });
 
@@ -97,7 +87,7 @@ suite('Oc', function() {
                 save: sinon.stub().returns(true)
             },
         });
-        const result = await Oc.create();
+        const result = await YamlFileCommands.create();
         expect(result).equals('Resources were successfully created.');
     });
 
@@ -109,7 +99,7 @@ suite('Oc', function() {
                 isDirty: true,
             },
         });
-        await Oc.create();
+        await YamlFileCommands.create();
         expect(warnStub).is.calledOnce;
         expect(infoMsg).is.calledOnce;
     });
@@ -121,7 +111,7 @@ suite('Oc', function() {
             stdout: 'imagestream.image.openshift.io/spring-petclinic created\ndeploymentconfig.apps.openshift.io/spring-petclinic created'
         });
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        const result = await Oc.create();
+        const result = await YamlFileCommands.create();
         expect(result).equals('Resources were successfully created.');
     });
 
@@ -130,7 +120,7 @@ suite('Oc', function() {
         execStub.rejects('error');
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
         try {
-            await Oc.create();
+            await YamlFileCommands.create();
         } catch (err) {
             savedErr = err;
         }
@@ -141,7 +131,7 @@ suite('Oc', function() {
         getActiveProjectStub.resetBehavior();
         getActiveProjectStub.resolves(undefined);
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        expect(await Oc.create()).null;
+        expect(await YamlFileCommands.create()).null;
     });
 
 });

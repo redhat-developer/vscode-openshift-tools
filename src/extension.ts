@@ -79,7 +79,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             './openshift/project',
             './openshift/cluster',
             './k8s/console',
-            './oc',
+            './yamlFileCommands',
             './registriesView',
             './componentsView',
             './webview/devfile-registry/registryViewLoader',

@@ -5,8 +5,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { OdoImpl } from '../../odo';
 import { Registry } from '../../odo/componentType';
+import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
@@ -51,7 +51,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             const componentFolder = path.join(projectFolder, componentName);
             try {
                 await fs.mkdir(componentFolder);
-                await OdoImpl.Instance.createComponentFromTemplateProject(
+                await Odo.Instance.createComponentFromTemplateProject(
                     componentFolder,
                     componentName,
                     portNumber,
