@@ -48,6 +48,9 @@ export class ManageRepository {
             void vscode.window.showErrorMessage(result.error.message);
             return false;
         }
+        await sendTelemetry('openshift.managerepo.rename.success', {
+            message: `Repo ${newName} renamed successfully`
+        });
         return true;
     }
 
@@ -83,12 +86,12 @@ export class ManageRepository {
             await sendTelemetry('openshift.managerepo.list.error', {
                 error: result.error.message
             });
-            await sendTelemetry('openshift.managerepo.list.success', {
-                repos: result.stdout.split('\n')
-            });
             void vscode.window.showErrorMessage(result.error.message);
             return [];
         }
+        await sendTelemetry('openshift.managerepo.list.success', {
+            repos: result.stdout.split('\n')
+        });
         return result.stdout.split('\n');
     }
 }
