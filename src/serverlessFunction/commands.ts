@@ -117,19 +117,12 @@ export class ServerlessCommand {
     }
 
     static config(functionPath: string, mode: string, isAdd: boolean): CommandText {
+        const option = isAdd ? mode === 'git' ? 'set' : 'add' : 'remove';
         const commandText = new CommandText('func', 'config', [
             new CommandOption(mode),
+            new CommandOption(option),
             new CommandOption('-p', functionPath)
         ]);
-        if (isAdd) {
-            if (mode === 'git') {
-                commandText.addOption(new CommandOption('set'));
-            } else {
-                commandText.addOption(new CommandOption('add'));
-            }
-        } else {
-            commandText.addOption(new CommandOption('remove'));
-        }
         return commandText;
     }
 
