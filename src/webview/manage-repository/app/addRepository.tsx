@@ -109,7 +109,7 @@ export class AddRepository extends React.Component<DefaultProps, {
                         error={input.error}
                         onChange={(e) => this.validateName(e.target.value)}
                         id='git-name'
-                        placeholder='Provide name for the repository'
+                        placeholder='Provide repository name'
                         sx={{
                             input: {
                                 color: 'var(--vscode-settings-textInputForeground)',
