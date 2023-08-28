@@ -151,6 +151,18 @@ button {
     color: var(--vscode-settings-textInputForeground) !important;
 }
 
+.successicon {
+    color: #198754 !important;
+}
+
+.erroricon {
+    color: #ff3333 !important;
+}
+
+.disabledicon {
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
 .MuiCircularProgress-svg {
     color: #EE0000 !important;
 }
@@ -181,5 +193,14 @@ li:hover {
     border-radius: 1rem !important;
     margin: auto !important;
     background-color: #101418 !important;
+    color: var(--vscode-settings-textInputForeground) !important
+}
+
+.MuiTableCell-body {
+    color: var(--vscode-settings-textInputForeground) !important
+}
+
+.MuiTablePagination-toolbar {
+    background-color: var(--vscode-button-secondaryHoverBackground) !important;
     color: var(--vscode-settings-textInputForeground) !important
 }

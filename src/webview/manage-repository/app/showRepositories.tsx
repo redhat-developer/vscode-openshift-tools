@@ -4,13 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import { Cancel, Delete, Done, Edit } from '@mui/icons-material';
+import { Add, Cancel, Delete, Done, Edit } from '@mui/icons-material';
 import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
-import { Box, Typography, Stack, Button, Grid, Dialog, DialogActions, DialogContent, TextField } from '@mui/material';
+import { Typography, Stack, Button, Dialog, DialogActions, DialogContent, TextField, TableCell, TableRow, Table, TableContainer, TableHead, styled, tableCellClasses, TableBody, Box, TablePagination, IconButton, Container, CircularProgress, Tooltip } from '@mui/material';
+import { AddRepository } from './addRepository';
 
 export class ShowRepositories extends React.Component<DefaultProps, {
     repositories: string[],
+    openAddDialog: boolean,
     openEditDialog: boolean,
     openDeleteDialog: boolean,
     openedRepo: string,
@@ -18,12 +20,15 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         name: string,
         error: boolean,
         helpText: string
-    }
+    },
+    page: number,
+    rowsPerPage: number
 }> {
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
             repositories: [],
+            openAddDialog: false,
             openEditDialog: false,
             openDeleteDialog: false,
             openedRepo: '',
@@ -31,7 +36,9 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                 name: '',
                 error: false,
                 helpText: ''
-            }
+            },
+            page: 0,
+            rowsPerPage: 10
         }
     }
 
@@ -49,21 +56,34 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                         helpText: message.data.helpText
                     }
                 })
+            } else if (message.data.action === 'addRepo' && message.data.status) {
+                this.setState({
+                    openAddDialog: false
+                });
+                VSCodeMessage.postMessage({
+                    action: `getRepositoryList`
+                });
             }
         });
     }
 
     handleDialog = (repoName: string, isEdit = true): void => {
-        this.setState({
-            openedRepo: repoName,
-            newRepoInput: {
-                name: repoName,
-                error: false,
-                helpText: ''
-            },
-            openDeleteDialog: isEdit ? false : !this.state.openDeleteDialog,
-            openEditDialog: isEdit ? !this.state.openEditDialog : false
-        });
+        if (!repoName) {
+            this.setState({
+                openAddDialog: !this.state.openAddDialog
+            })
+        } else {
+            this.setState({
+                openedRepo: repoName,
+                newRepoInput: {
+                    name: repoName,
+                    error: false,
+                    helpText: ''
+                },
+                openDeleteDialog: isEdit ? false : !this.state.openDeleteDialog,
+                openEditDialog: isEdit ? !this.state.openEditDialog : false
+            });
+        }
     }
 
     delete = (repo: string): void => {
@@ -76,6 +96,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
 
     CloseDialog = (): void => {
         this.setState({
+            openAddDialog: false,
             openEditDialog: false,
             openDeleteDialog: false,
             openedRepo: '',
@@ -119,64 +140,142 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         });
     }
 
+    StyledTableCell = styled(TableCell)(({ theme }) => ({
+        [`&.${tableCellClasses.head}`]: {
+            backgroundColor: 'var(--vscode-button-background)',
+            color: 'var(--vscode-settings-textInputForeground)',
+        },
+        [`&.${tableCellClasses.body}`]: {
+            fontSize: 14,
+        },
+    }));
+
+    StyledTableRow = styled(TableRow)(({ }) => ({
+        '&:nth-of-type(odd)': {
+            backgroundColor: 'var(--vscode-button-secondaryBackground)'
+        },
+
+        '&:nth-of-type(even)': {
+            backgroundColor: 'var(--vscode-button-secondaryHoverBackground)'
+        }
+    }));
+
+    handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            page: 0,
+            rowsPerPage: parseInt(event.target.value, 10)
+        });
+    };
+
+    handleChangePage = (_event: unknown, newPage: number) => {
+        this.setState({
+            page: newPage
+        });
+    };
+
     render(): React.ReactNode {
-        const { newRepoInput, openedRepo, openDeleteDialog, openEditDialog, repositories } = this.state;
+        const { newRepoInput, openedRepo, openAddDialog, openDeleteDialog, openEditDialog, page, repositories, rowsPerPage } = this.state;
         return (
-            <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                {
-                    repositories.map((repoName: string, index: number) => (
-                        <Grid item xs={2} sm={4} md={4} key={index}>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    maxWidth: '13em',
-                                    alignItems: 'center',
-                                    borderRadius: '2px',
-                                    borderStyle: 'solid',
-                                    BorderColor: '#99CCF3'
-                                }}
-                            >
-                                <Stack
-                                    direction='column'
-                                    spacing={1}
-                                    margin={1}
-                                    sx={{ flexShrink: '3', minWidth: '0', maxWidth: '35rem' }}>
-                                    <Stack direction='row' spacing={2} alignItems='center'>
-                                        <Typography
-                                            id='devfileName'
-                                            variant='body1'
-                                            sx={{
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                            }}>
-                                            {repoName}
-                                        </Typography>
-                                    </Stack>
-                                    <Stack direction='row' spacing={1}>
-                                        <Button variant='contained'
-                                            startIcon={<Edit />}
-                                            size='small'
-                                            color='success'
-                                            disabled={repoName === 'default'}
-                                            onClick={() => this.handleDialog(repoName)}
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button variant='contained'
-                                            startIcon={<Delete />}
-                                            size='small'
-                                            color='error'
-                                            disabled={repoName === 'default'}
-                                            onClick={() => this.handleDialog(repoName, false)}>
-                                            Delete
-                                        </Button>
-                                    </Stack>
-                                </Stack>
-                            </Box>
-                        </Grid>
-                    ))
-                }
+            <div className='mainContainer margin'>
+                <div className='title'>
+                    <Typography variant='h5'>Manage Repositories</Typography>
+                </div>
+                <div className='subTitle'>
+                    <Typography>Manage template repositories installed on disk at either the default location (~/.config/func/repositories) or the location specified by the --repository flag. Once added, a template from the repository can be used when creating a new function.</Typography>
+                </div>
+                <Container maxWidth='sm' sx={{
+                    border: '1px groove var(--vscode-activityBar-activeBorder)',
+                    borderRadius: '1rem', backgroundColor: '#101418',
+                    color: '#99CCF3'
+                }}>
+                    <Box
+                        display='flex'
+                        flexDirection={'row'}
+                        sx={{ width: '100%', margin: '20px' }}>
+                        <>
+                            {
+                                repositories.length > 0 ?
+                                    <>
+                                        <Box
+                                            display='flex'
+                                            flexDirection={'column'}
+                                            sx={{ width: '70%', margin: 'auto' }}>
+                                            <TableContainer>
+                                                <Table size='small' aria-label='customized table'>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <this.StyledTableCell>Repository Name</this.StyledTableCell>
+                                                            <this.StyledTableCell>Actions</this.StyledTableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {repositories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((repo) => (
+                                                            <this.StyledTableRow key={repo}>
+                                                                <this.StyledTableCell component='th' scope='row'>
+                                                                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', width: '11rem' }}>
+                                                                        <>
+                                                                            {
+                                                                                repo.length > 24 ? <Tooltip title={repo}>
+                                                                                    <Typography variant='body1' noWrap>{repo}</Typography>
+                                                                                </Tooltip> : <Typography variant='body1' noWrap>{repo}</Typography>
+                                                                            }
+                                                                        </>
+                                                                    </div>
+                                                                </this.StyledTableCell>
+                                                                <this.StyledTableCell>
+                                                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                                                                        <Tooltip title='Rename'>
+                                                                            <IconButton
+                                                                                disabled={repo === 'default'}
+                                                                                onClick={() => this.handleDialog(repo)}
+                                                                            >
+                                                                                <Edit className={repo === 'default' ? 'disabledicon' : 'successicon'} />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                        <Tooltip title='Delete'>
+                                                                            <IconButton
+                                                                                disabled={repo === 'default'}
+                                                                                onClick={() => this.handleDialog(repo, false)}
+                                                                            >
+                                                                                <Delete className={repo === 'default' ? 'disabledicon' : 'erroricon'} />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    </Stack>
+                                                                </this.StyledTableCell>
+                                                            </this.StyledTableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                            {
+                                                repositories.length > 10 &&
+                                                <TablePagination
+                                                    rowsPerPageOptions={[10, 20, 30]}
+                                                    component='div'
+                                                    count={repositories.length}
+                                                    rowsPerPage={rowsPerPage}
+                                                    page={page}
+                                                    onPageChange={this.handleChangePage}
+                                                    onRowsPerPageChange={this.handleChangeRowsPerPage} />
+                                            }
+
+                                        </Box>
+                                        <Stack direction='column' sx={{ marginRight: 'auto' }}>
+                                            <Tooltip title='Add Repository'>
+                                                <Button variant='contained'
+                                                    startIcon={<Add />}
+                                                    size='small'
+                                                    style={{ backgroundColor: 'var(--vscode-button-secondaryBackground)' }}
+                                                    onClick={() => this.handleDialog(undefined)}> Add </Button>
+                                            </Tooltip>
+                                        </Stack>
+                                    </>
+                                    :
+                                    <CircularProgress sx={{ margin: 'auto' }} />
+                            }
+                        </>
+                    </Box>
+                </Container>
                 {
                     openedRepo.length > 0 &&
                     <Dialog open={openDeleteDialog} onClose={() => this.CloseDialog()}>
@@ -244,7 +343,12 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                         </DialogActions>
                     </Dialog>
                 }
-            </Grid>
+                <Dialog open={openAddDialog} onClose={() => this.CloseDialog()}>
+                    <DialogContent>
+                        <AddRepository />
+                    </DialogContent>
+                </Dialog>
+            </div>
         )
     }
 }

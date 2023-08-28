@@ -91,10 +91,10 @@ export class AddRepository extends React.Component<DefaultProps, {
     render(): React.ReactNode {
         const { input, repo } = this.state;
         return (
-            <>
+            <Stack direction='column' spacing={2}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <Button variant='contained'
-                        disabled={true}
+                        disabled
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
                         Name *
@@ -120,7 +120,7 @@ export class AddRepository extends React.Component<DefaultProps, {
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                     <Button variant='contained'
-                        disabled={true}
+                        disabled
                         sx={{ width: { xs: 'auto', sm: '200px' } }}
                         className='labelStyle'>
                         Url *
@@ -129,7 +129,6 @@ export class AddRepository extends React.Component<DefaultProps, {
                         type='string'
                         variant='outlined'
                         required
-                        autoFocus
                         fullWidth
                         defaultValue={repo.url}
                         error={repo.error}
@@ -156,7 +155,7 @@ export class AddRepository extends React.Component<DefaultProps, {
                         Add
                     </Button>
                 </Stack>
-            </>
+            </Stack>
         )
     }
 }
