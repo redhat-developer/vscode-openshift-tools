@@ -332,21 +332,25 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 ? 'Selected Devfile'
                                                 : 'Recommended Devfile'}
                                         </Typography>
-                                        {recommendedDevfile.isDevfileExistsInRepo ? (
-                                            <Alert severity="info">
-                                                The Devfile that exists in the repo will be used
-                                            </Alert>
-                                        ) : (
+                                        {!recommendedDevfile.isDevfileExistsInRepo && (
                                             <DevfileRecommendationInfo />
                                         )}
                                     </Stack>
-                                    <DevfileListItem
-                                        devfile={
-                                            selectedDevfile
-                                                ? selectedDevfile
-                                                : recommendedDevfile.devfile
-                                        }
-                                    />
+                                    {recommendedDevfile.isDevfileExistsInRepo ? (
+                                        <Box margin={2}>
+                                            <Alert severity="info">
+                                                The Devfile that exists in the repo will be used
+                                            </Alert>
+                                        </Box>
+                                    ) : (
+                                        <DevfileListItem
+                                            devfile={
+                                                selectedDevfile
+                                                    ? selectedDevfile
+                                                    : recommendedDevfile.devfile
+                                            }
+                                        />
+                                    )}
                                     <Stack
                                         direction="row"
                                         justifyContent="flex-end"
@@ -407,7 +411,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         setCurrentPage('fromGitRepo');
                     }}
                     createComponent={createComponentFromGitRepo}
-                    devfile={selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
+                    devfile={recommendedDevfile.isDevfileExistsInRepo ? undefined : selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
                     initialComponentName={gitURL.url.substring(gitURL.url.lastIndexOf('/') + 1)}
                 />
             );
