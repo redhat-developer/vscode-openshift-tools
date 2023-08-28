@@ -11,6 +11,7 @@ import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import { WebglAddon } from 'xterm-addon-webgl';
 import 'xterm/css/xterm.css';
+import '../../common/scrollbar.scss';
 
 /**
  * Represents a tab in the terminal view. Wraps an instance of xtermjs.
@@ -36,6 +37,8 @@ export const TerminalInstance = (props: {
         newTerm.loadAddon(fitAddon);
         return newTerm;
     });
+
+    let resizeTimeout: NodeJS.Timeout = undefined;
 
     const setXtermjsTheme = (fontFamily: string, fontSize: number) => {
         const computedStyle = window.getComputedStyle(document.body);
@@ -162,7 +165,7 @@ export const TerminalInstance = (props: {
         };
     }, []);
 
-    const handleResize = function (_e: UIEvent) {
+    const performResize = function () {
         const dims = fitAddon.proposeDimensions();
         window.vscodeApi.postMessage({
             kind: 'resize',
@@ -172,6 +175,13 @@ export const TerminalInstance = (props: {
             },
         });
         fitAddon.fit();
+    }
+
+    const handleResize = function (_e: UIEvent) {
+        if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+        }
+        resizeTimeout = setTimeout(performResize, 200);
     };
 
     // resize the terminal when the window is resized
@@ -183,10 +193,10 @@ export const TerminalInstance = (props: {
     }, [fitAddon]);
 
     return (
-        <Box marginY="8px" marginX="16px" width="100%" height="100%">
+        <Box marginY="8px" marginX="16px" width="100%" height="100%" overflow='scroll'>
             <div
                 {...{ name: 'terminal-instance' }}
-                style={{ width: '100%', height: '100%', display: 'flex', flexFlow: 'column' }}
+                style={{ width: '100%', height: '100%', display: 'flex', flexFlow: 'column', overflow: 'hidden' }}
                 ref={termRef}
             ></div>
         </Box>
