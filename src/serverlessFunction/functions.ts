@@ -9,7 +9,7 @@ import validator from 'validator';
 import { ServerlessCommand, Utils } from './commands';
 import { Platform } from '../util/platform';
 import { OdoImpl } from '../odo';
-import { CliChannel } from '../cli';
+import { CliChannel, CliExitData } from '../cli';
 import { ChildProcess, SpawnOptions } from 'child_process';
 import { ServerlessFunctionView } from './view';
 import { multiStep } from './multiStepInput';
@@ -228,6 +228,14 @@ export class Functions {
                 void commands.executeCommand('openshift.Serverless.refresh');
             }
         });
+    }
+
+    public async getTemplates(): Promise<CliExitData> {
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+        if (result.error) {
+            void window.showErrorMessage(result.error.message);
+        }
+        return result;
     }
 
     public async deploy(context: FunctionObject) {

@@ -96,6 +96,8 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             await Functions.getInstance().invoke(functionName, invokeFunData);
             panel.dispose();
             break;
+        case 'getTemplates':
+
         default:
             break;
     }

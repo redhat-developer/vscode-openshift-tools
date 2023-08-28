@@ -60,7 +60,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             showLoadScreen: false
         }
         VSCodeMessage.postMessage({
-            action: 'selectFolder'
+            action: 'getTemplates'
         });
     }
 
@@ -98,6 +98,15 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         wsFolderItems: message.data.wsFolderItems
                     });
                 }
+            } else if (message.data.action === 'getTemplates') {
+                if (message.data.templates?.length > 0) {
+                    this.setState({
+                        templates: message.data.templates
+                    });
+                }
+                VSCodeMessage.postMessage({
+                    action: 'selectFolder'
+                });
             }
         });
     }

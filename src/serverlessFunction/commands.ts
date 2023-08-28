@@ -110,6 +110,12 @@ export class ServerlessCommand {
         return commandText
     }
 
+    static getTemplates(): CommandText {
+        const commandText = new CommandText('func', 'templates');
+        commandText.addOption(new CommandOption('--json'))
+        return commandText
+    }
+
     static getClusterVersion(): CommandText {
         return new CommandText('oc get clusterversion', undefined, [
             new CommandOption('-o', 'josn')
