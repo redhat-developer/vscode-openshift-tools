@@ -134,7 +134,8 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
         if (props.rootFolder && props.rootFolder.length != 0) {
             setProjectFolder(props.rootFolder);
-            const componentNameFromFolder: string = props.rootFolder.substring(props.rootFolder.lastIndexOf('/') + 1);
+            const isWindowsPath = props.rootFolder.charAt(1) === ':';
+            const componentNameFromFolder: string = props.rootFolder.substring(props.rootFolder.lastIndexOf(isWindowsPath ? '\\' : '/') + 1);
             setComponentName(componentNameFromFolder);
             window.vscodeApi.postMessage({
                 action: 'validateComponentName',
