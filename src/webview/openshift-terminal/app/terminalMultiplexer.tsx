@@ -258,7 +258,7 @@ export const TerminalMultiplexer = () => {
                     </Box>
                     {terminals.map((terminal, i) => (
                         <TabPanel
-                            sx={{ margin: '0px', padding: '0px', flex: '1' }}
+                            sx={{ margin: '0px', padding: '0px', flex: '1',  height: 'calc(100% - 36px)'}}
                             value={`${i}`}
                             key={terminal.terminal.props.uuid}
                         >
