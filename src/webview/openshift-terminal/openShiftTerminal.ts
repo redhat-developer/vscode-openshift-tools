@@ -153,8 +153,9 @@ class OpenShiftTerminal {
             const escapedArgs = Array.isArray(this._args)
                 ? this._args.join(' ')
                 : this._args;
+            this._options.useConpty = false;
             this._pty = ptyInstance.spawn(
-                'C:\\WINDOWS\\system32\\cmd.EXE',
+                'cmd.EXE',
                 [
                     '/c',
                     `${this._file} ${escapedArgs}`,
