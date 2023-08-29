@@ -127,7 +127,7 @@ async function updateDevfileContext(_: unknown) {
  */
 export function setupWorkspaceDevfileContext(): Disposable {
     void updateDevfileContext(undefined);
-    const devfileWatcher = workspace.createFileSystemWatcher('**/*devfile.yaml');
+    const devfileWatcher = workspace.createFileSystemWatcher('**/{devfile,.devfile}.yaml');
     devfileWatcher.onDidCreate(updateDevfileContext);
     devfileWatcher.onDidDelete(updateDevfileContext);
     workspace.onDidChangeWorkspaceFolders(updateDevfileContext);

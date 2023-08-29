@@ -3,39 +3,67 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
-import * as fs from 'fs-extra';
-import { Uri, window, workspace } from 'vscode';
-import { DeployedFunction, FunctionContent, FunctionObject, FunctionStatus } from './types';
-import { ServerlessCommand, Utils } from './commands';
-import { OdoImpl } from '../odo';
-import { Functions } from './functions';
-import { stringify } from 'yaml';
-import { CliChannel, CliExitData } from '../cli';
 import * as cp from 'child_process';
-import { VsCommandError } from '../vscommand';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import { Disposable, Uri, window, workspace } from 'vscode';
+import { stringify } from 'yaml';
 import { CommandText } from '../base/command';
+import { CliChannel, CliExitData } from '../cli';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
+import { OdoImpl } from '../odo';
+import { VsCommandError } from '../vscommand';
+import { ServerlessCommand, Utils } from './commands';
+import { Functions } from './functions';
+import { DeployedFunction, FunctionContent, FunctionObject, FunctionStatus } from './types';
 import { ServerlessFunctionView } from './view';
 
-export interface ServerlessFunction {
+export interface ServerlessFunction extends Disposable {
     getLocalFunctions(): Promise<FunctionObject[]>;
     createFunction(language: string, template: string, location: string, image: string): Promise<CliExitData>;
 }
 
 export class ServerlessFunctionImpl implements ServerlessFunction {
+    private static instance: ServerlessFunction = new ServerlessFunctionImpl();
 
-    private static instance: ServerlessFunction;
+    private watchers: fs.FSWatcher[] = [];
+    private workspaceWatcher: Disposable;
 
     public static get Instance(): ServerlessFunction {
-        if (!ServerlessFunctionImpl.instance) {
-            ServerlessFunctionImpl.instance = new ServerlessFunctionImpl();
-        }
         return ServerlessFunctionImpl.instance;
     }
 
+    private constructor() {
+        this.addWatchers();
+        this.workspaceWatcher = workspace.onDidChangeWorkspaceFolders((_e) => {
+            for (const watcher of this.watchers) {
+                watcher.close();
+            }
+            ServerlessFunctionView.getInstance().refresh();
+            this.addWatchers();
+        });
+    }
+
+    private addWatchers() {
+        if (workspace.workspaceFolders) {
+            for (const workspaceFolder of workspace.workspaceFolders) {
+                this.watchers.push(
+                    fs.watch(workspaceFolder.uri.fsPath, (_event, filename) => {
+                        if (filename === 'func.yaml') {
+                            ServerlessFunctionView.getInstance().refresh();
+                        }
+                    }),
+                );
+            }
+        }
+    }
+
     private async getListItems(command: CommandText, fail = false) {
-        const listCliExitData = await CliChannel.getInstance().executeTool(command, undefined, fail);
+        const listCliExitData = await CliChannel.getInstance().executeTool(
+            command,
+            undefined,
+            fail,
+        );
         try {
             return JSON.parse(listCliExitData.stdout) as FunctionObject[];
         } catch (err) {
@@ -47,45 +75,55 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return this.getListItems(DeploymentConfig.command.getDeploymentFunctions());
     }
 
-    async createFunction(language: string, template: string, location: string, image: string): Promise<CliExitData> {
-        let funnctionResponse: CliExitData;
+    async createFunction(
+        language: string,
+        template: string,
+        location: string,
+        image: string,
+    ): Promise<CliExitData> {
+        let functionResponse: CliExitData;
         try {
-            const response = await OdoImpl.Instance.execute(ServerlessCommand.createFunction(language, template, location));
+            const response = await OdoImpl.Instance.execute(
+                ServerlessCommand.createFunction(language, template, location),
+            );
             if (response && !response.error) {
                 const yamlContent = await Utils.getFuncYamlContent(location);
                 if (yamlContent) {
                     yamlContent.image = image;
-                    fs.rmSync(path.join(location, 'func.yaml'));
-                    fs.writeFileSync(path.join(location, 'func.yaml'), stringify(yamlContent), 'utf-8');
-                    funnctionResponse = {
+                    await fs.rm(path.join(location, 'func.yaml'));
+                    await fs.writeFile(
+                        path.join(location, 'func.yaml'),
+                        stringify(yamlContent),
+                        'utf-8',
+                    );
+                    functionResponse = {
                         error: undefined,
                         stderr: '',
-                        stdout: 'Success'
+                        stdout: 'Success',
                     };
                 }
             } else {
-                fs.rmdirSync(location);
-                funnctionResponse = response;
+                await fs.rmdir(location);
+                functionResponse = response;
             }
         } catch (err) {
             if (err instanceof VsCommandError) {
                 void window.showErrorMessage(err.message);
             }
-            fs.rmdirSync(location);
-            funnctionResponse = {
+            await fs.rmdir(location);
+            functionResponse = {
                 error: err as cp.ExecException,
                 stderr: '',
-                stdout: ''
-            }
+                stdout: '',
+            };
         }
-        return funnctionResponse;
+        return functionResponse;
     }
 
     async getLocalFunctions(): Promise<FunctionObject[]> {
         const functionList: FunctionObject[] = [];
         const folders: Uri[] = [];
         if (workspace.workspaceFolders) {
-            // eslint-disable-next-line no-restricted-syntax
             for (const wf of workspace.workspaceFolders) {
                 if (fs.existsSync(path.join(wf.uri.fsPath, 'func.yaml'))) {
                     folders.push(wf.uri);
@@ -96,30 +134,36 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         if (folders.length > 0) {
             for (const folderUri of folders) {
                 const funcData: FunctionContent = await Utils.getFuncYamlContent(folderUri.fsPath);
-                const deployFunction: DeployedFunction = this.getDeployFunction(funcData, deployedFunctions);
-                const functionNode: FunctionObject = {
-                    name: funcData.name,
-                    runtime: funcData.runtime,
-                    folderURI: folderUri,
-                    context: deployFunction.status,
-                    url: deployFunction.url,
-                    hasImage: await this.checkImage(folderUri),
-                    isRunning: Functions.getInstance().checkRunning(folderUri.fsPath)
+                if (funcData) {
+                    const deployFunction: DeployedFunction = this.getDeployFunction(
+                        funcData,
+                        deployedFunctions,
+                    );
+                    const functionNode: FunctionObject = {
+                        name: funcData.name,
+                        runtime: funcData.runtime,
+                        folderURI: folderUri,
+                        context: deployFunction.status,
+                        url: deployFunction.url,
+                        hasImage: await this.checkImage(folderUri),
+                        isRunning: Functions.getInstance().checkRunning(folderUri.fsPath),
+                    };
+                    functionList.push(functionNode);
                 }
-                functionList.push(functionNode);
-                fs.watchFile(path.join(folderUri.fsPath, 'func.yaml'), (_eventName, _filename) => {
-                    ServerlessFunctionView.getInstance().refresh();
-                });
             }
         }
         if (deployedFunctions.length > 0) {
             for (const deployedFunction of deployedFunctions) {
-                if (functionList.filter((functionParam) => functionParam.name === deployedFunction.name).length === 0) {
+                if (
+                    functionList.filter(
+                        (functionParam) => functionParam.name === deployedFunction.name,
+                    ).length === 0
+                ) {
                     const functionNode: FunctionObject = {
                         name: deployedFunction.name,
                         runtime: deployedFunction.runtime,
-                        context: FunctionStatus.CLUSTERONLY
-                    }
+                        context: FunctionStatus.CLUSTERONLY,
+                    };
                     functionList.push(functionNode);
                 }
             }
@@ -127,14 +171,31 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
         return functionList;
     }
 
-    getDeployFunction(funcData: FunctionContent, deployedFunctions: FunctionObject[]): DeployedFunction {
+    getDeployFunction(
+        funcData: FunctionContent,
+        deployedFunctions: FunctionObject[],
+    ): DeployedFunction {
         if (deployedFunctions.length > 0) {
-            const func = deployedFunctions.find((deployedFunction) => deployedFunction.name === funcData.name && deployedFunction.namespace === funcData.deploy?.namespace)
+            const func = deployedFunctions.find(
+                (deployedFunction) =>
+                    deployedFunction.name === funcData.name &&
+                    deployedFunction.namespace === funcData.deploy?.namespace,
+            );
             if (func) {
-                return {status: FunctionStatus.CLUSTERLOCALBOTH, url: func.url} as DeployedFunction
+                return {
+                    status: FunctionStatus.CLUSTERLOCALBOTH,
+                    url: func.url,
+                } as DeployedFunction;
             }
         }
-        return {status: FunctionStatus.LOCALONLY, url: ''} as DeployedFunction
+        return { status: FunctionStatus.LOCALONLY, url: '' } as DeployedFunction;
+    }
+
+    dispose() {
+        for (const watcher of this.watchers) {
+            watcher.close();
+        }
+        this.workspaceWatcher.dispose();
     }
 
     async checkImage(folderUri: Uri): Promise<boolean> {
