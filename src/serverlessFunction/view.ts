@@ -15,7 +15,7 @@ import {
     TreeView,
     Uri,
     window,
-    workspace,
+    workspace
 } from 'vscode';
 
 import * as path from 'path';
@@ -24,12 +24,12 @@ import { Platform } from '../util/platform';
 import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
-import { ServerlessFunction, serverlessInstance } from './functionImpl';
-import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
-import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
-import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
+import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
+import { ServerlessFunction, serverlessInstance } from './functionImpl';
+import { Functions } from './functions';
+import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -102,7 +102,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
         } else if ('context' in element) {
             const functionObj: FunctionObject = element;
             const explorerItem: ExplorerItem = {
-                label: functionObj.name,
+                label: functionObj?.name,
                 collapsibleState: TreeItemCollapsibleState.None
             }
             if (functionObj.context !== FunctionStatus.NONE) {
