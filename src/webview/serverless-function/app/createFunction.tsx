@@ -198,8 +198,9 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 </div>
                 <Container maxWidth='md' sx={{
                     border: '1px groove var(--vscode-activityBar-activeBorder)',
-                    borderRadius: '1rem', margin: 'auto', backgroundColor: '#101418',
-                    color: '#99CCF3'
+                    borderRadius: '1rem', margin: 'auto',
+                    backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                    color: 'var(--vscode-settings-textInputForeground)'
                 }}>
                     <Box
                         display='flex'
