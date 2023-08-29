@@ -9,7 +9,6 @@ import { ShowRepositories } from './showRepositories';
 import { VSCodeMessage } from './vsCodeMessage';
 
 export class ManageRepository extends React.Component<DefaultProps, {
-    value: string
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {

@@ -19,7 +19,7 @@ const webviews = [
     'welcome',
     'feedback',
     'serverless-function',
-    'manage-repository',
+    'serverless-manage-repository',
     'add-service-binding',
 ];
 

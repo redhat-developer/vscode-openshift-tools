@@ -67,7 +67,7 @@ export class ManageRepository {
                     });
                     void vscode.window.showErrorMessage(result.error.message);
                     resolve(false);
-                } else if (result.stdout.length === 0) {
+                } else if (result.stdout.length === 0 && result.stderr.length === 0) {
                     await sendTelemetry('openshift.managerepo.add.success', {
                         name,
                         message: 'Repo added successfully'
@@ -75,6 +75,10 @@ export class ManageRepository {
                     void vscode.window.showInformationMessage(`Repository ${name} added successfully`);
                     resolve(true);
                 }
+                await sendTelemetry('openshift.managerepo.add.error', {
+                    error: result.stderr
+                });
+                resolve(false);
             });
         });
     }

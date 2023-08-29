@@ -786,7 +786,7 @@
 			},
 			{
 				"command": "openshift.Serverless.manageRepository",
-				"title": "Manage Repositories",
+				"title": "Manage Knative Function Template Repositories",
 				"category": "OpenShift",
 				"icon": "$(gist)"
 			},

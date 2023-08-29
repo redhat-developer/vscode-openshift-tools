@@ -90,7 +90,9 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         this.CloseDialog();
         VSCodeMessage.postMessage({
             action: `deleteRepo`,
-            name: repo
+            data: {
+                name: repo
+            }
         });
     }
 
@@ -123,7 +125,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
             action: `validateNewName`,
-            name: value
+            data: value
         });
     }
 
@@ -135,15 +137,17 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         this.CloseDialog();
         VSCodeMessage.postMessage({
             action: `renameRepo`,
-            oldName: oldName,
-            newName: newName
+            data: {
+                oldName,
+                newName
+            }
         });
     }
 
     StyledTableCell = styled(TableCell)(({ theme }) => ({
         [`&.${tableCellClasses.head}`]: {
             backgroundColor: 'var(--vscode-button-background)',
-            color: 'var(--vscode-settings-textInputForeground)',
+            color: 'var(--vscode-button-foreground)'
         },
         [`&.${tableCellClasses.body}`]: {
             fontSize: 14,
@@ -185,8 +189,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                 </div>
                 <Container maxWidth='sm' sx={{
                     border: '1px groove var(--vscode-activityBar-activeBorder)',
-                    borderRadius: '1rem', backgroundColor: '#101418',
-                    color: '#99CCF3'
+                    borderRadius: '1rem', backgroundColor: '#101418'
                 }}>
                     <Box
                         display='flex'

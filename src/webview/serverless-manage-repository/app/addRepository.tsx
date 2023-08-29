@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import { Button, Stack, TextField } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { DefaultProps } from '../../common/propertyTypes';
 import './home.scss';
 import { VSCodeMessage } from './vsCodeMessage';
@@ -19,7 +20,8 @@ export class AddRepository extends React.Component<DefaultProps, {
         url: string,
         error: boolean,
         helpText: string
-    }
+    },
+    loading: boolean
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -34,7 +36,8 @@ export class AddRepository extends React.Component<DefaultProps, {
                 url: '',
                 error: false,
                 helpText: ''
-            }
+            },
+            loading: false
         }
     }
 
@@ -68,28 +71,33 @@ export class AddRepository extends React.Component<DefaultProps, {
     validateGitURL = (value: string): void => {
         VSCodeMessage.postMessage({
             action: `validateGitURL`,
-            url: value
+            data: value
         })
     }
 
     validateName = (value: string): void => {
         VSCodeMessage.postMessage({
             action: `validateName`,
-            name: value
+            data: value
         })
     }
 
     addRepo = (): void => {
+        this.setState({
+            loading: true
+        });
         VSCodeMessage.postMessage({
             action: `addRepo`,
-            name: this.state.input.name,
-            url: this.state.repo.url
+            data: {
+                name: this.state.input.name,
+                url: this.state.repo.url
+            }
         })
     }
 
 
     render(): React.ReactNode {
-        const { input, repo } = this.state;
+        const { input, repo, loading } = this.state;
         return (
             <Stack direction='column' spacing={2}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -144,7 +152,10 @@ export class AddRepository extends React.Component<DefaultProps, {
                         helperText={repo.helpText} />
                 </Stack>
                 <Stack direction='column'>
-                    <Button variant='contained'
+                    <LoadingButton
+                        loading = {loading}
+                        loadingPosition='start'
+                        variant='contained'
                         disabled={this.handleButtonDisable()}
                         className='buttonStyle'
                         style={{
@@ -153,7 +164,7 @@ export class AddRepository extends React.Component<DefaultProps, {
                         }}
                         onClick={() => this.addRepo()}>
                         Add
-                    </Button>
+                    </LoadingButton>
                 </Stack>
             </Stack>
         )

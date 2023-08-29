@@ -38,7 +38,7 @@
         "src/webview/helm-chart/app",
         "src/webview/feedback/app",
         "src/webview/serverless-function/app",
-        "src/webview/manage-repository/app",
+        "src/webview/serverless-manage-repository/app",
         "src/webview/common"
     ]
 }

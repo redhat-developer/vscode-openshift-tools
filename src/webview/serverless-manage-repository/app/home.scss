@@ -30,7 +30,6 @@ button {
     width: auto;
     word-spacing: 2px;
     text-align: left;
-    color: var(--vscode-foreground);
 }
 
 .buttonStyle {
@@ -148,7 +147,7 @@ button {
 
 .MuiSvgIcon-root,
 .MuiStepLabel-label {
-    color: var(--vscode-settings-textInputForeground) !important;
+    color: var(--vscode-button-foreground) !important;
 }
 
 .successicon {
@@ -172,7 +171,7 @@ button {
 }
 
 .Mui-disabled {
-    -webkit-text-fill-color: var(--vscode-settings-textInputForeground) !important;
+    -webkit-text-fill-color: var(--vscode-button-foreground) !important;
 }
 
 .Mui-active {
@@ -197,7 +196,7 @@ li:hover {
 }
 
 .MuiTableCell-body {
-    color: var(--vscode-settings-textInputForeground) !important
+    color: var(--vscode-button-foreground) !important
 }
 
 .MuiTablePagination-toolbar {

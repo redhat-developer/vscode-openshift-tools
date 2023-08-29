@@ -5,11 +5,9 @@
 import { ChildProcess } from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ManageRepository } from '../../serverlessFunction/mangeRepository';
+import { ManageRepository } from '../../serverlessFunction/manageRepository';
 import { ExtensionID } from '../../util/constants';
-import { gitUrlParse } from '../../util/gitParse';
-import { loadWebviewHtml } from '../common-ext/utils';
-import { validateName } from '../common/utils';
+import { loadWebviewHtml, Message, validateGitURL, validateName } from '../common-ext/utils';
 
 export default class ManageRepositoryViewLoader {
 
@@ -38,7 +36,7 @@ export default class ManageRepositoryViewLoader {
             return;
         }
         const localResourceRoot = vscode.Uri.file(
-            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'manageRepositoryViewer'),
+            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'serverlessManageRepositoryViewer'),
         );
 
         let panel = vscode.window.createWebviewPanel('manageRepositoryView', title, vscode.ViewColumn.One, {
@@ -60,40 +58,46 @@ export default class ManageRepositoryViewLoader {
             path.join(ManageRepositoryViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
 
-        panel.webview.html = await loadWebviewHtml('manageRepositoryViewer', panel);
+        panel.webview.html = await loadWebviewHtml('serverlessManageRepositoryViewer', panel);
         ManageRepositoryViewLoader.panel = panel;
 
         return panel;
     }
 
-    static async messageHandler(event: any) {
-        const action = event.action;
+    static async messageHandler(message: Message) {
+        const action = message.action;
         switch (action) {
             case 'validateGitURL':
-                validateGitURL(event);
+                const data = validateGitURL(message);
+                ManageRepositoryViewLoader.panel?.webview.postMessage({
+                    action,
+                    url: data.url,
+                    error: data.error,
+                    helpText: data.helpText
+                });
                 break;
             case 'validateName':
             case 'validateNewName':
-                const flag = validateName(event.name);
+                const flag = validateName(message.data);
                 const repoList = await ManageRepository.getInstance().list();
-                if (repoList.includes(event.name)) {
+                if (repoList.includes(message.data)) {
                     ManageRepositoryViewLoader.panel?.webview.postMessage({
                         action: action,
-                        name: event.name,
+                        name: message.data,
                         error: true,
-                        helpText: `Repository ${event.name} already exists`
+                        helpText: `Repository ${message.data} already exists`
                     });
                 } else {
                     ManageRepositoryViewLoader.panel?.webview.postMessage({
                         action: action,
-                        name: event.name,
+                        name: message.data,
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag
                     });
                 }
                 break;
             case 'addRepo':
-                const addRepoStatus = await ManageRepository.getInstance().addRepo(event.name, event.url);
+                const addRepoStatus = await ManageRepository.getInstance().addRepo(message.data.name, message.data.url);
                 ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action: action,
                     status: addRepoStatus
@@ -107,7 +111,7 @@ export default class ManageRepositoryViewLoader {
                 });
                 break;
             case 'deleteRepo':
-                const status = await ManageRepository.getInstance().deleteRepo(event.name);
+                const status = await ManageRepository.getInstance().deleteRepo(message.data.name);
                 if (status) {
                     const repositories = await ManageRepository.getInstance().list();
                     ManageRepositoryViewLoader.panel?.webview.postMessage({
@@ -117,7 +121,7 @@ export default class ManageRepositoryViewLoader {
                 }
                 break;
             case 'renameRepo':
-                const renameRepoStatus = await ManageRepository.getInstance().renameRepo(event.oldName, event.newName);
+                const renameRepoStatus = await ManageRepository.getInstance().renameRepo(message.data.oldName, message.data.newName);
                 if (renameRepoStatus) {
                     const repositories = await ManageRepository.getInstance().list();
                     ManageRepositoryViewLoader.panel?.webview.postMessage({
@@ -128,53 +132,4 @@ export default class ManageRepositoryViewLoader {
                 break;
         }
     }
-}
-
-function validateGitURL(event: any) {
-    if (typeof event.url === 'string' && (event.url as string).trim().length === 0) {
-        ManageRepositoryViewLoader.panel?.webview.postMessage({
-            action: event.action,
-            error: true,
-            helpText: 'Please enter a Git URL.',
-        });
-    } else {
-        try {
-            const parse = gitUrlParse(event.url);
-            const isGitRepo = isGitURL(parse.host);
-            if (!isGitRepo) {
-                throw 'Invalid Git URL';
-            }
-            if (parse.organization !== '' && parse.name !== '') {
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    url: event.url,
-                    error: false,
-                    helpText: 'The git repo URL is valid.',
-                });
-            } else {
-                ManageRepositoryViewLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    error: true,
-                    helpText: 'URL is missing organization or repo name.',
-                });
-            }
-        } catch (e) {
-            ManageRepositoryViewLoader.panel?.webview.postMessage({
-                action: event.action,
-                error: true,
-                helpText: 'Invalid Git URL.',
-            });
-        }
-    }
-}
-
-function isGitURL(host: string): boolean {
-    return [
-        'github.com',
-        'bitbucket.org',
-        'gitlab.com',
-        'git.sr.ht',
-        'codeberg.org',
-        'gitea.com',
-    ].includes(host);
 }

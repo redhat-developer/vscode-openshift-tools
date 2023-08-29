@@ -29,7 +29,7 @@ import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
-import ManageRepositoryViewLoader from '../webview/manage-repository/manageRepositoryLoader';
+import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
