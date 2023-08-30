@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { OdoImpl } from '../odo';
 import sendTelemetry from '../telemetry';
-import { Progress } from '../util/progress';
 import { ServerlessCommand } from './commands';
 
 export class ManageRepository {
@@ -58,29 +57,25 @@ export class ManageRepository {
         await sendTelemetry('openshift.managerepo.add', {
             name, url
         });
-        return new Promise<boolean>((resolve, _reject) => {
-            void Progress.execFunctionWithProgress(`Adding repository ${name}`, async () => {
-                const result = await OdoImpl.Instance.execute(ServerlessCommand.addRepo(name, url), '', false);
-                if (result.error) {
-                    await sendTelemetry('openshift.managerepo.add.error', {
-                        error: result.error.message
-                    });
-                    void vscode.window.showErrorMessage(result.error.message);
-                    resolve(false);
-                } else if (result.stdout.length === 0 && result.stderr.length === 0) {
-                    await sendTelemetry('openshift.managerepo.add.success', {
-                        name,
-                        message: 'Repo added successfully'
-                    });
-                    void vscode.window.showInformationMessage(`Repository ${name} added successfully`);
-                    resolve(true);
-                }
-                await sendTelemetry('openshift.managerepo.add.error', {
-                    error: result.stderr
-                });
-                resolve(false);
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.addRepo(name, url), '', false);
+        if (result.error) {
+            await sendTelemetry('openshift.managerepo.add.error', {
+                error: result.error.message
             });
+            void vscode.window.showErrorMessage(result.error.message);
+            return false;
+        } else if (result.stdout.length === 0 && result.stderr.length === 0) {
+            await sendTelemetry('openshift.managerepo.add.success', {
+                name,
+                message: 'Repo added successfully'
+            });
+            void vscode.window.showInformationMessage(`Repository ${name} added successfully`);
+            return true;
+        }
+        await sendTelemetry('openshift.managerepo.add.error', {
+            error: result.stderr
         });
+        return false;
     }
 
     public async list(): Promise<string[]> {

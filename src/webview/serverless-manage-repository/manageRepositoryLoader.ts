@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ManageRepository } from '../../serverlessFunction/manageRepository';
 import { ExtensionID } from '../../util/constants';
+import { Progress } from '../../util/progress';
 import { loadWebviewHtml, Message, validateGitURL, validateName } from '../common-ext/utils';
 
 export default class ManageRepositoryViewLoader {
@@ -97,7 +98,10 @@ export default class ManageRepositoryViewLoader {
                 }
                 break;
             case 'addRepo':
-                const addRepoStatus = await ManageRepository.getInstance().addRepo(message.data.name, message.data.url);
+                let addRepoStatus: boolean;
+                await Progress.execFunctionWithProgress(`Adding repository ${message.data.name}`, async () => {
+                    addRepoStatus = await ManageRepository.getInstance().addRepo(message.data.name, message.data.url);
+                });
                 ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action: action,
                     status: addRepoStatus

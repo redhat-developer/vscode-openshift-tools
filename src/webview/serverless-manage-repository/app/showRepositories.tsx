@@ -189,7 +189,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                 </div>
                 <Container maxWidth='sm' sx={{
                     border: '1px groove var(--vscode-activityBar-activeBorder)',
-                    borderRadius: '1rem', backgroundColor: '#101418'
+                    borderRadius: '1rem'
                 }}>
                     <Box
                         display='flex'
