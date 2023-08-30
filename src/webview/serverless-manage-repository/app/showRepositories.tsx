@@ -185,7 +185,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                     <Typography variant='h5'>Manage Repositories</Typography>
                 </div>
                 <div className='subTitle'>
-                    <Typography>Manage template repositories installed on disk at either the default location (~/.config/func/repositories) or the location specified by the --repository flag. Once added, a template from the repository can be used when creating a new function.</Typography>
+                    <Typography>Manage template repositories installed on disk at the default location (~/.config/func/repositories) Once added, a template from the repository can be used when creating a new function.</Typography>
                 </div>
                 <Container maxWidth='sm' sx={{
                     border: '1px groove var(--vscode-activityBar-activeBorder)',
