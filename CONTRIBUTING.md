@@ -8,7 +8,7 @@ There are only a few guidelines that we need contributors to follow.
 ## First Time Setup
 1. Install prerequisites:
    * latest [Visual Studio Code](https://code.visualstudio.com/)
-   * [Node.js](https://nodejs.org/) v16.17.0 or higher
+   * [Node.js](https://nodejs.org/) v18.17.0 or higher
      * It is recommended to set up `nvm` to manage different versions of node, which can be installed by following the instructions [here](https://github.com/nvm-sh/nvm#installing-and-updating).
      * To use the current recommended version for this project (in`./nvmrc`), run `nvm use`.
    * [Red Hat Authentication](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-redhat-account) VS Code plugin (VS Code will prompt to install this when you launch the extension if you don't have it)
