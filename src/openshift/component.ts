@@ -13,7 +13,7 @@ import * as YAML from 'yaml';
 import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription } from '../odo/componentType';
-import { StarterProject, CommandProvider } from '../odo/componentTypeDescription';
+import { CommandProvider, StarterProject } from '../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import * as odo3 from '../odo3';
 import sendTelemetry, { NewComponentCommandProps } from '../telemetry';
@@ -493,8 +493,8 @@ export class Component extends OpenShiftItem {
      *
      */
     @vsCommand('openshift.component.createFromRootWorkspaceFolder')
-    static async createFromRootWorkspaceFolderPalette(): Promise<void> {
-        const devFileLocation = path.join(workspace.workspaceFolders[0].uri.fsPath, 'devfile.yaml');
+    static async createFromRootWorkspaceFolderPalette(context: { fsPath: string}): Promise<void> {
+        const devFileLocation = path.join(context.fsPath, 'devfile.yaml');
         try {
             await fs.access(devFileLocation);
             await window.showErrorMessage('The selected folder already contains a devfile.');
@@ -502,7 +502,7 @@ export class Component extends OpenShiftItem {
         } catch (e) {
             // do nothing
         }
-        await CreateComponentLoader.loadView('Create Component', workspace.workspaceFolders[0].uri.fsPath);
+        await CreateComponentLoader.loadView('Create Component', context.fsPath);
     }
 
     /**
