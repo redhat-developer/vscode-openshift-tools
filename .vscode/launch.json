@@ -74,7 +74,8 @@
             "sourceMaps": true,
             "preLaunchTask": "instrument",
             "env": {
-                "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
+                "VSCODE_REDHAT_TELEMETRY_DEBUG":"true",
+                "IS_OPENSHIFT": "true",
             }
         },
         {
