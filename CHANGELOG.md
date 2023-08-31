@@ -12,6 +12,7 @@
  * [#3104](https://github.com/redhat-developer/vscode-openshift-tools/issues/3104) Import from git no longer fails if there is an existing Devfile.
  * [#3127](https://github.com/redhat-developer/vscode-openshift-tools/issues/3127) Fixed "Create Component from Folder" doesn't trim suggested name to last portion of the path on Windows.
  * [#3122](https://github.com/redhat-developer/vscode-openshift-tools/issues/3122) Fixed "Create Component From Folder" always uses first open folder, regardless of which one was right clicked on.
+ * [#3150](https://github.com/redhat-developer/vscode-openshift-tools/issues/3150) Attempt to sanitize the suggest name for the component in "Create Component from Folder".
 
 ## 1.6.0 (August 14, 2023)
  * [#2922](https://github.com/redhat-developer/vscode-openshift-tools/issues/2922) Combine different component creation strategies ("From Git", "From Local Folder", "From Template") into one, new UI.
