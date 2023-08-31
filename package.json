@@ -785,6 +785,12 @@
 				"icon": "$(plus)"
 			},
 			{
+				"command": "openshift.Serverless.manageRepository",
+				"title": "Manage Knative Function Template Repositories",
+				"category": "OpenShift",
+				"icon": "$(gist)"
+			},
+			{
 				"command": "openshift.Serverless.refresh",
 				"title": "Refresh Serverless Function View",
 				"category": "OpenShift",
@@ -1298,6 +1304,11 @@
 					"command": "openshift.Serverless.refresh",
 					"when": "view == openshiftServerlessFunctionsView",
 					"group": "navigation@1"
+				},
+				{
+					"command": "openshift.Serverless.manageRepository",
+					"when": "view == openshiftServerlessFunctionsView",
+					"group": "navigation@2"
 				},
 				{
 					"command": "openshift.component.openCreateComponent",

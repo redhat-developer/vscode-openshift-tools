@@ -11,8 +11,7 @@ import { serverlessInstance } from '../../serverlessFunction/functionImpl';
 import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
-import { loadWebviewHtml } from '../common-ext/utils';
-import { validateName } from '../common/utils';
+import { loadWebviewHtml, validateName } from '../common-ext/utils';
 import { InvokeFunction } from '../../serverlessFunction/types';
 
 export interface ServiceBindingFormResponse {

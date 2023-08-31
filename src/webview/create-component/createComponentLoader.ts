@@ -18,14 +18,13 @@ import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
-import { gitUrlParse } from '../../util/gitParse';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import {
     getDevfileRegistries,
     isValidProjectFolder,
     validateComponentName
 } from '../common-ext/createComponentHelpers';
-import { loadWebviewHtml } from '../common-ext/utils';
+import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 
 interface CloneProcess {
@@ -332,7 +331,14 @@ export default class CreateComponentLoader {
              * The panel requested to validate the git repository URL.
              */
             case 'validateGitURL': {
-                validateGitURL(message);
+                const response = validateGitURL(message);
+                CreateComponentLoader.panel?.webview.postMessage({
+                    action: message.action,
+                    data: {
+                        isValid: !response.error,
+                        helpText: response.helpText
+                    }
+                });
                 break;
             }
             /**
@@ -461,62 +467,6 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
             return false;
         }
     }
-}
-
-function validateGitURL(event: any) {
-    if (typeof event.data === 'string' && (event.data as string).trim().length === 0) {
-        CreateComponentLoader.panel?.webview.postMessage({
-            action: event.action,
-            data: {
-                isValid: false,
-                helpText: 'Please enter a Git URL.',
-            },
-        });
-    } else {
-        try {
-            const parse = gitUrlParse(event.data);
-            const isGitRepo = isGitURL(parse.host);
-            if (!isGitRepo) {
-                throw 'Invalid Git URL';
-            }
-            if (parse.organization !== '' && parse.name !== '') {
-                CreateComponentLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    data: {
-                        isValid: true,
-                        helpText: 'The git repo URL is valid.',
-                    },
-                });
-            } else {
-                CreateComponentLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    data: {
-                        isValid: false,
-                        helpText: 'URL is missing organization or repo name.',
-                    },
-                });
-            }
-        } catch (e) {
-            CreateComponentLoader.panel?.webview.postMessage({
-                action: event.action,
-                data: {
-                    isValid: false,
-                    helpText: 'Invalid Git URL.',
-                },
-            });
-        }
-    }
-}
-
-function isGitURL(host: string): boolean {
-    return [
-        'github.com',
-        'bitbucket.org',
-        'gitlab.com',
-        'git.sr.ht',
-        'codeberg.org',
-        'gitea.com',
-    ].includes(host);
 }
 
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {

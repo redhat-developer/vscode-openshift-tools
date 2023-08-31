@@ -29,6 +29,7 @@ import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
+import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -201,6 +202,11 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     @vsCommand('openshift.Serverless.createFunction')
     static async openServerlessFunction(): Promise<void> {
         await ServerlessFunctionViewLoader.loadView('Serverless Function - Create');
+    }
+
+    @vsCommand('openshift.Serverless.manageRepository')
+    static async openManageRepository(): Promise<void> {
+        await ManageRepositoryViewLoader.loadView('Manage Repository');
     }
 
     @vsCommand('openshift.Serverless.refresh')
