@@ -135,7 +135,14 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         if (props.rootFolder && props.rootFolder.length != 0) {
             setProjectFolder(props.rootFolder);
             const isWindowsPath = props.rootFolder.charAt(1) === ':';
-            const componentNameFromFolder: string = props.rootFolder.substring(props.rootFolder.lastIndexOf(isWindowsPath ? '\\' : '/') + 1);
+            let componentNameFromFolder: string = props.rootFolder //
+                .substring(props.rootFolder.lastIndexOf(isWindowsPath ? '\\' : '/') + 1)
+                .toLocaleLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/-$/, '')
+                .replace(/^[0-9]+/, '');
+            componentNameFromFolder = componentNameFromFolder.length ? componentNameFromFolder : 'component';
             setComponentName(componentNameFromFolder);
             window.vscodeApi.postMessage({
                 action: 'validateComponentName',
