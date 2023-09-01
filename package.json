@@ -84,7 +84,6 @@
 		"got": "^11.8.6",
 		"hasha": "^5.2.2",
 		"immutable": "^4.0.0",
-		"install": "^0.13.0",
 		"json-schema": "^0.4.0",
 		"lodash": "^4.17.21",
 		"make-fetch-happen": "^9.1.0",
@@ -183,7 +182,6 @@
 		"style-loader": "^3.3.1",
 		"survey-react-ui": "^1.9.89",
 		"ts-loader": "^9.2.6",
-		"tslint": "^5.20.1",
 		"typescript": "^4.5.2",
 		"utf-8-validate": "^5.0.7",
 		"vscode-extension-tester": "^5.2.0"
