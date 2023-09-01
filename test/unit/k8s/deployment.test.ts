@@ -12,6 +12,7 @@ import { CliChannel } from '../../../src/cli';
 import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { Progress } from '../../../src/util/progress';
+import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -89,7 +90,7 @@ suite('K8s/deployment', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        termStub =  sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+        termStub =  sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });

@@ -19,6 +19,7 @@ import {
 import { SerializeAddon } from 'xterm-addon-serialize';
 import { Terminal } from 'xterm-headless';
 import { CommandText } from '../../base/command';
+import { CliChannel } from '../../cli';
 import { ToolsConfig } from '../../tools';
 import { getVscodeModule } from '../../util/credentialManager';
 import { loadWebviewHtml } from '../common-ext/utils';
@@ -490,6 +491,11 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                 }),
             );
         });
+    }
+
+    public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {} as {[key : string]: string} ): Promise<void> {
+        const merged = Object.fromEntries([...Object.entries(addEnv), ...Object.entries(CliChannel.createTelemetryEnv()), ...Object.entries(process.env)]);
+        await OpenShiftTerminalManager.getInstance().createTerminal(command, name, cwd, merged);
     }
 
     /**

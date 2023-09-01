@@ -8,9 +8,9 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { CliChannel } from '../../../src/cli';
 import { Build } from '../../../src/k8s/build';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
+import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -62,7 +62,7 @@ suite('K8s/build', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        termStub = sandbox.stub(CliChannel.prototype, 'executeInTerminal');
+        termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         // sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });

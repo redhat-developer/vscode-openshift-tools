@@ -217,7 +217,7 @@ export class Functions {
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
-        await Functions.cli.executeInTerminal(ServerlessCommand.config(context.folderURI.fsPath, mode, isAdd),
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(ServerlessCommand.config(context.folderURI.fsPath, mode, isAdd),
             context.folderURI.fsPath, title);
     }
 

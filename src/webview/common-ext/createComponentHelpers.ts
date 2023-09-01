@@ -5,11 +5,11 @@
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
+import { format } from 'url';
 import { Registry } from '../../odo/componentType';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ComponentTypesView } from '../../registriesView';
 import { Devfile, DevfileRegistry } from '../common/devfile';
-import { format } from 'url';
 
 /**
  * Represents if something if valid, and if not, why

@@ -402,7 +402,7 @@ export class Component extends OpenShiftItem {
         if (Component.isUsingWebviewEditor()) {
             await DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
         } else {
-            await CliChannel.getInstance().executeInTerminal(
+            void OpenShiftTerminalManager.getInstance().executeInTerminal(
                 command,
                 componentFolder.contextPath,
                 `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
@@ -416,7 +416,7 @@ export class Component extends OpenShiftItem {
         if (Component.isUsingWebviewEditor()) {
             await LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
         } else {
-            await CliChannel.getInstance().executeInTerminal(
+            await OpenShiftTerminalManager.getInstance().executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
                 `Show '${componentName}' Component Log`);
@@ -430,7 +430,7 @@ export class Component extends OpenShiftItem {
         if (Component.isUsingWebviewEditor()) {
             await LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
         } else {
-            await CliChannel.getInstance().executeInTerminal(
+            await OpenShiftTerminalManager.getInstance().executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
                 `Follow '${componentName}' Component Log`);
@@ -771,7 +771,7 @@ export class Component extends OpenShiftItem {
         // const cs = Component.getComponentDevState(context);
         // cs.deployStatus = ComponentContextState.DEP_RUNNING;
         // Component.stateChanged.fire(context.contextPath);
-        void CliChannel.getInstance().executeInTerminal(
+        void OpenShiftTerminalManager.getInstance().executeInTerminal(
             Command.deploy(),
             context.contextPath,
             `Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
@@ -786,7 +786,7 @@ export class Component extends OpenShiftItem {
         // const cs = Component.getComponentDevState(context);
         // cs.deployStatus = ComponentContextState.DEP;
         // Component.stateChanged.fire(context.contextPath);
-        void CliChannel.getInstance().executeInTerminal(
+        void OpenShiftTerminalManager.getInstance().executeInTerminal(
             Command.undeploy(context.component.devfileData.devfile.metadata.name),
             context.contextPath,
             `Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);

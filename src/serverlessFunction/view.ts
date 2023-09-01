@@ -169,13 +169,13 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')
-    static buildAndRunFunction(context: FunctionObject) {
-        Functions.getInstance().run(context, true);
+    static async buildAndRunFunction(context: FunctionObject) {
+        await Functions.getInstance().run(context, true);
     }
 
     @vsCommand('openshift.Serverless.run')
-    static runFunction(context: FunctionObject) {
-        Functions.getInstance().run(context);
+    static async runFunction(context: FunctionObject) {
+        await Functions.getInstance().run(context);
     }
 
     @vsCommand('openshift.Serverless.stopRun')
