@@ -1,13 +1,13 @@
 {
-	// See http://go.microsoft.com/fwlink/?LinkId=827846
-	// for the documentation about the extensions.json format
-	"recommendations": [
-		"ms-vscode.vscode-typescript-tslint-plugin",
-		"eg2.vscode-npm-script",
-		"ryanluker.vscode-coverage-gutters",
-		"streetsidesoftware.code-spell-checker",
-    "shd101wyy.markdown-preview-enhanced",
-    "esbenp.prettier-vscode",
-    "gruntfuggly.todo-tree"
-  ]
+    // See http://go.microsoft.com/fwlink/?LinkId=827846
+    // for the documentation about the extensions.json format
+    "recommendations": [
+        "eg2.vscode-npm-script",
+        "ryanluker.vscode-coverage-gutters",
+        "streetsidesoftware.code-spell-checker",
+        "shd101wyy.markdown-preview-enhanced",
+        "esbenp.prettier-vscode",
+        "gruntfuggly.todo-tree",
+        "baeumer.vscode-eslint"
+    ]
 }
