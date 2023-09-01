@@ -17,6 +17,7 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
+import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
 
@@ -63,12 +64,12 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.about')
     static async about(): Promise<void> {
-        await CliChannel.getInstance().executeInTerminal(Command.printOdoVersion(), undefined, 'Show odo Version');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOdoVersion(), undefined, 'Show odo Version');
     }
 
     @vsCommand('openshift.oc.about')
     static async ocAbout(): Promise<void> {
-        await CliChannel.getInstance().executeInTerminal(Command.printOcVersion(), undefined, 'Show OKD CLI Tool Version');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOcVersion(), undefined, 'Show OKD CLI Tool Version');
     }
 
     @vsCommand('openshift.output')
@@ -248,7 +249,7 @@ export class Cluster extends OpenShiftItem {
         } else {
             crcBinary = crcPath;
         }
-        void CliChannel.getInstance().executeInTerminal(new CommandText(`${crcBinary} stop`), undefined, 'Stop OpenShift Local');
+        void OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${crcBinary} stop`), undefined, 'Stop OpenShift Local');
     }
 
     public static async getVersions(): Promise<Versions> {
@@ -528,7 +529,7 @@ export class Cluster extends OpenShiftItem {
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if(!NameValidator.ocLoginCommandMatches(clipboard)) {
+        if (!NameValidator.ocLoginCommandMatches(clipboard)) {
             const choice = await window.showErrorMessage('Cannot parse login command in clipboard. Please open cluster dashboard and select `Copy login command` from user name dropdown in the upper right corner. Copy full login command to clipboard. Switch back to VSCode window and press `Login to Sandbox` button again.',
                 'Open Dashboard');
             if (choice === 'Open Dashboard') {

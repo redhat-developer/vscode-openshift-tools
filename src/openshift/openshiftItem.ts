@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/ban-types */
 
 import { commands, QuickPickItem, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
@@ -85,6 +84,7 @@ export default class OpenShiftItem {
 export function clusterRequired() {
     return function (_target: any, key: string, descriptor: any): void {
         let fnKey: string | undefined;
+        // eslint-disable-next-line @typescript-eslint/ban-types
         let fn: Function | undefined;
 
         if (typeof descriptor.value === 'function') {

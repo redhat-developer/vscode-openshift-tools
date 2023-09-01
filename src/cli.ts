@@ -9,7 +9,6 @@ import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
 import { VsCommandError } from './vscommand';
-import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
 export class CliChannel {
 
@@ -63,11 +62,6 @@ export class CliChannel {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
-    }
-
-    async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {} as {[key : string]: string} ): Promise<void> {
-        const merged = Object.fromEntries([...Object.entries(addEnv), ...Object.entries(CliChannel.createTelemetryEnv()), ...Object.entries(process.env)]);
-        await OpenShiftTerminalManager.getInstance().createTerminal(command, name, cwd, merged);
     }
 
     async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {
