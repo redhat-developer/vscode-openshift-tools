@@ -97,7 +97,7 @@ jobs:
 
       # Upload coverage to codecov.io
       - name: Codecov
-        uses: codecov/codecov-action@40a12dcee2df644d47232dde008099a3e9e4f865 #v3.1.2
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d #v3.1.4
         if: (success() || failure()) && runner.os == 'Linux'
         with:
           files: ./coverage/unit/coverage-final.json,./coverage/integration/coverage-final.json
