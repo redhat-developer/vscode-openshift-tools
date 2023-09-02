@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
@@ -125,7 +125,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
         const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
             method: 'GET'
         });
-        const yamlResponse = YAML.parse(await signupResponse.text());
+        const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
         const entries = yamlResponse.entries;
         Object.keys(entries).forEach((key) => {
             let res: ChartResponse = {

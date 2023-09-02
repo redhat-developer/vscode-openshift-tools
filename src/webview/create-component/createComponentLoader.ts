@@ -10,7 +10,7 @@ import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
@@ -385,7 +385,7 @@ export default class CreateComponentLoader {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
                         const file = await fs.readFile(devFileV1Path, 'utf8');
-                        const devfileV1 = YAML.parse(file.toString());
+                        const devfileV1 = JSYAML.load(file.toString());
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
@@ -394,7 +394,7 @@ export default class CreateComponentLoader {
                             devfileV1,
                             endPoints,
                         );
-                        const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
+                        const yaml = JSYAML.dump(devfileV2, { sortKeys: true });
                         await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
                         CreateComponentLoader.panel?.webview.postMessage({
                             action: 'devfileRegenerated',

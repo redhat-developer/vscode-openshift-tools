@@ -13,7 +13,7 @@ import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { EventEmitter, Terminal, window, workspace } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { getInstance } from '../../src/odo';
@@ -636,7 +636,7 @@ suite('odo commands integration', function () {
             //
             // and then save into the same debfile.yaml
             const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile: V220Devfile = YAML.parse(file.toString());
+            const devfile = JSYAML.load(file.toString()) as V220Devfile;
             if (!devfile || !devfile.commands) {
                 fail(`DevFile '${devfilePath}' cannot be read`);
             }
@@ -668,7 +668,7 @@ suite('odo commands integration', function () {
                     id: helloWorldCommandId
                 })
             }
-            await fs.writeFile(devfilePath, YAML.stringify(devfile), 'utf8');
+            await fs.writeFile(devfilePath, JSYAML.dump(devfile));
         }
 
         test('runComponentCommand()', async function () {

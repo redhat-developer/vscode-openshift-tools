@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { parse } from 'yaml';
+import { load } from 'js-yaml';
 import { CommandText, CommandOption } from '../base/command';
 import { ClusterVersion, FunctionContent, InvokeFunction } from './types';
 
@@ -14,7 +14,7 @@ export class Utils {
         let funcData: FunctionContent;
         try {
             const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
-            funcData = parse(funcYaml) as FunctionContent;
+            funcData = load(funcYaml) as FunctionContent;
         } catch (error) {
             // ignore
         }

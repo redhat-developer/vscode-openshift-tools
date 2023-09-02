@@ -7,7 +7,7 @@ import * as cp from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Disposable, Uri, window, workspace } from 'vscode';
-import { stringify } from 'yaml';
+import { dump } from 'js-yaml';
 import { CommandText } from '../base/command';
 import { CliChannel, CliExitData } from '../cli';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
@@ -93,7 +93,7 @@ export class ServerlessFunctionImpl implements ServerlessFunction {
                     await fs.rm(path.join(location, 'func.yaml'));
                     await fs.writeFile(
                         path.join(location, 'func.yaml'),
-                        stringify(yamlContent),
+                        dump(yamlContent),
                         'utf-8',
                     );
                     functionResponse = {
