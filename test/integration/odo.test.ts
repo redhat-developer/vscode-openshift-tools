@@ -10,7 +10,7 @@ import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, window, workspace } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { CommandText } from '../../src/base/command';
 import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
@@ -221,7 +221,7 @@ suite('odo integration', function () {
         });
 
         test('createService()', async function () {
-            await odo.createService(YAML.parse(serviceFileYaml));
+            await odo.createService(JSYAML.load(serviceFileYaml));
             const deploymentsOutput = await odo.execute(Command.getDeployments(projectName));
             const deployments: V1Deployment[] = JSON.parse(deploymentsOutput.stdout).items;
             const deploymentNames = deployments.map((deployment) => deployment.metadata.name);

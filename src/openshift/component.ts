@@ -9,7 +9,7 @@ import { ChildProcess, SpawnOptions } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Terminal, Uri, window, workspace } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml'
 import { CliChannel } from '../cli';
 import { Command } from '../odo/command';
 import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription } from '../odo/componentType';
@@ -537,7 +537,8 @@ export class Component extends OpenShiftItem {
         let initialNameValue: string;
         if (useExistingDevfile) {
             const file = await fs.readFile(devFileLocation, 'utf8');
-            const devfileYaml = YAML.parse(file.toString());
+            const devfileYaml = JSYAML.load(file.toString()) as any;
+
             if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
                 initialNameValue = devfileYaml.metadata.name;
             }

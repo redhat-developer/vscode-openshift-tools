@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { Registry } from '../../odo/componentType';
 import OpenShiftItem from '../../openshift/openshiftItem';
 import { ComponentTypesView } from '../../registriesView';
@@ -140,7 +140,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
             id: component.name,
             starterProjects: component.devfileData.devfile.starterProjects,
             tags: component.tags,
-            yaml: YAML.stringify(component.devfileData.devfile),
+            yaml: JSYAML.dump(component.devfileData.devfile),
             supportsDebug:
                 Boolean(
                     component.devfileData.devfile.commands?.find(
