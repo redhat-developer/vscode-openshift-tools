@@ -138,7 +138,6 @@
 		"chai": "^4.3.4",
 		"chokidar": "^3.5.3",
 		"codecov": "^3.8.2",
-		"css-loader": "^6.5.1",
 		"esbuild": "^0.17.19",
 		"esbuild-plugin-svgr": "^2.0.0",
 		"esbuild-sass-plugin": "^2.9.0",
