@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/vscode/settings';
+import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import { CommandText } from './base/command';
