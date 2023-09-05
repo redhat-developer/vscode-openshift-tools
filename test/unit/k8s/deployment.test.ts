@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { Progress } from '../../../src/util/progress';
-import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 import { CliChannel } from '../../../src/cli';
+import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
+import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
+import { Progress } from '../../../src/util/progress';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -192,7 +193,7 @@ suite('K8s/deployment', () => {
         test('throws error if there is no DeploymentConfig to select', async () => {
             quickPickStub.restore();
             execStub.restore();
-            execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: mockData, stderr: undefined, error: undefined });
+            execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute').resolves({ stdout: mockData, stderr: undefined, error: undefined });
             execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {

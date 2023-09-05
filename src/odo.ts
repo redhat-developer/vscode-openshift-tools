@@ -14,15 +14,15 @@ import * as fs from 'fs';
 import { pathExistsSync } from 'fs-extra';
 import * as path from 'path';
 import * as tempfile from 'tmp';
-import { ProviderResult, QuickPickItem, Terminal, Uri, WorkspaceFolder, commands, workspace } from 'vscode';
+import { commands, ProviderResult, QuickPickItem, Terminal, Uri, workspace, WorkspaceFolder } from 'vscode';
 import { CommandText } from './base/command';
 import * as cliInstance from './cli';
-import { CliExitData } from './cli';
 import { Command } from './odo/command';
 import { AnalyzeResponse, ComponentType, ComponentTypeAdapter, DevfileComponentType, Registry } from './odo/componentType';
 import { ComponentDescription } from './odo/componentTypeDescription';
 import { Project } from './odo/project';
 import { ToolsConfig } from './tools';
+import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
 import { KubeConfigUtils } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { WindowUtil } from './util/windowUtils';
@@ -58,14 +58,14 @@ export interface Odo {
     getProjects(): Promise<Project[]>;
     getCompTypesJson():Promise<DevfileComponentType[]>;
     getComponentTypes(): Promise<ComponentTypeAdapter[]>;
-    execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<cliInstance.CliExitData>;
+    execute(command: CommandText, cwd?: string, fail?: boolean, addEnv?: any): Promise<CliExitData>;
     executeInTerminal(command: CommandText, cwd?: string, name?: string, addEnv?: any): Promise<void>;
     requireLogin(): Promise<boolean>;
     createProject(name: string): Promise<void>;
     deleteProject(projectName: string): Promise<void>;
     createComponentFromFolder(type: string, registryName: string, name: string, path: Uri, starterName?: string, useExistingDevfile?: boolean, customDevfilePath?: string): Promise<void>;
     createService(formData: any): Promise<void>;
-    loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[]): I[];
+    loadItems<I>(result: CliExitData, fetch: (data) => I[]): I[];
     getRegistries(): Promise<Registry[]>;
     addRegistry(name: string, url: string, token: string): Promise<Registry>;
     removeRegistry(name: string): Promise<void>;
@@ -118,7 +118,6 @@ export interface Odo {
 }
 
 export class OdoImpl implements Odo {
-    private static cli: cliInstance.Cli = cliInstance.CliChannel.getInstance();
 
     private static instance: Odo;
 
@@ -130,7 +129,7 @@ export class OdoImpl implements Odo {
     }
 
     async getActiveCluster(): Promise<string> {
-        const result: cliInstance.CliExitData = await this.execute(
+        const result: CliExitData = await this.execute(
             Command.printOdoVersion(), process.cwd(), false
         );
 
@@ -183,7 +182,7 @@ export class OdoImpl implements Odo {
     }
 
     public async getCompTypesJson(): Promise<DevfileComponentType[]> {
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
+        const result: CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
         return componentTypes;
     }
@@ -191,7 +190,7 @@ export class OdoImpl implements Odo {
     public async getComponentTypes(): Promise<ComponentType[]> {
         // if kc is produced, KUBECONFIG env var is empty or pointing
 
-        const result: cliInstance.CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
+        const result: CliExitData = await this.execute(Command.listCatalogComponentsJson(), undefined, true, this.getKubeconfigEnv());
         const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
 
@@ -203,7 +202,7 @@ export class OdoImpl implements Odo {
     public async describeComponent(contextPath: string, experimental = false): Promise<ComponentDescription | undefined> {
         const expEnv = experimental ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
         try {
-            const describeCmdResult: cliInstance.CliExitData = await this.execute(
+            const describeCmdResult: CliExitData = await this.execute(
                 Command.describeComponentJson(), contextPath, false, expEnv
             );
             return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
@@ -220,13 +219,13 @@ export class OdoImpl implements Odo {
         terminal.show();
     }
 
-    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<cliInstance.CliExitData> {
+    public async execute(command: CommandText, cwd?: string, fail = true, addEnv = {}): Promise<CliExitData> {
         const env = cliInstance.CliChannel.createTelemetryEnv();
         const commandActual = `${command}`;
         const commandPrivacy = `${command.privacyMode(true)}`;
         const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
-        const result: cliInstance.CliExitData = await OdoImpl.cli.execute(
+        const result: CliExitData = await ChildProcessUtil.Instance.execute(
             toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual,
             cwd ? {cwd, env: {...env, ...addEnv}} : { env: {...env, ...addEnv} }
         );
@@ -293,7 +292,7 @@ export class OdoImpl implements Odo {
         return parse;
     }
 
-    public loadItems<I>(result: cliInstance.CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {
+    public loadItems<I>(result: CliExitData, fetch: (data) => I[] = (data): I[] => data.items): I[] {
         let data: I[] = [];
         try {
             const items = fetch(JSON.parse(result.stdout));
@@ -372,7 +371,7 @@ export class OdoImpl implements Odo {
 
     public async canCreatePod(): Promise<boolean> {
         try {
-            const result: cliInstance.CliExitData = await this.execute(Command.canCreatePod());
+            const result: CliExitData = await this.execute(Command.canCreatePod());
             if (result.stdout === 'yes') {
                 return true;
             }
@@ -384,7 +383,7 @@ export class OdoImpl implements Odo {
 
     public async isPodmanPresent(): Promise<boolean> {
         try {
-            const result: cliInstance.CliExitData = await this.execute(Command.printOdoVersionJson());
+            const result: CliExitData = await this.execute(Command.printOdoVersionJson());
             if ('podman' in JSON.parse(result.stdout)) {
                 return true;
             }

@@ -5,11 +5,11 @@
 
 import { QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
-import { Progress } from '../util/progress';
-import * as common from './common';
-import { vsCommand, VsCommandError } from '../vscommand';
 import { CommandOption, CommandText } from '../base/command';
-import { Cli, CliChannel } from '../cli';
+import { CliChannel } from '../cli';
+import { Progress } from '../util/progress';
+import { vsCommand, VsCommandError } from '../vscommand';
+import * as common from './common';
 
 export class Build {
 
@@ -56,7 +56,7 @@ export class Build {
       }
   };
 
-    protected static readonly odo: Cli = CliChannel.getInstance();
+    protected static readonly cli = CliChannel.getInstance();
 
     static getNodeContributor(): ClusterExplorerV1.NodeContributor {
       return {
@@ -97,7 +97,7 @@ export class Build {
         let result: Promise<string> = null;
         if (!buildName) buildName = await common.selectResourceByName(await Build.getBuildConfigNames('You have no BuildConfigs available to start a build'), 'Select a BuildConfig to start a build');
         if (buildName) {
-            result = Progress.execFunctionWithProgress('Starting build', () => Build.odo.executeTool(Build.command.startBuild(buildName)))
+            result = Progress.execFunctionWithProgress('Starting build', () => Build.cli.executeTool(Build.command.startBuild(buildName)))
                 .then(() => `Build '${buildName}' successfully started`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to start build with error '${err}'`, 'Failed to start build')));
         }
@@ -108,7 +108,7 @@ export class Build {
     static async showLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, 'Select a Build to see the logs');
         if (build) {
-            Build.odo.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
+            Build.cli.executeInTerminal(Build.command.showLog(build, '-build'), undefined, `OpenShift: Show '${build}' Build Log`);
         }
         return null;
     }
@@ -125,7 +125,7 @@ export class Build {
             }
         }
         if (resourceId) {
-            Build.odo.executeInTerminal(Build.command.rebuildFrom(resourceId), undefined, `OpenShift: Rebuild '${resourceId}' Build`);
+            Build.cli.executeInTerminal(Build.command.rebuildFrom(resourceId), undefined, `OpenShift: Rebuild '${resourceId}' Build`);
         }
         return null;
     }
@@ -134,7 +134,7 @@ export class Build {
     static async followLog(context: { impl: any}): Promise<string> {
         const build = await Build.selectBuild(context, 'Select a build to follow the logs');
         if (build) {
-            Build.odo.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
+            Build.cli.executeInTerminal(Build.command.followLog(build, '-build'), undefined, `OpenShift: Follow '${build}' Build Log`);
         }
         return null;
     }
@@ -144,7 +144,7 @@ export class Build {
         let result: null | string | Promise<string> | PromiseLike<string> = null;
         const build = await Build.selectBuild(context, 'Select a build to delete');
         if (build) {
-            result = Progress.execFunctionWithProgress('Deleting build', () => Build.odo.executeTool(Build.command.delete(build)))
+            result = Progress.execFunctionWithProgress('Deleting build', () => Build.cli.executeTool(Build.command.delete(build)))
                 .then(() => `Build '${build}' successfully deleted`)
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete build with error '${err}'`, 'Failed to delete build')));
         }

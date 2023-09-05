@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
 import * as vscode from 'vscode';
-import { CliChannel } from './cli';
+import { ChildProcessUtil } from './util/childProcessUtil';
 import { Platform } from './util/platform';
 import semver = require('semver');
 
@@ -68,9 +68,9 @@ export class ToolsConfig {
     public static async getVersion(location: string): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
-            let result = await CliChannel.getInstance().execute(`"${location}" version --client`);
+            let result = await ChildProcessUtil.Instance.execute(`"${location}" version --client`);
             if (result.stderr && result.stderr.indexOf('unknown flag: --client') !== -1) {
-                result = await CliChannel.getInstance().execute(`"${location}" version`);
+                result = await ChildProcessUtil.Instance.execute(`"${location}" version`);
             }
             if (result.stdout) {
                 let trimmedText = result.stdout;

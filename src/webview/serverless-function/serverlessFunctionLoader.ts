@@ -2,24 +2,29 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as cp from 'child_process';
+import * as crypto from 'crypto';
+import * as fs from 'fs/promises';
+import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as crypto from 'crypto';
-import { CliExitData } from '../../cli';
+import { OdoImpl } from '../../odo';
+import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import { Functions } from '../../serverlessFunction/functions';
-import { serverlessInstance } from '../../serverlessFunction/functionImpl';
+import { InvokeFunction } from '../../serverlessFunction/types';
+import { CliExitData } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
+import { VsCommandError } from '../../vscommand';
 import { loadWebviewHtml, validateName } from '../common-ext/utils';
-import { InvokeFunction } from '../../serverlessFunction/types';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
     bindingName: string;
 }
 
-async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
+async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
     let response: CliExitData;
     const eventName = event.action;
     const functionName = event.name;
@@ -63,7 +68,7 @@ async function gitImportMessageListener(panel: vscode.WebviewPanel, event: any):
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {
-                    response = await serverlessInstance().createFunction(event.language, event.template, selctedFolder.fsPath, event.selectedImage);
+                    response = await ServerlessFunctionViewLoader.createFunction(event.language, event.template, selctedFolder.fsPath, event.selectedImage);
                 });
             if (response && response.error) {
                 void vscode.window.showErrorMessage(`Error while creating the function ${functionName}`);
@@ -174,7 +179,7 @@ export default class ServerlessFunctionViewLoader {
             'serverlessFunctionViewer',
             panel,
         );
-        panel.webview.onDidReceiveMessage((e) => gitImportMessageListener(panel, e));
+        panel.webview.onDidReceiveMessage((e) => messageListener(panel, e));
 
         panel.onDidDispose(() => {
             if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
@@ -185,5 +190,49 @@ export default class ServerlessFunctionViewLoader {
 
         return Promise.resolve(panel);
     }
-}
 
+    static async createFunction(
+        language: string,
+        template: string,
+        location: string,
+        image: string,
+    ): Promise<CliExitData> {
+        let functionResponse: CliExitData;
+        try {
+            const response = await OdoImpl.Instance.execute(
+                ServerlessCommand.createFunction(language, template, location),
+            );
+            if (response && !response.error) {
+                const yamlContent = await Utils.getFuncYamlContent(location);
+                if (yamlContent) {
+                    yamlContent.image = image;
+                    await fs.rm(path.join(location, 'func.yaml'));
+                    await fs.writeFile(
+                        path.join(location, 'func.yaml'),
+                        JSYAML.dump(yamlContent),
+                        'utf-8',
+                    );
+                    functionResponse = {
+                        error: undefined,
+                        stderr: '',
+                        stdout: 'Success',
+                    };
+                }
+            } else {
+                await fs.rmdir(location);
+                functionResponse = response;
+            }
+        } catch (err) {
+            if (err instanceof VsCommandError) {
+                void vscode.window.showErrorMessage(err.message);
+            }
+            await fs.rmdir(location);
+            functionResponse = {
+                error: err as cp.ExecException,
+                stderr: '',
+                stdout: '',
+            };
+        }
+        return functionResponse;
+    }
+}

@@ -27,7 +27,7 @@ import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { vsCommand } from '../vscommand';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
-import { ServerlessFunction, serverlessInstance } from './functionImpl';
+import { ServerlessFunctionModel } from './functionModel';
 import { Functions } from './functions';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 
@@ -51,9 +51,10 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
-    private serverlessFunction: ServerlessFunction = serverlessInstance();
+    private serverlessFunction: ServerlessFunctionModel;
 
     private constructor() {
+        this.serverlessFunction = new ServerlessFunctionModel(this);
         try {
             this.kubeConfig = new KubeConfigUtils();
             this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
@@ -197,6 +198,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     dispose(): void {
         this.fsw?.watcher?.close();
         this.treeView.dispose();
+        this.serverlessFunction.dispose();
     }
 
     @vsCommand('openshift.Serverless.createFunction')
@@ -216,7 +218,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await Functions.getInstance().build(context);
+        await Functions.getInstance().build(context, this);
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')

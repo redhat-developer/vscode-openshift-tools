@@ -21,7 +21,6 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
-import { ServerlessFunctionImpl } from './serverlessFunction/functionImpl';
 import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
@@ -95,7 +94,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         ...Component.init(),
         ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
         ServerlessFunctionView.getInstance(),
-        ServerlessFunctionImpl.Instance,
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
         setupWorkspaceDevfileContext(),
     ];

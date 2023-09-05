@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as JSYAML from 'js-yaml';
+import * as path from 'path';
 import { Registry } from '../../odo/componentType';
-import OpenShiftItem from '../../openshift/openshiftItem';
+import * as NameValidator from '../../openshift/nameValidator';
 import { ComponentTypesView } from '../../registriesView';
 import { Devfile, DevfileRegistry } from '../common/devfile';
 
@@ -90,16 +90,16 @@ export async function isValidProjectFolder(
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
 export function validateComponentName(name: string): string {
-    let validationMessage = OpenShiftItem.emptyName('Please enter a component name.', name);
+    let validationMessage = NameValidator.emptyName('Please enter a component name.', name);
     if (!validationMessage) {
-        validationMessage = OpenShiftItem.validateMatches(
+        validationMessage = NameValidator.validateMatches(
             `Not a valid component name.
         Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
             name,
         );
     }
     if (!validationMessage) {
-        validationMessage = OpenShiftItem.lengthName(
+        validationMessage = NameValidator.lengthName(
             'Component name should be between 2-63 characters',
             name,
             0,

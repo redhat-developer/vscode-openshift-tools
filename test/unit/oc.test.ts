@@ -7,11 +7,11 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { window } from 'vscode';
-import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc';
 import { getInstance } from '../../src/odo';
 import { Project } from '../../src/odo/project';
 import { ToolsConfig } from '../../src/tools';
+import { ChildProcessUtil } from '../../src/util/childProcessUtil';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -43,7 +43,7 @@ suite('Oc', function() {
     setup(function() {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
-        execStub = sandbox.stub(CliChannel.prototype, 'execute');
+        execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');
         getActiveProjectStub = sandbox.stub(getInstance(), 'getActiveProject').resolves('my-project');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
         sandbox.stub(getInstance(), 'getActiveCluster').resolves('cluster');
