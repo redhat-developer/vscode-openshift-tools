@@ -77,7 +77,7 @@
 		"@kubernetes/client-node": "^0.16.1",
 		"@octokit/rest": "^19.0.5",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.0",
-		"clsx": "^1.1.1",
+		"clsx": "^2.0.0",
 		"fs-extra": "^10.0.0",
 		"git-up": "^7.0.0",
 		"globby": "^10.0.1",
