@@ -4,18 +4,19 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, Progress as VProgress, WebviewPanel, commands, env, window, workspace } from 'vscode';
-import { CliChannel, CliExitData } from '../cli';
+import { commands, env, ExtensionContext, Progress as VProgress, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, window, workspace } from 'vscode';
+import { CliChannel } from '../cli';
 import { getInstance } from '../odo';
 import { Command } from '../odo/command';
+import * as NameValidator from '../openshift/nameValidator';
+import { CliExitData } from '../util/childProcessUtil';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { WindowUtil } from '../util/windowUtils';
-import { VsCommandError, vsCommand } from '../vscommand';
-import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
+import { vsCommand, VsCommandError } from '../vscommand';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
 
@@ -196,7 +197,7 @@ export class Cluster extends OpenShiftItem {
                         value: clusterURl,
                         ignoreFocusOut: true,
                         prompt: 'Provide new Cluster URL to connect',
-                        validateInput: (value: string) => Cluster.validateUrl('Invalid URL provided', value)
+                        validateInput: (value: string) => NameValidator.validateUrl('Invalid URL provided', value)
                     }));
                 } else {
                     resolve(choice.label);
@@ -221,14 +222,6 @@ export class Cluster extends OpenShiftItem {
             });
             quickPick.show();
         });
-    }
-
-    @vsCommand('openshift.explorer.addCluster')
-    static async add(value: string): Promise<void> {
-        const webViewPanel: WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
-        if(value?.length > 0){
-            await webViewPanel.webview.postMessage({action: 'cluster', param: value});
-        }
     }
 
     @vsCommand('openshift.explorer.stopCluster')
@@ -421,7 +414,7 @@ export class Cluster extends OpenShiftItem {
                     ignoreFocusOut: true,
                     prompt: 'Provide Username for basic authentication to the API server',
                     value: '',
-                    validateInput: (value: string) => Cluster.emptyName('User name cannot be empty', value)
+                    validateInput: (value: string) => NameValidator.emptyName('User name cannot be empty', value)
                 })
             } else {
                 username = choice.label;
@@ -471,7 +464,7 @@ export class Cluster extends OpenShiftItem {
 
     static async getUrlFromClipboard(): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if (Cluster.ocLoginCommandMatches(clipboard)) return Cluster.clusterURL(clipboard);
+        if (NameValidator.ocLoginCommandMatches(clipboard)) return NameValidator.clusterURL(clipboard);
         return null;
     }
 
@@ -490,7 +483,7 @@ export class Cluster extends OpenShiftItem {
         }
 
         if (!clusterURL && clusterUrlFromClipboard || clusterURL?.trim() === clusterUrlFromClipboard) {
-            token = Cluster.getToken(await Cluster.readFromClipboard());
+            token = NameValidator.getToken(await Cluster.readFromClipboard());
             clusterURL = clusterUrlFromClipboard;
         }
 
@@ -538,7 +531,7 @@ export class Cluster extends OpenShiftItem {
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if(!Cluster.ocLoginCommandMatches(clipboard)) {
+        if(!NameValidator.ocLoginCommandMatches(clipboard)) {
             const choice = await window.showErrorMessage('Cannot parse login command in clipboard. Please open cluster dashboard and select `Copy login command` from user name dropdown in the upper right corner. Copy full login command to clipboard. Switch back to VSCode window and press `Login to Sandbox` button again.',
                 'Open Dashboard');
             if (choice === 'Open Dashboard') {
@@ -546,8 +539,8 @@ export class Cluster extends OpenShiftItem {
             }
             return;
         }
-        const url = Cluster.clusterURL(clipboard);
-        const token = Cluster.getToken(clipboard);
+        const url = NameValidator.clusterURL(clipboard);
+        const token = NameValidator.getToken(clipboard);
         return Cluster.tokenLogin(url, true, token);
     }
 

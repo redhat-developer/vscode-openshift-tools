@@ -5,8 +5,8 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Uri, WebviewPanel, extensions } from 'vscode';
-import OpenShiftItem from '../../openshift/openshiftItem';
+import { extensions, Uri, WebviewPanel } from 'vscode';
+import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateGitURLProps } from '../common/propertyTypes';
@@ -98,13 +98,13 @@ export function validateGitURL(event: Message): validateGitURLProps {
 }
 
 export function validateName(value: string): string | null {
-    let validationMessage = OpenShiftItem.emptyName('Required', value.trim());
+    let validationMessage = NameValidator.emptyName('Required', value.trim());
     if (!validationMessage) {
-        validationMessage = OpenShiftItem.validateMatches(
+        validationMessage = NameValidator.validateMatches(
             'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets',
             value,
         );
     }
-    if (!validationMessage) { validationMessage = OpenShiftItem.lengthName('Should be between 2-63 characters', value, 0); }
+    if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
     return validationMessage;
 }

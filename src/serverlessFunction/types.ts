@@ -5,6 +5,10 @@
 
 import { Uri } from 'vscode';
 
+export interface FunctionView {
+    refresh(context?: FunctionObject);
+}
+
 export interface FunctionContent {
     name?: string;
     deploy?: {

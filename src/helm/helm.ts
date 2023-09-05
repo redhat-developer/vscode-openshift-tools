@@ -2,7 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { CliChannel, CliExitData } from '../cli';
+import { CliChannel } from '../cli';
+import { CliExitData } from '../util/childProcessUtil';
 import * as HelmCommands from './helmCommands';
 
 export type HelmRelease = {

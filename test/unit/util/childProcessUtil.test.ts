@@ -4,18 +4,18 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as sinon from 'sinon';
 import * as childProcess from 'child_process';
-import { CliChannel } from '../../src/cli';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('Cli', () => {
+suite('ChildProcessUtil', function() {
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
-    const cli = CliChannel.getInstance();
+    const childProcessUtil = ChildProcessUtil.Instance;
     const command = 'command';
     const options: childProcess.ExecOptions = { cwd: 'cwd' };
     const stdout = 'Standard output';
@@ -25,33 +25,33 @@ suite('Cli', () => {
         name: 'name'
     };
 
-    setup(() => {
+    setup(function() {
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(childProcess, 'exec');
     });
 
-    teardown(() => {
+    teardown(function() {
         sandbox.restore();
     });
 
-    test('execute runs the given command from shell', async () => {
+    test('execute runs the given command from shell', async function() {
         execStub.yields(null, stdout, '');
-        const result = await cli.execute(command, options);
+        const result = await childProcessUtil.execute(command, options);
 
         expect(execStub).calledWithExactly(command, options, sinon.match.func);
         expect(result).deep.equals({ error: null, stdout, stderr: '', cwd: 'cwd' });
     });
 
-    test('execute uses a 2MB buffer by default', async () => {
+    test('execute uses a 2MB buffer by default', async function() {
         execStub.yields(null, stdout, '');
-        await cli.execute(command);
+        await childProcessUtil.execute(command);
 
         expect(execStub).calledOnceWith(command, { maxBuffer: 2*1024*1024 }, sinon.match.func);
     });
 
-    test('execute passes errors into its exit data', async () => {
+    test('execute passes errors into its exit data', async function() {
         execStub.yields(error, stdout, stderr);
-        const result = await cli.execute(command);
+        const result = await childProcessUtil.execute(command);
 
         expect(result).deep.equals({ error, stdout, stderr , cwd: undefined});
     });
