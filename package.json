@@ -1891,7 +1891,8 @@
 		]
 	},
 	"extensionDependencies": [
-		"redhat.vscode-redhat-account"
+		"redhat.vscode-redhat-account",
+		"ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
 	"__metadata": {
 		"id": "8fea1f1f-b45c-4eea-b479-3a92c6e697d3",
