@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import Loader from 'react-loader-spinner';
+import { Bars } from 'react-loader-spinner';
 import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
 import { withStyles, makeStyles, createStyles } from '@mui/styles';
 import { AppBar, Button, FormControlLabel, FormGroup, IconButton, Switch, Toolbar, Typography } from '@mui/material';
@@ -82,7 +82,7 @@ export default function spinner(props: any): JSX.Element {
             <AppBar position="static" style={{backgroundColor: '#1e1e1e'}}>
                 <Toolbar variant="dense">
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                        <Loader type="Bars" color="#00BFFF" height={20} width={20} />
+                        <Bars color="#00BFFF" height={20} width={20} />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}>
                     Streaming Log
