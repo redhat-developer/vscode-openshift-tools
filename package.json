@@ -103,7 +103,7 @@
 	},
 	"devDependencies": {
 		"@devfile/api": "^2.2.0-alpha-1666195451",
-		"@mui/icons-material": "^5.14.7",
+		"@mui/icons-material": "^5.14.8",
 		"@mui/lab": "^5.0.0-alpha.122",
 		"@mui/material": "^5.14.8",
 		"@mui/styles": "^5.14.7",
