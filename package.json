@@ -70,7 +70,6 @@
 		"test-integration:coverage": "npm run vscode:prepublish && npm run test:instrument && node ./out/build/run-tests.js integration",
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
 		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/install-vscode.js && node ./out/build/run-tests.js unit",
-		"update-deps": "ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
 		"cluster-ui-test": "extest setup-and-run out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i",
 		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i"
@@ -157,7 +156,6 @@
 		"leasot": "^12.0.0",
 		"mocha": "^10.2.0",
 		"mocha-jenkins-reporter": "^0.4.7",
-		"npm-check-updates": "^16.6.3",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^2.5.1",
 		"pretty-bytes": "^5.6.0",
