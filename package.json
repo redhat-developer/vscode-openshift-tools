@@ -115,7 +115,7 @@
 		"@types/express": "^4.17.13",
 		"@types/fs-extra": "^11.0.1",
 		"@types/lodash": "^4.14.177",
-		"@types/make-fetch-happen": "^9.0.1",
+		"@types/make-fetch-happen": "^10.0.1",
 		"@types/mkdirp": "^1.0.2",
 		"@types/mocha": "^10.0.1",
 		"@types/node": "^16.11.12",
