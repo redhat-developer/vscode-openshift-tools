@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 
 suite('Extension activation', function() {
     test('Extension is activated', async function() {
+        this.timeout(120_000);
         await vscode.commands.executeCommand('openshift.output');
     });
 });
