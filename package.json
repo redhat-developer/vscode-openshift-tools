@@ -77,7 +77,7 @@
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.18.1",
-		"@octokit/rest": "^19.0.5",
+		"@octokit/rest": "^20.0.1",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.0",
 		"clsx": "^2.0.0",
 		"fs-extra": "^11.1.1",
