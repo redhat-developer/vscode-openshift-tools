@@ -4,13 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs-extra';
-import type { Got } from 'got/dist/source';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 import { promisify } from 'util';
 
 // need to use `require`, since we replace these imports in the unit tests
-import got = require('got');
 import stream = require('stream');
 
 export class DownloadUtil {
@@ -20,7 +18,8 @@ export class DownloadUtil {
         progressCb?: (current: number, increment: number) => void,
         throttle = 250,
     ): Promise<void> {
-        const dls = (got as unknown as Got).stream(fromUrl);
+        const got = await import('got');
+        const dls = got.stream.get(fromUrl);
         if (progressCb) {
             let previous = 0;
             // Process progress event from 'got'

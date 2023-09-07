@@ -78,6 +78,7 @@
 		"@kubernetes/client-node": "^0.18.1",
 		"@octokit/rest": "^19.0.5",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.0",
+		"@types/got": "^9.6.12",
 		"clsx": "^2.0.0",
 		"fs-extra": "^11.1.1",
 		"git-up": "^7.0.0",
