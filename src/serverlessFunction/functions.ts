@@ -237,11 +237,11 @@ export class Functions {
             if (!deployedNamespace) {
                 await this.deployProcess(context, deployedNamespace, yamlContent);
             } else if (deployedNamespace !== currentNamespace) {
-                const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to namespace ${deployedNamespace}?`,
+                const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to current namespace ${currentNamespace}?`,
                     'Ok',
                     'Cancel');
                 if (response === 'Ok') {
-                    await this.deployProcess(context, deployedNamespace, yamlContent);
+                    await this.deployProcess(context, currentNamespace, yamlContent);
                 }
             } else {
                 await this.deployProcess(context, deployedNamespace, yamlContent);
