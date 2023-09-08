@@ -4,13 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/ban-types */
 
-import * as path from 'path';
-import validator from 'validator';
-import { QuickPickItem, commands, window } from 'vscode';
+import { commands, QuickPickItem, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
-import { Odo, OpenShiftObject, getInstance } from '../odo';
+import { getInstance, Odo, OpenShiftObject } from '../odo';
 import { Project } from '../odo/project';
 import { ServerlessFunctionView } from '../serverlessFunction/view';
+import * as NameValidator from './nameValidator';
 
 export class QuickPickCommand implements QuickPickItem {
     constructor (public label: string,
@@ -42,9 +41,9 @@ export default class OpenShiftItem {
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
             validateInput: async (value: string) => {
-                let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-                if (!validationMessage) validationMessage = OpenShiftItem.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
-                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
+                let validationMessage = NameValidator.emptyName(`Empty ${message}`, value.trim());
+                if (!validationMessage) validationMessage = NameValidator.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = NameValidator.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) {
                     try {
                         const existingResources = await data;
@@ -64,9 +63,9 @@ export default class OpenShiftItem {
             prompt: `Provide ${message}`,
             ignoreFocusOut: true,
             validateInput: async (value: string) => {
-                let validationMessage = OpenShiftItem.emptyName(`Empty ${message}`, value.trim());
-                if (!validationMessage) validationMessage = OpenShiftItem.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
-                if (!validationMessage) validationMessage = OpenShiftItem.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
+                let validationMessage = NameValidator.emptyName(`Empty ${message}`, value.trim());
+                if (!validationMessage) validationMessage = NameValidator.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
+                if (!validationMessage) validationMessage = NameValidator.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 if (!validationMessage) {
                     try {
                         const existingProjects = await data;
@@ -79,45 +78,6 @@ export default class OpenShiftItem {
                 return validationMessage;
             }
         });
-    }
-
-    static emptyName(message: string, value: string): string | null {
-        return validator.isEmpty(value) ? message : null;
-    }
-
-    static lengthName(message: string, value: string, offset: number): string | null {
-        return validator.isLength(value, {min: 2, max: 63 - offset}) ? null : message;
-    }
-
-    static validateUrl(message: string, value: string): string | null {
-        return validator.isURL(value) ? null : message;
-    }
-
-    static validateMatches(message: string, value: string): string | null {
-        return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
-    }
-
-    static validateFilePath(message: string, value: string): string | null {
-        const proposedPath = path.parse(value);
-        return /^devfile\.ya?ml$/i.test(proposedPath.base) ? null : message;
-    }
-
-    static validateRFC1123DNSLabel(message: string, value: string): string | null {
-      return validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$') ? null : message;
-    }
-
-    static clusterURL(value: string): string | null {
-        const urlRegex = value.match(/--server=(https?:\/\/[^ ]*)/);
-        return urlRegex ? urlRegex[1] : null;
-    }
-
-    static ocLoginCommandMatches(value: string): string | null {
-        return OpenShiftItem.clusterURL(value) !== null && OpenShiftItem.getToken(value) !== null ? value : null;
-    }
-
-    static getToken(value: string): string | null {
-        const tokenRegex = value.match(/--token\s*=\s*(\S*).*/);
-        return tokenRegex ? tokenRegex[1] : null;
     }
 
 }

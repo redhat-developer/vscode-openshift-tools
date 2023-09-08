@@ -7,12 +7,12 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
-import { CliExitData } from '../../../src/cli';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Cluster } from '../../../src/openshift/cluster';
-import { TokenStore, getVscodeModule } from '../../../src/util/credentialManager';
+import { CliExitData } from '../../../src/util/childProcessUtil';
+import { getVscodeModule, TokenStore } from '../../../src/util/credentialManager';
 import { TestItem } from './testOSItem';
 import pq = require('proxyquire');
 

@@ -12,25 +12,18 @@ import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 import { ThemeIcon } from 'vscode';
 
-interface ComponentInfo extends ComponentWorkspaceFolder {
-    getParent(): ComponentInfo;
+export interface ComponentInfo extends ComponentWorkspaceFolder {
 
     getChildren() : ComponentInfo[];
 
     toTreeItem() : ComponentWorkspaceFolderTreeItem;
 }
 
-abstract class ComponentInfo implements ComponentInfo {
-    parent : ComponentInfo | null;
+export abstract class ComponentInfo implements ComponentInfo {
 
-    constructor(parent : ComponentInfo, folder : ComponentWorkspaceFolder) {
-        this.parent = parent;
+    constructor(folder : ComponentWorkspaceFolder) {
         this.component = folder.component;
         this.contextPath = folder.contextPath;
-    }
-
-    getParent(): ComponentInfo {
-        return this.parent;
     }
 
     getChildren(): ComponentInfo[] {
@@ -39,12 +32,12 @@ abstract class ComponentInfo implements ComponentInfo {
 }
 
 class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
-    command :Command;
-
     private static icon = new ThemeIcon('terminal-view-icon');
 
-    constructor(parent : ComponentInfo, command : Command) {
-        super(parent, parent);
+    private command :Command;
+
+    constructor(folder : ComponentInfo, command : Command) {
+        super(folder);
         this.command = command;
     }
 
@@ -66,10 +59,6 @@ class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
 
 class ComponentInfoCommands extends ComponentInfo {
     private children : ComponentInfo[];
-
-    constructor (parent : ComponentInfo)  {
-        super(parent, parent);
-    }
 
     getChildren(): ComponentInfo[] {
         if (!this.children) {
@@ -96,14 +85,6 @@ class ComponentInfoCommands extends ComponentInfo {
 
 class ComponentInfoRoot extends ComponentInfo {
     private children : ComponentInfo[];
-
-    constructor (folder : ComponentWorkspaceFolder) {
-        super(null, folder);
-    }
-
-    getParent(): ComponentInfo {
-        return this;
-    }
 
     getChildren(): ComponentInfo[] {
         if (!this.children) {

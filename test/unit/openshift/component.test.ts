@@ -13,18 +13,20 @@ import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { Project } from '../../../src/odo/project';
-import { ComponentWorkspaceFolder } from '../../../src/odo/workspace';
+import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
 import * as Util from '../../../src/util/async';
 import { comp1Folder } from '../../fixtures';
 import { TestItem } from './testOSItem';
 import pq = require('proxyquire');
 import fs = require('fs-extra');
+import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
+import { CommandProvider } from '../../../src/odo/componentTypeDescription';
 
 const { expect } = chai;
 chai.use(sinonChai);
 
-suite('OpenShift/Component', function() {
+suite('OpenShift/Component', function () {
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub; let execStub: sinon.SinonStub;
@@ -37,7 +39,87 @@ suite('OpenShift/Component', function() {
     const componentItem = new TestItem(undefined, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
     const componentItem1: ComponentWorkspaceFolder = {
         contextPath: comp1Folder,
-        component: undefined,
+        component: {
+            devfilePath: `${path.join(fixtureFolder, 'components', 'comp1', 'devfile.yaml')}`,
+            devfileData: {
+                devfile: {
+                    schemaVersion: '2.1.0',
+                    metadata: {
+                        name: 'comp1',
+                        version: '2.0.1',
+                        displayName: 'React',
+                        description: 'React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It is maintained by Meta and a community of individual developers and companies.',
+                        tags: [
+                            'Node.js',
+                            'React'
+                        ],
+                        icon: 'https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/react.svg',
+                        projectType: 'React',
+                        language: 'Typescript',
+                    },
+                    parent: null,
+                    starterProjects: [
+                        {
+                            name: 'nodejs-react-starter'
+                        }
+                    ],
+                    components: [
+                        {
+                            name: 'runtime',
+                            container: {
+                                image: 'registry.access.redhat.com/ubi8/nodejs-16:latest',
+                                memoryLimit: '1024Mi',
+                                endpoints: [
+                                    {
+                                        name: 'http-react',
+                                        targetPort: 3000
+                                    }
+                                ],
+                                mountSources: false,
+                                volumeMounts: [],
+                            }
+                        }
+                    ],
+                    commands: [
+                        {
+                            id: 'install',
+                            exec: {
+                                group: {
+                                    kind: 'build',
+                                    isDefault: true
+                                },
+                                commandLine: 'npm install',
+                                component: 'runtime',
+                                workingDir: '${PROJECT_SOURCE}'
+                            }
+                        },
+                        {
+                            id: 'run',
+                            exec: {
+                                group: {
+                                    kind: 'run',
+                                    isDefault: true
+                                },
+                                commandLine: 'npm run dev',
+                                component: 'runtime',
+                                workingDir: '${PROJECT_SOURCE}'
+                            }
+                        }
+                    ],
+                    events: {
+                        postStart: []
+                    }
+                },
+                supportedOdoFeatures: {
+                    debug: true,
+                    deploy: true,
+                    dev: true
+                }
+            },
+            runningIn: null,
+            managedBy: 'odo',
+            devForwardedPorts: []
+        }
     };
     let Component: typeof openShiftComponent.Component;
     let commandStub: sinon.SinonStub;
@@ -50,6 +132,8 @@ suite('OpenShift/Component', function() {
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
         sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(OdoImpl.prototype, 'describeComponent').resolves(componentItem1.component);
+        sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
         sandbox.stub(Util, 'wait').resolves();
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         sandbox.stub()
@@ -114,7 +198,7 @@ suite('OpenShift/Component', function() {
                     ''
                 )
             ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1'});
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledOnce;
             expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
@@ -140,7 +224,7 @@ suite('OpenShift/Component', function() {
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 componentType1, componentType2
             ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {componentTypeName: 'componentType1'});
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledTwice;
             expect(quickPickStub).calledWith([componentType1, componentType2]);
@@ -158,7 +242,7 @@ suite('OpenShift/Component', function() {
             sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
                 componentType1
             ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {componentTypeName: 'componentType1'});
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
             expect(quickPickStub).calledTwice;
             expect(quickPickStub).calledWith([componentType1]);
@@ -171,34 +255,34 @@ suite('OpenShift/Component', function() {
                 'metadata:\n' +
                 '  name: componentName'
             );
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {componentTypeName: 'componentType1'});
+            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
             expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
         });
 
     });
 
-    suite('deleteConfigurationFiles', function() {
+    suite('deleteConfigurationFiles', function () {
 
         let subSandbox: sinon.SinonSandbox;
         let showWarningMessageStub: sinon.SinonStub<any[], any> | sinon.SinonStub<unknown[], unknown>;
 
-        suiteSetup(function() {
+        suiteSetup(function () {
             subSandbox = sinon.createSandbox();
             subSandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             subSandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
             showWarningMessageStub = subSandbox.stub<any, any>(vscode.window, 'showWarningMessage');
         });
 
-        setup(function() {
+        setup(function () {
             execStub.reset();
             showWarningMessageStub.resetBehavior();
         });
 
-        suiteTeardown(function() {
+        suiteTeardown(function () {
             subSandbox.restore();
         });
 
-        test('confirm delete', async function() {
+        test('confirm delete', async function () {
             showWarningMessageStub.resolves('Delete Configuration');
             await Component.deleteConfigurationFiles({
                 component: {
@@ -210,7 +294,7 @@ suite('OpenShift/Component', function() {
             expect(execStub.lastCall.args[0].toString().endsWith('odo component delete -f --force'));
         });
 
-        test('cancel delete', async function() {
+        test('cancel delete', async function () {
             showWarningMessageStub.resolves('Cancel');
             await Component.deleteConfigurationFiles({
                 component: {
@@ -223,7 +307,7 @@ suite('OpenShift/Component', function() {
 
     });
 
-    suite('deleteSourceFolder', function() {
+    suite('deleteSourceFolder', function () {
 
         let subSandbox: sinon.SinonSandbox;
         let rmStub: sinon.SinonStub<[path: fs.PathLike, options?: fs.RmOptions], Promise<void>>;
@@ -236,7 +320,7 @@ suite('OpenShift/Component', function() {
             };
         };
 
-        suiteSetup(function() {
+        suiteSetup(function () {
             subSandbox = sinon.createSandbox();
             subSandbox.stub(vscode.workspace, 'workspaceFolders').value([wsFolder1, wsFolder2]);
             subSandbox.stub(vscode.workspace, 'getWorkspaceFolder').returns(wsFolder1);
@@ -245,16 +329,16 @@ suite('OpenShift/Component', function() {
             showWarningMessageStub = subSandbox.stub<any, any>(vscode.window, 'showWarningMessage');
         });
 
-        setup(function() {
+        setup(function () {
             rmStub.reset();
             showWarningMessageStub.resetBehavior();
         })
 
-        suiteTeardown(function() {
+        suiteTeardown(function () {
             subSandbox.restore();
         });
 
-        test('confirm delete', async function() {
+        test('confirm delete', async function () {
             showWarningMessageStub.resolves('Delete Source Folder');
             await Component.deleteSourceFolder({
                 component: {
@@ -266,7 +350,7 @@ suite('OpenShift/Component', function() {
             expect(rmStub.lastCall.args[0]).to.equal(wsFolder1.uri.fsPath);
         });
 
-        test('cancel delete', async function() {
+        test('cancel delete', async function () {
             showWarningMessageStub.resolves('Cancel');
             await Component.deleteSourceFolder({
                 component: {
@@ -279,13 +363,14 @@ suite('OpenShift/Component', function() {
 
     });
 
-    suite.skip('describe', () => {
+    suite('describe', () => {
         setup(() => {
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.onSecondCall().resolves(componentItem);
         });
 
-        test('returns null when cancelled', async () => {
+        // Skipped due to 'null' argument value is not supported by `Component..describe'
+        test.skip('returns null when cancelled', async () => {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.describe(null);
             expect(result).null;
@@ -296,9 +381,53 @@ suite('OpenShift/Component', function() {
             expect(termStub).calledOnceWith(Command.describeComponent());
         });
 
-        test('works with no context', async () => {
+        // Skipped due to 'null' argument value is not supported by `Component..describe'
+        test.skip('works with no context', async () => {
             await Component.describe(null);
             expect(termStub).calledOnceWith(Command.describeComponent());
+        });
+    });
+
+    suite('component commands tree', () => {
+        setup(() => {
+            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
+            quickPickStub.onSecondCall().resolves(componentItem);
+        });
+
+        test('returns correct component commands tree nodes', async () => {
+            const treeDataProvider = ComponentsTreeDataProvider.instance;
+
+            // Expect 1 child node (`'comp1'`)
+            const components: ComponentWorkspaceFolder[] = await treeDataProvider.getChildren();
+            expect(components).length(1);
+            const componentNode = components[0] as ComponentInfo;
+            const componentTreeItem: vscode.TreeItem = treeDataProvider.getTreeItem(componentNode);
+            expect(componentTreeItem.label === 'comp1').true;
+
+            // Expect 1 child node (`Commands`)
+            const componentCommands: ComponentWorkspaceFolder[] = await treeDataProvider.getChildren(componentNode);
+            expect(componentCommands).length(1);
+            const componentCommandsNode = componentCommands[0] as ComponentInfo;
+            const componentCommandTreeItem: vscode.TreeItem = treeDataProvider.getTreeItem(componentCommandsNode);
+            expect(componentCommandTreeItem.label === 'Commands').true;
+
+            // Expect at least 2 child command node ('install', `run`)
+            const componentCommandsCommands: ComponentWorkspaceFolder[] = await treeDataProvider.getChildren(componentCommandsNode);
+            expect(componentCommandsCommands).length(2);
+
+            // Expect commands 'install' and 'run' to exist
+            const requiredCommands = ['install', 'run'];
+            for (let i = 0; i < componentCommandsCommands.length; i++) {
+                const componentCommandsCommandNode = componentCommandsCommands[i] as ComponentInfo;
+                const componentCommandsCommandTreeItem: vscode.TreeItem = treeDataProvider.getTreeItem(componentCommandsCommandNode);
+                expect(
+                        requiredCommands.filter(id => id === componentCommandsCommandTreeItem.label))
+                    .length(1);
+
+                expect(componentCommandsCommandNode.getChildren).length(0);
+                const commandProvider = componentCommandsCommandNode as unknown as CommandProvider;
+                expect(commandProvider.getCommand).not.null;
+            }
         });
     });
 

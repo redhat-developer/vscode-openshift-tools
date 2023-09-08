@@ -3,9 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { EventEmitter, Terminal, Uri, commands, window } from 'vscode';
-import { ClusterVersion, FunctionContent, FunctionObject, InvokeFunction, RunResponse } from './types';
+import { ChildProcess, SpawnOptions } from 'child_process';
 import validator from 'validator';
+import { commands, EventEmitter, Terminal, Uri, window } from 'vscode';
+import { CliChannel } from '../cli';
+import { OdoImpl } from '../odo';
+import { Platform } from '../util/platform';
+import { Progress } from '../util/progress';
 import { ServerlessCommand, Utils } from './commands';
 import { Platform } from '../util/platform';
 import { OdoImpl } from '../odo';
@@ -13,7 +17,7 @@ import { CliChannel, CliExitData } from '../cli';
 import { ChildProcess, SpawnOptions } from 'child_process';
 import { ServerlessFunctionView } from './view';
 import { multiStep } from './multiStepInput';
-import { Progress } from '../util/progress';
+import { ClusterVersion, FunctionContent, FunctionObject, FunctionView, InvokeFunction, RunResponse } from './types';
 
 export class Functions {
 
@@ -51,7 +55,7 @@ export class Functions {
         }
     }
 
-    public async build(context: FunctionObject): Promise<void> {
+    public async build(context: FunctionObject, view: FunctionView): Promise<void> {
         const exisitingTerminal = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
         const outputEmitter = this.buildEmiterMap.get(`build-${context.folderURI.fsPath}`);
         if (exisitingTerminal) {
@@ -81,18 +85,18 @@ export class Functions {
                         });
                         exisitingProcess.on('exit', () => {
                             context.hadBuilt = true;
-                            ServerlessFunctionView.getInstance().refresh(context);
+                            view.refresh(context);
                             outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
                         });
                     });
                 }
             });
         } else {
-            await this.buildProcess(context);
+            await this.buildProcess(context, view);
         }
     }
 
-    private async buildProcess(context: FunctionObject) {
+    private async buildProcess(context: FunctionObject, view: FunctionView) {
         const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const outputEmitter = new EventEmitter<string>();
@@ -121,7 +125,7 @@ export class Functions {
                         });
                         devProcess.on('exit', () => {
                             context.hadBuilt = true;
-                            ServerlessFunctionView.getInstance().refresh(context);
+                            view.refresh(context);
                             outputEmitter.fire('\r\nPress any key to close this terminal\r\n');
                         });
                     });
@@ -239,7 +243,7 @@ export class Functions {
     }
 
     public async deploy(context: FunctionObject) {
-        const currentNamespace: string = ServerlessFunctionView.getInstance().getCurrentNameSpace();
+        const currentNamespace: string = await OdoImpl.Instance.getActiveProject();
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
             const deployedNamespace = yamlContent.deploy?.namespace || undefined;

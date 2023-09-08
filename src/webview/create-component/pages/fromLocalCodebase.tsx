@@ -134,7 +134,15 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
         if (props.rootFolder && props.rootFolder.length != 0) {
             setProjectFolder(props.rootFolder);
-            const componentNameFromFolder: string = props.rootFolder.substring(props.rootFolder.lastIndexOf('/') + 1);
+            const isWindowsPath = props.rootFolder.charAt(1) === ':';
+            let componentNameFromFolder: string = props.rootFolder //
+                .substring(props.rootFolder.lastIndexOf(isWindowsPath ? '\\' : '/') + 1)
+                .toLocaleLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/-$/, '')
+                .replace(/^[0-9]+/, '');
+            componentNameFromFolder = componentNameFromFolder.length ? componentNameFromFolder : 'component';
             setComponentName(componentNameFromFolder);
             window.vscodeApi.postMessage({
                 action: 'validateComponentName',

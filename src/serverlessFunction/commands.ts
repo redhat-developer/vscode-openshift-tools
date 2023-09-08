@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { parse } from 'yaml';
+import { load } from 'js-yaml';
 import { CommandText, CommandOption } from '../base/command';
 import { ClusterVersion, FunctionContent, InvokeFunction } from './types';
 
@@ -14,7 +14,7 @@ export class Utils {
         let funcData: FunctionContent;
         try {
             const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
-            funcData = parse(funcYaml) as FunctionContent;
+            funcData = load(funcYaml) as FunctionContent;
         } catch (error) {
             // ignore
         }
@@ -123,19 +123,41 @@ export class ServerlessCommand {
     }
 
     static config(functionPath: string, mode: string, isAdd: boolean): CommandText {
+        const option = isAdd ? mode === 'git' ? 'set' : 'add' : 'remove';
         const commandText = new CommandText('func', 'config', [
             new CommandOption(mode),
+            new CommandOption(option),
             new CommandOption('-p', functionPath)
         ]);
-        if (isAdd) {
-            if (mode === 'git') {
-                commandText.addOption(new CommandOption('set'));
-            } else {
-                commandText.addOption(new CommandOption('add'));
-            }
-        } else {
-            commandText.addOption(new CommandOption('remove'));
-        }
+        return commandText;
+    }
+
+    static addRepo(name: string, gitURL: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('add'));
+        commandText.addOption(new CommandOption(name));
+        commandText.addOption(new CommandOption(gitURL));
+        return commandText;
+    }
+
+    static deleteRepo(name: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('remove'));
+        commandText.addOption(new CommandOption(name));
+        return commandText;
+    }
+
+    static list(): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('list'));
+        return commandText;
+    }
+
+    static renameRepo(oldName: string, newName: string): CommandText {
+        const commandText = new CommandText('func', 'repository');
+        commandText.addOption(new CommandOption('rename'));
+        commandText.addOption(new CommandOption(oldName));
+        commandText.addOption(new CommandOption(newName));
         return commandText;
     }
 }

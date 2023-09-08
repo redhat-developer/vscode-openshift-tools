@@ -1,0 +1,205 @@
+body {
+    &.vscode-light {
+        background-color: var(--color-background--darken-05);
+    }
+}
+
+button {
+    padding: 0;
+}
+
+.margin {
+    margin: 3rem;
+}
+
+.mainContainer,
+.formContainer,
+.form {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--vscode-font-family) !important;
+}
+
+.title {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.subTitle {
+    margin-bottom: 2rem;
+    width: auto;
+    word-spacing: 2px;
+    text-align: left;
+}
+
+.buttonStyle {
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--vscode-button-foreground);
+    width: 3rem;
+    height: 2.5rem !important;
+    &:hover {
+        background-color: '#BE0000' !important;
+    }
+
+    text-transform: none;
+}
+
+.MuiButton-root.Mui-disabled {
+    -webkit-text-fill-color: white !important;
+}
+
+.labelStyle {
+    text-align: center;
+    text-transform: none;
+    height: 2.5rem !important;
+    background-color: var(--vscode-button-background) !important;
+    border: 1px solid var(--vscode-settings-textInputForeground);
+}
+
+.strategyContainer {
+    display: flex;
+    flex-direction: row;
+    border-top: 3px solid;
+    max-width: 55rem;
+    margin-top: 2rem;
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+    min-height: 2rem;
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+}
+
+.strategySuccess {
+    border-color: green;
+    background-color: darkseagreen !important;
+}
+
+.strategyWarning {
+    border-color: orange;
+    background-color: burlywood !important;
+}
+
+.MuiTypography-root {
+    font-family: var(--vscode-font-family) !important;
+}
+
+.MuiFormHelperText-root {
+    color: var(--vscode-foreground) !important;
+    font-family: var(--vscode-font-family) !important;
+    margin-left: 0px !important;
+}
+
+.Mui-error {
+    color: #EE0000 !important;
+}
+
+.MuiSelect-select,
+.MuiAutocomplete-inputRoot {
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.MuiMenu-paper {
+    background-color: var(--vscode-dropdown-background) !important;
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.MuiInputLabel-root,
+.MuiFormLabel-root {
+    background-color: transparent;
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiAutocomplete-inputRoot {
+    padding: 0 !important;
+    padding-left: 5px !important;
+    height: 2.5rem !important;
+}
+
+.MuiMenuItem-root {
+    background-color: var(--vscode-dropdown-background) !important;
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.MuiMenuItem-root:hover {
+    background-color: var(--vscode-button-hoverBackground) !important;
+}
+
+.MuiFormControl-root {
+    border: none;
+    &:hover {
+        border: none;
+    }
+}
+
+.MuiOutlinedInput-notchedOutline {
+    border-color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiFormControl-fullWidth {
+    max-width: 100% !important;
+}
+
+.MuiSvgIcon-root,
+.MuiStepLabel-label {
+    color: var(--vscode-button-foreground) !important;
+}
+
+.successicon {
+    color: #198754 !important;
+}
+
+.erroricon {
+    color: #ff3333 !important;
+}
+
+.disabledicon {
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
+.MuiCircularProgress-svg {
+    color: #EE0000 !important;
+}
+
+.MuiOutlinedInput-root.Mui-disabled {
+    border: 0px solid var(--vscode-tab-unfocusedActiveBorder) !important;
+}
+
+.Mui-disabled {
+    -webkit-text-fill-color: var(--vscode-button-foreground) !important;
+}
+
+.Mui-active {
+    color: var(--vscode-button-hoverBackground) !important;
+}
+
+.MuiAutocomplete-noOptions {
+    background-color: var(--vscode-settings-textInputBackground);
+    color: var(--vscode-settings-textInputForeground) !important;
+}
+
+li:hover {
+    background-color: var(--vscode-button-hoverBackground) !important;
+}
+
+.MuiDialog-paper {
+    border: 1px groove var(--vscode-activityBar-activeBorder) !important;
+    border-radius: 1rem !important;
+    margin: auto !important;
+    background-color: #101418 !important;
+    color: var(--vscode-settings-textInputForeground) !important
+}
+
+.MuiTableCell-body {
+    color: var(--vscode-button-foreground) !important
+}
+
+.MuiTablePagination-toolbar {
+    background-color: var(--vscode-button-secondaryHoverBackground) !important;
+    color: var(--vscode-settings-textInputForeground) !important
+}

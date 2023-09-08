@@ -33,11 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout vscode-openshift-tools
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - name: Install dependencies
         run: |
           npm install -g typescript "vsce" "ovsx"
@@ -65,7 +65,7 @@ jobs:
           done
           ls -lash *.vsix *.sha256
       - name: Upload VSIX Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: openshift-toolkit
           path: openshift-toolkit*-${{ env.EXT_VERSION }}-${{github.run_number}}*.vsix
@@ -88,11 +88,11 @@ jobs:
     needs: packaging-job
     steps:
     - name: Checkout vscode-openshift-tools
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 18
     - name: Install dependencies
       run: |
         npm install -g typescript "vsce" "ovsx"

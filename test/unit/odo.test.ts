@@ -11,9 +11,10 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
-import { CliChannel, CliExitData } from '../../src/cli';
+import { CliChannel } from '../../src/cli';
 import * as odo from '../../src/odo';
 import { ToolsConfig } from '../../src/tools';
+import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { WindowUtil } from '../../src/util/windowUtils';
 
 const {expect} = chai;
@@ -57,7 +58,7 @@ suite('odo', () => {
         const command = new CommandText('odo do whatever you do');
 
         setup(() => {
-            execStub = sandbox.stub(CliChannel.prototype, 'execute');
+            execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');
             toolsStub = sandbox.stub(ToolsConfig, 'detect').resolves();
         });
 

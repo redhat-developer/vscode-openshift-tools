@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { Build } from '../../../src/k8s/build';
 import { CliChannel } from '../../../src/cli';
+import { Build } from '../../../src/k8s/build';
+import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -62,7 +63,7 @@ suite('K8s/build', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(CliChannel.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
+        execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         // sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 

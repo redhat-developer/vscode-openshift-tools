@@ -238,7 +238,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             result = [...await this.odo3.getDeploymentConfigs(), ...await this.odo3.getDeployments(), ...await Helm.getHelmReleases()];
         }
         // don't show Open In Developer Dashboard if not openshift cluster
-        const openshiftResources = await CliChannel.getInstance().executeTool(Command.isOpenshiftCluster());
+        const openshiftResources = await CliChannel.getInstance().executeTool(Command.isOpenshiftCluster(), undefined, false);
         let isOpenshiftCluster = true;
         if (openshiftResources.stdout.length === 0){
             isOpenshiftCluster = false;

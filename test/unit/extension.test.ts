@@ -105,6 +105,7 @@ suite('openshift toolkit Extension', () => {
 
     test('Extension should be present', () => {
 		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
+		assert.ok(vscode.extensions.getExtension('ms-kubernetes-tools.vscode-kubernetes-tools'));
 	});
 
     test('should register all extension commands declared commands in package descriptor', async function() {

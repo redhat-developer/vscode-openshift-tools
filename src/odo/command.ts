@@ -260,6 +260,9 @@ export class Command {
         return new CommandText('oc whoami -t');
     }
 
+    /**
+     * Only works for OpenShift clusters
+     */
     static showConsoleUrl(): CommandText {
         return new CommandText('oc get configmaps console-public -n openshift-config-managed -o json');
     }

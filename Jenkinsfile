@@ -29,8 +29,6 @@ node('rhel8'){
 
   withEnv(['TARGET=all']) {
     stage('Package sources and ovsx package') {
-        packageJson.extensionDependencies << "ms-kubernetes-tools.vscode-kubernetes-tools"
-        writeJSON file: 'package.json', json: packageJson, pretty: 4
         sh 'node ./out/build/update-readme.js'
         sh "vsce package -o openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix"
         sh "sha256sum *-ovsx.vsix > openshift-toolkit-${packageJson.version}-${env.BUILD_NUMBER}-ovsx.vsix.sha256"

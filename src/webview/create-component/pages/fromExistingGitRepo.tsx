@@ -8,6 +8,7 @@ import {
     AccordionDetails,
     AccordionSummary,
     Alert,
+    Box,
     Button,
     CircularProgress,
     Divider,
@@ -331,9 +332,17 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 ? 'Selected Devfile'
                                                 : 'Recommended Devfile'}
                                         </Typography>
-                                        <DevfileRecommendationInfo />
+                                        {!recommendedDevfile.isDevfileExistsInRepo && (
+                                            <DevfileRecommendationInfo />
+                                        )}
                                     </Stack>
-                                    {!recommendedDevfile.noRecommendation && (
+                                    {recommendedDevfile.isDevfileExistsInRepo ? (
+                                        <Box margin={2}>
+                                            <Alert severity="info">
+                                                The Devfile that exists in the repo will be used
+                                            </Alert>
+                                        </Box>
+                                    ) : (
                                         <DevfileListItem
                                             devfile={
                                                 selectedDevfile
@@ -369,15 +378,17 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         >
                                             BACK
                                         </Button>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => {
-                                                setSelectedDevfile(undefined);
-                                                setCurrentPage('selectDifferentDevfile');
-                                            }}
-                                        >
-                                            SELECT A DIFFERENT DEVFILE
-                                        </Button>
+                                        {!recommendedDevfile.isDevfileExistsInRepo && (
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => {
+                                                    setSelectedDevfile(undefined);
+                                                    setCurrentPage('selectDifferentDevfile');
+                                                }}
+                                            >
+                                                SELECT A DIFFERENT DEVFILE
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="contained"
                                             onClick={() => {
@@ -400,7 +411,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         setCurrentPage('fromGitRepo');
                     }}
                     createComponent={createComponentFromGitRepo}
-                    devfile={selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
+                    devfile={recommendedDevfile.isDevfileExistsInRepo ? undefined : selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
                     initialComponentName={gitURL.url.substring(gitURL.url.lastIndexOf('/') + 1)}
                 />
             );

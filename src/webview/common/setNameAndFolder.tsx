@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import {
+    Alert,
+    Box,
     Button,
     Checkbox,
     FormControl,
@@ -114,18 +116,22 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
             </div>
 
             <Stack direction="column" spacing={2} marginTop={2}>
-                <Paper elevation={4}>
-                    <Stack margin={2} spacing={2}>
-                        <DevfileListItem devfile={props.devfile} />
-                        {/* padding here is to match the padding build into the devfile list component */}
-                        {props.templateProject && (
-                            <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
-                                <Typography variant="body1">Project:</Typography>
-                                <code>{props.templateProject}</code>
-                            </Stack>
-                        )}
-                    </Stack>
-                </Paper>
+                {props.devfile ? (
+                    <Paper elevation={4}>
+                        <Stack margin={2} spacing={2}>
+                            <DevfileListItem devfile={props.devfile} />
+                            {/* padding here is to match the padding build into the devfile list component */}
+                            {props.templateProject && (
+                                <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
+                                    <Typography variant="body1">Project:</Typography>
+                                    <code>{props.templateProject}</code>
+                                </Stack>
+                            )}
+                        </Stack>
+                    </Paper>
+                ) : (
+                    <Alert severity="info">The Devfile that exists in the repo will be used</Alert>
+                )}
                 <ComponentNameInput
                     isComponentNameFieldValid={isComponentNameFieldValid}
                     componentNameErrorMessage={componentNameErrorMessage}

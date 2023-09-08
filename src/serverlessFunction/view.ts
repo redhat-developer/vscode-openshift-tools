@@ -15,7 +15,7 @@ import {
     TreeView,
     Uri,
     window,
-    workspace,
+    workspace
 } from 'vscode';
 
 import * as path from 'path';
@@ -24,11 +24,12 @@ import { Platform } from '../util/platform';
 import { Context, KubernetesObject } from '@kubernetes/client-node';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
-import { ServerlessFunction, serverlessInstance } from './functionImpl';
-import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
-import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
-import { Functions } from './functions';
 import { vsCommand } from '../vscommand';
+import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
+import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
+import { ServerlessFunctionModel } from './functionModel';
+import { Functions } from './functions';
+import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 
 const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
@@ -50,9 +51,10 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
-    private serverlessFunction: ServerlessFunction = serverlessInstance();
+    private serverlessFunction: ServerlessFunctionModel;
 
     private constructor() {
+        this.serverlessFunction = new ServerlessFunctionModel(this);
         try {
             this.kubeConfig = new KubeConfigUtils();
             this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
@@ -101,7 +103,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
         } else if ('context' in element) {
             const functionObj: FunctionObject = element;
             const explorerItem: ExplorerItem = {
-                label: functionObj.name,
+                label: functionObj?.name,
                 collapsibleState: TreeItemCollapsibleState.None
             }
             if (functionObj.context !== FunctionStatus.NONE) {
@@ -196,11 +198,17 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     dispose(): void {
         this.fsw?.watcher?.close();
         this.treeView.dispose();
+        this.serverlessFunction.dispose();
     }
 
     @vsCommand('openshift.Serverless.createFunction')
     static async openServerlessFunction(): Promise<void> {
         await ServerlessFunctionViewLoader.loadView('Serverless Function - Create');
+    }
+
+    @vsCommand('openshift.Serverless.manageRepository')
+    static async openManageRepository(): Promise<void> {
+        await ManageRepositoryViewLoader.loadView('Manage Repository');
     }
 
     @vsCommand('openshift.Serverless.refresh')
@@ -210,7 +218,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.build')
     static async buildFunction(context: FunctionObject) {
-        await Functions.getInstance().build(context);
+        await Functions.getInstance().build(context, this);
     }
 
     @vsCommand('openshift.Serverless.buildAndRun')

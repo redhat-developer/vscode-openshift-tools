@@ -28,7 +28,8 @@ void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
 
     // Install extensions that openshift-toolkit depends on
     const extensionsToInstall = [
-        'redhat.vscode-redhat-account'
+        'redhat.vscode-redhat-account',
+        'ms-kubernetes-tools.vscode-kubernetes-tools'
     ];
 
     const extensionRootPath = path.resolve(__dirname, '..', '..');

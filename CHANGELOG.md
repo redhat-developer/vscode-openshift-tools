@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.7.0 (August 31, 2023)
+ * [#3010](https://github.com/redhat-developer/vscode-openshift-tools/issues/3010) Create UI for invoking serverless functions.
+ * [#3056](https://github.com/redhat-developer/vscode-openshift-tools/issues/3056) Configure serverless function environment, labels, volumes, and git.
+ * [#3055](https://github.com/redhat-developer/vscode-openshift-tools/issues/3055) Manage repositories of serverless function templates.
+ * [#2811](https://github.com/redhat-developer/vscode-openshift-tools/issues/2811) View and run devfile commands on running components from the components view.
+ * [#2668](https://github.com/redhat-developer/vscode-openshift-tools/issues/2668) Support binding services to a component.
+ * [#3131](https://github.com/redhat-developer/vscode-openshift-tools/pull/3131) Update `odo` to 3.14.0.
+ * [#3119](https://github.com/redhat-developer/vscode-openshift-tools/pull/3119) Update `crc` to 2.25.0.
+ * [#3133](https://github.com/redhat-developer/vscode-openshift-tools/pull/3133) Background of "Create serverless function" UI respects the user's colour theme.
+ * [#3104](https://github.com/redhat-developer/vscode-openshift-tools/issues/3104) Import from git no longer fails if there is an existing Devfile.
+ * [#3127](https://github.com/redhat-developer/vscode-openshift-tools/issues/3127) Fixed "Create Component from Folder" doesn't trim suggested name to last portion of the path on Windows.
+ * [#3122](https://github.com/redhat-developer/vscode-openshift-tools/issues/3122) Fixed "Create Component From Folder" always uses first open folder, regardless of which one was right clicked on.
+ * [#3150](https://github.com/redhat-developer/vscode-openshift-tools/issues/3150) Attempt to sanitize the suggest name for the component in "Create Component from Folder".
+
 ## 1.6.0 (August 14, 2023)
  * [#2922](https://github.com/redhat-developer/vscode-openshift-tools/issues/2922) Combine different component creation strategies ("From Git", "From Local Folder", "From Template") into one, new UI.
  * [#3039](https://github.com/redhat-developer/vscode-openshift-tools/issues/3039) Add `Create Component from Folder` context menu item to quickly create components from file explorer

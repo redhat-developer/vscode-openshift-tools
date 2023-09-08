@@ -3,19 +3,22 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { V220Devfile, V220DevfileCommandsItemsExecGroup } from '@devfile/api';
 import { KubeConfig } from '@kubernetes/client-node';
+import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs/promises';
-import * as _ from 'lodash';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
-import { EventEmitter, window, workspace } from 'vscode';
+import { EventEmitter, Terminal, window, workspace } from 'vscode';
+import * as JSYAML from 'js-yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { getInstance } from '../../src/odo';
 import { Command } from '../../src/odo/command';
+import { ComponentDescription } from '../../src/odo/componentTypeDescription';
 
 const ODO = getInstance();
 const kc = new KubeConfig();
@@ -25,23 +28,26 @@ const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
 suite('odo commands integration', function () {
 
+    const isOpenShift = process.env.IS_OPENSHIFT || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     suiteSetup(async function() {
-        try {
-            await ODO.execute(Command.odoLogout());
-        } catch (e) {
-            // do nothing
+        if (isOpenShift) {
+            try {
+                await ODO.execute(Command.odoLogout());
+            } catch (e) {
+                // do nothing
+            }
+            await ODO.execute(
+                Command.odoLoginWithUsernamePassword(
+                    clusterUrl,
+                    username,
+                    password,
+                ),
+            );
         }
-        await ODO.execute(
-            Command.odoLoginWithUsernamePassword(
-                clusterUrl,
-                username,
-                password,
-            ),
-        );
         kc.loadFromDefault();
     });
 
@@ -49,15 +55,21 @@ suite('odo commands integration', function () {
         let token: string;
 
         suiteSetup(async function() {
-            // get current user token and logout
-            await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-            token = (await ODO.execute(Command.getCurrentUserToken())).stdout;
-            await ODO.execute(Command.odoLogout());
+            if (isOpenShift) {
+                // get current user token and logout
+                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+                token = (await ODO.execute(Command.getCurrentUserToken())).stdout;
+                await ODO.execute(Command.odoLogout());
+            } else {
+                this.skip();
+            }
         });
 
         suiteTeardown(async function() {
             // log back in for the rest of the tests
-            await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            if (isOpenShift) {
+                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            }
         });
 
         teardown(async function() {
@@ -99,12 +111,20 @@ suite('odo commands integration', function () {
     });
 
     test('getCurrentUserName()', async function() {
-        const cliData = await ODO.execute(Command.getCurrentUserName());
-        expect(cliData.stdout).to.contain(username);
+        if (isOpenShift) {
+            const cliData = await ODO.execute(Command.getCurrentUserName());
+            expect(cliData.stdout).to.contain(username);
+        } else {
+            this.skip();
+        }
     });
 
     test('getCurrentUserToken()', async function() {
-        await ODO.execute(Command.getCurrentUserToken());
+        if (isOpenShift) {
+            await ODO.execute(Command.getCurrentUserToken());
+        } else {
+            this.skip();
+        }
     });
 
     suite('project-related commands', function() {
@@ -166,17 +186,21 @@ suite('odo commands integration', function () {
     });
 
     test('showConsoleUrl()', async function () {
-        const canI = await ODO.execute(
-            new CommandText('oc auth can-i get configmap --namespace openshift-config-managed'),
-            undefined,
-            false,
-        ).then((result) => {
-            return !result.stdout.startsWith('no');
-        });
-        if (!canI) {
-            this.skip();
+        if (isOpenShift) {
+            const canI = await ODO.execute(
+                new CommandText('oc auth can-i get configmap --namespace openshift-config-managed'),
+                undefined,
+                false,
+            ).then((result) => {
+                return !result.stdout.startsWith('no');
+            });
+            if (!canI) {
+                this.skip();
+            } else {
+                await ODO.execute(Command.showConsoleUrl());
+            }
         } else {
-            await ODO.execute(Command.showConsoleUrl());
+            this.skip();
         }
     });
 
@@ -219,7 +243,7 @@ suite('odo commands integration', function () {
     suite('services', function() {
 
         const serviceName = 'my-test-service';
-        const projectName = `my-test-project${_.random(100)}`;
+        const projectName = 'my-test-service-project1';
 
         // taken from https://docs.openshift.com/container-platform/3.11/dev_guide/deployments/kubernetes_deployments.html
         const serviceFileYaml = //
@@ -248,15 +272,22 @@ suite('odo commands integration', function () {
         suiteSetup(async function () {
             serviceFile = await promisify(tmp.file)();
             await fs.writeFile(serviceFile, serviceFileYaml);
-            await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
-            await ODO.execute(Command.createProject(projectName));
+            if (isOpenShift) {
+                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            }
+            try {
+                await ODO.execute(Command.createProject(projectName));
+            } catch (e) {
+                // do nothing, it probably already exists
+            }
             await ODO.execute(Command.setNamespace(projectName));
         });
 
         suiteTeardown(async function() {
-            await ODO.execute(new CommandText(`oc delete deployment ${serviceName}`));
+            await ODO.execute(new CommandText(`oc delete deployment ${serviceName} --namespace ${projectName}  --force=true`));
             await fs.rm(serviceFile);
-            await ODO.execute(Command.deleteProject(projectName));
+            // this call fails to exit on kind/minikube during integration tests
+            void ODO.deleteProject(projectName);
         });
 
         test('ocCreate()', async function() {
@@ -275,7 +306,9 @@ suite('odo commands integration', function () {
             await ODO.execute(Command.createProject(newProjectName));
             await ODO.execute(Command.setNamespace(newProjectName));
             componentLocation = await promisify(tmp.dir)();
-            await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            if (isOpenShift) {
+                await ODO.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            }
         });
 
         suiteTeardown(async function () {
@@ -443,4 +476,251 @@ suite('odo commands integration', function () {
         });
     });
 
+    suite('component dev', function() {
+        const componentName = 'my-test-component';
+        const componentType = 'nodejs';
+        const componentStarterProject = 'nodejs-starter';
+        let componentLocation: string;
+
+        suiteSetup(async function () {
+            if (isOpenShift) {
+                await ODO.execute(
+                    Command.odoLoginWithUsernamePassword(clusterUrl, username, password),
+                );
+            }
+            await ODO.execute(Command.createProject(newProjectName));
+            await ODO.execute(Command.setNamespace(newProjectName));
+            componentLocation = await promisify(tmp.dir)();
+        });
+
+        suiteTeardown(async function () {
+            let toRemove = -1;
+            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+                if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
+                    toRemove = i;
+                    break;
+                }
+            }
+            if (toRemove !== -1) {
+                workspace.updateWorkspaceFolders(toRemove, 1);
+            }
+            await fs.rm(componentLocation, { recursive: true, force: true });
+            await ODO.execute(Command.deleteProject(newProjectName));
+        });
+
+        interface TerminalListener {
+            onOutput(data: string): void;
+            onError(data:string): void;
+        }
+
+        function executeCommandInTerminal(commandText: CommandText, cwd: string, listener?: TerminalListener) : Terminal {
+            const outputEmitter = new EventEmitter<string>();
+            outputEmitter.event(data => {
+                if (listener) listener.onOutput(data);
+            });
+            let devProcess: ChildProcess;
+            function failListener(_error) {
+                assert.fail('odo dev errored before it was closed');
+            }
+            return window.createTerminal({
+                name: 'test terminal',
+                pty: {
+                    open: () => {
+                        void CliChannel.getInstance().spawnTool(Command.dev(true),
+                            {
+                                cwd
+                            })
+                            .then(childProcess => {
+                                devProcess = childProcess
+                                devProcess.on('error', failListener);
+                                devProcess.stdout.on('data', data => {
+                                    if (listener) listener.onOutput(data);
+                                });
+                                devProcess.stderr.on('data', data => {
+                                    if (listener) listener.onError(data);
+                                });
+                            });
+                    },
+                    close: () => {
+                        if (devProcess) {
+                            devProcess.removeListener('error', failListener);
+                            devProcess.kill('SIGINT');
+                        }
+                    },
+                    handleInput: (data: string) => {
+                        // Close terminal on any input
+                        if (data.length) {
+                            if (devProcess) {
+                                devProcess.removeListener('error', failListener);
+                                devProcess.kill('SIGINT');
+                            }
+                        }
+                    },
+                    onDidWrite: outputEmitter.event
+                }
+            });
+        }
+
+        async function startDevInTerminal(cwd?) : Promise<Terminal> {
+            let termOutput = '';
+            let termError = '';
+            const term = executeCommandInTerminal(Command.dev(true), cwd, {
+                onOutput(data) {
+                    termOutput = termOutput.concat(data);
+                },
+                onError(data) {
+                    termError = termError.concat(data);
+                }
+            });
+
+            let hopesLeft = 30;
+            let devIsRunning = false;
+            do {
+                hopesLeft--;
+                await new Promise<void>(resolve => setTimeout(resolve, 2000));
+                let index = termOutput.indexOf(`Developing using the "${componentName}" Devfile`);
+                if (index >= 0) index = termOutput.indexOf('✓  Pod is Running', index);
+                if (index >= 0) index = termOutput.indexOf('↪ Dev mode', index);
+                devIsRunning = (index >= 0);
+            } while (hopesLeft > 0 && !devIsRunning);
+            if (!devIsRunning) {
+                if (termError.trim().length > 0) {
+                    fail(`Start Dev failed: ${termError}`);
+                }
+                fail('Waiting for pod to start is timed out');
+            }
+            return term;
+        }
+
+        const helloWorldCommandId = 'hello-world';
+        const helloWorldCommandOutput = 'Hello, World!';
+        const helloWorldCommandExecCommandLine = `echo "${helloWorldCommandOutput}"`;
+
+        async function runComponentCommandInTerminal(commandId: string, cwd?) : Promise<Terminal> {
+            let termOutput = '';
+            let termError = '';
+            const term = executeCommandInTerminal(Command.runComponentCommand(commandId), cwd, {
+                onOutput(data) {
+                    termOutput = termOutput.concat(data);
+                },
+                onError(data) {
+                    termError = termError.concat(data);
+                }
+            });
+
+            let hopesLeft = 30;
+            let commandIdRunning = false;
+            do {
+                hopesLeft--;
+                await new Promise<void>(resolve => setTimeout(resolve, 2000));
+                commandIdRunning = termOutput.indexOf(helloWorldCommandOutput) >= -1;
+            } while (hopesLeft > 0 && !commandIdRunning);
+            if (!commandIdRunning) {
+                if (termError.trim().length > 0) {
+                    fail(`Run Component Command failed: ${termError}`);
+                }
+                fail('Waiting for command to start executing is timed out');
+            }
+            return term;
+        }
+
+        async function fixupDevFile(devfilePath: string): Promise<void> {
+            // Parse YAML into an Object, add:
+            //
+            // - exec:
+            //     group:
+            //       kind: run
+            //     commandLine: echo "Hello, World!"
+            //     component: runtime
+            //   id: hello-world
+            //
+            // and then save into the same debfile.yaml
+            const file = await fs.readFile(devfilePath, 'utf8');
+            const devfile = JSYAML.load(file.toString()) as V220Devfile;
+            if (!devfile || !devfile.commands) {
+                fail(`DevFile '${devfilePath}' cannot be read`);
+            }
+            const devfileCommands = devfile.commands;
+            let helloWorldCommand;
+            for (let i = 0; i < devfileCommands.length; i++) {
+                if(devfileCommands[i].id === helloWorldCommandId) {
+                    helloWorldCommand = devfileCommands[i];
+                    break;
+                }
+            }
+            if (helloWorldCommand) {
+                helloWorldCommand.exec = {
+                    group:{
+                        kind: V220DevfileCommandsItemsExecGroup.KindEnum.Run
+                    },
+                    commandLine: helloWorldCommandExecCommandLine,
+                    component: 'runtime'
+                }
+            } else {
+                devfileCommands.push({
+                    exec: {
+                        group:{
+                            kind: V220DevfileCommandsItemsExecGroup.KindEnum.Run
+                        },
+                        commandLine: helloWorldCommandExecCommandLine,
+                        component: 'runtime'
+                    },
+                    id: helloWorldCommandId
+                })
+            }
+            await fs.writeFile(devfilePath, JSYAML.dump(devfile));
+        }
+
+        test('runComponentCommand()', async function () {
+             await ODO.execute(
+                Command.createLocalComponent(
+                    componentType,
+                    'DefaultDevfileRegistry',
+                    componentName,
+                    componentStarterProject,
+                    undefined,
+                    undefined,
+                    '2.1.1'
+                ),
+                componentLocation
+            );
+            const devfilePath = path.join(componentLocation, 'devfile.yaml')
+            await fs.access(devfilePath);
+
+            fixupDevFile(devfilePath);
+
+            const describeCmdResult = await ODO.execute(Command.describeComponentJson(), componentLocation);
+            const componentDescription = JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+            expect(componentDescription.devfileData.devfile.commands[0]?.id).exist;
+
+            const commands = componentDescription.devfileData.devfile.commands
+            let helloCommand: Command;
+            for (let i = 0; i < commands.length; i++) {
+                if (commands[i].id && helloWorldCommandId === commands[i].id) {
+                    helloCommand = commands[i];
+                    break;
+                }
+            }
+            if (!helloCommand) {
+                fail(`Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`);
+            }
+
+            let devTerm : Terminal;
+            let runCommandTerm : Terminal;
+            try {
+                devTerm = await startDevInTerminal(componentLocation);
+                runCommandTerm = await runComponentCommandInTerminal(helloWorldCommandId, componentLocation);
+            } finally {
+                // we instruct the pseudo terminals to close the dev session when any text is sent
+                if (runCommandTerm) {
+                    runCommandTerm.sendText('exit');
+                    runCommandTerm.dispose();
+                }
+                if (devTerm) {
+                    devTerm.sendText('exit');
+                    devTerm.dispose();
+                }
+            }
+        });
+    });
 });

@@ -4,14 +4,14 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import * as sinon from 'sinon';
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as shelljs from 'shelljs';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
+import * as shelljs from 'shelljs';
+import * as sinon from 'sinon';
+import * as vscode from 'vscode';
+import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
-import { CliExitData, CliChannel } from '../../src/cli';
 
 import hasha = require('hasha');
 import pq = require('proxyquire');
@@ -40,7 +40,7 @@ suite('tools configuration', () => {
     suite('getVersion()', () => {
         test('returns version number with expected output', async () => {
             const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
-            sb.stub(CliChannel.prototype, 'execute').resolves(testData);
+            sb.stub(ChildProcessUtil.prototype, 'execute').resolves(testData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('odo');
@@ -49,7 +49,7 @@ suite('tools configuration', () => {
 
         test('returns version undefined for unexpected output', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
-            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
+            sb.stub(ChildProcessUtil.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');
@@ -58,7 +58,7 @@ suite('tools configuration', () => {
 
         test('returns version undefined for not existing tool', async () => {
             const invalidData: CliExitData = { error: undefined, stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
-            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
+            sb.stub(ChildProcessUtil.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(false);
 
             const result: string = await ToolsConfig.getVersion('oc');
@@ -67,7 +67,7 @@ suite('tools configuration', () => {
 
         test('returns version undefined for tool that does not support version parameter', async () => {
             const invalidData: CliExitData = { error: new Error('something bad happened'), stderr: '', stdout: 'ocunexpected v0-0-13 (65b5bed8) \n line two' };
-            sb.stub(CliChannel.prototype, 'execute').resolves(invalidData);
+            sb.stub(ChildProcessUtil.prototype, 'execute').resolves(invalidData);
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');

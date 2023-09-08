@@ -10,7 +10,7 @@ import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
@@ -18,14 +18,13 @@ import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
-import { gitUrlParse } from '../../util/gitParse';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import {
     getDevfileRegistries,
     isValidProjectFolder,
     validateComponentName
 } from '../common-ext/createComponentHelpers';
-import { loadWebviewHtml } from '../common-ext/utils';
+import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 
 interface CloneProcess {
@@ -235,6 +234,10 @@ export default class CreateComponentLoader {
                         action: 'cloneFailed',
                     });
                 } else {
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'devfileExists',
+                        data: await isDevfileExists(tmpFolder),
+                    });
                     CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 }
                 break;
@@ -283,11 +286,13 @@ export default class CreateComponentLoader {
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
-                        await OdoImpl.Instance.createComponentFromLocation(
-                            devfileType,
-                            componentName,
-                            Uri.file(componentFolder),
-                        );
+                        if (!await isDevfileExists(Uri.file(componentFolder))) {
+                            await OdoImpl.Instance.createComponentFromLocation(
+                                devfileType,
+                                componentName,
+                                Uri.file(componentFolder),
+                            );
+                        }
                         await sendTelemetry('newComponentCreated', {
                             strategy,
                             component_type: devfileType,
@@ -326,7 +331,14 @@ export default class CreateComponentLoader {
              * The panel requested to validate the git repository URL.
              */
             case 'validateGitURL': {
-                validateGitURL(message);
+                const response = validateGitURL(message);
+                CreateComponentLoader.panel?.webview.postMessage({
+                    action: message.action,
+                    data: {
+                        isValid: !response.error,
+                        helpText: response.helpText
+                    }
+                });
                 break;
             }
             /**
@@ -373,7 +385,7 @@ export default class CreateComponentLoader {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
                         const file = await fs.readFile(devFileV1Path, 'utf8');
-                        const devfileV1 = YAML.parse(file.toString());
+                        const devfileV1 = JSYAML.load(file.toString());
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
@@ -382,7 +394,7 @@ export default class CreateComponentLoader {
                             devfileV1,
                             endPoints,
                         );
-                        const yaml = YAML.stringify(devfileV2, { sortMapEntries: true });
+                        const yaml = JSYAML.dump(devfileV2, { sortKeys: true });
                         await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
                         CreateComponentLoader.panel?.webview.postMessage({
                             action: 'devfileRegenerated',
@@ -455,62 +467,6 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
             return false;
         }
     }
-}
-
-function validateGitURL(event: any) {
-    if (typeof event.data === 'string' && (event.data as string).trim().length === 0) {
-        CreateComponentLoader.panel?.webview.postMessage({
-            action: event.action,
-            data: {
-                isValid: false,
-                helpText: 'Please enter a Git URL.',
-            },
-        });
-    } else {
-        try {
-            const parse = gitUrlParse(event.data);
-            const isGitRepo = isGitURL(parse.host);
-            if (!isGitRepo) {
-                throw 'Invalid Git URL';
-            }
-            if (parse.organization !== '' && parse.name !== '') {
-                CreateComponentLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    data: {
-                        isValid: true,
-                        helpText: 'The git repo URL is valid.',
-                    },
-                });
-            } else {
-                CreateComponentLoader.panel?.webview.postMessage({
-                    action: event.action,
-                    data: {
-                        isValid: false,
-                        helpText: 'URL is missing organization or repo name.',
-                    },
-                });
-            }
-        } catch (e) {
-            CreateComponentLoader.panel?.webview.postMessage({
-                action: event.action,
-                data: {
-                    isValid: false,
-                    helpText: 'Invalid Git URL.',
-                },
-            });
-        }
-    }
-}
-
-function isGitURL(host: string): boolean {
-    return [
-        'github.com',
-        'bitbucket.org',
-        'gitlab.com',
-        'git.sr.ht',
-        'codeberg.org',
-        'gitea.com',
-    ].includes(host);
 }
 
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {

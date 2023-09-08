@@ -30,7 +30,6 @@ button {
     width: auto;
     word-spacing: 2px;
     text-align: left;
-    color: var(--vscode-foreground);
 }
 
 .buttonStyle {
@@ -88,7 +87,6 @@ button {
 
 .MuiTypography-root {
     font-family: var(--vscode-font-family) !important;
-    color: var(--vscode-settings-textInputForeground) !important;
 }
 
 .MuiFormHelperText-root {
@@ -149,6 +147,18 @@ button {
 
 .MuiSvgIcon-root,
 .MuiStepLabel-label {
+    color: var(--vscode-button-foreground) !important;
+}
+
+.successicon {
+    color: #198754 !important;
+}
+
+.erroricon {
+    color: #ff3333 !important;
+}
+
+.disabledicon {
     color: var(--vscode-settings-textInputForeground) !important;
 }
 
@@ -161,7 +171,7 @@ button {
 }
 
 .Mui-disabled {
-    -webkit-text-fill-color: var(--vscode-titleBar-inactiveForeground) !important;
+    -webkit-text-fill-color: var(--vscode-button-foreground) !important;
 }
 
 .Mui-active {
@@ -175,4 +185,21 @@ button {
 
 li:hover {
     background-color: var(--vscode-button-hoverBackground) !important;
+}
+
+.MuiDialog-paper {
+    border: 1px groove var(--vscode-activityBar-activeBorder) !important;
+    border-radius: 1rem !important;
+    margin: auto !important;
+    background-color: #101418 !important;
+    color: var(--vscode-settings-textInputForeground) !important
+}
+
+.MuiTableCell-body {
+    color: var(--vscode-button-foreground) !important
+}
+
+.MuiTablePagination-toolbar {
+    background-color: var(--vscode-button-secondaryHoverBackground) !important;
+    color: var(--vscode-settings-textInputForeground) !important
 }

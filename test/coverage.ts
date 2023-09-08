@@ -9,15 +9,9 @@
 
 import paths = require('path');
 import fs = require('fs');
-
+import * as mkdirp from 'mkdirp';
 const istanbul = require('istanbul');
 const remapIstanbul = require('remap-istanbul');
-
-function _mkDirIfExists(dir: string): void {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
-}
 
 export interface TestRunnerOptions {
     relativeCoverageDir?: string;
@@ -43,7 +37,7 @@ export class CoverageRunner {
      *
      * @memberOf CoverageRunner
      */
-    public reportCoverage(): void {
+    public async reportCoverage(): Promise<void> {
         // istanbul.hook.unhookRequire();
 
         if (typeof global[this.coverageVar] === 'undefined' || Object.keys(global[this.coverageVar]).length === 0) {
@@ -58,8 +52,7 @@ export class CoverageRunner {
         const coverageFile = paths.resolve(reportingDir, `coverage${pidExt}.json`);
 
         // yes, do this again since some test runners could clean the dir initially created
-        _mkDirIfExists(reportingDir);
-
+        await mkdirp(reportingDir);
         fs.writeFileSync(coverageFile, JSON.stringify(cov), 'utf8');
 
         const remappedCollector = remapIstanbul.remap(cov, {
@@ -74,5 +67,6 @@ export class CoverageRunner {
         reporter.write(remappedCollector, true, () => {
             console.log(`Reports written to ${reportingDir}`);
         });
+
     }
 }

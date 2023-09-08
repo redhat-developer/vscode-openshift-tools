@@ -2,8 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
-import { ChangeEvent } from 'react';
 import { ComponentTypeDescription, Registry } from '../../odo/componentType';
 import { StarterProject } from '../../odo/componentTypeDescription';
 import { ChartResponse } from '../helm-chart/helmChartType';
@@ -83,4 +81,10 @@ export interface RunFunctionPageProps extends DefaultProps {
     folderPath: Uri;
     skip: (stepCount: number) => void;
     onRunSubmit: (folderPath: Uri, build: boolean) => void;
+}
+
+export interface validateGitURLProps {
+    url: string;
+    error: boolean;
+    helpText: string;
 }

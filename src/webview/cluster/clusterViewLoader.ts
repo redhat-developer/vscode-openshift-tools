@@ -6,10 +6,10 @@ import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { CliChannel } from '../../cli';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
+import { ChildProcessUtil } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
 import { WindowUtil } from '../../util/windowUtils';
 import { vsCommand } from '../../vscommand';
@@ -333,6 +333,14 @@ export default class ClusterViewLoader {
         });
     }
 
+    @vsCommand('openshift.explorer.addCluster')
+    static async add(value: string): Promise<void> {
+        const webViewPanel: vscode.WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
+        if(value?.length > 0){
+            await webViewPanel.webview.postMessage({action: 'cluster', param: value});
+        }
+    }
+
     static async crcSaveSettings(event) {
         const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
         await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
@@ -367,10 +375,10 @@ export default class ClusterViewLoader {
 
     public static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
         const crcCredArray = [];
-        const crcVerInfo = await CliChannel.getInstance().execute(`"${filePath}" version -o json`);
+        const crcVerInfo = await ChildProcessUtil.Instance.execute(`"${filePath}" version -o json`);
         channel.append(`\n\n"${filePath}" version -o json\n`);
         channel.append(crcVerInfo.stdout);
-        const result =  await CliChannel.getInstance().execute(`"${filePath}" status -o json`);
+        const result =  await ChildProcessUtil.Instance.execute(`"${filePath}" status -o json`);
         channel.append(`\n\n"${filePath}" status -o json\n`);
         channel.append(result.stdout);
         if (result.error || crcVerInfo.error) {
@@ -384,7 +392,7 @@ export default class ClusterViewLoader {
                 creds: crcCredArray
             });
         }
-        const crcCreds = await CliChannel.getInstance().execute(`"${filePath}" console --credentials -o json`);
+        const crcCreds = await ChildProcessUtil.Instance.execute(`"${filePath}" console --credentials -o json`);
         if (!crcCreds.error) {
             try {
                 crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);

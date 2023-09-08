@@ -10,7 +10,6 @@ import {
     EventEmitter, TreeDataProvider,
     TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
-import { CliExitData } from './cli';
 import { getInstance, Odo, OdoImpl } from './odo';
 import { Command } from './odo/command';
 import {
@@ -19,6 +18,7 @@ import {
     Registry
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
+import { CliExitData } from './util/childProcessUtil';
 import { Progress } from './util/progress';
 import { vsCommand, VsCommandError } from './vscommand';
 import fetch = require('make-fetch-happen');

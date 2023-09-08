@@ -6,18 +6,18 @@
 import { V1Deployment } from '@kubernetes/client-node';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
-import * as _ from 'lodash';
 import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, window, workspace } from 'vscode';
-import * as YAML from 'yaml';
+import * as JSYAML from 'js-yaml';
 import { CommandText } from '../../src/base/command';
 import * as Odo from '../../src/odo';
 import { Command } from '../../src/odo/command';
 import { Project } from '../../src/odo/project';
 
 suite('odo integration', function () {
+    const isOpenShift = process.env.IS_OPENSHIFT || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -25,12 +25,14 @@ suite('odo integration', function () {
     const odo: Odo.Odo = Odo.getInstance();
 
     suiteSetup(async function () {
-        try {
-            await odo.execute(Command.odoLogout());
-        } catch (e) {
-            // do nothing
+        if (isOpenShift) {
+            try {
+                await odo.execute(Command.odoLogout());
+            } catch (e) {
+                // do nothing
+            }
+            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
         }
-        await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
     });
 
     suiteTeardown(async function () {
@@ -46,7 +48,9 @@ suite('odo integration', function () {
             // do nothing
         }
 
-        await odo.execute(Command.odoLogout());
+        if (isOpenShift) {
+            await odo.execute(Command.odoLogout());
+        }
     });
 
     suite('clusters', function () {
@@ -131,7 +135,9 @@ suite('odo integration', function () {
         });
 
         suiteTeardown(async function () {
-            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            if (isOpenShift) {
+                await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            }
             const newWorkspaceFolders = workspace.workspaceFolders.filter((workspaceFolder) => {
                 const fsPath = workspaceFolder.uri.fsPath;
                 return (fsPath !== tmpFolder1.fsPath && fsPath !== tmpFolder2.fsPath);
@@ -164,16 +170,18 @@ suite('odo integration', function () {
             const canCreatePod1 = await odo.canCreatePod();
             expect(canCreatePod1).to.exist;
             expect(canCreatePod1).to.equal(true);
-            await odo.execute(Command.odoLogout());
-            const canCreatePod2 = await odo.canCreatePod();
-            expect(canCreatePod2).to.exist;
-            expect(canCreatePod2).to.equal(false);
+            if (isOpenShift) {
+                await odo.execute(Command.odoLogout());
+                const canCreatePod2 = await odo.canCreatePod();
+                expect(canCreatePod2).to.exist;
+                expect(canCreatePod2).to.equal(false);
+            }
         });
     });
 
     suite('services', function () {
         const serviceName = 'my-test-service';
-        const projectName = `my-test-project${_.random(100)}`;
+        const projectName = 'my-test-service-project2';
 
         // taken from https://docs.openshift.com/container-platform/3.11/dev_guide/deployments/kubernetes_deployments.html
         const serviceFileYaml = //
@@ -204,14 +212,16 @@ suite('odo integration', function () {
                 // do nothing
             }
             await odo.createProject(projectName);
+            await odo.execute(Command.setNamespace(projectName));
         });
 
-        suiteTeardown(async function () {
-            await odo.execute(Command.deleteProject(projectName));
+        suiteTeardown(function () {
+            // this call fails to exit on minikube/kind
+            void odo.deleteProject(projectName);
         });
 
         test('createService()', async function () {
-            await odo.createService(YAML.parse(serviceFileYaml));
+            await odo.createService(JSYAML.load(serviceFileYaml));
             const deploymentsOutput = await odo.execute(Command.getDeployments(projectName));
             const deployments: V1Deployment[] = JSON.parse(deploymentsOutput.stdout).items;
             const deploymentNames = deployments.map((deployment) => deployment.metadata.name);
@@ -272,8 +282,16 @@ suite('odo integration', function () {
     });
 
     suite('require login', function () {
+        suiteSetup(function () {
+            if (!isOpenShift) {
+                this.skip();
+            }
+        });
+
         suiteTeardown(async function () {
-            await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            if (isOpenShift) {
+                await odo.execute(Command.odoLoginWithUsernamePassword(clusterUrl, username, password));
+            }
         });
 
         test('requireLogin()', async function () {
