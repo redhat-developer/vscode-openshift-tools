@@ -8,6 +8,7 @@ import validator from 'validator';
 import { commands, EventEmitter, Terminal, Uri, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { OdoImpl } from '../odo';
+import { CliExitData } from '../util/childProcessUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { ServerlessCommand, Utils } from './commands';
@@ -227,6 +228,14 @@ export class Functions {
                 void commands.executeCommand('openshift.Serverless.refresh');
             }
         });
+    }
+
+    public async getTemplates(): Promise<CliExitData> {
+        const result = await OdoImpl.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+        if (result.error) {
+            void window.showErrorMessage(result.error.message);
+        }
+        return JSON.parse(result.stdout);
     }
 
     public async deploy(context: FunctionObject) {

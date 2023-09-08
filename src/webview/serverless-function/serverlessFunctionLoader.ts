@@ -100,6 +100,12 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
             await Functions.getInstance().invoke(functionName, invokeFunData);
             panel.dispose();
             break;
+        case 'getTemplates':
+            const templates = await Functions.getInstance().getTemplates();
+            panel?.webview.postMessage({
+                action: eventName,
+                basicTemplates: templates
+            })
         default:
             break;
     }

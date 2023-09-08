@@ -30,6 +30,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
         helpText?: string
     },
     images: string[],
+    baseTemplates: string[],
     templates: string[],
     language: string,
     template: string,
@@ -52,6 +53,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                 helpText: `Image name should be in the form of '[registry]/[namespace]/[name]:[tag]'`
             },
             images: [],
+            baseTemplates: [],
             templates: [],
             language: '',
             template: '',
@@ -60,7 +62,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             showLoadScreen: false
         }
         VSCodeMessage.postMessage({
-            action: 'selectFolder'
+            action: 'getTemplates'
         });
     }
 
@@ -98,6 +100,13 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                         wsFolderItems: message.data.wsFolderItems
                     });
                 }
+            } else if (message.data.action === 'getTemplates') {
+                this.setState({
+                    baseTemplates: message.data.basicTemplates
+                });
+                VSCodeMessage.postMessage({
+                    action: 'selectFolder'
+                });
             }
         });
     }
@@ -129,15 +138,9 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
     handleDropDownChange = (_event: any, value: string, isLang = false): void => {
         if (isLang) {
-            if (value !== 'Python') {
-                this.setState({
-                    templates: ['Cloud Events', 'HTTP']
-                });
-            } else {
-                this.setState({
-                    templates: ['Cloud Events', 'Flask', 'HTTP', 'WSGI']
-                })
-            }
+            this.setState({
+                templates: this.state.baseTemplates[this.convert(value)]
+            });
             this.setState({
                 language: value,
                 template: ''
