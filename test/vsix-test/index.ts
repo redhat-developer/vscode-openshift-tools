@@ -19,12 +19,10 @@ const config: Mocha.MochaOptions = {
 const mocha = new Mocha(config);
 
 export function run(): Promise<void> {
-     return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
-        glob('**/**.test.js', { cwd: testsRoot }, (error, files): void => {
-            if (error) {
-                reject(error);
-            } else {
+        glob('**/**.test.js', { cwd: testsRoot })
+            .then(files => {
                 files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
                 mocha.run(failures => {
                     if (failures > 0) {
@@ -33,7 +31,8 @@ export function run(): Promise<void> {
                         resolve();
                     }
                 });
-            }
-        });
+            }).catch(error => {
+                reject(error);
+            });
     });
 }

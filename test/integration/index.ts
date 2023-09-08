@@ -37,13 +37,12 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 
 async function collectTests(testsRoot: string): Promise<string[]> {
     const files = await new Promise<string[]>((resolve, reject) => {
-        glob('**.test.js', { cwd: testsRoot }, (error, files): void => {
-            if (error) {
-                reject(error);
-            } else {
+        glob('**.test.js', { cwd: testsRoot })
+            .then(files => {
                 resolve(files);
-            }
-        });
+            }).catch(error => {
+                reject(error);
+            });
     });
     return files;
 }
