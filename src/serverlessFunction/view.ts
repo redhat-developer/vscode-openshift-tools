@@ -43,7 +43,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     private fsw: FileContentChangeNotifier;
     private kubeContext: Context;
     private kubeConfig: KubeConfigUtils;
-    private currentNameSpace: string;
 
     private eventEmitter: EventEmitter<ExplorerItem | undefined> =
         new EventEmitter<ExplorerItem | undefined>();
@@ -158,14 +157,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             'Local Only' : context === FunctionStatus.CLUSTERONLY ? 'Cluster Only' : '';
     }
 
-    setCurrentNameSpace(value: string) {
-        this.currentNameSpace = value;
-    }
-
-    public getCurrentNameSpace(): string {
-        return this.currentNameSpace;
-    }
-
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         if (!element) {
@@ -177,7 +168,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                     }
                     result = [functionNode]
                 }
-            this.setCurrentNameSpace(this.kubeContext?.namespace);
         }
         return result;
     }
