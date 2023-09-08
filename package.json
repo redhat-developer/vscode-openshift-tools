@@ -1627,11 +1627,11 @@
 				},
 				{
 					"command": "openshift.Serverless.deploy",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/ && isLoggedIn"
 				},
 				{
 					"command": "openshift.Serverless.undeploy",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localDeployFunctions|deployFunctions)$/"
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localDeployFunctions|deployFunctions)$/ && isLoggedIn"
 				},
 				{
 					"command": "openshift.Serverless.stopRun",

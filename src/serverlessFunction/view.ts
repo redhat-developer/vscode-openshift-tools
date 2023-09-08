@@ -169,16 +169,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         if (!element) {
-            result = [{
-                kind: 'project',
-                metadata: {
-                    name: this.kubeContext?.namespace,
-                },
-            } as KubernetesObject];
-            this.setCurrentNameSpace(this.kubeContext?.namespace);
-        } else if ('kind' in element) {
-            if (element.kind === 'project') {
-                result = [...await this.serverlessFunction.getLocalFunctions()]
+            result = [...await this.serverlessFunction.getLocalFunctions()]
                 if (result.length === 0) {
                     const functionNode: FunctionObject = {
                         name: 'No Available Functions',
@@ -186,7 +177,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                     }
                     result = [functionNode]
                 }
-            }
+            this.setCurrentNameSpace(this.kubeContext?.namespace);
         }
         return result;
     }
