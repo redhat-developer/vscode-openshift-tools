@@ -19,11 +19,8 @@ import {
 } from 'vscode';
 
 import * as path from 'path';
-import { Platform } from '../util/platform';
 
 import { Context, KubernetesObject } from '@kubernetes/client-node';
-import { KubeConfigUtils } from '../util/kubeUtils';
-import { FileContentChangeNotifier, WatchUtil } from '../util/watch';
 import { vsCommand } from '../vscommand';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
@@ -31,18 +28,12 @@ import { ServerlessFunctionModel } from './functionModel';
 import { Functions } from './functions';
 import { FunctionContextType, FunctionObject, FunctionStatus } from './types';
 
-const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
-
 type ExplorerItem = KubernetesObject | FunctionObject | Context | TreeItem;
 
 export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, Disposable {
     private static instance: ServerlessFunctionView;
 
     private treeView: TreeView<ExplorerItem>;
-
-    private fsw: FileContentChangeNotifier;
-    private kubeContext: Context;
-    private kubeConfig: KubeConfigUtils;
 
     private eventEmitter: EventEmitter<ExplorerItem | undefined> =
         new EventEmitter<ExplorerItem | undefined>();
@@ -54,29 +45,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     private constructor() {
         this.serverlessFunction = new ServerlessFunctionModel(this);
-        try {
-            this.kubeConfig = new KubeConfigUtils();
-            this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
-        } catch (err) {
-            // ignore config loading error
-        }
-        try {
-            this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
-        } catch (err) {
-            void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
-        }
-        this.fsw?.emitter?.on('file-changed', () => {
-            const ku2 = new KubeConfigUtils();
-            const newCtx = ku2.getContextObject(ku2.currentContext);
-            if (!this.kubeContext
-                || (this.kubeContext.cluster !== newCtx.cluster
-                    || this.kubeContext.user !== newCtx.user
-                    || this.kubeContext.namespace !== newCtx.namespace)) {
-                this.refresh();
-            }
-            this.kubeContext = newCtx;
-            this.kubeConfig = ku2;
-        });
         this.treeView = window.createTreeView<ExplorerItem>('openshiftServerlessFunctionsView', {
             treeDataProvider: this,
         });
@@ -177,7 +145,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     dispose(): void {
-        this.fsw?.watcher?.close();
         this.treeView.dispose();
         this.serverlessFunction.dispose();
     }
