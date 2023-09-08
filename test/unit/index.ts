@@ -37,13 +37,12 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 function createTestFinder(testsRoot: string) {
     return (pattern: string): Promise<string[]> => {
         return new Promise((resolve, reject) => {
-            glob(pattern, { cwd: testsRoot }, (error, files): void => {
-                if (error) {
-                    reject(error);
-                } else {
+            glob(pattern, { cwd: testsRoot })
+                .then(files => {
                     resolve(files);
-                }
-            });
+                }).catch(error => {
+                    reject(error);
+                });
         });
     }
 }
