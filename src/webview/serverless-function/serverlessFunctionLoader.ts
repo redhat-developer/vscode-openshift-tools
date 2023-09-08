@@ -28,7 +28,7 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
     let response: CliExitData;
     const eventName = event.action;
     const functionName = event.name;
-    const functionPath: vscode.Uri = event.folderPath ? vscode.Uri.from(event.folderPath) : undefined;
+    const functionPath: vscode.Uri = event.folderPath;
     switch (eventName) {
         case 'validateName':
             const flag = validateName(functionName);
@@ -64,11 +64,14 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
             });
             break;
         case 'createFunction':
-            const selctedFolder: vscode.Uri = vscode.Uri.file(path.join(functionPath.fsPath, functionName));
+            let selctedFolder: vscode.Uri = vscode.Uri.file(functionPath.fsPath);
+            if ((await fs.readdir(selctedFolder.fsPath)).length !== 0) {
+                selctedFolder = vscode.Uri.file(path.join(selctedFolder.fsPath, functionName));
+            }
             await Progress.execFunctionWithProgress(
                 `Creating function '${functionName}'`,
                 async () => {
-                    response = await ServerlessFunctionViewLoader.createFunction(event.language, event.template, selctedFolder.fsPath, event.selectedImage);
+                    response = await ServerlessFunctionViewLoader.createFunction(functionName, event.language, event.template, selctedFolder.fsPath, event.selectedImage);
                 });
             if (response && response.error) {
                 void vscode.window.showErrorMessage(`Error while creating the function ${functionName}`);
@@ -198,6 +201,7 @@ export default class ServerlessFunctionViewLoader {
     }
 
     static async createFunction(
+        name: string,
         language: string,
         template: string,
         location: string,
@@ -206,7 +210,7 @@ export default class ServerlessFunctionViewLoader {
         let functionResponse: CliExitData;
         try {
             const response = await OdoImpl.Instance.execute(
-                ServerlessCommand.createFunction(language, template, location),
+                ServerlessCommand.createFunction(name, language, template, location),
             );
             if (response && !response.error) {
                 const yamlContent = await Utils.getFuncYamlContent(location);

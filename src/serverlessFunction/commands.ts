@@ -60,8 +60,8 @@ export class ServerlessCommand {
         return commandText
     }
 
-    static createFunction(language: string, template: string, location: string): CommandText {
-        return new CommandText(`func create ${location}`, undefined, [
+    static createFunction(name: string, language: string, template: string, location: string): CommandText {
+        return new CommandText(`func create ${name} ${location}`, undefined, [
             new CommandOption('-l', language),
             new CommandOption('-t', template)
         ]);
