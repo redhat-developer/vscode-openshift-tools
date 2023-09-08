@@ -234,7 +234,7 @@ export class Functions {
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
             const deployedNamespace = yamlContent.deploy?.namespace || undefined;
-            if (!deployedNamespace) {
+            if (!deployedNamespace || (deployedNamespace === currentNamespace)) {
                 await this.deployProcess(context, deployedNamespace, yamlContent);
             } else if (deployedNamespace !== currentNamespace) {
                 const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to current namespace ${currentNamespace}?`,
@@ -243,8 +243,6 @@ export class Functions {
                 if (response === 'Ok') {
                     await this.deployProcess(context, currentNamespace, yamlContent);
                 }
-            } else {
-                await this.deployProcess(context, deployedNamespace, yamlContent);
             }
         }
     }
