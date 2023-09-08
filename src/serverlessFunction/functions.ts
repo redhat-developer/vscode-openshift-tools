@@ -8,14 +8,10 @@ import validator from 'validator';
 import { commands, EventEmitter, Terminal, Uri, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { OdoImpl } from '../odo';
+import { CliExitData } from '../util/childProcessUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { ServerlessCommand, Utils } from './commands';
-import { Platform } from '../util/platform';
-import { OdoImpl } from '../odo';
-import { CliChannel, CliExitData } from '../cli';
-import { ChildProcess, SpawnOptions } from 'child_process';
-import { ServerlessFunctionView } from './view';
 import { multiStep } from './multiStepInput';
 import { ClusterVersion, FunctionContent, FunctionObject, FunctionView, InvokeFunction, RunResponse } from './types';
 
@@ -239,7 +235,7 @@ export class Functions {
         if (result.error) {
             void window.showErrorMessage(result.error.message);
         }
-        return result;
+        return JSON.parse(result.stdout);
     }
 
     public async deploy(context: FunctionObject) {
