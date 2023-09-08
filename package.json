@@ -105,7 +105,7 @@
 		"@mui/lab": "^5.0.0-alpha.122",
 		"@mui/material": "^5.14.8",
 		"@mui/styles": "^5.14.7",
-		"@rjsf/core": "^5.0.0-beta.14",
+		"@rjsf/core": "^5.13.0",
 		"@rjsf/validator-ajv8": "^5.12.1",
 		"@segment/analytics-next": "^1.17.4",
 		"@svgr/plugin-jsx": "^8.1.0",
