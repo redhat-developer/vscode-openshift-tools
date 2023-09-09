@@ -12,14 +12,7 @@ import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 import { ThemeIcon } from 'vscode';
 
-export interface ComponentInfo extends ComponentWorkspaceFolder {
-
-    getChildren() : ComponentInfo[];
-
-    toTreeItem() : ComponentWorkspaceFolderTreeItem;
-}
-
-class BaseComponentInfo implements ComponentInfo {
+export class ComponentInfo implements ComponentWorkspaceFolder {
     contextPath: string;
     component: ComponentDescription;
 
@@ -37,7 +30,7 @@ class BaseComponentInfo implements ComponentInfo {
     }
 }
 
-class ComponentInfoCommand extends BaseComponentInfo implements CommandProvider {
+class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
     private static icon = new ThemeIcon('terminal-view-icon');
 
     private command :Command;
@@ -63,7 +56,7 @@ class ComponentInfoCommand extends BaseComponentInfo implements CommandProvider 
     }
 }
 
-class ComponentInfoCommands extends BaseComponentInfo {
+class ComponentInfoCommands extends ComponentInfo {
     private children : ComponentInfo[];
 
     getChildren(): ComponentInfo[] {
@@ -89,7 +82,7 @@ class ComponentInfoCommands extends BaseComponentInfo {
     }
 }
 
-class ComponentInfoRoot extends BaseComponentInfo {
+class ComponentInfoRoot extends ComponentInfo {
     private children : ComponentInfo[];
 
     getChildren(): ComponentInfo[] {
