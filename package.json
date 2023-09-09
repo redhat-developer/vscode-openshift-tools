@@ -106,7 +106,7 @@
 		"@mui/material": "^5.14.8",
 		"@mui/styles": "^5.14.7",
 		"@rjsf/core": "^5.13.0",
-		"@rjsf/validator-ajv8": "^5.12.1",
+		"@rjsf/validator-ajv8": "^5.13.0",
 		"@segment/analytics-next": "^1.17.4",
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^4.3.6",
