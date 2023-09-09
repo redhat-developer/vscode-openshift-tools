@@ -102,7 +102,8 @@
     "no-trailing-spaces": "error",
     "@typescript-eslint/prefer-regexp-exec": 0,
     "quotes": [ "error", "single"],
-    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none" }]
+    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none" }],
+    "@typescript-eslint/no-explicit-any": 1
   },
   "overrides": [
     {

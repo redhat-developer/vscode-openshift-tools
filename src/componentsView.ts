@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
-import { Command, CommandProvider } from './odo/componentTypeDescription';
+import { Command, CommandProvider, ComponentDescription } from './odo/componentTypeDescription';
 import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 import { ThemeIcon } from 'vscode';
@@ -19,11 +19,17 @@ export interface ComponentInfo extends ComponentWorkspaceFolder {
     toTreeItem() : ComponentWorkspaceFolderTreeItem;
 }
 
-export abstract class ComponentInfo implements ComponentInfo {
+class BaseComponentInfo implements ComponentInfo {
+    contextPath: string;
+    component: ComponentDescription;
 
     constructor(folder : ComponentWorkspaceFolder) {
         this.component = folder.component;
         this.contextPath = folder.contextPath;
+    }
+
+    toTreeItem(): ComponentWorkspaceFolderTreeItem {
+        throw new Error('Method not implemented.');
     }
 
     getChildren(): ComponentInfo[] {
@@ -31,7 +37,7 @@ export abstract class ComponentInfo implements ComponentInfo {
     }
 }
 
-class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
+class ComponentInfoCommand extends BaseComponentInfo implements CommandProvider {
     private static icon = new ThemeIcon('terminal-view-icon');
 
     private command :Command;
@@ -57,7 +63,7 @@ class ComponentInfoCommand extends ComponentInfo implements CommandProvider {
     }
 }
 
-class ComponentInfoCommands extends ComponentInfo {
+class ComponentInfoCommands extends BaseComponentInfo {
     private children : ComponentInfo[];
 
     getChildren(): ComponentInfo[] {
@@ -83,7 +89,7 @@ class ComponentInfoCommands extends ComponentInfo {
     }
 }
 
-class ComponentInfoRoot extends ComponentInfo {
+class ComponentInfoRoot extends BaseComponentInfo {
     private children : ComponentInfo[];
 
     getChildren(): ComponentInfo[] {

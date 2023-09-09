@@ -23,6 +23,7 @@ export class Delayer<T> {
 
     private completionPromise: Promise<any> | null;
 
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     private doResolve: ((value?: any | Promise<any>) => void) | null;
 
     private task: Task<T | Promise<T>> | null;

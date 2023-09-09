@@ -48,7 +48,8 @@ async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourc
       // assuming now that it’s a project node
       const projectName = node.name;
       if (projectName === lastNamespace) {
-          treeItem.label = `* ${treeItem.label}`;
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            treeItem.label = `* ${treeItem.label}`;
       } else {
           treeItem.contextValue = `${treeItem.contextValue || ''}.openshift.inactiveProject`;
       }

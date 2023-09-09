@@ -9,6 +9,7 @@ import { Registry } from '../../odo/componentType';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ComponentTypesView } from '../../registriesView';
 import { Devfile, DevfileRegistry } from '../common/devfile';
+import { format } from 'url';
 
 /**
  * Represents if something if valid, and if not, why
@@ -129,7 +130,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
     const components = ComponentTypesView.instance.getCompDescriptions();
     for (const component of components) {
         const devfileRegistry = devfileRegistries.find(
-            (devfileRegistry) => devfileRegistry.url === component.registry.url.toString(),
+             (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
         );
 
         devfileRegistry.devfiles.push({

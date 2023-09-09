@@ -11,7 +11,7 @@ import * as stackTraceParser from 'stacktrace-parser';
 import sendTelemetry, { TelemetryProps, CommonCommandProps } from './telemetry';
 import { ExtensionID } from './util/constants';
 
-type VsCommandFunction = (...args: any[]) => Promise<any> | any;
+type VsCommandFunction = (...args: any[]) => Promise<string | undefined> | string | undefined;
 
 interface VsCommand {
     commandId: string;
@@ -33,7 +33,7 @@ export class VsCommandError extends Error {
 
 const vsCommands: VsCommand[] = [];
 
-function displayResult(result: unknown): void {
+function displayResult(result: string | undefined): void {
     if (result && `${result}`) {
         window.showInformationMessage(`${result}`);
     }

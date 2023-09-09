@@ -68,7 +68,7 @@ interface ComponentDevState {
     // dev state
     devTerminal?: Terminal;
     devProcess?: ChildProcess;
-    devStatus?: string;
+    devStatus?: ComponentContextState;
     contextValue?: string;
     devProcessStopRequest?: DevProcessStopRequest;
     // debug state
