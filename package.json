@@ -1756,7 +1756,7 @@
 						"title": "Create Function",
 						"description": "Creates a Function in the mentioned directory with the specified language/runtime selected and handles HTTP events. \n[Create Function](command:openshift.Serverless.createFunction)",
 						"media": {
-							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/create.gif",
+							"image": "images/walkthrough/serverless-function/create.gif",
 							"altText": "Create function"
 						},
 						"completionEvents": [
@@ -1768,7 +1768,7 @@
 						"title": "Build Function",
 						"description": "Build a function project (source code in the workspace) as a container image and push to a registry.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/build.gif",
+							"image": "images/walkthrough/serverless-function/build.gif",
 							"altText": "Build function"
 						}
 					},
@@ -1777,7 +1777,7 @@
 						"title": "Run the Function locally",
 						"description": "Run your function to see how it works locally before to push it on your cluster.\nOnly a function which has the source code opened in the IDE can be run. Right click on the function you want to run (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Run\". The output channel will show up with run command where you can see the logs.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/run.gif",
+							"image": "images/walkthrough/serverless-function/run.gif",
 							"altText": "Run function"
 						}
 					},
@@ -1786,7 +1786,7 @@
 						"title": "Deploy the Function",
 						"description": "Deploys a function to the currently configured Knative-enabled cluster from your IDE.\nOnly a function which has the source code opened in the IDE can be pushed. Right-click on the function you want to deploy (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Deploy\". The Output Channel will show up with the deploy command where you can see the logs.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/deploy.gif",
+							"image": "images/walkthrough/serverless-function/deploy.gif",
 							"altText": "Deploy function"
 						}
 					},
@@ -1795,7 +1795,7 @@
 						"title": "Invoke a Function",
 						"description": "Invokes the function by sending a test request to the currently running function instance, either locally or remote.\nOnly a function which has the source code opened in the IDE can be invoked. Right-click on the function you want to invoke (look for its node in the Functions tree), open the context menu (right-click on the node) and click on \"Invoke\". Provide all necessary details and click on Invoke. \nNote: The function need to be run before invoke it.",
 						"media": {
-							"image": "https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/walkthrough/serverless-function/invoke.gif",
+							"image": "images/walkthrough/serverless-function/invoke.gif",
 							"altText": "Invoke function"
 						}
 					}
