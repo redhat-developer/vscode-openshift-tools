@@ -36,6 +36,12 @@ export class ServerlessFunctionModel implements Disposable {
         const folders: Uri[] = [];
         if (workspace.workspaceFolders) {
             for (const wf of workspace.workspaceFolders) {
+                const entries = await fs.readdir(wf.uri.fsPath, { withFileTypes: true });
+                for (const file of entries) {
+                    if (file.isDirectory() && fs.existsSync(path.join(wf.uri.fsPath, file.name, 'func.yaml'))) {
+                        folders.push(Uri.file(path.join(wf.uri.fsPath, file.name)));
+                    }
+                }
                 if (fs.existsSync(path.join(wf.uri.fsPath, 'func.yaml'))) {
                     folders.push(wf.uri);
                 }
