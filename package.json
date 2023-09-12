@@ -1766,7 +1766,7 @@
 					{
 						"id": "createFunctionWithGitTemplate",
 						"title": "Create Function using git template",
-						"description": "Creates a Function in the mentioned directory with the specified git based template selected and handles HTTP events. \n[Create Function](command:openshift.Serverless.createFunction)",
+						"description": "Creates a Function in the mentioned directory with the specified git based template selected. \n[Create Function](command:openshift.Serverless.createFunction)",
 						"media": {
 							"image": "images/walkthrough/serverless-function/create-function-template.gif",
 							"altText": "Create function"
