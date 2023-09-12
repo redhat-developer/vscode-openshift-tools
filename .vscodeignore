@@ -8,6 +8,7 @@ out/tools-cache/**
 out/**/*.map
 out/src-orig/**
 src/**
+!src/tools.json
 doc/**
 .gitignore
 .github
