@@ -229,7 +229,7 @@ export class Cluster extends OpenShiftItem {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
-        const crcPath = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+        const crcPath: string = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
         if(crcPath) {
             newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path'};
             pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true});

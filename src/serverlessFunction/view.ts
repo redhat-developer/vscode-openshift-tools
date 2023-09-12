@@ -121,8 +121,9 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     getDescription(context: string): string {
-        return context === FunctionStatus.CLUSTERLOCALBOTH ? 'Local/Cluster' : context === FunctionStatus.LOCALONLY ?
-            'Local Only' : context === FunctionStatus.CLUSTERONLY ? 'Cluster Only' : '';
+        return context === `${FunctionStatus.CLUSTERLOCALBOTH}` ?
+            'Local/Cluster' : context === `${FunctionStatus.LOCALONLY}` ?
+                'Local Only' : context === `${FunctionStatus.CLUSTERONLY}` ? 'Cluster Only' : '';
     }
 
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {

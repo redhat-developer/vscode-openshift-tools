@@ -28,7 +28,7 @@ export interface FunctionObject {
     runtime?: string;
     folderURI?: Uri;
     ready?: string;
-    context: string;
+    context: FunctionStatus;
     hasImage?: boolean;
     hadBuilt?: boolean;
     isRunning?: boolean;

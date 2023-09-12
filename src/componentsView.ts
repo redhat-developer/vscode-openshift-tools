@@ -7,23 +7,22 @@ import * as path from 'path';
 import * as vsc from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
-import { Command, CommandProvider } from './odo/componentTypeDescription';
+import { Command, CommandProvider, ComponentDescription } from './odo/componentTypeDescription';
 import { Component } from './openshift/component';
 import { vsCommand } from './vscommand';
 import { ThemeIcon } from 'vscode';
 
-export interface ComponentInfo extends ComponentWorkspaceFolder {
-
-    getChildren() : ComponentInfo[];
-
-    toTreeItem() : ComponentWorkspaceFolderTreeItem;
-}
-
-export abstract class ComponentInfo implements ComponentInfo {
+export class ComponentInfo implements ComponentWorkspaceFolder {
+    contextPath: string;
+    component: ComponentDescription;
 
     constructor(folder : ComponentWorkspaceFolder) {
         this.component = folder.component;
         this.contextPath = folder.contextPath;
+    }
+
+    toTreeItem(): ComponentWorkspaceFolderTreeItem {
+        throw new Error('Method not implemented.');
     }
 
     getChildren(): ComponentInfo[] {
