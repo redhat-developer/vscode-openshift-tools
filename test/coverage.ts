@@ -9,7 +9,7 @@
 
 import paths = require('path');
 import fs = require('fs');
-import * as mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 const istanbul = require('istanbul');
 const remapIstanbul = require('remap-istanbul');
 
