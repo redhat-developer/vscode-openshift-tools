@@ -28,7 +28,7 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
     let response: CliExitData;
     const eventName = event.action;
     const functionName = event.name;
-    const functionPath: vscode.Uri = event.folderPath ? vscode.Uri.from(event.folderPath) : undefined;
+    const functionPath: vscode.Uri = event.folderPath;
     switch (eventName) {
         case 'validateName':
             const flag = validateName(functionName);
