@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.8.0 (September 14, 2023)
+ * [#3128](https://github.com/redhat-developer/vscode-openshift-tools/issues/3128) Create Serverless Functions based on templates from configured template repositories.
+ * [#3251](https://github.com/redhat-developer/vscode-openshift-tools/issues/3251) Add a walkthrough for creating a Serverless Function from a template.
+ * [#3260](https://github.com/redhat-developer/vscode-openshift-tools/issues/3260) Improve README with content about Serverless Functions.
+ * [#3136](https://github.com/redhat-developer/vscode-openshift-tools/issues/3136) Fix newly created Serverless Functions not appearing in serverless functions view when they are created outside of the workspace.
+ * [#3154](https://github.com/redhat-developer/vscode-openshift-tools/issues/3154) Fix "No such file" error when opening "Create OpenShift Local Cluster".
+ * [#3145](https://github.com/redhat-developer/vscode-openshift-tools/issues/3145) Don't show the current namespace in the Serverless Functions view.
+ * [#3268](https://github.com/redhat-developer/vscode-openshift-tools/issues/3268) Fix Developer Sandbox WebView font color not adapting when switching to a light theme.
+ * [#3272](https://github.com/redhat-developer/vscode-openshift-tools/issues/3272) Fix links to screencasts in READMEs.
+ * [#3091](https://github.com/redhat-developer/vscode-openshift-tools/issues/3091) Depend on vscode-kubernetes while developing and testing the extension.
+ * [#3239](https://github.com/redhat-developer/vscode-openshift-tools/pull/3239) Update crc to 2.26.0.
+ * [#3189](https://github.com/redhat-developer/vscode-openshift-tools/pull/3189) Check for and remove cycles in module dependencies.
+ * Update many of the extension dependencies.
+ * Remove many unused extension dependencies.
+
 ## 1.7.0 (August 31, 2023)
  * [#3010](https://github.com/redhat-developer/vscode-openshift-tools/issues/3010) Create UI for invoking serverless functions.
  * [#3056](https://github.com/redhat-developer/vscode-openshift-tools/issues/3056) Configure serverless function environment, labels, volumes, and git.
