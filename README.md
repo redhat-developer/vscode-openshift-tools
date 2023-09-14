@@ -4,14 +4,14 @@
 
 [![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/redhat.vscode-openshift-connector?style=for-the-badge&label=VS%20Marketplace&logo=visual-studio-code&color=blue)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/redhat.vscode-openshift-connector?style=for-the-badge&color=purple)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector)
-[![Gitter](https://img.shields.io/gitter/room/redhat-developer/vscode-openshift-tools?style=for-the-badge&logo=gitter)](https://gitter.im/redhat-developer/openshift-connector)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/redhat-developer/vscode-openshift-tools/continuous-integration-workflow.yml?style=for-the-badge)](https://github.com/redhat-developer/vscode-openshift-tools/actions?query=workflow%3ACI)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE)
 
 
 [Walthrough Running a Demo App](./doc/wild-west-demo-app-walkthrough.md) •
 [Getting Started](#getting-started) •
-[Quick Start Guide](#quick-start---showcasing-component-creation) •
+[Quick Start for Application Development](#quick-start---showcasing-component-creation) •
+[Quick Start for Serverless Development](#quick-start---showcasing-serverless-workflow) •
 [Commands and Features](#commands-and-features) •
 [Feedback](#feedback)
 </div>
@@ -21,11 +21,21 @@
 The OpenShift Toolkit extends Visual Studio Code to provide all of the power and convenience of IDEs for developing cloud-native Kubernetes applications, without leaving the comfort of your IDE. For a developer to run the local code on an OpenShift instance, test & debug it and deploy it on production without worrying about the complexities around different K8s tools.
 
 OpenShift Toolkit extension provides an end-to-end developer experience for Red Hat® OpenShift®. Using this extension:
+
+<code>OpenShift Application Development</code>
  - Developers can easily create, deploy and live debug container applications running on OpenShift, podman and Hybrid cloud.
     - Convert local codebases and git repositories into components that can be debugged on OpenShift through the _Create Component_ guided workflow.
     - Create new [devfile](https://devfile.io) based components from a template project using the _Create Component_ or _Devfile Registries View_ guided workflows.
+
+<code>OpenShift Serverless Workflow</code>
+ - This extension provides the app developer the tools and experience needed when working with `Knative & OpenShift Serverless Functions` on a Kubernetes/OpenShift cluster. Using this extension, developers can develop and deploy functions in a serverless way through guided IDE workflow.
+ - Users can create, run, deploy, build, invoke functions and manage repositories directly from extension intuitive UI workflow.
+
+<code>OpenShift and Helm Integration</code>
  - Browse & Install [Helm Charts](https://helm.sh/) on to the cluster directly from IDE.
  - Developers can view and edit Resources YAML manifests, and view logs for pods, deployments, and deployment configs.
+
+<code>OpenShift Cluster Provisioning</code>
  - Run local instance of OpenShift 4.x using [OpenShift Local](https://crc.dev/crc/) directly from IDE
  - Connect & Provision free [Developer Sandbox for Red Hat OpenShift](https://developers.redhat.com/developer-sandbox) instance without leaving the IDE
 
@@ -44,7 +54,9 @@ The OpenShift Toolkit extension provides multiple views to the user once it is l
 
 <code>3. Devfile Registries View</code>: Contains the [Default Devfile Registry](https://registry.devfile.io/viewer) to browse and create components from the devfile stacks provided. Users can add their own custom registry to the view and create components.
 
-<code>4. Debug Sessions View</code>: Once the debug session is active, the associate component is displayed in this view.
+<code>3. Serverless Functions View</code>: Lists the available functions created in the cluster and provides option to Create, Build, Deploy, Run functions. It also allos to Manage Repositories for the function template.
+
+<code>4. Debug Sessions View</code>: Once the debug session is active, the associated component running in debug mode is displayed in this view.
 
 ## Provision new OpenShift Cluster
 
@@ -94,6 +106,18 @@ In the Devfile Registries view, there is an action to `Open Registry View` which
 Browse the catalog to discover and install [Helm Charts](https://helm.sh/) on cluster, directly from VSCode.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/helm.gif)
+
+## Quick Start - Showcasing Serverless Workflow
+
+### **Create a Function**
+
+Creates a Function in the mentioned directory with the specified language/runtime selected and handles HTTP events.
+
+![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/create.gif)
+
+For more Serverless Functions Actions, please visit the detailed section [here](README.serverlessfn.md)
+
+
 ##  Commands and Features
 
 The extension supports a number of commands to interact with OpenShift clusters and resources. The commands are accessible via the command palette (`Cmd+Shift+P` <kbd>⌘⇧P</kbd> on macOS or `Ctrl+Shift+P` <kbd>⌃⇧P</kbd> on Windows and Linux), Visual Studio Code View title buttons and tree context menus.
@@ -115,7 +139,6 @@ Download the most recent `openshift-toolkit-<version>.vsix` file from the [relea
 
 If you discover an issue please file a bug and we will fix it as soon as possible.
 * File a bug in [GitHub Issues](https://github.com/redhat-developer/vscode-openshift-tools/issues).
-* Chat with us on [Gitter](https://gitter.im/redhat-developer/openshift-connector).
 * Open a [Discussion on GitHub](https://github.com/redhat-developer/vscode-openshift-tools/discussions).
 
 ## License
