@@ -93,7 +93,7 @@ or create a new project from a template.
 This workflow generates a file called `devfile.yaml` (a [Devfile](https://devfile.io/)) that contains instructions on how to deploy the project to OpenShift/Kubernetes based on the project's language or framework.
 Once you have this set up, you can debug your project on OpenShift/Kubernetes by right clicking on the project in the Components in the OpenShift sidebar, then selecting 'Start Dev'.
 
-![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/gif/create-component-demo.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/create-component-demo.gif)
 
 ### **Create component from devfile registry**
 
@@ -113,7 +113,7 @@ Browse the catalog to discover and install [Helm Charts](https://helm.sh/) on cl
 
 Creates a Function in the mentioned directory with the specified language/runtime selected and handles HTTP events.
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/create.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/create.gif)
 
 For more Serverless Functions Actions, please visit the detailed section [here](README.serverlessfn.md)
 
