@@ -403,7 +403,7 @@ export default function addSandboxView(props): JSX.Element {
                                 </Tooltip>
                             Your sandbox account has been provisioned and is ready to use.
                         </Typography>
-                        <Typography variant='caption' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
+                        <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
                             Next steps to connect with Developer Sandbox:<br></br>
                             1. Click on <strong>Get token</strong> button. In the browser, login using <strong>DevSandbox</strong> button.<br></br>
                             2. Click on <strong>Display token</strong> link and copy token to clipboard.<br></br>
