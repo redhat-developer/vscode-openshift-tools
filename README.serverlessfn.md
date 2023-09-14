@@ -2,37 +2,37 @@
 
 Creates a Function in the mentioned directory with the specified language/runtime selected and handles HTTP events.
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/create.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/create.gif)
 
 ### **Create Function using git template**
 
 Creates a Function in the mentioned directory with the specified git based template selected.
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/create-function-template.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/create-function-template.gif)
 
 ### **Build a Function**
 
 Build a function project (source code in the workspace) as a container image and push to a registry.
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/build.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/build.gif)
 
 ### **Run the Function locally**
 
 Run your function to see how it works locally before to push it on your cluster.
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/run.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/run.gif)
 
 ### **RDeploy the Function**
 
 Deploys a function to the currently configured Knative-enabled cluster from your IDE
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/deploy.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/deploy.gif)
 
 ### **Invoke the Function**
 
 Invokes the function by sending a test request to the currently running function instance, either locally or remote
 
-![ screencast ](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/images/walkthrough/serverless-function/invoke.gif)
+![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/invoke.gif)
 
 ## Documentation
 
