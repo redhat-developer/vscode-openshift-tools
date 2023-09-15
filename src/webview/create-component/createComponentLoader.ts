@@ -20,6 +20,8 @@ import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import {
+    getDevfileCapabilities,
+    getDevfileTags,
     getDevfileRegistries,
     isValidProjectFolder,
     validateComponentName
@@ -77,8 +79,18 @@ export default class CreateComponentLoader {
             sendUpdatedRegistries();
         });
 
+        const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
+            sendUpdatedCapabilities();
+        });
+
+        const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
+            sendUpdatedTags();
+        });
+
         panel.onDidDispose(() => {
             void sendTelemetry('newComponentClosed');
+            tagsSubscription.unsubscribe();
+            capabiliiesySubscription.unsubscribe();
             registriesSubscription.unsubscribe();
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
@@ -125,6 +137,26 @@ export default class CreateComponentLoader {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileRegistries',
                     data: getDevfileRegistries(),
+                });
+                break;
+            }
+            /**
+             * The panel requested the list of devfile capabilities. Respond with this list.
+             */
+            case 'getDevfileCapabilities': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileCapabilities',
+                    data: getDevfileCapabilities(),
+                });
+                break;
+            }
+            /**
+             * The panel requested the list of devfile tags. Respond with this list.
+             */
+            case 'getDevfileTags': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileTags',
+                    data: getDevfileTags(),
                 });
                 break;
             }
@@ -512,10 +544,27 @@ async function validateFolderPath(path: string) {
 
 function sendUpdatedRegistries() {
     if (CreateComponentLoader.panel) {
-        const registries = getDevfileRegistries();
         void CreateComponentLoader.panel.webview.postMessage({
             action: 'devfileRegistries',
-            data: registries,
+            data: getDevfileRegistries(),
+        });
+    }
+}
+
+function sendUpdatedCapabilities() {
+    if (CreateComponentLoader.panel) {
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'devfileCapabilities',
+            data: getDevfileCapabilities(),
+        });
+    }
+}
+
+function sendUpdatedTags() {
+    if (CreateComponentLoader.panel) {
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'devfileTags',
+            data: getDevfileTags(),
         });
     }
 }
