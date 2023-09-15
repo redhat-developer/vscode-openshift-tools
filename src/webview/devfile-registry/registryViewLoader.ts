@@ -12,7 +12,7 @@ import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
-import { getDevfileRegistries, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
+import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { TemplateProjectIdentifier } from '../common/devfile';
 
@@ -37,6 +37,12 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         case 'getDevfileRegistries':
             RegistryViewLoader.sendUpdatedRegistries();
+            break;
+        case 'getDevfileCapabilities':
+            RegistryViewLoader.sendUpdatedCapabilities();
+            break;
+        case 'getDevfileTags':
+            RegistryViewLoader.sendUpdatedTags();
             break;
         case 'createComponent': {
             const { projectFolder, componentName } = event.data;
@@ -126,7 +132,6 @@ export default class RegistryViewLoader {
         if (panel) {
             if (RegistryViewLoader.url !== url) {
                 RegistryViewLoader.url = url;
-
             }
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -179,8 +184,33 @@ export default class RegistryViewLoader {
         }
     }
 
+    static sendUpdatedCapabilities() {
+        if (panel) {
+            void panel.webview.postMessage({
+                action: 'devfileCapabilities',
+                data: getDevfileCapabilities(),
+            });
+        }
+    }
+
+    static sendUpdatedTags() {
+        if (panel) {
+            void panel.webview.postMessage({
+                action: 'devfileTags',
+                data: getDevfileTags(RegistryViewLoader.url),
+            });
+        }
+    }
 }
 
 ComponentTypesView.instance.subject.subscribe(() => {
     RegistryViewLoader.sendUpdatedRegistries();
+});
+
+ComponentTypesView.instance.subject.subscribe(() => {
+    RegistryViewLoader.sendUpdatedCapabilities();
+});
+
+ComponentTypesView.instance.subject.subscribe(() => {
+    RegistryViewLoader.sendUpdatedTags();
 });
