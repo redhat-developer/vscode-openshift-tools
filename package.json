@@ -105,7 +105,7 @@
 		"@mui/icons-material": "^5.14.9",
 		"@mui/lab": "^5.0.0-alpha.145",
 		"@mui/material": "^5.14.10",
-		"@mui/styles": "^5.14.9",
+		"@mui/styles": "^5.14.10",
 		"@rjsf/core": "^5.13.0",
 		"@rjsf/validator-ajv8": "^5.13.0",
 		"@segment/analytics-next": "^1.55.0",
