@@ -102,19 +102,21 @@ export interface Odo {
      *
      * @param componentPath the folder in which to create the project
      * @param componentName the name of the component
+     * @param portNumber the port number used in the component
      * @param devfileName the name of the devfile to use
      * @param registryName the name of the devfile registry that the devfile comes from
      * @param templateProjectName the template project from the devfile to use
      */
-    createComponentFromTemplateProject(componentPath: string, componentName: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void>;
+    createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: number, devfileName: string, registryName: string, templateProjectName: string): Promise<void>;
     /**
      * Create a component from the given local codebase.
      *
      * @param devfileName the name of the devfile to use
      * @param componentName the name of the component
+     * @param portNumber the port number used in the component
      * @param location the location of the local codebase
      */
-    createComponentFromLocation(devfileName: string, componentName: string, location: Uri): Promise<void>;
+    createComponentFromLocation(devfileName: string, componentName: string, portNumber: number, location: Uri): Promise<void>;
 }
 
 export class OdoImpl implements Odo {
@@ -252,7 +254,7 @@ export class OdoImpl implements Odo {
     }
 
     public async createComponentFromFolder(type: string, registryName: string, name: string, location: Uri, starter: string = undefined, useExistingDevfile = false, customDevfilePath = ''): Promise<void> {
-        await this.execute(Command.createLocalComponent(type, registryName, name, starter, useExistingDevfile, customDevfilePath), location.fsPath);
+        await this.execute(Command.createLocalComponent(type, registryName, name, undefined, starter, useExistingDevfile, customDevfilePath), location.fsPath);
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
             // could be new or existing folder
@@ -263,12 +265,12 @@ export class OdoImpl implements Odo {
         }
     }
 
-    public async createComponentFromLocation(devfileName: string, componentName: string, location: Uri): Promise<void> {
-        await this.execute(Command.createLocalComponent(devfileName, undefined, componentName, undefined, false, ''), location.fsPath);
+    public async createComponentFromLocation(devfileName: string, componentName: string, portNumber: number, location: Uri): Promise<void> {
+        await this.execute(Command.createLocalComponent(devfileName, undefined, componentName, portNumber, undefined, false, ''), location.fsPath);
     }
 
-    public async createComponentFromTemplateProject(componentPath: string, componentName: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void> {
-        await this.execute(Command.createLocalComponent(devfileName, registryName, componentName, templateProjectName), componentPath);
+    public async createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: number, devfileName: string, registryName: string, templateProjectName: string): Promise<void> {
+        await this.execute(Command.createLocalComponent(devfileName, registryName, componentName, portNumber, templateProjectName), componentPath);
     }
 
     public async createService(formData: any): Promise<void> {

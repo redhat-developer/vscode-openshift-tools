@@ -56,9 +56,14 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
     const [workspaceFolders, setWorkspaceFolders] = React.useState<string[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
     const [componentName, setComponentName] = React.useState('');
+    const [portNumber, setPortNumber] = React.useState(undefined);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
+    );
+    const [isPortNumberFieldValid, setPortNumberFieldValid] = React.useState(true);
+    const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
+        'Please enter port number.',
     );
     const [isLoading, setLoading] = React.useState(false);
     const [isLoaded, setLoaded] = React.useState(false);
@@ -101,6 +106,16 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 } else {
                     setComponentNameFieldValid(true);
                     setComponentNameErrorMessage('');
+                }
+                break;
+            }
+            case 'validatePortNumber': {
+                if (message.data) {
+                    setPortNumberFieldValid(false);
+                    setPortNumberErrorMessage(message.data);
+                } else {
+                    setPortNumberFieldValid(true);
+                    setPortNumberErrorMessage('Please enter port number (optional)');
                 }
                 break;
             }
@@ -159,7 +174,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     }
 
-    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean) {
+    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
@@ -167,6 +182,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                     ? selectedDevfile.name
                     : recommendedDevfile.devfile.name,
                 componentName: componentName,
+                portNumber: portNumber,
                 path: projectFolder,
                 isFromTemplateProject: false,
                 addToWorkspace,
@@ -188,6 +204,10 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                             componentNameErrorMessage={componentNameErrorMessage}
                             componentName={componentName}
                             setComponentName={setComponentName}
+                            isPortNumberFieldValid={isPortNumberFieldValid}
+                            portNumberErrorMessage={portNumberErrorMessage}
+                            portNumber={portNumber}
+                            setPortNumber={setPortNumber}
                         />
                         <Stack direction="row" spacing={1} marginTop={1}>
                             <FormControl
@@ -334,14 +354,13 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                                     componentName={componentName}
                                                     componentParentFolder={projectFolder}
                                                     addToWorkspace={true}
-                                                    isComponentNameFieldValid={
-                                                        isComponentNameFieldValid
-                                                    }
+                                                    portNumber={portNumber}
+                                                    isComponentNameFieldValid={isComponentNameFieldValid}
                                                     isFolderFieldValid={true}
                                                     isLoading={isLoading}
                                                     createComponent={createComponentFromLocalCodebase}
                                                     setLoading={setLoading}
-                                                />
+                                                    isPortNumberFieldValid={isPortNumberFieldValid}                                                />
                                             )}
                                     </Stack>
                                     <CreateComponentErrorAlert

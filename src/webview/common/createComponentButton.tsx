@@ -11,10 +11,12 @@ export type CreateComponentButtonProps = {
     componentName: string;
     componentParentFolder: string;
     addToWorkspace: boolean;
+    portNumber: number;
     isComponentNameFieldValid: boolean;
+    isPortNumberFieldValid: boolean;
     isFolderFieldValid: boolean;
     isLoading: boolean;
-    createComponent: (projectFolder: string, componentName: string, isAddToWorkspace: boolean) => void;
+    createComponent: (projectFolder: string, componentName: string, isAddToWorkspace: boolean, portNumber: number) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -23,10 +25,10 @@ export function CreateComponentButton(props: CreateComponentButtonProps) {
         <LoadingButton
             variant="contained"
             onClick={() => {
-                props.createComponent(props.componentParentFolder, props.componentName, props.addToWorkspace);
+                props.createComponent(props.componentParentFolder, props.componentName, props.addToWorkspace, props.portNumber);
                 props.setLoading(true);
             }}
-            disabled={!props.isComponentNameFieldValid || !props.isFolderFieldValid || props.isLoading}
+            disabled={!props.isComponentNameFieldValid || !props.isPortNumberFieldValid || !props.isFolderFieldValid || props.isLoading}
             loading={props.isLoading}
             loadingPosition="start"
             startIcon={<ConstructionIcon />}

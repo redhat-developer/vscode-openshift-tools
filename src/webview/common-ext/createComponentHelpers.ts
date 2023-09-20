@@ -110,6 +110,33 @@ export function validateComponentName(name: string): string {
 }
 
 /**
+ * Returns the validation message if the component name is invalid, and undefined otherwise.
+ *
+ * @param name the port number to validate
+ * @returns the validation message if the component name is invalid, and undefined otherwise
+ */
+export function validatePortNumber(portNumber: string): string {
+    let validationMessage: string;
+    if (portNumber.trim().length > 0) {
+        validationMessage = NameValidator.lengthName(
+            'Port number length should be between 4-5 digits',
+            portNumber,
+            0,
+            4,
+            5
+        );
+
+        if (!validationMessage) {
+            const port = parseInt(portNumber, 10);
+            if (port < 1 || port > 65536) {
+                validationMessage = 'Not a valid port number.'
+            }
+        }
+    }
+    return validationMessage;
+}
+
+/**
  * Returns a list of the devfile registries with their devfiles attached.
  *
  * @returns a list of the devfile registries with their devfiles attached
@@ -130,7 +157,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
     const components = ComponentTypesView.instance.getCompDescriptions();
     for (const component of components) {
         const devfileRegistry = devfileRegistries.find(
-             (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
+            (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
         );
 
         devfileRegistry.devfiles.push({

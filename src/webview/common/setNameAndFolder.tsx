@@ -29,7 +29,7 @@ type Message = {
 
 type SetNameAndFolderProps = {
     goBack: () => void;
-    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean) => void;
+    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber?: number) => void;
     devfile: Devfile;
     templateProject?: string;
     initialComponentName?: string;
@@ -37,11 +37,15 @@ type SetNameAndFolderProps = {
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentName, setComponentName] = React.useState(props.initialComponentName);
+    const [portNumber, setPortNumber] = React.useState(props.devfile.port);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
     );
-
+    const [isPortNumberFieldValid, setPortNumberFieldValid] = React.useState(true);
+    const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
+        'Please enter port number (optional)',
+    );
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
     const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
@@ -72,6 +76,16 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                 } else {
                     setComponentNameFieldValid(true);
                     setComponentNameErrorMessage('');
+                }
+                break;
+            }
+            case 'validatePortNumber': {
+                if (message.data) {
+                    setPortNumberFieldValid(false);
+                    setPortNumberErrorMessage(message.data);
+                } else {
+                    setPortNumberFieldValid(true);
+                    setPortNumberErrorMessage('Please enter port number (optional)');
                 }
                 break;
             }
@@ -137,6 +151,10 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     componentNameErrorMessage={componentNameErrorMessage}
                     componentName={componentName}
                     setComponentName={setComponentName}
+                    isPortNumberFieldValid={isPortNumberFieldValid}
+                    portNumberErrorMessage={portNumberErrorMessage}
+                    portNumber={portNumber}
+                    setPortNumber={setPortNumber}
                 />
                 <FormControl fullWidth>
                     <Stack direction="row" spacing={2}>
@@ -195,7 +213,9 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         componentName={componentName}
                         componentParentFolder={componentParentFolder}
                         addToWorkspace={isAddToWorkspace}
+                        portNumber={portNumber}
                         isComponentNameFieldValid={isComponentNameFieldValid}
+                        isPortNumberFieldValid={isPortNumberFieldValid}
                         isFolderFieldValid={isFolderFieldValid}
                         isLoading={isLoading}
                         createComponent={props.createComponent}

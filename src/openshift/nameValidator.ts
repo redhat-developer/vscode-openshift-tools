@@ -10,8 +10,8 @@ export function emptyName(message: string, value: string): string | null {
     return validator.isEmpty(value) ? message : null;
 }
 
-export function lengthName(message: string, value: string, offset: number): string | null {
-    return validator.isLength(value, {min: 2, max: 63 - offset}) ? null : message;
+export function lengthName(message: string, value: string, offset: number, minVal = 2, maxVal = 63): string | null {
+    return validator.isLength(value, { min: minVal, max: maxVal - offset }) ? null : message;
 }
 
 export function validateUrl(message: string, value: string): string | null {

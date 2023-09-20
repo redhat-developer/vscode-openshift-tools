@@ -132,6 +132,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         projectFolder: string,
         componentName: string,
         addToWorkspace: boolean,
+        portNumber: number
     ) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
@@ -142,6 +143,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 componentName: componentName,
                 gitDestinationPath: projectFolder,
                 isFromTemplateProject: false,
+                portNumber: portNumber,
                 addToWorkspace,
             },
         });

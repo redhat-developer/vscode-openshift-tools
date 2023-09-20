@@ -10,24 +10,46 @@ export type ComponentNameInputProps = {
     componentNameErrorMessage: string,
     componentName: string,
     setComponentName: React.Dispatch<React.SetStateAction<string>>
+
+    portNumber: number,
+    isPortNumberFieldValid: boolean,
+    portNumberErrorMessage: string,
+    setPortNumber: React.Dispatch<React.SetStateAction<number>>
 };
 
 export function ComponentNameInput(props: ComponentNameInputProps) {
     return (
-        <TextField fullWidth
-            id='componentName'
-            variant='outlined'
-            label='Component Name'
-            value={props.componentName}
-            error={!props.isComponentNameFieldValid}
-            helperText={props.componentNameErrorMessage}
-            onChange={(e) => {
-                window.vscodeApi.postMessage({
-                    action: 'validateComponentName',
-                    data: e.target.value
-                });
-                props.setComponentName(e.target.value);
-            }}
-        />
+        <>
+            <TextField fullWidth
+                id='componentName'
+                variant='outlined'
+                label='Component Name'
+                value={props.componentName}
+                error={!props.isComponentNameFieldValid}
+                helperText={props.componentNameErrorMessage}
+                onChange={(e) => {
+                    window.vscodeApi.postMessage({
+                        action: 'validateComponentName',
+                        data: e.target.value
+                    });
+                    props.setComponentName(e.target.value);
+                }} />
+
+            <TextField fullWidth
+                id='portnumber'
+                variant='outlined'
+                label='Port'
+                type='number'
+                value={props.portNumber}
+                error={!props.isPortNumberFieldValid}
+                helperText={props.portNumberErrorMessage}
+                onChange={(e) => {
+                    window.vscodeApi.postMessage({
+                        action: 'validatePortNumber',
+                        data: e.target.value
+                    });
+                    props.setPortNumber(parseInt(e.target.value, 10));
+                }} />
+        </>
     );
 }
