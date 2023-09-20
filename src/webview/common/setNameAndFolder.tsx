@@ -3,9 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import {
-    Alert,
-    Box,
-    Button,
+    Alert, Button,
     Checkbox,
     FormControl,
     FormControlLabel,
@@ -13,7 +11,7 @@ import {
     Paper,
     Stack,
     TextField,
-    Typography,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
@@ -95,11 +93,13 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                 setCreateComponentErrorMessage(message.data);
                 break;
             }
+            default:
+                break;
         }
     }
 
     React.useEffect(() => {
-        window['vscodeApi'].postMessage({
+        window.vscodeApi.postMessage({
             action: 'isValidProjectFolder',
             data: {
                 folder: componentParentFolder,
@@ -178,7 +178,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                             variant="contained"
                             sx={{ whiteSpace: 'nowrap' }}
                             onClick={(e) => {
-                                window['vscodeApi'].postMessage({
+                                window.vscodeApi.postMessage({
                                     action: 'selectProjectFolderNewProject',
                                 });
                             }}

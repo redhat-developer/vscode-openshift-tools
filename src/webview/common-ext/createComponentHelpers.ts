@@ -196,3 +196,36 @@ export function getDevfileRegistries(): DevfileRegistry[] {
     devfileRegistries.sort((a, b) => (a.name < b.name ? -1 : 1));
     return devfileRegistries;
 }
+
+/**
+ * Returns a list of possible the devfile capabilities.
+ *
+ * Currently the capabilities are predefined and include:
+ * - Debug Support
+ * - Deploy Support
+ *
+ * @returns a list of the devfile capabilities
+ */
+export function getDevfileCapabilities(): string[] {
+    return [ 'Debug Support', 'Deploy Support'];
+}
+
+/**
+ * Returns a list of the devfile tags found in devfiles registries.
+ *
+ * @returns a list of the devfile tags
+ */
+export function getDevfileTags(url?:string ): string[] {
+    const devfileRegistries = getDevfileRegistries();
+
+    const devfileTags: string[] = [
+            ...new Set(
+                devfileRegistries
+                    .filter((devfileRegistry) => url ? devfileRegistry.url === url : true)
+                    .flatMap((_devfileRegistry) => _devfileRegistry.devfiles)
+                    .flatMap((_devfile) => _devfile.tags))
+        ]
+        .sort((a, b) => a.localeCompare(b));
+
+    return devfileTags;
+}

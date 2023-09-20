@@ -6,9 +6,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
 
-import { commands, Disposable, window } from 'vscode';
 import * as stackTraceParser from 'stacktrace-parser';
-import sendTelemetry, { TelemetryProps, CommonCommandProps } from './telemetry';
+import { commands, Disposable, window } from 'vscode';
+import sendTelemetry, { CommonCommandProps, TelemetryProps } from './telemetry';
 import { ExtensionID } from './util/constants';
 
 type VsCommandFunction = (...args: any[]) => Promise<string | undefined> | string | undefined;
@@ -35,7 +35,7 @@ const vsCommands: VsCommand[] = [];
 
 function displayResult(result: string | undefined): void {
     if (result && `${result}`) {
-        window.showInformationMessage(`${result}`);
+        void window.showInformationMessage(`${result}`);
     }
 }
 
@@ -75,7 +75,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                         telemetryProps.error = 'Unexpected error';
                     }
                 }
-                window.showErrorMessage(err.message);
+                void window.showErrorMessage(err.message);
                 exception = err;
             } finally {
                 telemetryProps.duration = Date.now() - startTime;
@@ -86,7 +86,7 @@ export async function registerCommands(...modules: string[]): Promise<Disposable
                 if (exception?.telemetryProps) {
                     telemetryProps = {...telemetryProps, ...exception.telemetryProps};
                 }
-                sendTelemetry('command', telemetryProps);
+                void sendTelemetry('command', telemetryProps);
             }
             return result;
         });

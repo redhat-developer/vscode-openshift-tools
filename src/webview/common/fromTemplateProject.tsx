@@ -62,5 +62,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                     initialComponentName={selectedTemplateProject.templateProjectName}
                 />
             );
+        default:
+            break;
     }
 }

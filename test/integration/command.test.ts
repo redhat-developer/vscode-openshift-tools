@@ -689,7 +689,7 @@ suite('odo commands integration', function () {
             const devfilePath = path.join(componentLocation, 'devfile.yaml')
             await fs.access(devfilePath);
 
-            fixupDevFile(devfilePath);
+            await fixupDevFile(devfilePath);
 
             const describeCmdResult = await ODO.execute(Command.describeComponentJson(), componentLocation);
             const componentDescription = JSON.parse(describeCmdResult.stdout) as ComponentDescription;

@@ -16,7 +16,10 @@
   "parserOptions": {
     "ecmaVersion": 2018,
     "comment": true,
-    "project": "./tsconfig.json",
+    "project": [
+        "./tsconfig.json",
+        "./src/webview/tsconfig.json"
+    ],
     "sourceType": "module"
   },
   "plugins": [
@@ -35,6 +38,7 @@
         "extensions": [
           ".js",
           ".jsx",
+          ".tsx",
           ".ts"
         ]
       }
@@ -42,6 +46,7 @@
     "import/extensions": [
       ".js",
       ".jsx",
+      ".tsx",
       ".ts"
     ]
   },
@@ -83,11 +88,10 @@
     "no-shadow": 1,
     "no-underscore-dangle": 0,
     "no-useless-constructor": "off",
-    "@typescript-eslint/no-use-before-define": 2,
     "@typescript-eslint/await-thenable": "error",
     "@typescript-eslint/unbound-method": ["error", { "ignoreStatic": true }],
     "@typescript-eslint/restrict-template-expressions": 1,
-    "@typescript-eslint/no-floating-promises": 1,
+    "@typescript-eslint/no-floating-promises": 2,
     "@typescript-eslint/no-unsafe-return": 1,
     "@typescript-eslint/no-unsafe-member-access": 1,
     "@typescript-eslint/no-unsafe-call": 1,

@@ -16,13 +16,11 @@ export default class Describe extends LazyLog {
         this.content = `${this.props.text}\n`;
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     componentDidMount() {
         super.componentDidMount();
         window.addEventListener('message', this.messageListener);
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     messageListener = (event: MessageEvent) => {
         const enc = new TextEncoder();
         if (event?.data?.action){
@@ -42,7 +40,6 @@ export default class Describe extends LazyLog {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     componentWillUnmount() {
         super.componentWillUnmount();
         window.removeEventListener('message',this.messageListener);

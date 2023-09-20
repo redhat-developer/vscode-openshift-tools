@@ -20,6 +20,8 @@ import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import {
+    getDevfileCapabilities,
+    getDevfileTags,
     getDevfileRegistries,
     isValidProjectFolder,
     validateComponentName,
@@ -58,7 +60,7 @@ export default class CreateComponentLoader {
             path.join(CreateComponentLoader.extensionPath, 'out', 'createComponentViewer'),
         );
 
-        let panel = window.createWebviewPanel('createComponentView', title, ViewColumn.One, {
+        const panel = window.createWebviewPanel('createComponentView', title, ViewColumn.One, {
             enableScripts: true,
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true,
@@ -78,14 +80,24 @@ export default class CreateComponentLoader {
             sendUpdatedRegistries();
         });
 
+        const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
+            sendUpdatedCapabilities();
+        });
+
+        const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
+            sendUpdatedTags();
+        });
+
         panel.onDidDispose(() => {
-            sendTelemetry('newComponentClosed');
+            void sendTelemetry('newComponentClosed');
+            tagsSubscription.unsubscribe();
+            capabiliiesySubscription.unsubscribe();
             registriesSubscription.unsubscribe();
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateComponentLoader.panel = undefined;
             if (tmpFolder) {
-                fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
+                void fs.rm(tmpFolder.fsPath, { force: true, recursive: true });
             }
         });
 
@@ -130,11 +142,31 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
+             * The panel requested the list of devfile capabilities. Respond with this list.
+             */
+            case 'getDevfileCapabilities': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileCapabilities',
+                    data: getDevfileCapabilities(),
+                });
+                break;
+            }
+            /**
+             * The panel requested the list of devfile tags. Respond with this list.
+             */
+            case 'getDevfileTags': {
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'devfileTags',
+                    data: getDevfileTags(),
+                });
+                break;
+            }
+            /**
              * The panel requested the list of workspace folders. Respond with this list.
              */
             case 'getWorkspaceFolders': {
                 if (vscode.workspace.workspaceFolders !== undefined) {
-                    let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(
+                    const workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders.map(
                         (wsFolder) => wsFolder.uri,
                     );
                     const filteredWorkspaceUris: Uri[] = [];
@@ -179,7 +211,7 @@ export default class CreateComponentLoader {
              */
             case 'selectProjectFolder': {
                 const workspaceUri: Uri = await selectWorkspaceFolder(true);
-                let workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders
+                const workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders
                     ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
                     : [];
                 workspaceFolderUris.push(workspaceUri);
@@ -215,11 +247,11 @@ export default class CreateComponentLoader {
              * The panel requested to get the receommended devfile given the selected project.
              */
             case 'getRecommendedDevfile': {
-                void CreateComponentLoader.panel.webview.postMessage({
+                await CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileExists',
                     data: await isDevfileExists(Uri.file(message.data)),
                 });
-                CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
+                void CreateComponentLoader.getRecommendedDevfile(Uri.file(message.data));
                 break;
             }
             case 'isValidProjectFolder': {
@@ -250,7 +282,7 @@ export default class CreateComponentLoader {
                         action: 'devfileExists',
                         data: await isDevfileExists(tmpFolder),
                     });
-                    CreateComponentLoader.getRecommendedDevfile(tmpFolder);
+                    void CreateComponentLoader.getRecommendedDevfile(tmpFolder);
                 }
                 break;
             }
@@ -279,7 +311,9 @@ export default class CreateComponentLoader {
                         );
                         await sendTelemetry('newComponentCreated', {
                             strategy: 'fromTemplateProject',
+                            // eslint-disable-next-line camelcase
                             component_type: templateProject.devfileId,
+                            // eslint-disable-next-line camelcase
                             starter_project: templateProject.templateProjectName,
                         });
                     } else {
@@ -310,6 +344,7 @@ export default class CreateComponentLoader {
                         }
                         await sendTelemetry('newComponentCreated', {
                             strategy,
+                            // eslint-disable-next-line camelcase
                             component_type: devfileType,
                         });
                     }
@@ -347,7 +382,7 @@ export default class CreateComponentLoader {
              */
             case 'validateGitURL': {
                 const response = validateGitURL(message);
-                CreateComponentLoader.panel?.webview.postMessage({
+                void CreateComponentLoader.panel?.webview.postMessage({
                     action: message.action,
                     data: {
                         isValid: !response.error,
@@ -380,10 +415,13 @@ export default class CreateComponentLoader {
                 void sendTelemetry(actionName, properties);
                 break;
             }
+            default:
+                void window.showErrorMessage(`Unexpected message from webview: '${message.action}'`);
+                break;
         }
     }
 
-    static async getRecommendedDevfile(uri: Uri) {
+    static async getRecommendedDevfile(uri: Uri): Promise<void> {
         let analyzeRes: AnalyzeResponse[] = [];
         let compDescriptions: ComponentTypeDescription[] = [];
         try {
@@ -411,16 +449,16 @@ export default class CreateComponentLoader {
                         );
                         const yaml = JSYAML.dump(devfileV2, { sortKeys: true });
                         await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
-                        CreateComponentLoader.panel?.webview.postMessage({
+                        await CreateComponentLoader.panel?.webview.postMessage({
                             action: 'devfileRegenerated',
                         });
                     } catch (e) {
-                        vscode.window.showErrorMessage(
+                        void vscode.window.showErrorMessage(
                             'Failed to parse devfile v1, Unable to proceed the component creation',
                         );
                     }
                 } else {
-                    vscode.window.showErrorMessage(
+                    void vscode.window.showErrorMessage(
                         'Devfile version not supported, Unable to proceed the component creation',
                     );
                 }
@@ -440,7 +478,7 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: {
-                    devfile: devfile,
+                    devfile,
                 },
             });
         }
@@ -490,8 +528,8 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
-    let command: string = `${git} clone ${url} ${location}`;
-    command = branch ? command + ` --branch ${branch}` : command;
+    let command = `${git} clone ${url} ${location}`;
+    command = branch ? `${command} --branch ${branch}` : command;
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) =>
         cp.exec(command, (error: cp.ExecException) => {
@@ -503,8 +541,8 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
 }
 
 async function validateFolderPath(path: string) {
-    let isValid: boolean = true;
-    let helpText: string = '';
+    let isValid = true;
+    let helpText = '';
     if ((await fs.stat(path)).isDirectory()) {
         try {
             await fs.access(path);
@@ -512,11 +550,11 @@ async function validateFolderPath(path: string) {
             isValid = false;
             helpText = 'Please enter a valid directory path.';
         }
-        CreateComponentLoader.panel?.webview.postMessage({
+        await CreateComponentLoader.panel?.webview.postMessage({
             action: 'validatedFolderPath',
             data: {
-                isValid: isValid,
-                helpText: helpText,
+                isValid,
+                helpText,
             },
         });
     }
@@ -524,10 +562,27 @@ async function validateFolderPath(path: string) {
 
 function sendUpdatedRegistries() {
     if (CreateComponentLoader.panel) {
-        let registries = getDevfileRegistries();
         void CreateComponentLoader.panel.webview.postMessage({
             action: 'devfileRegistries',
-            data: registries,
+            data: getDevfileRegistries(),
+        });
+    }
+}
+
+function sendUpdatedCapabilities() {
+    if (CreateComponentLoader.panel) {
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'devfileCapabilities',
+            data: getDevfileCapabilities(),
+        });
+    }
+}
+
+function sendUpdatedTags() {
+    if (CreateComponentLoader.panel) {
+        void CreateComponentLoader.panel.webview.postMessage({
+            action: 'devfileTags',
+            data: getDevfileTags(),
         });
     }
 }

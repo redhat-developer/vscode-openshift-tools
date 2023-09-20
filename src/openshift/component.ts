@@ -439,48 +439,45 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.describe', true)
-    static describe(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+    static async describe(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const command = Command.describeComponent();
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if (Component.isUsingWebviewEditor()) {
-            DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
+            await DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            await Component.odo.executeInTerminal(
                 command,
                 componentFolder.contextPath,
                 `OpenShift: Describe '${componentName}' Component`);
         }
-        return;
     }
 
     @vsCommand('openshift.component.log', true)
-    static log(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+    static async log(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         const showLogCmd = Command.showLog(Component.getDevPlatform(componentFolder));
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
+            await LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            await Component.odo.executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
                 `OpenShift: Show '${componentName}' Component Log`);
         }
-        return;
     }
 
     @vsCommand('openshift.component.followLog', true)
-    static followLog(componentFolder: ComponentWorkspaceFolder): Promise<string> {
+    static async followLog(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         const showLogCmd = Command.showLogAndFollow(Component.getDevPlatform(componentFolder));
         if (Component.isUsingWebviewEditor()) {
-            LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
+            await LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
         } else {
-            void Component.odo.executeInTerminal(
+            await Component.odo.executeInTerminal(
                 showLogCmd,
                 componentFolder.contextPath,
                 `OpenShift: Follow '${componentName}' Component Log`);
         }
-        return;
     }
 
     @vsCommand('openshift.component.openCreateComponent')
@@ -639,7 +636,7 @@ export class Component extends OpenShiftItem {
 
             // when creating component based on existing workspace folder refresh components view
             if (refreshComponentsView) {
-                commands.executeCommand('openshift.componentsView.refresh');
+                void commands.executeCommand('openshift.componentsView.refresh');
             }
 
             const result: any = new String(`Component '${componentName}' successfully created. Perform actions on it from Components View.`);
@@ -669,11 +666,10 @@ export class Component extends OpenShiftItem {
         if (Component.debugSessions.get(component.contextPath)) {
             const choice = await window.showWarningMessage(`Debugger session is already running for ${component.component.devfileData.devfile.metadata.name}.`, 'Show \'Run and Debug\' view');
             if (choice) {
-                commands.executeCommand('workbench.view.debug');
+                await commands.executeCommand('workbench.view.debug');
             }
             return result;
         }
-        // const components = await Component.odo.getComponentTypes();
         const isJava = component.component.devfileData.devfile.metadata.tags.includes('Java') ;
         const isNode = component.component.devfileData.devfile.metadata.tags.includes('Node.js');
         const isPython = component.component.devfileData.devfile.metadata.tags.includes('Python');
@@ -877,7 +873,7 @@ export class Component extends OpenShiftItem {
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
             const command = Command.runComponentCommand(componentCommand.id);
             if (Component.isUsingWebviewEditor()) {
-                DescribeViewLoader.loadView(`Component ${componentName}: Run '${componentCommand.id}' Command`, command, componentFolder);
+                void DescribeViewLoader.loadView('Component ${componentName}: Run \'${componentCommand.id}\' Command', command, componentFolder);
             } else {
                 void Component.odo.executeInTerminal(
                     command,

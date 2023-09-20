@@ -53,7 +53,7 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
     }
 
     convert = (value: string): string => {
-        return value.replace('/\s+/g', '').toLowerCase();
+        return value.replace('/\\s+/g', '').toLowerCase();
     }
 
     handleDropDownChange = (_event: React.SyntheticEvent<Element, Event>, value: string, isContent = false): void => {
@@ -127,6 +127,8 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
                 this.setState({
                     invokeURL: value
                 });
+                break;
+            default:
                 break;
         }
     }

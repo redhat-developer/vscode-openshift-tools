@@ -125,7 +125,6 @@ export class CardItem extends React.Component<DevFileProps, {
     }
 
     setSelectedVersion = (event: any, value: Chart): void => {
-        console.log('Value:::: ', value);
         this.setState({
             selectedVersion: value
         });
@@ -310,7 +309,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                         <img
                                             data-testid='icon'
                                             src={this.state.selectedVersion.icon}
-                                            alt={this.state.selectedVersion.icon + ' logo'}
+                                            alt={`${this.state.selectedVersion.icon} logo`}
                                             style={{ margin: '0', width: '4rem', height: '3rem', objectFit: 'contain', objectPosition: 'left' }} />
                                         :
                                         <SvgIcon
@@ -369,7 +368,7 @@ export class CardItem extends React.Component<DevFileProps, {
                                 :
                                 <SvgIcon component={HelmIcon} style={{ fontSize: '3rem' }} inheritViewBox/>
                             }
-                            {selectedVersion.version && <Badge key={`key-` + selectedVersion.version}
+                            {selectedVersion.version && <Badge key={`key-${selectedVersion.version}`}
                                 className={this.props.cardItemStyle.badge}
                                 overlap='rectangular'
                                 variant='standard'

@@ -101,7 +101,7 @@ export function clusterRequired() {
                 if (lOrC === 'Login') {
                     const loginResult = await commands.executeCommand('openshift.explorer.login');
                     if (typeof loginResult === 'string') {
-                        window.showInformationMessage(loginResult);
+                        void window.showInformationMessage(loginResult);
                     }
                     hasActiveCluster = await getInstance().canCreatePod();
                 }

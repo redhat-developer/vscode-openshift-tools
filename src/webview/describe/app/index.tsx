@@ -19,7 +19,7 @@ class DescribeResource extends React.Component {
     constructor(props) {
         super(props);
     }
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
     render() {
         return <div className="box">
             <div className="row header">

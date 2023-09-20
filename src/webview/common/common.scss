@@ -10,6 +10,11 @@ input[type='text'] {
 .MuiFormHelperText-root {
     color: var(--vscode-foreground) !important;
     margin-left: 0px !important;
+    width: 11rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .Mui-error {
@@ -21,13 +26,6 @@ input[type='text'] {
     min-width: 86%;
 }
 
-.MuiFormHelperText-root {
-    width: 11rem;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
 .MuiFormControl-root {
     border: none;
     &:hover {

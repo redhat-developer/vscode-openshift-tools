@@ -200,12 +200,12 @@ export const useStyles = (theme: Theme) =>
             marginTop: theme.spacing(2)
         },
         icon: {
-            verticalAlign: "bottom",
+            verticalAlign: 'bottom',
             height: 20,
             width: 20
         },
         column: {
-            flexBasis: "40%"
+            flexBasis: '40%'
         },
         helper: {
             borderLeft: `2px solid ${theme.palette.divider}`,

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
-import { Uri, ViewColumn, WebviewPanel, extensions, window } from 'vscode';
+import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
 import { ComponentWorkspaceFolder } from '../../odo/workspace';
@@ -24,13 +24,13 @@ export default class DescribeViewLoader {
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true
         });
-        panel.iconPath = Uri.file(path.join(DescribeViewLoader.extensionPath, "images/context/cluster-node.png"));
+        panel.iconPath = Uri.file(path.join(DescribeViewLoader.extensionPath, 'images/context/cluster-node.png'));
 
         // TODO: When webview is going to be ready?
         panel.webview.html = await loadWebviewHtml('describeViewer', panel, new Map([['%COMMAND%', `${cmd}`]]));
 
         const result = await CliChannel.getInstance().executeTool(cmd, {cwd: target.contextPath});
-        panel.webview.postMessage({action: 'describe', data: `${result.stdout}`.trim().split('\n')});
+        await panel.webview.postMessage({action: 'describe', data: `${result.stdout}`.trim().split('\n')});
         return panel;
     }
 

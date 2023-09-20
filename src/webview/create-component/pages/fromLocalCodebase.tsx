@@ -136,6 +136,8 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 setCreateComponentErrorMessage(message.data);
                 break;
             }
+            default:
+                break;
         }
     }
 
@@ -148,7 +150,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'getWorkspaceFolders' });
-        if (props.rootFolder && props.rootFolder.length != 0) {
+        if (props.rootFolder && props.rootFolder.length !== 0) {
             setProjectFolder(props.rootFolder);
             const isWindowsPath = props.rootFolder.charAt(1) === ':';
             let componentNameFromFolder: string = props.rootFolder //
@@ -182,7 +184,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 devfileDisplayName: selectedDevfile
                     ? selectedDevfile.name
                     : recommendedDevfile.devfile.name,
-                componentName: componentName,
+                componentName,
                 portNumber: portNumber,
                 path: projectFolder,
                 isFromTemplateProject: false,
@@ -225,7 +227,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                     value={projectFolder}
                                     label="Folder"
                                     onChange={(e) => {
-                                        setProjectFolder(e.target.value as string);
+                                        setProjectFolder(e.target.value);
                                     }}
                                     disabled={
                                         recommendedDevfile.showRecommendation ||
@@ -257,7 +259,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                     variant="contained"
                                     sx={{ whiteSpace: 'nowrap', height: '4em' }}
                                     onClick={(e) => {
-                                        window['vscodeApi'].postMessage({
+                                        window.vscodeApi.postMessage({
                                             action: 'selectProjectFolder',
                                         });
                                     }}
@@ -269,7 +271,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                         {!isLoaded ? (
                             <>
                                 <Stack direction="row" spacing={1} marginTop={2}>
-                                    {(!props.rootFolder || props.rootFolder.length == 0) &&
+                                    {(!props.rootFolder || props.rootFolder.length === 0) &&
                                         <Button variant='text' onClick={() => { props.setCurrentView('home') }}>
                                             BACK
                                         </Button>
@@ -428,5 +430,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                     )}
                 </>
             );
+        default:
+            break;
     }
 }
