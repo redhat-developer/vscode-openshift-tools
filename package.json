@@ -182,7 +182,7 @@
 		"vscode-extension-tester": "^5.0.0 <5.7.0",
 		"xterm-addon-fit": "^0.7.0",
 		"xterm-addon-web-links": "^0.8.0",
-		"xterm-addon-webgl": "^0.14.0"
+		"xterm-addon-webgl": "^0.16.0"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
