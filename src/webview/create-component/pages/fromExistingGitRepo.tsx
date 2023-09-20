@@ -272,7 +272,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     </Stack>
                                 )}
                             </>
-                        ) : recommendedDevfile.noRecommendation ? (
+                        ) : recommendedDevfile.noRecommendation && !selectedDevfile ? (
                             <>
                                 <NoSuitableDevfile />
                                 <Stack
