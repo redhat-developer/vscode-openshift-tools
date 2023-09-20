@@ -143,7 +143,7 @@
 		"codecov": "^3.8.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.3",
-		"esbuild-plugin-svgr": "^2.0.0",
+		"esbuild-plugin-svgr": "^2.1.0",
 		"esbuild-sass-plugin": "^2.14.0",
 		"eslint": "^8.49.0",
 		"eslint-config-prettier": "^9.0.0",
