@@ -119,16 +119,16 @@ export function validatePortNumber(portNumber: string): string {
     let validationMessage: string;
     if (portNumber.trim().length > 0) {
         validationMessage = NameValidator.lengthName(
-            'Port number length should be between 4-5 digits',
+            'Port number length should be between 1-5 digits',
             portNumber,
             0,
-            4,
+            1,
             5
         );
 
         if (!validationMessage) {
             const port = parseInt(portNumber, 10);
-            if (port < 1 || port > 65536) {
+            if (port < 1 || port > 65535) {
                 validationMessage = 'Not a valid port number.'
             }
         }

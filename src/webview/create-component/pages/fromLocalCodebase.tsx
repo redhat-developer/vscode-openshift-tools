@@ -25,6 +25,7 @@ import { DevfileListItem } from '../../common/devfileListItem';
 import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
 import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { PortNumberInput } from '../../common/portNumberInput';
 
 type Message = {
     action: string;
@@ -115,7 +116,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                     setPortNumberErrorMessage(message.data);
                 } else {
                     setPortNumberFieldValid(true);
-                    setPortNumberErrorMessage('Please enter port number (optional)');
+                    setPortNumberErrorMessage('');
                 }
                 break;
             }
@@ -204,6 +205,8 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                             componentNameErrorMessage={componentNameErrorMessage}
                             componentName={componentName}
                             setComponentName={setComponentName}
+                        />
+                        <PortNumberInput
                             isPortNumberFieldValid={isPortNumberFieldValid}
                             portNumberErrorMessage={portNumberErrorMessage}
                             portNumber={portNumber}
@@ -360,7 +363,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                                     isLoading={isLoading}
                                                     createComponent={createComponentFromLocalCodebase}
                                                     setLoading={setLoading}
-                                                    isPortNumberFieldValid={isPortNumberFieldValid}                                                />
+                                                    isPortNumberFieldValid={isPortNumberFieldValid} />
                                             )}
                                     </Stack>
                                     <CreateComponentErrorAlert

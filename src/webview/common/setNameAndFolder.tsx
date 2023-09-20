@@ -21,6 +21,7 @@ import { ComponentNameInput } from './componentNameInput';
 import { CreateComponentButton, CreateComponentErrorAlert } from './createComponentButton';
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
+import { PortNumberInput } from './portNumberInput';
 
 type Message = {
     action: string;
@@ -44,7 +45,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     );
     const [isPortNumberFieldValid, setPortNumberFieldValid] = React.useState(true);
     const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
-        'Please enter port number (optional)',
+        'Please enter port number',
     );
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
     const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
@@ -85,7 +86,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     setPortNumberErrorMessage(message.data);
                 } else {
                     setPortNumberFieldValid(true);
-                    setPortNumberErrorMessage('Please enter port number (optional)');
+                    setPortNumberErrorMessage('');
                 }
                 break;
             }
@@ -151,6 +152,8 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     componentNameErrorMessage={componentNameErrorMessage}
                     componentName={componentName}
                     setComponentName={setComponentName}
+                />
+                <PortNumberInput
                     isPortNumberFieldValid={isPortNumberFieldValid}
                     portNumberErrorMessage={portNumberErrorMessage}
                     portNumber={portNumber}
