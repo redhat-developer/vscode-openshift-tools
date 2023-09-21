@@ -6,10 +6,10 @@ import { TextField } from '@mui/material';
 import * as React from 'react';
 
 export type PortNumberInputProps = {
-    portNumber: number,
+    portNumber: string,
     isPortNumberFieldValid: boolean,
     portNumberErrorMessage: string,
-    setPortNumber: React.Dispatch<React.SetStateAction<number>>
+    setPortNumber: React.Dispatch<React.SetStateAction<string>>
 };
 
 export function PortNumberInput(props: PortNumberInputProps) {
@@ -27,7 +27,7 @@ export function PortNumberInput(props: PortNumberInputProps) {
                     action: 'validatePortNumber',
                     data: e.target.value
                 });
-                props.setPortNumber(parseInt(e.target.value, 10));
+                props.setPortNumber(e.target.value);
             }} />
     );
 }

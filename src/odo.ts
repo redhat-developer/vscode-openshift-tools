@@ -105,7 +105,7 @@ export interface Odo {
      * @param registryName the name of the devfile registry that the devfile comes from
      * @param templateProjectName the template project from the devfile to use
      */
-    createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: number, devfileName: string, registryName: string, templateProjectName: string): Promise<void>;
+    createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void>;
     /**
      * Create a component from the given local codebase.
      *
@@ -114,7 +114,7 @@ export interface Odo {
      * @param portNumber the port number used in the component
      * @param location the location of the local codebase
      */
-    createComponentFromLocation(devfileName: string, componentName: string, portNumber: number, location: Uri): Promise<void>;
+    createComponentFromLocation(devfileName: string, componentName: string, portNumber: string, location: Uri): Promise<void>;
 }
 
 export class OdoImpl implements Odo {
@@ -255,11 +255,11 @@ export class OdoImpl implements Odo {
         }
     }
 
-    public async createComponentFromLocation(devfileName: string, componentName: string, portNumber: number, location: Uri): Promise<void> {
+    public async createComponentFromLocation(devfileName: string, componentName: string, portNumber: string, location: Uri): Promise<void> {
         await this.execute(Command.createLocalComponent(devfileName, undefined, componentName, portNumber, undefined, false, ''), location.fsPath);
     }
 
-    public async createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: number, devfileName: string, registryName: string, templateProjectName: string): Promise<void> {
+    public async createComponentFromTemplateProject(componentPath: string, componentName: string, portNumber: string, devfileName: string, registryName: string, templateProjectName: string): Promise<void> {
         await this.execute(Command.createLocalComponent(devfileName, registryName, componentName, portNumber, templateProjectName), componentPath);
     }
 

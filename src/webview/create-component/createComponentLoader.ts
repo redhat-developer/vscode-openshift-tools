@@ -291,7 +291,7 @@ export default class CreateComponentLoader {
              */
             case 'createComponent': {
                 const componentName: string = message.data.componentName;
-                const portNumber: number = message.data.portNumber;
+                const portNumber: string = message.data.portNumber;
                 let componentFolder: string;
                 try {
                     if (message.data.isFromTemplateProject) {
@@ -304,7 +304,7 @@ export default class CreateComponentLoader {
                         await OdoImpl.Instance.createComponentFromTemplateProject(
                             componentFolder,
                             componentName,
-                            portNumber,
+                            portNumber.trim(),
                             templateProject.devfileId,
                             templateProject.registryName,
                             templateProject.templateProjectName,
@@ -338,7 +338,7 @@ export default class CreateComponentLoader {
                             await OdoImpl.Instance.createComponentFromLocation(
                                 devfileType,
                                 componentName,
-                                portNumber,
+                                portNumber.trim(),
                                 Uri.file(componentFolder),
                             );
                         }

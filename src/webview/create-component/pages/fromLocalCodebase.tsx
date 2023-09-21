@@ -57,14 +57,14 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
     const [workspaceFolders, setWorkspaceFolders] = React.useState<string[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
     const [componentName, setComponentName] = React.useState('');
-    const [portNumber, setPortNumber] = React.useState(undefined);
+    const [portNumber, setPortNumber] = React.useState('');
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
     );
     const [isPortNumberFieldValid, setPortNumberFieldValid] = React.useState(true);
     const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
-        'Please enter port number.',
+        'Port number auto filled based on devfile selection',
     );
     const [isLoading, setLoading] = React.useState(false);
     const [isLoaded, setLoaded] = React.useState(false);
@@ -98,6 +98,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                     showRecommendation: Boolean(message.data.devfile),
                 }));
                 setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
+                setPortNumber(message.data.devfile.port);
+                setPortNumberFieldValid(true);
+                setPortNumberErrorMessage('');
                 break;
             }
             case 'validatedComponentName': {
@@ -177,7 +180,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     }
 
-    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) {
+    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: string) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {

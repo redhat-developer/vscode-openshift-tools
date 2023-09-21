@@ -332,7 +332,7 @@ suite('odo commands integration', function () {
                     componentType,
                     'DefaultDevfileRegistry',
                     componentName,
-                    8080,
+                    '8080',
                     componentStarterProject,
                     undefined,
                     undefined,

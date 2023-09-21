@@ -28,7 +28,7 @@ type Message = {
 
 type SetNameAndFolderProps = {
     goBack: () => void;
-    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber?: number) => void;
+    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: string) => void;
     devfile: Devfile;
     templateProject?: string;
     initialComponentName?: string;
@@ -36,14 +36,14 @@ type SetNameAndFolderProps = {
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentName, setComponentName] = React.useState(props.initialComponentName);
-    const [portNumber, setPortNumber] = React.useState(props.devfile.port);
+    const [portNumber, setPortNumber] = React.useState<string>(`${props.devfile.port}`);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
     );
     const [isPortNumberFieldValid, setPortNumberFieldValid] = React.useState(true);
     const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
-        'Please enter port number',
+        'Port number auto filled based on devfile selection',
     );
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
     const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
@@ -120,6 +120,15 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
             window.vscodeApi.postMessage({
                 action: 'validateComponentName',
                 data: props.initialComponentName,
+            });
+        }
+    }, []);
+
+    React.useEffect(() => {
+        if (props.devfile.port) {
+            window.vscodeApi.postMessage({
+                action: 'validatePortNumber',
+                data: `${props.devfile.port}`,
             });
         }
     }, []);
