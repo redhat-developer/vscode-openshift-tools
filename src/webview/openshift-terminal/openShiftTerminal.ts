@@ -82,8 +82,6 @@ class OpenShiftTerminal {
     private _onExitListener: () => void;
     private _onTextListener: (text: string) => void;
 
-    private _closeOnExit: boolean;
-
     private _uuid: string;
     private _headlessTerm: Terminal;
     private _termSerializer: SerializeAddon;
@@ -114,7 +112,6 @@ class OpenShiftTerminal {
         file: string,
         args: string | string[],
         options,
-        closeOnExit = false,
         callbacks?: {
             onSpawn?: () => void;
             onExit?: () => void;
@@ -132,8 +129,6 @@ class OpenShiftTerminal {
         this._onSpawnListener = callbacks?.onSpawn || (() => undefined);
         this._onExitListener = callbacks?.onExit || (() => undefined);
         this._onTextListener = callbacks?.onText || ((_text: string) => undefined);
-
-        this._closeOnExit = closeOnExit;
 
         this._file = file;
         this._args = args;
@@ -188,13 +183,9 @@ class OpenShiftTerminal {
 
     private onExit() {
         this._onExitListener();
-        if (this._closeOnExit) {
-            this._sendExitMessage();
-        } else {
-            const msg = '\r\n\r\nPress any key to close this terminal\r\n';
-            this._sendTerminalData(msg);
-            this._headlessTerm.write(msg);
-        }
+        const msg = '\r\n\r\nPress any key to close this terminal\r\n';
+        this._sendTerminalData(msg);
+        this._headlessTerm.write(msg);
         this._ptyExited = true;
     }
 
@@ -519,7 +510,6 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         name: string,
         cwd = process.cwd(),
         env = process.env,
-        exitOnClose = false,
         callbacks?: {
             onSpawn?: () => void;
             onExit?: () => void;
@@ -572,7 +562,6 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     env,
                     name,
                 },
-                exitOnClose,
                 callbacks,
             ),
         );

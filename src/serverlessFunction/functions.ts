@@ -92,7 +92,6 @@ export class Functions {
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,
-            true,
             {
                 onExit: () => {
                     this.buildTerminalMap.delete(terminalKey)
@@ -109,7 +108,6 @@ export class Functions {
             `${runBuild ? 'Build and ' : ''}Run ${context.name}`,
             context.folderURI.fsPath,
             process.env,
-            false,
             {
                 onSpawn: () => {
                     void commands.executeCommand('openshift.Serverless.refresh', context);
@@ -183,7 +181,6 @@ export class Functions {
             `Deploy ${context.name}`,
             context.folderURI.fsPath,
             undefined,
-            false,
             {
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onText: (text) => {
@@ -210,9 +207,6 @@ export class Functions {
         await OpenShiftTerminalManager.getInstance().createTerminal(
             ServerlessCommand.invokeFunction(invokeFunData),
             `Invoke ${functionName}`,
-            undefined,
-            undefined,
-            false
             );
     }
 
