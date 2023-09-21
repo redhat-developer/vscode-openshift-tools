@@ -143,7 +143,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 componentName,
                 gitDestinationPath: projectFolder,
                 isFromTemplateProject: false,
-                portNumber: portNumber,
+                portNumber,
                 addToWorkspace,
             },
         });

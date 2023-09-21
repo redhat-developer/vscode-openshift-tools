@@ -185,7 +185,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                     ? selectedDevfile.name
                     : recommendedDevfile.devfile.name,
                 componentName,
-                portNumber: portNumber,
+                portNumber,
                 path: projectFolder,
                 isFromTemplateProject: false,
                 addToWorkspace,
