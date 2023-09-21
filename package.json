@@ -100,7 +100,7 @@
 		"validator": "^13.11.0",
 		"vscode-kubernetes-tools-api": "^1.3.0",
 		"xterm": "^5.1.0",
-		"xterm-addon-serialize": "^0.9.0",
+		"xterm-addon-serialize": "^0.11.0",
 		"xterm-headless": "^5.1.0"
 	},
 	"devDependencies": {
