@@ -5,18 +5,17 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { extensions, Uri, WebviewPanel } from 'vscode';
+import { extensions, Uri, WebviewPanel, WebviewView } from 'vscode';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateGitURLProps } from '../common/propertyTypes';
-
 export type Message = {
     action: string;
     data: any;
 };
 
-export async function loadWebviewHtml(webviewName: string, webviewPanel: WebviewPanel, additionalInjections?: Map<string, string>): Promise<string> {
+export async function loadWebviewHtml(webviewName: string, webviewPanel: WebviewPanel | WebviewView, additionalInjections?: Map<string, string>): Promise<string> {
 
     const extensionPath = extensions.getExtension(ExtensionID).extensionPath;
 

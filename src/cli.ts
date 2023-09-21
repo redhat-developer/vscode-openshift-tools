@@ -5,11 +5,9 @@
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
-import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
-import { WindowUtil } from './util/windowUtils';
 import { VsCommandError } from './vscommand';
 
 export class CliChannel {
@@ -64,17 +62,6 @@ export class CliChannel {
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
-    }
-
-    async executeInTerminal(command: CommandText, cwd: string, name: string, env = process.env, isFuncionCLI = false): Promise<void> {
-        const commandStr = command.toString();
-        const [cmd, ...params] = commandStr.split(' ');
-        const toolLocation = await ToolsConfig.detect(cmd);
-        const envWithTelemetry = {...env, ...CliChannel.createTelemetryEnv()};
-        const terminal: vscode.Terminal = WindowUtil.createTerminal(name, cwd, envWithTelemetry);
-        terminal.sendText(toolLocation === cmd ? commandStr :
-            isFuncionCLI ? toolLocation.concat(' ', ...params.join(' ')) : toolLocation.concat(' ', ...params), true);
-        terminal.show();
     }
 
     async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {

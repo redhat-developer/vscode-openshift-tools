@@ -4,7 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { commands, env, ExtensionContext, Progress as VProgress, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, Terminal, ThemeIcon, Uri, window, workspace } from 'vscode';
+import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, Progress as VProgress, commands, env, window, workspace } from 'vscode';
+import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { getInstance } from '../odo';
 import { Command } from '../odo/command';
@@ -15,8 +16,8 @@ import { Filters } from '../util/filters';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
-import { WindowUtil } from '../util/windowUtils';
-import { vsCommand, VsCommandError } from '../vscommand';
+import { VsCommandError, vsCommand } from '../vscommand';
+import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
 
@@ -63,12 +64,12 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.about')
     static async about(): Promise<void> {
-        await Cluster.odo.executeInTerminal(Command.printOdoVersion(), undefined, 'OpenShift: Show odo Version');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOdoVersion(), undefined, 'Show odo Version');
     }
 
     @vsCommand('openshift.oc.about')
     static async ocAbout(): Promise<void> {
-        await Cluster.odo.executeInTerminal(Command.printOcVersion(), undefined, 'OpenShift: Show OKD CLI Tool Version');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOcVersion(), undefined, 'Show OKD CLI Tool Version');
     }
 
     @vsCommand('openshift.output')
@@ -248,10 +249,7 @@ export class Cluster extends OpenShiftItem {
         } else {
             crcBinary = crcPath;
         }
-        const terminal: Terminal = WindowUtil.createTerminal('OpenShift: Stop OpenShift Local', undefined);
-            terminal.sendText(`${crcBinary} stop`);
-            terminal.show();
-        return;
+        void OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${crcBinary} stop`), undefined, 'Stop OpenShift Local');
     }
 
     public static async getVersions(): Promise<Versions> {
@@ -531,7 +529,7 @@ export class Cluster extends OpenShiftItem {
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if(!NameValidator.ocLoginCommandMatches(clipboard)) {
+        if (!NameValidator.ocLoginCommandMatches(clipboard)) {
             const choice = await window.showErrorMessage('Cannot parse login command in clipboard. Please open cluster dashboard and select `Copy login command` from user name dropdown in the upper right corner. Copy full login command to clipboard. Switch back to VSCode window and press `Login to Sandbox` button again.',
                 'Open Dashboard');
             if (choice === 'Open Dashboard') {

@@ -2,18 +2,18 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
-import { Stack, SvgIcon, Typography } from '@mui/material';
-import { Model } from 'survey-core';
-import { Survey } from 'survey-react-ui';
-import { DefaultProps } from '../../common/propertyTypes';
-import { json } from '../json';
-import { VSCodeMessage } from './vsCodeMessage';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { Stack, SvgIcon, Typography } from '@mui/material';
+import React from 'react';
+import { Model } from 'survey-core';
+import 'survey-core/defaultV2.css';
+import { Survey } from 'survey-react-ui';
 import OpenShiftExtensionIcon from '../../../../images/openshift_icon.png';
 import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
-import 'survey-core/defaultV2.css';
-import './feedback.css'
+import { DefaultProps } from '../../common/propertyTypes';
+import { json } from '../json';
+import './feedback.css';
+import { VSCodeMessage } from './vsCodeMessage';
 
 export const FeedbackComponent: React.FC<DefaultProps> = () => {
 
