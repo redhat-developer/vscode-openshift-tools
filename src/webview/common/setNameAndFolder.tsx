@@ -28,7 +28,7 @@ type Message = {
 
 type SetNameAndFolderProps = {
     goBack: () => void;
-    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: string) => void;
+    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) => void;
     devfile: Devfile;
     templateProject?: string;
     initialComponentName?: string;
@@ -36,7 +36,7 @@ type SetNameAndFolderProps = {
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentName, setComponentName] = React.useState(props.initialComponentName);
-    const [portNumber, setPortNumber] = React.useState<string>(`${props.devfile.port}`);
+    const [portNumber, setPortNumber] = React.useState<number>(props.devfile.port);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
@@ -162,12 +162,15 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     componentName={componentName}
                     setComponentName={setComponentName}
                 />
-                <PortNumberInput
-                    isPortNumberFieldValid={isPortNumberFieldValid}
-                    portNumberErrorMessage={portNumberErrorMessage}
-                    portNumber={portNumber}
-                    setPortNumber={setPortNumber}
-                />
+                {
+                    portNumber &&
+                    <PortNumberInput
+                        isPortNumberFieldValid={isPortNumberFieldValid}
+                        portNumberErrorMessage={portNumberErrorMessage}
+                        portNumber={portNumber}
+                        setPortNumber={setPortNumber}
+                    />
+                }
                 <FormControl fullWidth>
                     <Stack direction="row" spacing={2}>
                         <TextField

@@ -115,20 +115,20 @@ export function validateComponentName(name: string): string {
  * @param name the port number to validate
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
-export function validatePortNumber(portNumber: string): string {
-    let validationMessage: string;
-    if (portNumber.trim().length > 0) {
+export function validatePortNumber(portNumber: number): string {
+    let validationMessage: string | null;
+    const port = portNumber.toString();
+    if (NameValidator.emptyName('Empty', port) === null) {
         validationMessage = NameValidator.lengthName(
             'Port number length should be between 1-5 digits',
-            portNumber,
+            port,
             0,
             1,
             5
         );
 
         if (!validationMessage) {
-            const port = parseInt(portNumber, 10);
-            if (port < 1 || port > 65535) {
+            if (portNumber < 1 || portNumber > 65535) {
                 validationMessage = 'Not a valid port number.'
             }
         }

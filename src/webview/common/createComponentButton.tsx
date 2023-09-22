@@ -11,12 +11,12 @@ export type CreateComponentButtonProps = {
     componentName: string;
     componentParentFolder: string;
     addToWorkspace: boolean;
-    portNumber: string;
+    portNumber: number;
     isComponentNameFieldValid: boolean;
     isPortNumberFieldValid: boolean;
     isFolderFieldValid: boolean;
     isLoading: boolean;
-    createComponent: (projectFolder: string, componentName: string, isAddToWorkspace: boolean, portNumber: string) => void;
+    createComponent: (projectFolder: string, componentName: string, isAddToWorkspace: boolean, portNumber: number) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 

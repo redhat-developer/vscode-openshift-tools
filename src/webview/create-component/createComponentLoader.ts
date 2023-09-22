@@ -291,7 +291,7 @@ export default class CreateComponentLoader {
              */
             case 'createComponent': {
                 const componentName: string = message.data.componentName;
-                const portNumber: string = message.data.portNumber;
+                const portNumber: number = message.data.portNumber;
                 let componentFolder: string;
                 try {
                     if (message.data.isFromTemplateProject) {
@@ -304,7 +304,7 @@ export default class CreateComponentLoader {
                         await OdoImpl.Instance.createComponentFromTemplateProject(
                             componentFolder,
                             componentName,
-                            portNumber.trim(),
+                            portNumber,
                             templateProject.devfileId,
                             templateProject.registryName,
                             templateProject.templateProjectName,
@@ -338,7 +338,7 @@ export default class CreateComponentLoader {
                             await OdoImpl.Instance.createComponentFromLocation(
                                 devfileType,
                                 componentName,
-                                portNumber.trim(),
+                                portNumber,
                                 Uri.file(componentFolder),
                             );
                         }
@@ -473,7 +473,7 @@ export default class CreateComponentLoader {
                       )
                     : undefined;
             if (devfile) {
-                devfile.port = compDescriptions[0].devfileData.devfile.components[0].container?.endpoints[0].targetPort
+                devfile.port = compDescriptions[0].devfileData.devfile.components[0].container?.endpoints[0].targetPort;
             }
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',

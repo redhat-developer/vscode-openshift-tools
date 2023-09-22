@@ -206,7 +206,7 @@ export class Command {
         type = '', // will use empty string in case of undefined type passed in
         registryName: string,
         name: string,
-        portNumber: string,
+        portNumber: number,
         starter: string = undefined,
         useExistingDevfile = false,
         customDevfilePath = '',
@@ -234,8 +234,8 @@ export class Command {
         if (devfileVersion) {
             cTxt.addOption(new CommandOption('--devfile-version', devfileVersion, false));
         }
-        if (portNumber.length > 0) {
-            cTxt.addOption(new CommandOption(' --run-port', portNumber, false));
+        if (portNumber) {
+            cTxt.addOption(new CommandOption(' --run-port', portNumber.toString(), false));
         }
         return cTxt;
     }

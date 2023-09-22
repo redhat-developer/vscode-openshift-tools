@@ -47,14 +47,14 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'createComponent': {
             const { projectFolder, componentName } = event.data;
             const templateProject: TemplateProjectIdentifier = event.data.templateProject;
-            const portNumber: string = event.data.portNumber;
+            const portNumber: number = event.data.portNumber;
             const componentFolder = path.join(projectFolder, componentName);
             try {
                 await fs.mkdir(componentFolder);
                 await OdoImpl.Instance.createComponentFromTemplateProject(
                     componentFolder,
                     componentName,
-                    portNumber.trim(),
+                    portNumber,
                     templateProject.devfileId,
                     templateProject.registryName,
                     templateProject.templateProjectName,

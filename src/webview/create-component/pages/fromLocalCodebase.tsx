@@ -34,12 +34,6 @@ type Message = {
 
 type CurrentPage = 'fromLocalCodeBase' | 'selectDifferentDevfile';
 
-export type ComponentNameState = {
-    name: string;
-    isValid: boolean;
-    helpText: string;
-};
-
 type RecommendedDevfileState = {
     devfile: Devfile;
     showRecommendation: boolean;
@@ -57,7 +51,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
     const [workspaceFolders, setWorkspaceFolders] = React.useState<string[]>([]);
     const [projectFolder, setProjectFolder] = React.useState('');
     const [componentName, setComponentName] = React.useState('');
-    const [portNumber, setPortNumber] = React.useState('');
+    const [portNumber, setPortNumber] = React.useState<number>(undefined);
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
@@ -180,7 +174,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     }
 
-    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: string) {
+    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
@@ -199,224 +193,229 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
 
     switch (currentPage) {
         case 'fromLocalCodeBase':
-            return (
-                <>
-                    <div style={{ position: 'relative' }}>
-                        <Typography variant="h5">From Existing Local Codebase</Typography>
-                    </div>
-                    <Stack direction="column" spacing={2} marginTop={4}>
-                        <ComponentNameInput
-                            isComponentNameFieldValid={isComponentNameFieldValid}
-                            componentNameErrorMessage={componentNameErrorMessage}
-                            componentName={componentName}
-                            setComponentName={setComponentName}
-                        />
-                        <PortNumberInput
-                            isPortNumberFieldValid={isPortNumberFieldValid}
-                            portNumberErrorMessage={portNumberErrorMessage}
-                            portNumber={portNumber}
-                            setPortNumber={setPortNumber}
-                        />
-                        <Stack direction="row" spacing={1} marginTop={1}>
-                            <FormControl
-                                fullWidth
-                                error={recommendedDevfile.isDevfileExistsInFolder}
-                            >
-                                <InputLabel id="project-path-label">Folder</InputLabel>
-                                <Select
+            {
+                return (
+                    <>
+                        <div style={{ position: 'relative' }}>
+                            <Typography variant="h5">From Existing Local Codebase</Typography>
+                        </div>
+                        <Stack direction="column" spacing={2} marginTop={4}>
+                            <ComponentNameInput
+                                isComponentNameFieldValid={isComponentNameFieldValid}
+                                componentNameErrorMessage={componentNameErrorMessage}
+                                componentName={componentName}
+                                setComponentName={setComponentName}
+                            />
+                            {
+                                portNumber &&
+                                <PortNumberInput
+                                    isPortNumberFieldValid={isPortNumberFieldValid}
+                                    portNumberErrorMessage={portNumberErrorMessage}
+                                    portNumber={portNumber}
+                                    setPortNumber={setPortNumber}
+                                />
+                            }
+                            <Stack direction="row" spacing={1} marginTop={1}>
+                                <FormControl
                                     fullWidth
-                                    className="selectFolder"
-                                    labelId="project-path-label"
-                                    value={projectFolder}
-                                    label="Folder"
-                                    onChange={(e) => {
-                                        setProjectFolder(e.target.value);
-                                    }}
-                                    disabled={
-                                        recommendedDevfile.showRecommendation ||
-                                        workspaceFolders.length === 0
-                                    }
+                                    error={recommendedDevfile.isDevfileExistsInFolder}
                                 >
-                                    {workspaceFolders.length !== 0 &&
-                                        workspaceFolders.map((folder) => (
-                                            <MenuItem key={folder} value={folder}>
-                                                {folder}
-                                            </MenuItem>
-                                        ))}
-                                </Select>
-                                {recommendedDevfile.isDevfileExistsInFolder && (
-                                    <FormHelperText>
-                                        A devfile already exists in this project, please select
-                                        another folder.
-                                    </FormHelperText>
-                                )}
-                                {workspaceFolders.length === 0 && (
-                                    <FormHelperText>
-                                        There are no projects in the workspace, select folder or
-                                        open a folder in the workspace.
-                                    </FormHelperText>
-                                )}
-                            </FormControl>
-                            {!recommendedDevfile.showRecommendation && (
-                                <Button
-                                    variant="contained"
-                                    sx={{ whiteSpace: 'nowrap', height: '4em' }}
-                                    onClick={(e) => {
-                                        window.vscodeApi.postMessage({
-                                            action: 'selectProjectFolder',
-                                        });
-                                    }}
-                                >
-                                    Select Folder
-                                </Button>
-                            )}
-                        </Stack>
-                        {!isLoaded ? (
-                            <>
-                                <Stack direction="row" spacing={1} marginTop={2}>
-                                    {(!props.rootFolder || props.rootFolder.length === 0) &&
-                                        <Button variant='text' onClick={() => { props.setCurrentView('home') }}>
-                                            BACK
-                                        </Button>
-                                    }
+                                    <InputLabel id="project-path-label">Folder</InputLabel>
+                                    <Select
+                                        fullWidth
+                                        className="selectFolder"
+                                        labelId="project-path-label"
+                                        value={projectFolder}
+                                        label="Folder"
+                                        onChange={(e) => {
+                                            setProjectFolder(e.target.value);
+                                        }}
+                                        disabled={
+                                            recommendedDevfile.showRecommendation ||
+                                            workspaceFolders.length === 0
+                                        }
+                                    >
+                                        {workspaceFolders.length !== 0 &&
+                                            workspaceFolders.map((folder) => (
+                                                <MenuItem key={folder} value={folder}>
+                                                    {folder}
+                                                </MenuItem>
+                                            ))}
+                                    </Select>
+                                    {recommendedDevfile.isDevfileExistsInFolder && (
+                                        <FormHelperText>
+                                            A devfile already exists in this project, please select
+                                            another folder.
+                                        </FormHelperText>
+                                    )}
+                                    {workspaceFolders.length === 0 && (
+                                        <FormHelperText>
+                                            There are no projects in the workspace, select folder or
+                                            open a folder in the workspace.
+                                        </FormHelperText>
+                                    )}
+                                </FormControl>
+                                {!recommendedDevfile.showRecommendation && (
                                     <Button
                                         variant="contained"
-                                        disabled={
-                                            !isComponentNameFieldValid ||
-                                            componentName.length === 0 ||
-                                            projectFolder.length === 0 ||
-                                            recommendedDevfile.isDevfileExistsInFolder
-                                        }
-                                        onClick={handleNext}
+                                        sx={{ whiteSpace: 'nowrap', height: '4em' }}
+                                        onClick={(e) => {
+                                            window.vscodeApi.postMessage({
+                                                action: 'selectProjectFolder',
+                                            });
+                                        }}
                                     >
-                                        NEXT
+                                        Select Folder
                                     </Button>
-                                </Stack>
-                                {recommendedDevfile.isLoading && (
-                                    <Stack direction="column" spacing={3} alignItems="center">
-                                        <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                                        <CircularProgress />
-                                        <Typography variant="body2">
-                                            Scanning for recommended devfile.
-                                        </Typography>
-                                    </Stack>
                                 )}
-                            </>
-                        ) : recommendedDevfile.showRecommendation || selectedDevfile ? (
-                            <>
-                                <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                                <Stack direction="column">
-                                    <>
+                            </Stack>
+                            {!isLoaded ? (
+                                <>
+                                    <Stack direction="row" spacing={1} marginTop={2}>
+                                        {(!props.rootFolder || props.rootFolder.length === 0) &&
+                                            <Button variant='text' onClick={() => { props.setCurrentView('home') }}>
+                                                BACK
+                                            </Button>
+                                        }
+                                        <Button
+                                            variant="contained"
+                                            disabled={
+                                                !isComponentNameFieldValid ||
+                                                componentName.length === 0 ||
+                                                projectFolder.length === 0 ||
+                                                recommendedDevfile.isDevfileExistsInFolder
+                                            }
+                                            onClick={handleNext}
+                                        >
+                                            NEXT
+                                        </Button>
+                                    </Stack>
+                                    {recommendedDevfile.isLoading && (
+                                        <Stack direction="column" spacing={3} alignItems="center">
+                                            <Divider variant="middle" sx={{ marginTop: '2em' }} />
+                                            <CircularProgress />
+                                            <Typography variant="body2">
+                                                Scanning for recommended devfile.
+                                            </Typography>
+                                        </Stack>
+                                    )}
+                                </>
+                            ) : recommendedDevfile.showRecommendation || selectedDevfile ? (
+                                <>
+                                    <Divider variant="middle" sx={{ marginTop: '2em' }} />
+                                    <Stack direction="column">
+                                        <>
+                                            <Stack
+                                                direction="row"
+                                                justifyContent="space-between"
+                                                marginTop={1}
+                                            >
+                                                <Typography variant="h6" paddingBottom={1}>
+                                                    {selectedDevfile
+                                                        ? 'Selected Devfile'
+                                                        : 'Recommended Devfile'}
+                                                </Typography>
+                                                {!selectedDevfile && <DevfileRecommendationInfo />}
+                                            </Stack>
+                                            <DevfileListItem
+                                                devfile={
+                                                    selectedDevfile
+                                                        ? selectedDevfile
+                                                        : recommendedDevfile.devfile
+                                                }
+                                            />
+                                        </>
                                         <Stack
                                             direction="row"
-                                            justifyContent="space-between"
-                                            marginTop={1}
+                                            justifyContent="flex-end"
+                                            spacing={1}
+                                            marginTop={2}
                                         >
-                                            <Typography variant="h6" paddingBottom={1}>
-                                                {selectedDevfile
-                                                    ? 'Selected Devfile'
-                                                    : 'Recommended Devfile'}
-                                            </Typography>
-                                            {!selectedDevfile && <DevfileRecommendationInfo />}
+                                            <Button
+                                                variant="text"
+                                                onClick={() => {
+                                                    setRecommendedDevfile((prevState) => ({
+                                                        ...prevState,
+                                                        showRecommendation: false,
+                                                    }));
+                                                    setSelectedDevfile(undefined);
+                                                    setLoaded((_) => false);
+                                                }}
+                                                sx={{ marginRight: 'auto' }}
+                                            >
+                                                BACK
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => {
+                                                    setSelectedDevfile(undefined);
+                                                    setCurrentPage('selectDifferentDevfile');
+                                                }}
+                                            >
+                                                SELECT A DIFFERENT DEVFILE
+                                            </Button>
+                                            {(recommendedDevfile.showRecommendation ||
+                                                selectedDevfile) && (
+                                                    <CreateComponentButton
+                                                        componentName={componentName}
+                                                        componentParentFolder={projectFolder}
+                                                        addToWorkspace={true}
+                                                        portNumber={portNumber}
+                                                        isComponentNameFieldValid={isComponentNameFieldValid}
+                                                        isFolderFieldValid={true}
+                                                        isLoading={isLoading}
+                                                        createComponent={createComponentFromLocalCodebase}
+                                                        setLoading={setLoading}
+                                                        isPortNumberFieldValid={isPortNumberFieldValid} />
+                                                )}
                                         </Stack>
-                                        <DevfileListItem
-                                            devfile={
-                                                selectedDevfile
-                                                    ? selectedDevfile
-                                                    : recommendedDevfile.devfile
-                                            }
+                                        <CreateComponentErrorAlert
+                                            createComponentErrorMessage={createComponentErrorMessage}
                                         />
-                                    </>
-                                    <Stack
-                                        direction="row"
-                                        justifyContent="flex-end"
-                                        spacing={1}
-                                        marginTop={2}
-                                    >
-                                        <Button
-                                            variant="text"
-                                            onClick={() => {
-                                                setRecommendedDevfile((prevState) => ({
-                                                    ...prevState,
-                                                    showRecommendation: false,
-                                                }));
-                                                setSelectedDevfile(undefined);
-                                                setLoaded((_) => false);
-                                            }}
-                                            sx={{ marginRight: 'auto' }}
-                                        >
-                                            BACK
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => {
-                                                setSelectedDevfile(undefined);
-                                                setCurrentPage('selectDifferentDevfile');
-                                            }}
-                                        >
-                                            SELECT A DIFFERENT DEVFILE
-                                        </Button>
-                                        {(recommendedDevfile.showRecommendation ||
-                                            selectedDevfile) && (
-                                                <CreateComponentButton
-                                                    componentName={componentName}
-                                                    componentParentFolder={projectFolder}
-                                                    addToWorkspace={true}
-                                                    portNumber={portNumber}
-                                                    isComponentNameFieldValid={isComponentNameFieldValid}
-                                                    isFolderFieldValid={true}
-                                                    isLoading={isLoading}
-                                                    createComponent={createComponentFromLocalCodebase}
-                                                    setLoading={setLoading}
-                                                    isPortNumberFieldValid={isPortNumberFieldValid} />
-                                            )}
                                     </Stack>
-                                    <CreateComponentErrorAlert
-                                        createComponentErrorMessage={createComponentErrorMessage}
-                                    />
-                                </Stack>
-                            </>
-                        ) : (
-                            <>
-                                <Divider variant="middle" sx={{ marginTop: '2em' }} />
-                                <Stack direction="column">
-                                    <NoSuitableDevfile />
-                                    <Stack
-                                        direction="row"
-                                        justifyContent="flex-end"
-                                        spacing={1}
-                                        marginTop={2}
-                                    >
-                                        <Button
-                                            variant="text"
-                                            onClick={() => {
-                                                setRecommendedDevfile((prevState) => ({
-                                                    ...prevState,
-                                                    showRecommendation: false,
-                                                }));
-                                                setSelectedDevfile(undefined);
-                                                setLoaded((_) => false);
-                                            }}
-                                            sx={{ marginRight: 'auto' }}
+                                </>
+                            ) : (
+                                <>
+                                    <Divider variant="middle" sx={{ marginTop: '2em' }} />
+                                    <Stack direction="column">
+                                        <NoSuitableDevfile />
+                                        <Stack
+                                            direction="row"
+                                            justifyContent="flex-end"
+                                            spacing={1}
+                                            marginTop={2}
                                         >
-                                            BACK
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            onClick={() => {
-                                                setSelectedDevfile(undefined);
-                                                setCurrentPage('selectDifferentDevfile');
-                                            }}
-                                        >
-                                            SELECT A DEVFILE
-                                        </Button>
+                                            <Button
+                                                variant="text"
+                                                onClick={() => {
+                                                    setRecommendedDevfile((prevState) => ({
+                                                        ...prevState,
+                                                        showRecommendation: false,
+                                                    }));
+                                                    setSelectedDevfile(undefined);
+                                                    setLoaded((_) => false);
+                                                }}
+                                                sx={{ marginRight: 'auto' }}
+                                            >
+                                                BACK
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => {
+                                                    setSelectedDevfile(undefined);
+                                                    setCurrentPage('selectDifferentDevfile');
+                                                }}
+                                            >
+                                                SELECT A DEVFILE
+                                            </Button>
+                                        </Stack>
                                     </Stack>
-                                </Stack>
-                            </>
-                        )}
-                    </Stack>
-                </>
-            );
+                                </>
+                            )}
+                        </Stack>
+                    </>
+                );
+            }
         case 'selectDifferentDevfile':
             return (
                 <>
