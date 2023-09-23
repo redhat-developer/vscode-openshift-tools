@@ -309,7 +309,6 @@ export class Component extends OpenShiftItem {
                 `odo dev: ${component.component.devfileData.devfile.metadata.name}`,
                 component.contextPath,
                 process.env,
-                true,
                 {
                     onExit() {
                         if (cs.devProcessStopRequest) {
