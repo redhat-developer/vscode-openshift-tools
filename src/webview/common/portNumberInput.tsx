@@ -5,28 +5,29 @@
 import { TextField } from '@mui/material';
 import * as React from 'react';
 
-export type ComponentNameInputProps = {
-    isComponentNameFieldValid: boolean,
-    componentNameErrorMessage: string,
-    componentName: string,
-    setComponentName: React.Dispatch<React.SetStateAction<string>>
+export type PortNumberInputProps = {
+    portNumber: number,
+    isPortNumberFieldValid: boolean,
+    portNumberErrorMessage: string,
+    setPortNumber: React.Dispatch<React.SetStateAction<number>>
 };
 
-export function ComponentNameInput(props: ComponentNameInputProps) {
+export function PortNumberInput(props: PortNumberInputProps) {
     return (
         <TextField fullWidth
-            id='componentName'
+            id='portnumber'
             variant='outlined'
-            label='Component Name'
-            value={props.componentName}
-            error={!props.isComponentNameFieldValid}
-            helperText={props.componentNameErrorMessage}
+            label='Port'
+            type='number'
+            value={props.portNumber}
+            error={!props.isPortNumberFieldValid}
+            helperText={props.portNumberErrorMessage}
             onChange={(e) => {
                 window.vscodeApi.postMessage({
-                    action: 'validateComponentName',
+                    action: 'validatePortNumber',
                     data: e.target.value
                 });
-                props.setComponentName(e.target.value);
+                props.setPortNumber(parseInt(e.target.value, 10));
             }} />
     );
 }

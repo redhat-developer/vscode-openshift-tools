@@ -12,7 +12,7 @@ import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
-import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateComponentName } from '../common-ext/createComponentHelpers';
+import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateComponentName, validatePortNumber } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { TemplateProjectIdentifier } from '../common/devfile';
 
@@ -47,12 +47,14 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'createComponent': {
             const { projectFolder, componentName } = event.data;
             const templateProject: TemplateProjectIdentifier = event.data.templateProject;
+            const portNumber: number = event.data.portNumber;
             const componentFolder = path.join(projectFolder, componentName);
             try {
                 await fs.mkdir(componentFolder);
                 await OdoImpl.Instance.createComponentFromTemplateProject(
                     componentFolder,
                     componentName,
+                    portNumber,
                     templateProject.devfileId,
                     templateProject.registryName,
                     templateProject.templateProjectName,
@@ -82,6 +84,17 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             const validationMessage = validateComponentName(event.data);
             void panel.webview.postMessage({
                 action: 'validatedComponentName',
+                data: validationMessage,
+            });
+            break;
+        }
+        /**
+         * The panel requested to validate the entered port number. Respond with error status and message.
+         */
+        case 'validatePortNumber': {
+            const validationMessage = validatePortNumber(event.data);
+            void panel.webview.postMessage({
+                action: 'validatePortNumber',
                 data: validationMessage,
             });
             break;

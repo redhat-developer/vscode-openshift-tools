@@ -88,6 +88,7 @@ export interface AnalyzeResponse {
     devfile: string;
     devfileRegistry: string;
     devfileVersion: string;
+    ports: number[];
 }
 
 export type ComponentTypeDescription = DevfileComponentType & DevfileData;
