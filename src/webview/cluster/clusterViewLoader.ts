@@ -358,7 +358,6 @@ export default class ClusterViewLoader {
         await cfg.update('crcNameserver', event.nameserver);
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
         if (panel) {
@@ -372,11 +371,13 @@ export default class ClusterViewLoader {
             });
             panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
             panel.webview.html = await loadWebviewHtml('clusterViewer', panel);
-            await panel.webview.postMessage({action: 'cluster', data: ''});
+            const messageListenerDisposable = panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
             panel.onDidDispose(()=> {
+                messageListenerDisposable.dispose();
                 panel = undefined;
             });
-            panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
+            // don't await this message being sent, since the webview may not be set up yet
+            void panel.webview.postMessage({action: 'cluster', data: ''});
         }
         return panel;
     }
