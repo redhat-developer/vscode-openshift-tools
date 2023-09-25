@@ -54,6 +54,7 @@ export interface HelmChartHomePageProps extends React.AnchorHTMLAttributes<HTMLA
 }
 
 export interface CreateFunctionPageProps extends DefaultProps {
+    basicTemplates: string[],
     onCreateSubmit: (name: string, language: string, template: string, location: Uri, image: string) => void;
 }
 
@@ -63,6 +64,8 @@ export interface InvokeFunctionPageProps extends DefaultProps {
     uri: Uri;
     instance: string;
     invokeURL: string;
+    template: string;
+    basicTemplates: string[];
     onInvokeSubmit: (name: string, instance: string, id: string, path: string, contentType: string, format: string, source: string,
         type: string, data: string, file: string, enableUrl: boolean, invokeURL: string) => void;
 }

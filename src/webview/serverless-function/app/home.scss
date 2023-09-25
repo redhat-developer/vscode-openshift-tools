@@ -46,6 +46,10 @@ button {
     text-transform: none;
 }
 
+.MuiIconButton-root.Mui-disabled > .MuiSvgIcon-root {
+    color: var(--vscode-titleBar-inactiveForeground) !important;
+}
+
 .MuiButton-root.Mui-disabled {
     -webkit-text-fill-color: white !important;
 }
@@ -171,7 +175,7 @@ button {
 }
 
 .Mui-disabled {
-    -webkit-text-fill-color: var(--vscode-button-foreground) !important;
+    -webkit-text-fill-color: var(--vscode-titleBar-inactiveForeground) !important;
 }
 
 .Mui-active {

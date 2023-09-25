@@ -121,14 +121,6 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
             panel.dispose();
             break;
         }
-        case 'getTemplates': {
-            const templates = await Functions.getInstance().getTemplates();
-            await panel?.webview.postMessage({
-                action: eventName,
-                basicTemplates: templates
-            });
-            break;
-        }
         default:
             break;
     }
@@ -163,25 +155,39 @@ export default class ServerlessFunctionViewLoader {
             panel.reveal(vscode.ViewColumn.One);
             return null;
         }
+        const templates = await Functions.getInstance().getTemplates();
         if (invoke) {
             const panel = await this.createView(title);
             const getEnvFuncId = crypto.randomUUID();
             ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
+            const yamlContent = await Utils.getFuncYamlContent(folderURI.fsPath);
+            let template: string, runtime: string, basicTemplates: string[] = ['cloudevent', 'http'];
+            if (yamlContent) {
+                template = yamlContent.invoke;
+                runtime = yamlContent.runtime;
+                basicTemplates = template ? templates[runtime] : basicTemplates;
+            }
             void panel.webview.postMessage({
                 action: 'invoke',
                 instance: status,
                 name: title.substring(0, title.indexOf('-')).trim(),
                 id: getEnvFuncId,
                 uri: folderURI,
+                runtime,
+                template,
+                basicTemplates,
                 url
             });
             return panel;
         } else if (!invoke) {
-            return await this.createView(title);
+            const panel = await this.createView(title);
+            void panel.webview.postMessage({
+                action: 'create',
+                basicTemplates: templates
+            });
+            return panel;
         }
-
-        return this.createView(title);
-
+        return null;
     }
 
     private static async createView(

@@ -33,7 +33,7 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
             contentType: 'text/plain',
             source: '/boson/fn',
             type: 'boson.fn',
-            format: 'HTTP',
+            format: props.template?.length > 0 ? props.template : 'http',
             input: 'Hello World',
             inputFilePath: '',
             mode: 'text',
@@ -206,7 +206,6 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
             'video/3gpp2',
             'application/x-7z-compressed',
         ];
-        const templates = ['HTTP', 'Cloud Events'];
         return (
             <div className='mainContainer margin'>
                 <div className='title'>
@@ -319,8 +318,9 @@ export class InvokeFunction extends React.Component<InvokeFunctionPageProps, {
                                 </Button>
                                 <Autocomplete
                                     defaultValue={format}
+                                    disabled={this.props.template !== undefined}
                                     id='format-dropdown'
-                                    options={templates}
+                                    options={this.props.basicTemplates}
                                     onChange={(e, v) => this.handleDropDownChange(e, v)}
                                     PaperComponent={({ children }) => (
                                         <Paper sx={{
