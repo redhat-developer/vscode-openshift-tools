@@ -16,7 +16,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     id: any,
     folderURI: Uri,
     instance: string,
-    invokeURL: string
+    invokeURL: string,
+    runtime: string,
+    basicTemplates: string[],
+    template: string
 }> {
 
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
@@ -27,7 +30,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
             id: undefined,
             folderURI: undefined,
             instance: '',
-            invokeURL: ''
+            invokeURL: '',
+            runtime: '',
+            basicTemplates: [],
+            template: ''
         }
     }
 
@@ -40,7 +46,15 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
                     id: message.data.id,
                     folderURI: message.data.uri,
                     instance: message.data.instance,
-                    invokeURL: message.data.url
+                    invokeURL: message.data.url,
+                    runtime: message.data.runtime,
+                    template: message.data.template,
+                    basicTemplates: message.data.basicTemplates
+                })
+            } else if (message.data.action === 'create') {
+                this.setState({
+                    invoke: false,
+                    basicTemplates: message.data.basicTemplates
                 })
             }
         });
@@ -80,9 +94,10 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
         return (
             this.state.invoke ?
                 <InvokeFunction instance={this.state.instance} uri={this.state.folderURI} name={this.state.name}
-                    invokeURL={this.state.invokeURL} id={this.state.id} onInvokeSubmit={this.handleInvokeSubmit} />
+                    invokeURL={this.state.invokeURL} id={this.state.id}
+                    template={this.state.template} basicTemplates={this.state.basicTemplates} onInvokeSubmit={this.handleInvokeSubmit} />
                 :
-                <CreateFunction onCreateSubmit={this.handleCreateSubmit} />
+                <CreateFunction onCreateSubmit={this.handleCreateSubmit} basicTemplates={this.state.basicTemplates} />
         )
     }
 }

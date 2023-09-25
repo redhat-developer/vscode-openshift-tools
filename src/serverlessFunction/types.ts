@@ -18,6 +18,7 @@ export interface FunctionContent {
     image?: string;
     imageDigest?: string;
     builder?: string;
+    invoke?: string;
     invocation?: { format?: string };
 }
 
@@ -70,8 +71,6 @@ export interface ClusterVersion {
         },
     ];
 }
-
-
 
 export interface InvokeFunction {
     instance: string;
