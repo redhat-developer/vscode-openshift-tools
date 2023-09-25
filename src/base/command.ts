@@ -53,6 +53,15 @@ export class CommandText {
        this.options.push(option);
        return this;
     }
+
+    get args(): string[] {
+        const parameterSectionArgs = this.parameter.split(' ');
+
+        return [
+            ...parameterSectionArgs,
+            ...this.options.map(opt => opt.toString())
+        ];
+    }
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types

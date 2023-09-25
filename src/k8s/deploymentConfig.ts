@@ -16,34 +16,34 @@ export class DeploymentConfig {
 
     public static command = {
         getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {
-            return new CommandText('get rc',
-                undefined, [
+            return new CommandText('oc', 'get rc',
+                [
                     new CommandOption('-o', `jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${(parent as any).name}')]}{.metadata.namespace}{','}{.metadata.name}{','}{.metadata.annotations.openshift\\.io/deployment-config\\.latest-version}{\\"\\n\\"}{end}"`)
                 ]
             );
         },
         deploy(build: string): CommandText {
-            return new CommandText('oc rollout latest', `dc/${build}`);
+            return new CommandText('oc', `rollout latest dc/${build}`);
         },
         getDeploymentConfigs(): CommandText {
-            return new CommandText('oc get deploymentConfig -o json');
+            return new CommandText('oc', 'get deploymentConfig -o json');
         },
         getDeploymentFunctions(): CommandText {
-            return new CommandText('func list -o json');
+            return new CommandText('func', 'list -o json');
         },
         showDeploymentConfigLog(deploymentConfig: string): CommandText {
-            return new CommandText('oc logs', `dc/${deploymentConfig}`);
+            return new CommandText('oc', `logs dc/${deploymentConfig}`);
         },
         getReplicas(deploymentConfig: string): CommandText {
-            return new CommandText('oc get rc', undefined, [
+            return new CommandText('oc', 'get rc', [
                 new CommandOption('-o', `jsonpath="{range .items[?(.metadata.annotations.openshift\\.io/deployment-config\\.name=='${deploymentConfig}')]}{.metadata.name}{\\"\\n\\"}{end}"`)
             ]);
         },
         delete(replica: string): CommandText {
-            return new CommandText('oc delete rc',replica);
+            return new CommandText('oc', `delete rc ${replica}`);
         },
         showLog(replica: string): CommandText {
-            return new CommandText('oc logs', `rc/${replica}`);
+            return new CommandText('oc', `logs rc/${replica}`);
         }
     };
 

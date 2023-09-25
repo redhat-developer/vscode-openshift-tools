@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandText, CommandOption } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 
 export const Command = {
     delete(name: string): CommandText {
@@ -15,8 +15,8 @@ export const Command = {
         // present in namespace
         // TODO: Parse the deployment description, get the hooks and delete them
         // ignoring the possible errors
-        return new CommandText('oc delete',
-            'all', [
+        return new CommandText('oc',
+            'delete all', [
                 new CommandOption('-l', `app.kubernetes.io/component=${name}`, true, true),
                 new CommandOption('--wait=true'),
                 new CommandOption('--cascade=true')
@@ -24,8 +24,8 @@ export const Command = {
         );
     },
     get(): CommandText {
-        return new CommandText('oc get',
-            'deployments', [
+        return new CommandText('oc',
+            'get deployments', [
                 new CommandOption('-o', 'json')
             ]
         );

@@ -10,7 +10,7 @@ import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
 import { getInstance as getOdoInstance } from '../odo';
 import { Progress } from '../util/progress';
-import { vsCommand, VsCommandError } from '../vscommand';
+import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
 
 export class Command {
@@ -19,7 +19,7 @@ export class Command {
     }
 
     static deleteProject(name: string) {
-        return new CommandText('odo delete namespace', name, [new CommandOption('--wait=true'), new CommandOption('-f')])
+        return new CommandText('odo', `delete namespace ${name}`, [new CommandOption('--wait=true'), new CommandOption('-f')])
     }
 
     static getAll(namespace: string) {

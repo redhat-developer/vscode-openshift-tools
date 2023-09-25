@@ -175,7 +175,7 @@ suite('OpenShift/Project', () => {
                 label: projectItem.name,
             });
             const result = await Project.set();
-            expect(execStub).calledWith(new CommandText('odo project set', projectItem.name));
+            expect(execStub).calledWith(new CommandText('odo', `project set ${projectItem.name}`));
             expect(result).equals(`Project '${projectItem.name}' set as active.`);
         });
 

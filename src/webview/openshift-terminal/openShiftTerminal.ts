@@ -150,7 +150,13 @@ class OpenShiftTerminal {
                 ? this._args.join(' ')
                 : this._args;
             this._options.useConpty = false;
-            this._pty = ptyInstance.spawn(
+            this._pty = (/\s/).test(this._file) ? ptyInstance.spawn(
+                `${this._file}`,
+                [
+                    `${escapedArgs}`,
+                ],
+                this._options,
+            ) : ptyInstance.spawn(
                 'cmd.EXE',
                 [
                     '/c',
@@ -522,23 +528,23 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         // wait until the webview is ready to receive requests to create terminals
         await this.webviewResolved;
 
-        const [cmd, ...args] = `${commandText}`.split(' ');
+        const tool = commandText.command;
         let toolLocation: string | undefined;
         try {
-            toolLocation = await ToolsConfig.detect(cmd);
+            toolLocation = await ToolsConfig.detect(tool);
         } catch (_e) {
             // do nothing
         }
         if (!toolLocation) {
             try {
-                await fs.access(cmd);
-                toolLocation = cmd;
+                await fs.access(tool);
+                toolLocation = tool;
             } catch (__e) {
                 // do nothing
             }
         }
         if (!toolLocation) {
-            const msg = `OpenShift Toolkit internal error: could not find ${cmd}`;
+            const msg = `OpenShift Toolkit internal error: could not find ${tool}`;
             void window.showErrorMessage(msg);
             throw new Error(msg);
         }
@@ -556,7 +562,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     return this.sendMessage(message);
                 },
                 toolLocation,
-                args,
+                commandText.args,
                 {
                     cwd,
                     env,

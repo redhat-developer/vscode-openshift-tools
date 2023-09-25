@@ -249,7 +249,7 @@ export class Cluster extends OpenShiftItem {
         } else {
             crcBinary = crcPath;
         }
-        void OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${crcBinary} stop`), undefined, 'Stop OpenShift Local');
+        void OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${crcBinary}`, 'stop'), undefined, 'Stop OpenShift Local');
     }
 
     public static async getVersions(): Promise<Versions> {
