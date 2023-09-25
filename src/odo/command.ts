@@ -8,7 +8,7 @@ import { CommandOption, CommandText, verbose } from '../base/command';
 export class Command {
 
     static deletePreviouslyPushedResources(name: string): CommandText {
-        return new CommandText('oc delete', 'deployment', [
+        return new CommandText('oc', 'delete deployment', [
             new CommandOption('-l', `component='${name}'`),
             new CommandOption('--cascade')
         ])
@@ -19,7 +19,7 @@ export class Command {
     }
 
     static undeploy(name?: string): CommandText {
-        const command = new CommandText('odo delete', 'component');
+        const command = new CommandText('odo', 'delete component');
         if (name) {
             command.addOption(new CommandOption('--name', name));
         }
@@ -40,8 +40,8 @@ export class Command {
 
     static ocCreate(fileName: string, namespace?: string): CommandText {
         const cmd =  new CommandText(
-            'oc create',
-            undefined,
+            'oc',
+            'create',
             [ new CommandOption('-f', fileName), ]
         );
         if (namespace) {
@@ -58,8 +58,8 @@ export class Command {
 
     static getDeployments(namespace: string): CommandText {
         return new CommandText(
-            'oc get deployment',
-            undefined,
+            'oc',
+            'get deployment',
             [
                 new CommandOption('--namespace', namespace),
                 new CommandOption('-o', 'json'),
@@ -69,8 +69,8 @@ export class Command {
 
     static deleteProject(name: string): CommandText {
         return new CommandText(
-            'odo delete namespace',
-            name, [
+            'odo', `delete namespace ${name}`,
+            [
             new CommandOption('-f'),
             new CommandOption('-w'),
         ]
@@ -79,16 +79,16 @@ export class Command {
 
     @verbose
     static createProject(name: string): CommandText {
-        return new CommandText('odo create namespace',
-            name, [
+        return new CommandText('odo', `create namespace ${name}`,
+            [
             new CommandOption('-w')
         ]
         );
     }
 
     static listComponents(project: string): CommandText {
-        return new CommandText('odo list component',
-            undefined, [
+        return new CommandText('odo',
+            'list component', [
             new CommandOption('--namespace', project),
             new CommandOption('-o', 'json', false)
         ]
@@ -96,11 +96,11 @@ export class Command {
     }
 
     static listRegistries(): CommandText {
-        return new CommandText('odo preference view -o json');
+        return new CommandText('odo', 'preference view -o json');
     }
 
     static addRegistry(name: string, url: string, token: string): CommandText {
-        const cTxt = new CommandText('odo preference add registry', `${name} ${url}`);
+        const cTxt = new CommandText('odo', `preference add registry ${name} ${url}`);
         if (token) {
             cTxt.addOption(new CommandOption('--token', token));
         }
@@ -108,41 +108,39 @@ export class Command {
     }
 
     static removeRegistry(name: string): CommandText {
-        return new CommandText('odo preference remove registry', name, [new CommandOption('--force')]);
+        return new CommandText('odo', `preference remove registry ${name}`, [new CommandOption('--force')]);
     }
 
     static listCatalogComponentsJson(): CommandText {
-        return new CommandText('odo registry -o json');
+        return new CommandText('odo', 'registry -o json');
     }
 
     static listCatalogOperatorBackedServices(): CommandText {
-        return new CommandText('oc get csv -o jsonpath="{range .items[*]}{.metadata.name}{\'\\t\'}{.spec.version}{\'\\t\'}{.spec.displayName}{\'\\t\'}{.metadata.annotations.description}{\'\\t\'}{.spec.customresourcedefinitions.owned}{\'\\n\'}{end}"');
+        return new CommandText('oc', 'get csv -o jsonpath="{range .items[*]}{.metadata.name}{\'\\t\'}{.spec.version}{\'\\t\'}{.spec.displayName}{\'\\t\'}{.metadata.annotations.description}{\'\\t\'}{.spec.customresourcedefinitions.owned}{\'\\n\'}{end}"');
     }
 
     static printOcVersion(): CommandText {
-        return new CommandText('oc version');
+        return new CommandText('oc', 'version');
     }
 
     static printOcVersionJson(): CommandText {
-        return new CommandText('oc version -ojson');
+        return new CommandText('oc', 'version -ojson');
     }
 
     static printOdoVersion(): CommandText {
-        return new CommandText('odo version');
+        return new CommandText('odo', 'version');
     }
 
     static printOdoVersionJson(): CommandText {
-        return new CommandText('odo version -o json');
+        return new CommandText('odo', 'version -o json');
     }
 
     static odoLogout(): CommandText {
-        return new CommandText('odo logout');
+        return new CommandText('odo', 'logout');
     }
 
     static setOpenshiftContext(context: string): CommandText {
-        return new CommandText('oc config use-context',
-            context
-        );
+        return new CommandText('oc', `config use-context ${context}`);
     }
 
     static odoLoginWithUsernamePassword(
@@ -150,8 +148,8 @@ export class Command {
         username: string,
         passwd: string,
     ): CommandText {
-        return new CommandText('oc login',
-            clusterURL, [
+        return new CommandText('oc',
+            `login ${clusterURL}`, [
             new CommandOption('-u', username, true, true),
             new CommandOption('-p', passwd, true, true),
             new CommandOption('--insecure-skip-tls-verify')
@@ -160,8 +158,8 @@ export class Command {
     }
 
     static odoLoginWithToken(clusterURL: string, ocToken: string): CommandText {
-        return new CommandText('oc login',
-            clusterURL, [
+        return new CommandText('oc',
+            `login ${clusterURL}`, [
             new CommandOption('--token', ocToken),
             new CommandOption('--insecure-skip-tls-verify')
         ]
@@ -241,70 +239,71 @@ export class Command {
     }
 
     static deleteContext(name: string): CommandText {
-        return new CommandText('oc config delete-context', name);
+        return new CommandText('oc', `config delete-context ${name}`);
     }
 
     static deleteCluster(name: string): CommandText {
-        return new CommandText('oc config delete-cluster', `${name}`);
+        return new CommandText('oc', `config delete-cluster ${name}`);
     }
 
     static deleteUser(name: string): CommandText {
-        return new CommandText('oc config delete-user', name);
+        return new CommandText('oc', `config delete-user ${name}`);
     }
 
     static showServerUrl(): CommandText {
-        return new CommandText('oc whoami --show-server');
+        return new CommandText('oc', 'whoami --show-server');
     }
 
     static getCurrentUserName(): CommandText {
-        return new CommandText('oc whoami');
+        return new CommandText('oc', 'whoami');
     }
 
     static getCurrentUserToken(): CommandText {
-        return new CommandText('oc whoami -t');
+        return new CommandText('oc', 'whoami -t');
     }
 
     /**
      * Only works for OpenShift clusters
      */
     static showConsoleUrl(): CommandText {
-        return new CommandText('oc get configmaps console-public -n openshift-config-managed -o json');
+        return new CommandText('oc', 'get configmaps console-public -n openshift-config-managed -o json');
     }
 
     static getClusterServiceVersionJson(name: string) {
-        return new CommandText('oc get csv',
-            name, [
+        return new CommandText('oc',
+        `get csv ${name}`, [
             new CommandOption('-o', 'json')
         ]
         );
     }
 
     static analyze(): CommandText {
-        return new CommandText('odo analyze -o json');
+        return new CommandText('odo', 'analyze -o json');
     }
 
     static setNamespace(namespace: string) {
-        return new CommandText('odo set namespace', namespace);
+        return new CommandText('odo', `set namespace ${namespace}`);
     }
 
     static deleteComponentConfiguration(): CommandText {
-        return new CommandText('odo delete component', undefined, [
+        return new CommandText('odo', 'delete component', [
             new CommandOption('--files'),
             new CommandOption('-f'),
         ]);
     }
 
     static canCreatePod(): CommandText {
-        return new CommandText('oc auth can-i create pod');
+        return new CommandText('oc', 'auth can-i create pod');
     }
 
     static isOpenshiftCluster(): CommandText {
+        // FIXME: this is POSIX shell and won't work on Windows !!
         return new CommandText('oc api-resources | grep openshift');
     }
 
     static addBinding(serviceNamespace: string, serviceName: string, bindingName: string): CommandText {
-        return new CommandText('odo add binding',
-            undefined,
+        return new CommandText('odo',
+            'add binding',
             [
                 new CommandOption('--service-namespace', serviceNamespace, false),
                 new CommandOption('--service', serviceName, false),
@@ -314,12 +313,12 @@ export class Command {
     }
 
     static getBindableServices(): CommandText {
-        return new CommandText('odo list service',
-            undefined,
+        return new CommandText('odo',
+            'list service',
             [new CommandOption('-o json')]);
     }
 
     static runComponentCommand(commandId : string): CommandText {
-        return new CommandText('odo run', commandId);
+        return new CommandText('odo', `run ${commandId}`);
     }
 }

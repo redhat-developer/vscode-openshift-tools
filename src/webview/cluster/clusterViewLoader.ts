@@ -259,7 +259,7 @@ export default class ClusterViewLoader {
 
     @vsCommand('openshift.explorer.addCluster.crcSetup')
     static async crcSetup(event: any) {
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${event.data.tool} setup`), undefined, 'OpenShift Local Setup');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${event.data.tool}`, 'setup'), undefined, 'OpenShift Local Setup');
     }
 
     @vsCommand('openshift.explorer.addCluster.crcStart')

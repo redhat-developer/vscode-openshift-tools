@@ -6,11 +6,11 @@
 import { CommandOption, CommandText } from '../base/command';
 
 export function addHelmRepo(): CommandText {
-    return new CommandText('helm repo add openshift https://charts.openshift.io/');
+    return new CommandText('helm', 'repo add openshift https://charts.openshift.io/');
 }
 
 export function updateHelmRepo(): CommandText {
-    return new CommandText('helm repo update');
+    return new CommandText('helm', 'repo update');
 }
 
 export function installHelmChart(name: string, chartName: string, version: string): CommandText {
@@ -18,7 +18,7 @@ export function installHelmChart(name: string, chartName: string, version: strin
 }
 
 export function unInstallHelmChart(name: string): CommandText {
-    return new CommandText(`helm uninstall ${name}`);
+    return new CommandText('helm', `uninstall ${name}`);
 }
 
 export function listHelmReleases(): CommandText {

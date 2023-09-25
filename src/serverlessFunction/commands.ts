@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as fs from 'fs-extra';
 import { load } from 'js-yaml';
-import { CommandText, CommandOption } from '../base/command';
+import * as path from 'path';
+import { CommandOption, CommandText } from '../base/command';
 import { ClusterVersion, FunctionContent, InvokeFunction } from './types';
 
 export class Utils {
@@ -61,7 +61,7 @@ export class ServerlessCommand {
     }
 
     static createFunction(language: string, template: string, location: string): CommandText {
-        return new CommandText(`func create ${location}`, undefined, [
+        return new CommandText('func', `create ${location}`, [
             new CommandOption('-l', language),
             new CommandOption('-t', template)
         ]);
@@ -117,7 +117,7 @@ export class ServerlessCommand {
     }
 
     static getClusterVersion(): CommandText {
-        return new CommandText('oc get clusterversion', undefined, [
+        return new CommandText('oc', 'get clusterversion', [
             new CommandOption('-o', 'josn')
         ]);
     }

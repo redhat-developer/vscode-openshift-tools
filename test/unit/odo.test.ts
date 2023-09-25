@@ -53,7 +53,7 @@ suite('odo', () => {
 
     suite('command execution', () => {
         let execStub: sinon.SinonStub; let toolsStub: sinon.SinonStub;
-        const command = new CommandText('odo do whatever you do');
+        const command = new CommandText('odo', 'do whatever you do');
 
         setup(() => {
             execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');
@@ -267,7 +267,7 @@ suite('odo', () => {
             const stub = sandbox.stub(odoCli, 'execute').resolves({ error: null, stdout: 'logged in', stderr: ''});
             const result = await odoCli.requireLogin();
 
-            expect(stub).calledWith(new CommandText('oc whoami'));
+            expect(stub).calledWith(new CommandText('oc', 'whoami'));
             expect(result).false;
         });
 

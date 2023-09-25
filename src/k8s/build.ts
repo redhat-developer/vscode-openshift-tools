@@ -15,7 +15,7 @@ import * as common from './common';
 export class Build {
     public static command = {
         getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {
-            return new CommandText('get build', undefined, [
+            return new CommandText('oc', 'get build', [
                 new CommandOption(
                     '-o',
                     `jsonpath="{range .items[?(.metadata.labels.buildconfig=='${
@@ -25,30 +25,30 @@ export class Build {
             ]);
         },
         startBuild(buildConfig: string): CommandText {
-            return new CommandText('oc start-build', buildConfig);
+            return new CommandText('oc', `start-build ${buildConfig}`);
         },
         getBuilds(build: string): CommandText {
-            return new CommandText('oc get build', undefined, [
+            return new CommandText('oc', 'get build', [
                 new CommandOption('-l', `buildconfig=${build}`),
                 new CommandOption('-o', 'json', false),
             ]);
         },
         showLog(build: string, text: string): CommandText {
-            return new CommandText('oc logs', `${build}${text}`);
+            return new CommandText('oc', `logs ${build}${text}`);
         },
         rebuildFrom(resourceId: string): CommandText {
-            return new CommandText('oc start-build', undefined, [
+            return new CommandText('oc', 'start-build', [
                 new CommandOption('--from-build', resourceId),
             ]);
         },
         followLog(build: string, text: string): CommandText {
-            return new CommandText('oc logs', `${build}${text}`, [new CommandOption('-f')]);
+            return new CommandText('oc', `logs ${build}${text}`, [new CommandOption('-f')]);
         },
         delete(build: string): CommandText {
-            return new CommandText('oc delete build', build);
+            return new CommandText('oc', `delete build ${build}`);
         },
         getBuildConfigs(): CommandText {
-            return new CommandText('oc get buildConfig -o json');
+            return new CommandText('oc', 'get buildConfig -o json');
         },
     };
 

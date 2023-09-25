@@ -7,13 +7,13 @@ import { QuickPickItem, window } from 'vscode';
 
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { CommandOption, CommandText } from '../base/command';
+import { CliChannel } from '../cli';
 import { VsCommandError } from '../vscommand';
 import { Node } from './node';
-import { CliChannel } from '../cli';
 
 export const Command = {
     getResourceList(name: string) {
-        return new CommandText('oc get', name , [ new CommandOption('-o', 'json')]);
+        return new CommandText('oc', `get ${name}`, [ new CommandOption('-o', 'json')]);
     }
 }
 

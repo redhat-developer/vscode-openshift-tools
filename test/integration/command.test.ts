@@ -9,11 +9,11 @@ import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs/promises';
+import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { EventEmitter, Terminal, window, workspace } from 'vscode';
-import * as JSYAML from 'js-yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { getInstance } from '../../src/odo';
@@ -188,7 +188,8 @@ suite('odo commands integration', function () {
     test('showConsoleUrl()', async function () {
         if (isOpenShift) {
             const canI = await ODO.execute(
-                new CommandText('oc auth can-i get configmap --namespace openshift-config-managed'),
+                new CommandText('oc',
+                'auth can-i get configmap --namespace openshift-config-managed'),
                 undefined,
                 false,
             ).then((result) => {
