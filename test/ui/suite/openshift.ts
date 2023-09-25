@@ -3,21 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
-import { ActivityBar, By, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench, waitForAttributeValue } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
-
-async function collapse(section: ViewSection){
-    try {
-        await section.collapse();
-    } catch {
-        if (await section.isExpanded()) {
-            const mainPanel = await section.findElement(By.className('pane-header'));
-            const arrowPanel = await section.findElement(By.className('codicon'));
-            await arrowPanel.click();
-            await section.getDriver().wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
-        }
-    }
-}
+import { collapse } from '../common/overdrives';
 
 export function checkOpenshiftView() {
     describe('OpenShift View', function() {
