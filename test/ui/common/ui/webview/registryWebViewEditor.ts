@@ -6,7 +6,7 @@ import { By, ModalDialog, WebElement, WebView } from 'vscode-extension-tester';
 import { WebViewForm } from './WebViewForm';
 
 /**
- * @author odockal@redhat.com
+ * @author odockal@redhat.com, lgrossma@redhat.com
  * Class represents Registry Stack item in web View form
  */
 export class RegistryStackItem {
@@ -91,5 +91,35 @@ export class RegistryWebViewEditor extends WebViewForm {
                 }
             }
         });
+    }
+}
+
+export class RegistryWebViewDevfileWindow extends WebViewForm {
+    //TODO: Add more functionality to class to cover all elements
+
+    public constructor(name: string) {
+        super(name)
+    }
+
+    public async clickListBox(): Promise<void> {
+        await (await this.getListBox()).click();
+    }
+
+    public async getListBox(): Promise<WebElement> {
+        const listBox = this.enterWebView( async (webView) => {
+            return await webView.findWebElement(By.xpath('//svg[@data-testid="ArrowDropDownIcon"]'));
+        })
+        return listBox;
+    }
+
+    public async useDevfile(): Promise<void> {
+        await this.enterWebView(async (webView) => {
+            const button = await this.getUseDevfileButton(webView);
+            await button.click();
+        });
+    }
+
+    private async getUseDevfileButton(webView: WebView): Promise<WebElement> {
+        return await webView.findWebElement(By.xpath('//button[contains(text(), "Use Devfile")]'));
     }
 }
