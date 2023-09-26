@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.9.0 (Sept 26, 2023)
+ * [#3086](https://github.com/redhat-developer/vscode-openshift-tools/issues/3086) In Devfile search view, you can now filter by debug/deploy support and tags.
+ * [#2781](https://github.com/redhat-developer/vscode-openshift-tools/issues/2781) Add support for Devfile port and name detection.
+ * [#2819](https://github.com/redhat-developer/vscode-openshift-tools/issues/2819) Create a separate terminal pane for all vscode-openshift related commands to run in.
+ * [#3316](https://github.com/redhat-developer/vscode-openshift-tools/issues/3316) Fix bug where invoking "Cloud Events" functions didn't work.
+ * [#2854](https://github.com/redhat-developer/vscode-openshift-tools/issues/2854) Killing terminal from older start dev action stops current dev.
+ * [#3323](https://github.com/redhat-developer/vscode-openshift-tools/issues/3323) Prevent "Create Dev Sandbox" wizard from getting stuck at loading screen.
+ * [#3293](https://github.com/redhat-developer/vscode-openshift-tools/issues/3293) Trying "Create Component" with a mostly empty git repository doesn't work.
+ * [#3324](https://github.com/redhat-developer/vscode-openshift-tools/issues/3324) Remove "Connect on Slack" button in "Dev Sandbox" wizard, since the link no longer works.
+
 ## 1.8.0 (September 14, 2023)
  * [#3128](https://github.com/redhat-developer/vscode-openshift-tools/issues/3128) Create Serverless Functions based on templates from configured template repositories.
  * [#3251](https://github.com/redhat-developer/vscode-openshift-tools/issues/3251) Add a walkthrough for creating a Serverless Function from a template.
