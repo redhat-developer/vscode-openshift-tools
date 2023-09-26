@@ -22,7 +22,7 @@ Run your function to see how it works locally before to push it on your cluster.
 
 ![ screencast ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/walkthrough/serverless-function/run.gif)
 
-### **RDeploy the Function**
+### **Deploy the Function**
 
 Deploys a function to the currently configured Knative-enabled cluster from your IDE
 
@@ -37,7 +37,7 @@ Invokes the function by sending a test request to the currently running function
 ## Documentation
 
 - [What is OpenShift Serverless](https://www.redhat.com/en/technologies/cloud-computing/openshift/serverless)
-- [Setting up OpenShift Serverless Functions - Red Hat Official Documentation](https://docs.openshift.com/container-platform/4.11/serverless/functions/serverless-functions-setup.html)
+- [Setting up OpenShift Serverless Functions - Red Hat Official Documentation](https://docs.openshift.com/serverless/1.30/functions/serverless-functions-getting-started.html)
 - [Serverless Function CLI docs](https://github.com/knative/func)
 - [Knative Docs](https://knative.dev/docs/)
 
