@@ -19,11 +19,6 @@
 	},
 	"badges": [
 		{
-			"url": "https://img.shields.io/gitter/room/redhat-developer/vscode-openshift-tools?style=for-the-badge&logo=gitter",
-			"href": "https://gitter.im/redhat-developer/openshift-connector",
-			"description": "Join us at #openshift-connector channel"
-		},
-		{
 			"url": "https://img.shields.io/twitter/follow/rhdevelopers?style=social",
 			"href": "https://twitter.com/intent/follow?screen_name=rhdevelopers",
 			"description": "Tweet"
