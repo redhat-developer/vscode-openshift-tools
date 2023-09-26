@@ -52,7 +52,7 @@ function ShowProgress(props: {size: number}): JSX.Element {
         />);
 }
 
-export default function addSandboxView(props): JSX.Element {
+export default function addSandboxView(): JSX.Element {
     const [currentState, setCurrentState] = React.useState({
         action: 'sandboxPageDetectAuthSession',
         statusInfo: '',

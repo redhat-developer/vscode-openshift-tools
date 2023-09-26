@@ -192,7 +192,6 @@ export default function Header() {
                             </Typography>
                             <Button variant='contained' href='https://developers.redhat.com/developer-sandbox' className='sandboxButton'>Learn More</Button>
                             <Button variant='contained' href='mailto:devsandbox@redhat.com' className='sandboxButton'>Contact Us</Button>
-                            <Button variant='contained' href='https://dn.dev/DevNationSlack' className='sandboxButton'>Connect on Slack</Button>
                             <AddSandboxView />
                         </Card>
                     </div>
