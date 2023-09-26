@@ -128,7 +128,7 @@
 		"@types/react-syntax-highlighter": "^15.5.7",
 		"@types/shelljs": "^0.8.13",
 		"@types/sinon": "^10.0.16",
-		"@types/sinon-chai": "^3.2.6",
+		"@types/sinon-chai": "^3.2.10",
 		"@types/targz": "^1.0.2",
 		"@types/tmp": "^0.2.4",
 		"@types/unzip-stream": "^0.3.2",
