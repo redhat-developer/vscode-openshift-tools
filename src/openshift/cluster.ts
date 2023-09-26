@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { ExtensionContext, QuickInputButton, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, Progress as VProgress, commands, env, window, workspace } from 'vscode';
+import { ExtensionContext, InputBox, QuickInputButton, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, Progress as VProgress, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { getInstance } from '../odo';
@@ -134,6 +134,7 @@ export class Cluster extends OpenShiftItem {
             const quickPick = window.createQuickPick();
             const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [deleteBtn] }));
             quickPick.items = contextNames;
+            quickPick.buttons = [QuickInputButtons.Back];
             if (contextNames.length === 0) {
                 void window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel')
                     .then((command: string) => {
@@ -156,16 +157,25 @@ export class Cluster extends OpenShiftItem {
                         .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
                         .catch(reject);
                 });
+                quickPick.onDidTriggerButton((button) => {
+                    if (button === QuickInputButtons.Back) {
+                        quickPick.hide();
+                    }
+                });
                 quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
-                    const answer = await window.showInformationMessage(`Do you want to delete '${event.item.label}' Context from Kubernetes configuration?`, 'Yes', 'No');
-                    if (answer === 'Yes') {
-                        const context = k8sConfig.getContextObject(event.item.label);
-                        const index = contexts.indexOf(context);
-                        if (index > -1) {
-                            CliChannel.getInstance().executeTool(Command.deleteContext(context.name))
-                                .then(() => resolve(`Context ${context.name} deleted.`))
-                                .catch(reject);
-                        }
+                    if (event.button === deleteBtn) {
+                        await window.showInformationMessage(`Do you want to delete '${event.item.label}' Context from Kubernetes configuration?`, 'Yes', 'No')
+                            .then((command: string) => {
+                                if (command === 'Yes') {
+                                    const context = k8sConfig.getContextObject(event.item.label);
+                                    const index = contexts.indexOf(context);
+                                    if (index > -1) {
+                                        CliChannel.getInstance().executeTool(Command.deleteContext(context.name))
+                                            .then(() => resolve(`Context ${context.name} deleted.`))
+                                            .catch(reject);
+                                    }
+                                }
+                            });
                     }
                 });
                 quickPick.show();
@@ -187,19 +197,24 @@ export class Cluster extends OpenShiftItem {
             const quickPick = window.createQuickPick();
             const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ ...ctx, buttons: ctx.description ? [] : [deleteBtn] }));
             quickPick.items = [createUrl, ...contextNames];
+            quickPick.buttons = [QuickInputButtons.Back];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
-            quickPick.onDidAccept(() => {
+            quickPick.onDidAccept(async () => {
                 const choice = selection[0];
                 hideDisposable.dispose();
                 quickPick.hide();
                 if (choice.label === createUrl.label) {
-                    resolve(window.showInputBox({
-                        value: clusterURl,
-                        ignoreFocusOut: true,
-                        prompt: 'Provide new Cluster URL to connect',
-                        validateInput: (value: string) => NameValidator.validateUrl('Invalid URL provided', value)
-                    }));
+                    const prompt = 'Provide new Cluster URL to connect';
+                    const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
+                    const newURL = await this.enterValue(prompt, '', false, validateInput);
+                    if (!newURL) {
+                        resolve(await Cluster.showQuickPick(clusterURl)); // Back
+                    } else if (newURL === null) {
+                        return null; // Cancel
+                    } else {
+                       resolve(newURL);
+                    }
                 } else {
                     resolve(choice.label);
                 }
@@ -207,18 +222,27 @@ export class Cluster extends OpenShiftItem {
             quickPick.onDidChangeSelection((selects) => {
                 selection = selects;
             });
+            quickPick.onDidTriggerButton((button) => {
+                if (button === QuickInputButtons.Back) {
+                    quickPick.hide();
+                }
+            });
             quickPick.onDidTriggerItemButton(async (event) => {
-                const answer = await window.showInformationMessage(`Do you want to delete ${event.item.label} Cluster and all the related Contexts and Users form Kubernetes configuration?`, 'Yes', 'No')
-                if (answer === 'Yes') {
-                    const cluster = k8sConfig.getClusters().find((kubeConfigCluster) => kubeConfigCluster.server === event.item.label);
-                    const contexts = k8sConfig.getContexts().filter((kubeContext) => kubeContext.cluster === cluster.name);
-                    // find users and remove duplicates
-                    const users = [ ...new Set(contexts.map(context => k8sConfig.getUser(context.user)))];
+                if (event.button === deleteBtn) {
+                    await window.showInformationMessage(`Do you want to delete ${event.item.label} Cluster and all the related Contexts and Users form Kubernetes configuration?`, 'Yes', 'No')
+                        .then( async (command: string) => {
+                            if (command === 'Yes') {
+                                const cluster = k8sConfig.getClusters().find((kubeConfigCluster) => kubeConfigCluster.server === event.item.label);
+                                const contexts = k8sConfig.getContexts().filter((kubeContext) => kubeContext.cluster === cluster.name);
+                                // find users and remove duplicates
+                                const users = [ ...new Set(contexts.map(context => k8sConfig.getUser(context.user)))];
 
-                    await Promise.all(contexts.map((context) => CliChannel.getInstance().executeTool(Command.deleteContext(context.name))))
-                        .then(() => Promise.all(users.map(user => CliChannel.getInstance().executeTool(Command.deleteUser(user.name)))))
-                        .then(() => CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)))
-                        .catch(reject)
+                                await Promise.all(contexts.map((context) => CliChannel.getInstance().executeTool(Command.deleteContext(context.name))))
+                                    .then(() => Promise.all(users.map(user => CliChannel.getInstance().executeTool(Command.deleteUser(user.name)))))
+                                    .then(() => CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)))
+                                    .catch(reject)
+                            }
+                        });
                 }
             });
             quickPick.show();
@@ -278,89 +302,159 @@ export class Cluster extends OpenShiftItem {
         return versions;
     }
 
+    /*
+     * Shows a Quick Pick to select a cluster login method. Returns either:
+     * - login method string, or
+     * - `null` in case of user cancelled (pressed `ESC`), or
+     * - `undefined` if user pressed `Back` button
+     * @returns string contaning cluster login method name or null if cancelled or undefined if Back is pressed
+     */
+    private static async getLoginMethod(): Promise<string | null | undefined> {
+        return new Promise<string | null>((resolve, reject) => {
+            const loginActions: QuickPickItem[] = [
+                {
+                    label: 'Credentials',
+                    description: 'Log in to the given server using credentials',
+                },
+                {
+                    label: 'Token',
+                    description: 'Log in to the given server using bearer token',
+                }
+            ];
+            const quickPick = window.createQuickPick();
+            quickPick.items = [...loginActions];
+            quickPick.buttons = [QuickInputButtons.Back];
+            let selection: readonly QuickPickItem[] | undefined;
+            const hideDisposable = quickPick.onDidHide(() => resolve(null));
+            quickPick.onDidAccept(() => {
+                const choice = selection[0];
+                hideDisposable.dispose();
+                quickPick.hide();
+                resolve(choice.label);
+            });
+            quickPick.onDidChangeSelection((selects) => {
+                selection = selects;
+            });
+            quickPick.onDidTriggerButton((button) => {
+                if (button === QuickInputButtons.Back) {
+                    resolve(undefined);
+                }
+            });
+            quickPick.show();
+        });
+    }
+
     @vsCommand('openshift.explorer.login')
     static async login(context?: any, skipConfirmation = false): Promise<string> {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
-        let clusterIsUp = false;
         let clusterURL: string;
 
-        do {
-            clusterURL = await Cluster.getUrl();
+        enum Step {
+            selectCluster = 'selectCluster',
+            selectLoginMethod = 'selectLoginMethod',
+            loginUsingCredentials = 'loginUsingCredentials',
+            loginUsingToken = 'loginUsingToken'
+        }
 
-            if (!clusterURL) return null;
+        let step: Step = Step.selectCluster;
+        while (step !== undefined) {
+            switch (step) {
+                case Step.selectCluster: {
+                    let clusterIsUp = false;
+                    do {
+                        clusterURL = await Cluster.getUrl();
 
-            try {
-                await fetch(`${clusterURL}/api`, {
-                    // disable cert checking. crc uses a self-signed cert,
-                    // which means this request will always fail on crc unless cert checking is disabled
-                    strictSSL: false
-                });
-                // since the fetch didn't throw an exception,
-                // a route to the cluster is available,
-                // so it's running
-                clusterIsUp = true;
-            } catch (e) {
-                const clusterURLObj = new URL(clusterURL);
-                if (clusterURLObj.hostname === 'api.crc.testing') {
-                    const startCrc = 'Start OpenShift Local';
-                    const promptResponse = await window.showWarningMessage(
-                        'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
-                        'Use a different cluster',
-                        startCrc,
-                    );
-                    if (promptResponse === startCrc){
-                        await commands.executeCommand('openshift.explorer.addCluster', 'crc');
-                        // no point in continuing with the wizard,
-                        // it will take the cluster a few minutes to stabilize
-                        return null;
-                    }
-                } else if (/api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
-                    const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
-                    const promptResponse = await window.showWarningMessage(
-                        'The cluster appears to be a OpenShift Dev Sandbox cluster, but it isn\'t running',
-                        'Use a different cluster',
-                        devSandboxSignup,
-                    );
-                    if (promptResponse === devSandboxSignup){
-                        await commands.executeCommand('openshift.explorer.addCluster', 'sandbox');
-                        // no point in continuing with the wizard,
-                        // the user needs to sign up for the service
-                        return null;
-                    }
-                } else {
-                    void window.showWarningMessage(
-                        'Unable to contact the cluster. Is it running and accessible?',
-                    );
+                        if (!clusterURL) return null;
+
+                        try {
+                            await fetch(`${clusterURL}/api`, {
+                                // disable cert checking. crc uses a self-signed cert,
+                                // which means this request will always fail on crc unless cert checking is disabled
+                                strictSSL: false
+                            });
+                            // since the fetch didn't throw an exception,
+                            // a route to the cluster is available,
+                            // so it's running
+                            clusterIsUp = true;
+                        } catch (e) {
+                            const clusterURLObj = new URL(clusterURL);
+                            if (clusterURLObj.hostname === 'api.crc.testing') {
+                                const startCrc = 'Start OpenShift Local';
+                                const promptResponse = await window.showWarningMessage(
+                                    'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
+                                    'Use a different cluster',
+                                    startCrc,
+                                );
+                                if (promptResponse === startCrc){
+                                    await commands.executeCommand('openshift.explorer.addCluster', 'crc');
+                                    // no point in continuing with the wizard,
+                                    // it will take the cluster a few minutes to stabilize
+                                    return null;
+                                }
+                            } else if (/api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
+                                const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
+                                const promptResponse = await window.showWarningMessage(
+                                    'The cluster appears to be a OpenShift Dev Sandbox cluster, but it isn\'t running',
+                                    'Use a different cluster',
+                                    devSandboxSignup,
+                                );
+                                if (promptResponse === devSandboxSignup){
+                                    await commands.executeCommand('openshift.explorer.addCluster', 'sandbox');
+                                    // no point in continuing with the wizard,
+                                    // the user needs to sign up for the service
+                                    return null;
+                                }
+                            } else {
+                                void window.showWarningMessage(
+                                    'Unable to contact the cluster. Is it running and accessible?',
+                                );
+                            }
+                        }
+                    } while (!clusterIsUp);
+
+                    step = Step.selectLoginMethod;
+                    break;
                 }
-
-            }
-        } while (!clusterIsUp);
-
-        const loginActions = [
-            {
-                label: 'Credentials',
-                description: 'Log in to the given server using credentials'
-            },
-            {
-                label: 'Token',
-                description: 'Log in to the given server using bearer token'
-            }
-        ];
-        const loginActionSelected = await window.showQuickPick(loginActions, {placeHolder: 'Select a way to log in to the cluster.', ignoreFocusOut: true});
-        if (!loginActionSelected) return null;
-        let result:any = loginActionSelected.label === 'Credentials' ? await Cluster.credentialsLogin(true, clusterURL) : await Cluster.tokenLogin(clusterURL, true);
-        if (result) {
-            const versions = await Cluster.getVersions();
-            if (versions) {
-                result = new String(result);
-                // get cluster information using 'oc version'
-                result.properties = versions;
+                case Step.selectLoginMethod: {
+                    const result = await Cluster.getLoginMethod();
+                    if (!result) { // Back Button is hit
+                        step = Step.selectCluster;
+                    } if (result === null) { // User cancelled the operation
+                        return null;
+                    } else if(result === 'Credentials') {
+                        step = Step.loginUsingCredentials;
+                    } else if (result === 'Token') {
+                        step = Step.loginUsingToken;
+                    }
+                    break;
+                }
+                case Step.loginUsingCredentials: // Drop down
+                case Step.loginUsingToken: {
+                    let clusterVersions:any = step === Step.loginUsingCredentials
+                        ? await Cluster.credentialsLogin(true, clusterURL)
+                            : await Cluster.tokenLogin(clusterURL, true);
+                    if (!clusterVersions) { // Back Button is hit
+                        step = Step.selectLoginMethod;
+                    } else if (clusterVersions === null) { // User cancelled the operation
+                        return null;
+                    } else {
+                        const versions = await Cluster.getVersions();
+                        if (versions) {
+                            clusterVersions = new String(clusterVersions);
+                            // get cluster information using 'oc version'
+                            clusterVersions.properties = versions;
+                        }
+                        return clusterVersions;
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
         }
-        return result;
     }
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
@@ -382,8 +476,94 @@ export class Cluster extends OpenShiftItem {
         return result;
     }
 
+    /*
+     * Shows a Quick Pick to select or type in a username. Returns either:
+     * - username string, or
+     * - `null` in case of user cancelled (pressed `ESC`), or
+     * - `undefined` if user pressed `Back` button
+     * @returns string contaning user name or null if cancelled or undefined if Back is pressed
+     */
+    private static async getUserName(clusterURL: string, addUserLabel: string): Promise<string | null | undefined> {
+        return new Promise<string | null | undefined>((resolve, reject) => {
+            const users = new KubeConfigUtils().getClusterUsers(clusterURL);
+            const addUser: QuickPickItem = { label: addUserLabel };
+
+            const quickPick = window.createQuickPick();
+            quickPick.items = [addUser, ...users];
+            quickPick.buttons = [QuickInputButtons.Back];
+            let selection: readonly QuickPickItem[] | undefined;
+            const hideDisposable = quickPick.onDidHide(() => resolve(null));
+            quickPick.onDidAccept(() => {
+                const choice = selection[0];
+                hideDisposable.dispose();
+                quickPick.hide();
+                resolve(choice.label);
+            });
+            quickPick.onDidChangeSelection((selects) => {
+                selection = selects;
+            });
+            quickPick.onDidTriggerButton((button) => {
+                if (button === QuickInputButtons.Back) {
+                    resolve(undefined);
+                }
+            });
+            quickPick.show();
+        });
+    }
+
+    /*
+     * Shows a Input Field to type in a username. Returns either:
+     * - username string, or
+     * - `null` in case of user cancelled (pressed `ESC`), or
+     * - `undefined` if user pressed `Back` button
+     * @returns string contaning user name or null if cancelled or undefined if Back is pressed
+     */
+    private static async enterValue(prompt: string, initialValue: string, password: boolean, validate ): Promise<string | null | undefined> {
+        return new Promise<string | null | undefined>((resolve, reject) => {
+            const input: InputBox = window.createInputBox();
+            input.value = initialValue;
+            input.prompt = prompt;
+            input.password = password;
+            input.buttons = [QuickInputButtons.Back];
+            const validationMessage: string = validate(input.value);
+            input.ignoreFocusOut = true;
+            if (validationMessage) {
+                input.validationMessage = validationMessage;
+            }
+
+            input.onDidAccept(async () => {
+                const value = input.value;
+                input.enabled = false;
+                input.busy = true;
+                if (!(await validate(value))) {
+                    input.hide();
+                    resolve(value);
+                }
+                input.enabled = true;
+                input.busy = false;
+            });
+            input.onDidChangeValue(async text => {
+                const current = validate(text);
+                const validating = current;
+                const validationMessage = await current;
+                if (current === validating) {
+                input.validationMessage = validationMessage;
+                }
+            });
+            input.onDidHide(() => {
+                input.dispose();
+            })
+            input.onDidTriggerButton((event) => {
+                if (event === QuickInputButtons.Back) {
+                    resolve(undefined);
+                }
+            });
+            input.show();
+        });
+    }
+
     @vsCommand('openshift.explorer.login.credentialsLogin')
-    static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string> {
+    static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string | null | undefined> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
@@ -396,45 +576,75 @@ export class Cluster extends OpenShiftItem {
 
         if (!clusterURL) return null;
 
+        enum Step {
+            'getUserName',
+            'enterUserName',
+            'enterPassword'
+        }
+
         let username = userName;
-        const getUserName = await TokenStore.getUserName();
+        // const getUserName = await TokenStore.getUserName();
+        let passwd = userPassword;
 
-        if (!username)  {
-            const k8sConfig = new KubeConfigUtils();
-            const users = k8sConfig.getClusterUsers(clusterURL);
-            const addUser: QuickPickItem = { label: '$(plus) Add new user...'};
-            const choice = await window.showQuickPick([addUser, ...users], {placeHolder: 'Select username for basic authentication to the API server', ignoreFocusOut: true});
+        let step: Step = Step.getUserName;
+        while (step !== undefined) {
+            switch (step) {
+                case Step.getUserName:
+                    if (!username)  {
+                        const addUserLabel = '$(plus) Add new user...';
+                        const choice = await this.getUserName(clusterURL, addUserLabel);
+                        if (!choice || choice === null) return choice; // Back or Cancel
 
-            if (!choice) return null;
-
-            if (choice.label === addUser.label) {
-                username = await window.showInputBox({
-                    ignoreFocusOut: true,
-                    prompt: 'Provide Username for basic authentication to the API server',
-                    value: '',
-                    validateInput: (value: string) => NameValidator.emptyName('User name cannot be empty', value)
-                })
-            } else {
-                username = choice.label;
+                        if (choice === addUserLabel) {
+                            step = Step.enterUserName;
+                        } else {
+                            username = choice;
+                            step = Step.enterPassword;
+                        }
+                    }
+                    break;
+                case Step.enterUserName:
+                    if (!username)  {
+                        const prompt = 'Provide Username for basic authentication to the API server';
+                        const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value);
+                        const newUsername = await this.enterValue(prompt, '', false, validateInput);
+                        if (!newUsername) {
+                            username = undefined;
+                            step = Step.getUserName; // Back
+                        } else if (newUsername === null) {
+                            return null; // Cancel
+                        } else {
+                            username = newUsername;
+                            step = Step.enterPassword;
+                        }
+                    }
+                    break;
+                case Step.enterPassword:
+                    if (!passwd) {
+                        password = await TokenStore.getItem('login', username);
+                        const prompt = 'Provide Password for basic authentication to the API server';
+                        const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value);
+                        const newPassword = await this.enterValue(prompt, password, true, validateInput);
+                        if (!newPassword) {
+                            username = undefined;
+                            step = Step.getUserName; // Back
+                        } else if (newPassword === null) {
+                            return null; // Cancel
+                        } else {
+                            passwd = newPassword;
+                            step = undefined;
+                        }
+                    }
+                    break;
+                default: // Shouldn't happen, but force cycle exit
+                    step = undefined;
+                    break;
             }
         }
+        if (!username || !passwd) return null;
 
-        if (!username) return null;
-
-        if (getUserName) password = await TokenStore.getItem('login', username);
-
-        let passwd = userPassword;
-        if (!passwd) {
-            passwd = await window.showInputBox({
-                ignoreFocusOut: true,
-                password: true,
-                prompt: 'Provide Password for basic authentication to the API server',
-                value: password
-            });
-        }
-
-        if (!passwd) return null;
-
+        // If there is saved password for the username - read it
+        password = await TokenStore.getItem('login', username);
         try {
             const result = await Progress.execFunctionWithProgress(
                 `Login to the cluster: ${clusterURL}`,
@@ -491,13 +701,15 @@ export class Cluster extends OpenShiftItem {
 
         let ocToken: string;
         if (!userToken) {
-            ocToken = await window.showInputBox({
-                value: token,
-                prompt: 'Provide Bearer token for authentication to the API server',
-                ignoreFocusOut: true,
-                password: true
-            });
-            if (!ocToken) return null;
+            const prompt = 'Provide Bearer token for authentication to the API server';
+            const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value);
+            const initialValue = token ? token : '';
+            ocToken = await this.enterValue(prompt, initialValue, true, validateInput);
+            if (!ocToken) {
+                return undefined; // Back
+            } else if (ocToken === null) {
+                return null; // Cancel
+            }
         } else {
             ocToken = userToken;
         }
