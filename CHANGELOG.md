@@ -1,7 +1,8 @@
 # Change Log
 
-## 1.9.1 (September 27, 2023)
+## 1.9.1 (September 28, 2023)
  * [#3342](https://github.com/redhat-developer/vscode-openshift-tools/issues/3342) Sandbox page in `Add OpenShift Cluster` editor stays in 'Detecting' status forever.
+ * [#3356](https://github.com/redhat-developer/vscode-openshift-tools/issues/3356) Extension fails to activate when a deleted folder is in the workspace.
 
 ## 1.9.0 (September 26, 2023)
  * [#3086](https://github.com/redhat-developer/vscode-openshift-tools/issues/3086) In Devfile search view, you can now filter by debug/deploy support and tags.
@@ -141,7 +142,7 @@
 * [#2718](https://github.com/redhat-developer/vscode-openshift-tools/issues/2718) Is it possible to change the colors of the YML keys?
 * [#2711](https://github.com/redhat-developer/vscode-openshift-tools/issues/2711) Migrate to odo 3.4.0
 * [#2710](https://github.com/redhat-developer/vscode-openshift-tools/issues/2710) remove patternfly dependencies from OpenShift Toolkit
-* [#2709](https://github.com/redhat-developer/vscode-openshift-tools/issues/2709) Fix the GitHub Readme badge error 
+* [#2709](https://github.com/redhat-developer/vscode-openshift-tools/issues/2709) Fix the GitHub Readme badge error
 * [#2705](https://github.com/redhat-developer/vscode-openshift-tools/issues/2705) Devfile Registry View does not show errors for connectivity related issues and stays in 'Loading Registry View' mode forever
 * [#2701](https://github.com/redhat-developer/vscode-openshift-tools/issues/2701) Show and Follow log is not shown when set to open in web view
 * [#2700](https://github.com/redhat-developer/vscode-openshift-tools/issues/2700) Missing word in error message in Import from Git wizard
@@ -156,7 +157,7 @@
 * [#2674](https://github.com/redhat-developer/vscode-openshift-tools/issues/2674) Unable to select devfile registry in git import when multiple devfile registry configured
 * [#2671](https://github.com/redhat-developer/vscode-openshift-tools/issues/2671) Unable to create component from Get started page view
 * [#2667](https://github.com/redhat-developer/vscode-openshift-tools/issues/2667) Support odo 3.2.0 workflow
-* [#2666](https://github.com/redhat-developer/vscode-openshift-tools/issues/2666) Typo: Component name spell error 
+* [#2666](https://github.com/redhat-developer/vscode-openshift-tools/issues/2666) Typo: Component name spell error
 * [#2608](https://github.com/redhat-developer/vscode-openshift-tools/issues/2608) Debug session failed to start
 * [#2598](https://github.com/redhat-developer/vscode-openshift-tools/issues/2598) Manage Kubernetes Context Action
 * [#2579](https://github.com/redhat-developer/vscode-openshift-tools/issues/2579) Add Browse actions in registry view
@@ -187,7 +188,7 @@
 * [#2593](https://github.com/redhat-developer/vscode-openshift-tools/issues/2593) Open .kubeconfig in editor
 * [#2591](https://github.com/redhat-developer/vscode-openshift-tools/issues/2591) Update Readme with 1.0 changes and odov3 support
 * [#2590](https://github.com/redhat-developer/vscode-openshift-tools/issues/2590) Follow logs commands fails with error
-* [#2588](https://github.com/redhat-developer/vscode-openshift-tools/issues/2588) Odo logo output is missing in terminal when starting dev on k8s cluster 
+* [#2588](https://github.com/redhat-developer/vscode-openshift-tools/issues/2588) Odo logo output is missing in terminal when starting dev on k8s cluster
 * [#2582](https://github.com/redhat-developer/vscode-openshift-tools/issues/2582) Show the application explorer using the cluster and project structure
 * [#2580](https://github.com/redhat-developer/vscode-openshift-tools/issues/2580) Force stop dev fails with the following error
 * [#2578](https://github.com/redhat-developer/vscode-openshift-tools/issues/2578) Created component notification says is should be pushed into cluster, wrong description
@@ -228,7 +229,7 @@
 * [#2486](https://github.com/redhat-developer/vscode-openshift-tools/issues/2486) Fix UI responsiveness for Add Cluster screen
 * [#2480](https://github.com/redhat-developer/vscode-openshift-tools/issues/2480) Activate basic UI tests in GitHub Actions workflow
 * [#2474](https://github.com/redhat-developer/vscode-openshift-tools/issues/2474) Launching Developer Sandbox feature does not work
-* [#2450](https://github.com/redhat-developer/vscode-openshift-tools/issues/2450) Migrate to latest CRC 2.4.1 release 
+* [#2450](https://github.com/redhat-developer/vscode-openshift-tools/issues/2450) Migrate to latest CRC 2.4.1 release
 * [#2421](https://github.com/redhat-developer/vscode-openshift-tools/issues/2421) Review telemetry events to eliminate not used ones
 * [#2404](https://github.com/redhat-developer/vscode-openshift-tools/issues/2404) Change New Component workflow
 * [#1477](https://github.com/redhat-developer/vscode-openshift-tools/issues/1477) 'OpenShift: Delete Storage' command should not delete storage from tree until it is pushed
@@ -265,7 +266,7 @@
 
 ## 0.3.0 (February 28, 2022)
 
-* [#2361](https://github.com/redhat-developer/vscode-openshift-tools/issues/2361) SandBox code verification page shows all button on the same line for wide screens 
+* [#2361](https://github.com/redhat-developer/vscode-openshift-tools/issues/2361) SandBox code verification page shows all button on the same line for wide screens
 * [#2359](https://github.com/redhat-developer/vscode-openshift-tools/issues/2359) OpenShift Sandbox Cluster has no active project after login
 * [#2350](https://github.com/redhat-developer/vscode-openshift-tools/issues/2350) Sandbox view is broken after second click on `Add Cluster` Button
 * [#2344](https://github.com/redhat-developer/vscode-openshift-tools/issues/2344) Error message appears for odo verbosity level values > 0
@@ -283,7 +284,7 @@
 * [#2254](https://github.com/redhat-developer/vscode-openshift-tools/issues/2254) Add Create Service Form support for user without access to service CRDs
 * [#2246](https://github.com/redhat-developer/vscode-openshift-tools/issues/2246) Provide warning/info about kubeadmin user for service workflow
 * [#2238](https://github.com/redhat-developer/vscode-openshift-tools/issues/2238) Remove info about Git Repository and Binary File component creation in readme
-* [#2228](https://github.com/redhat-developer/vscode-openshift-tools/issues/2228) Are Git Repository and Binary File options removed when creating a component from Openshift Connector extension? 
+* [#2228](https://github.com/redhat-developer/vscode-openshift-tools/issues/2228) Are Git Repository and Binary File options removed when creating a component from Openshift Connector extension?
 * [#2208](https://github.com/redhat-developer/vscode-openshift-tools/issues/2208) Remove service catalog support related commands
 * [#2007](https://github.com/redhat-developer/vscode-openshift-tools/issues/2007) 'Open in Readme.md in Browser' for S2I Component Type
 * [#1967](https://github.com/redhat-developer/vscode-openshift-tools/issues/1967) Add quickpick item 'Login using cluster URL and token from clipboard' to login command
@@ -331,7 +332,7 @@
 
 ### Bug fixes
 
-* [#2213](https://github.com/redhat-developer/vscode-openshift-tools/issues/2213) DevSandbox page fails 
+* [#2213](https://github.com/redhat-developer/vscode-openshift-tools/issues/2213) DevSandbox page fails
 * [#2177](https://github.com/redhat-developer/vscode-openshift-tools/issues/2177) Objects deleted from App Explorer tree have not deleted from parent->children cache
 * [#2167](https://github.com/redhat-developer/vscode-openshift-tools/issues/2167) Option to prevent removing project folder from workspace when deleting component
 

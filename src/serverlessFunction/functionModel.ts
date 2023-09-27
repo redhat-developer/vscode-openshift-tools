@@ -5,7 +5,7 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Disposable, Uri, workspace } from 'vscode';
+import { Disposable, Uri, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
@@ -123,13 +123,23 @@ export class ServerlessFunctionModel implements Disposable {
     private addWatchers() {
         if (workspace.workspaceFolders) {
             for (const workspaceFolder of workspace.workspaceFolders) {
-                this.watchers.push(
-                    fs.watch(workspaceFolder.uri.fsPath, (_event, filename) => {
-                        if (filename === 'func.yaml') {
-                            this.view.refresh();
-                        }
-                    }),
-                );
+                let folderExists = false;
+                try {
+                    fs.accessSync(workspaceFolder.uri.fsPath);
+                    folderExists = true;
+                } catch (e) {
+                    // folder doesn't exist
+                    void window.showErrorMessage(`Can't keep track of if '${path.basename(workspaceFolder.uri.fsPath)}' contains a serverless function, since it's been deleted.`);
+                }
+                if (folderExists) {
+                    this.watchers.push(
+                        fs.watch(workspaceFolder.uri.fsPath, (_event, filename) => {
+                            if (filename === 'func.yaml') {
+                                this.view.refresh();
+                            }
+                        }),
+                    );
+                }
             }
         }
     }
