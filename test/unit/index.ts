@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* tslint:disable no-require-imports */
 import * as fs from 'fs';
-import { glob } from 'glob';
+import { sync } from 'glob';
 import * as paths from 'path';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
@@ -37,14 +37,14 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 function createTestFinder(testsRoot: string) {
     return (pattern: string): Promise<string[]> => {
         return new Promise((resolve, reject) => {
-            glob(pattern, { cwd: testsRoot })
-                .then(files => {
-                    resolve(files);
-                }).catch(error => {
-                    reject(error);
-                });
-        });
-    }
+            try {
+                const files = sync(pattern, {cwd: testsRoot});
+                resolve(files);
+            } catch(error) {
+                reject(error);
+            }
+        }
+    )};
 }
 
 export async function run(): Promise<void> {

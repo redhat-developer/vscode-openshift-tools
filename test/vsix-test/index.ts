@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* tslint:disable no-require-imports */
 
-import { glob } from 'glob';
+import { sync } from 'glob';
 import * as paths from 'path';
 
 import Mocha = require('mocha');
@@ -21,18 +21,18 @@ const mocha = new Mocha(config);
 export function run(): Promise<void> {
     return new Promise((resolve, reject) => {
         const testsRoot = paths.resolve(__dirname);
-        glob('**/**.test.js', { cwd: testsRoot })
-            .then(files => {
-                files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
-                mocha.run(failures => {
-                    if (failures > 0) {
-                        reject(new Error(`${failures} test${failures === 1 ? 's' : ''} failed.`));
-                    } else {
-                        resolve();
-                    }
-                });
-            }).catch(error => {
-                reject(error);
+        try {
+            const files = sync('**/**.test.js', {cwd: testsRoot});
+            files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
+            mocha.run(failures => {
+                if (failures > 0) {
+                    reject(new Error(`${failures} test${failures === 1 ? 's' : ''} failed.`));
+                } else {
+                    resolve();
+                }
             });
+        } catch(error) {
+            reject(error);
+        }
     });
 }
