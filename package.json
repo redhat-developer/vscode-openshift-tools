@@ -133,7 +133,7 @@
 		"@typescript-eslint/parser": "^6.7.3",
 		"@vscode/test-electron": "^2.3.4",
 		"bootstrap": "^5.3.2",
-		"chai": "^4.3.8",
+		"chai": "^4.3.9",
 		"chokidar": "^3.5.3",
 		"codecov": "^3.8.2",
 		"dpdm": "^3.14.0",
