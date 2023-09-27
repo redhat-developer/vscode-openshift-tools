@@ -3,24 +3,24 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import {
-    PaletteMode,
-    createTheme,
-    SvgIcon,
-    Typography,
-    Box,
-    Stack,
-    styled,
-    Tab,
-    ThemeProvider
-} from '@mui/material';
-import React from 'react';
-import { VSCodeMessage } from './vscodeMessage';
-import OpenShiftIcon from '../../../../images/openshift_view.svg';
-import { TerminalInstance } from './terminalInstance';
 import CloseIcon from '@mui/icons-material/Close';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import {
+    Box,
+    PaletteMode,
+    Stack,
+    SvgIcon,
+    Tab,
+    ThemeProvider,
+    Typography,
+    styled
+} from '@mui/material';
+import React from 'react';
+import OpenShiftIcon from '../../../../images/openshift_view.svg';
+import { createVSCodeTheme } from '../../common/vscode-theme';
+import { TerminalInstance } from './terminalInstance';
+import { VSCodeMessage } from './vscodeMessage';
 
 /**
  * Represents the label for the tab that's used in the list of tabs.
@@ -75,11 +75,7 @@ export const TerminalMultiplexer = () => {
     // represents the Material UI theme currently being used by this webview
     const theme = React.useMemo(
         () =>
-            createTheme({
-                palette: {
-                    mode: themeKind,
-                },
-            }),
+            createVSCodeTheme(themeKind),
         [themeKind],
     );
 

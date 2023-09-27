@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Box } from '@mui/material';
+import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import React from 'react';
 import { VSCodeMessage } from './vscodeMessage';
 import { Terminal, ITheme } from 'xterm';
@@ -12,6 +12,75 @@ import { WebLinksAddon } from 'xterm-addon-web-links';
 import { WebglAddon } from 'xterm-addon-webgl';
 import 'xterm/css/xterm.css';
 import '../../common/scrollbar.scss';
+
+/**
+ * Clone of VS Code's context menu with "Copy" and "Select All" items.
+ */
+const TerminalContextMenu = (props: {
+    onCopyHandler: React.MouseEventHandler<HTMLButtonElement>;
+    onSelectAllHandler: React.MouseEventHandler<HTMLButtonElement>;
+}) => {
+    return (
+        <Paper
+            variant="outlined"
+            sx={{
+                borderRadius: '6px',
+                backgroundColor: 'var(--vscode-editor-background)',
+                borderColor: 'var(--vscode-menu-border)',
+                boxShadow: '0px 0px 8px var(--vscode-widget-shadow)',
+            }}
+        >
+            <Stack direction="column" minWidth="200px" marginX="4px" marginY="3px">
+                <Button
+                    variant="text"
+                    onClick={props.onCopyHandler}
+                    sx={{
+                        width: '100%',
+                        textTransform: 'none',
+                        '&:hover': {
+                            backgroundColor:
+                                'color-mix(in srgb, var(--vscode-button-background) 50%, black)',
+                        },
+                        paddingY: '4px',
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        marginX="13px"
+                        style={{ width: '100%' }}
+                    >
+                        <Typography variant="body1">Copy</Typography>
+                        <Typography variant="body1">Ctrl+Shift+C</Typography>
+                    </Stack>
+                </Button>
+                <Button
+                    variant="text"
+                    onClick={props.onSelectAllHandler}
+                    sx={{
+                        width: '100%',
+                        textTransform: 'none',
+                        '&:hover': {
+                            backgroundColor:
+                                'color-mix(in srgb, var(--vscode-button-background) 50%, black)',
+                        },
+                        paddingY: '4px',
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        marginX="13px"
+                        style={{ width: '100%' }}
+                    >
+                        <Typography variant="body1">Select All</Typography>
+                        <Typography variant="body1">Ctrl+Shift+A</Typography>
+                    </Stack>
+                </Button>
+            </Stack>
+        </Paper>
+    );
+};
 
 /**
  * Represents a tab in the terminal view. Wraps an instance of xtermjs.
@@ -24,6 +93,34 @@ export const TerminalInstance = (props: {
     // Represents a reference to a div where the xtermjs instance is being rendered
     const termRef = React.useRef(null);
 
+    const [isContextMenuOpen, setContextMenuOpen] = React.useState(false);
+    const contextMenuRef = React.useRef(null);
+
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        setContextMenuOpen(true);
+        const { pageX, pageY } = event;
+        contextMenuRef.current.style.left = `${pageX}px`;
+        contextMenuRef.current.style.top = `${pageY}px`;
+
+        // Close the context menu when clicking outside of it
+        const handleOutsideClick = () => {
+            setContextMenuOpen(false);
+        };
+
+        document.addEventListener('click', handleOutsideClick);
+    };
+
+    const handleCopy = () => {
+        void navigator.clipboard.writeText(term.getSelection());
+        setContextMenuOpen(false);
+    };
+
+    const handleSelectAll = () => {
+        term.selectAll();
+        setContextMenuOpen(false);
+    };
+
     // The xtermjs addon that can be used to resize the terminal according to the size of the div
     const fitAddon = React.useMemo(() => {
         return new FitAddon();
@@ -35,7 +132,34 @@ export const TerminalInstance = (props: {
         newTerm.loadAddon(new WebLinksAddon());
         newTerm.loadAddon(new WebglAddon());
         newTerm.loadAddon(fitAddon);
+        newTerm.attachCustomKeyEventHandler((keyboardEvent: KeyboardEvent) => {
+            // Copy/Paste/Select All keybinding handlers
+            if (keyboardEvent.shiftKey && keyboardEvent.ctrlKey) {
+                // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values
+                if (keyboardEvent.code === 'KeyC' && term.hasSelection) {
+                    // Ctrl+Shift+C copies
+                    void navigator.clipboard.writeText(term.getSelection());
+                    keyboardEvent.stopPropagation();
+                    return false;
+                } else if (keyboardEvent.code === 'KeyA') {
+                    // Ctrl+Shift+A selects all
+                    term.selectAll();
+                    keyboardEvent.stopPropagation();
+                    return false;
+                }
+            }
+
+            return true;
+        });
         return newTerm;
+    });
+
+    React.useEffect(() => {
+        const contextMenuListener = (event) => {
+            event.preventDefault();
+        };
+        window.addEventListener('contextmenu', contextMenuListener);
+        return window.removeEventListener('contextmenu', contextMenuListener);
     });
 
     let resizeTimeout: NodeJS.Timeout = undefined;
@@ -175,7 +299,7 @@ export const TerminalInstance = (props: {
             },
         });
         fitAddon.fit();
-    }
+    };
 
     const handleResize = function (_e: UIEvent) {
         if (resizeTimeout) {
@@ -193,10 +317,36 @@ export const TerminalInstance = (props: {
     }, [fitAddon]);
 
     return (
-        <Box marginY="8px" marginX="16px" width="100%" height="100%" overflow='scroll'>
+        <Box
+            onContextMenu={handleContextMenu}
+            marginY="8px"
+            marginX="16px"
+            width="100%"
+            height="100%"
+            overflow="scroll"
+        >
+            <div
+                style={{
+                    zIndex: 1000,
+                    position: 'absolute',
+                    display: isContextMenuOpen ? 'block' : 'none',
+                }}
+                ref={contextMenuRef}
+            >
+                <TerminalContextMenu
+                    onCopyHandler={handleCopy}
+                    onSelectAllHandler={handleSelectAll}
+                />
+            </div>
             <div
                 {...{ name: 'terminal-instance' }}
-                style={{ width: '100%', height: '100%', display: 'flex', flexFlow: 'column', overflow: 'hidden' }}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexFlow: 'column',
+                    overflow: 'hidden',
+                }}
                 ref={termRef}
             ></div>
         </Box>
