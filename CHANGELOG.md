@@ -1,6 +1,9 @@
 # Change Log
 
-## 1.9.0 (Sept 26, 2023)
+## 1.9.1 (September 27, 2023)
+ * [#3342](https://github.com/redhat-developer/vscode-openshift-tools/issues/3342) Sandbox page in `Add OpenShift Cluster` editor stays in 'Detecting' status forever.
+
+## 1.9.0 (September 26, 2023)
  * [#3086](https://github.com/redhat-developer/vscode-openshift-tools/issues/3086) In Devfile search view, you can now filter by debug/deploy support and tags.
  * [#2781](https://github.com/redhat-developer/vscode-openshift-tools/issues/2781) Add support for Devfile port and name detection.
  * [#2819](https://github.com/redhat-developer/vscode-openshift-tools/issues/2819) Create a separate terminal pane for all vscode-openshift related commands to run in.
