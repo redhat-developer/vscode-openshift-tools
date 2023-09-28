@@ -59,7 +59,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         devfile: undefined,
         showRecommendation: false,
         isLoading: false,
-        completionValue: undefined,
+        completionValue: 0,
         isDevfileExistsInRepo: false,
         noRecommendation: false,
     });
@@ -104,7 +104,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
             case 'devfileExists': {
                 setRecommendedDevfile((prevState) => ({
                     ...prevState,
-                    completionValue: 50
+                    completionValue: prevState.completionValue + 10
                 }));
                 setRecommendedDevfile((prevState) => ({
                     ...prevState,
@@ -116,9 +116,14 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setCloneFailed(true);
                 break;
             }
-            case 'cloneExecution' :
+            case 'cloneStart':
+            case 'cloneExecution':
+            case 'getRecommendedDevfileStart': {
+                setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 10}));
+                break;
+            }
             case 'getRecommendedDevfile': {
-                setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: message.data.value}));
+                setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 45}));
                 break;
             }
             default:
@@ -141,7 +146,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 branch: branchOption,
             },
         });
-        setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true, completionValue: 0 }));
+        setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true, completionValue: 5 }));
     }
 
     function createComponentFromGitRepo(

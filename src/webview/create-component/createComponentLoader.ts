@@ -268,6 +268,9 @@ export default class CreateComponentLoader {
              */
             case 'getRecommendedDevfileFromGit': {
                 tmpFolder = Uri.parse(await promisify(tmp.dir)());
+                void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'cloneStart',
+                });
                 const cloneProcess: CloneProcess = await clone(
                     message.data.url,
                     tmpFolder.fsPath,
@@ -426,10 +429,7 @@ export default class CreateComponentLoader {
         let compDescriptions: ComponentTypeDescription[] = [];
         try {
             void CreateComponentLoader.panel.webview.postMessage({
-                action: 'getRecommendedDevfile',
-                data: {
-                    value: 60
-                }
+                action: 'getRecommendedDevfileStart'
             });
             analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
             compDescriptions = getCompDescription(analyzeRes);
@@ -471,10 +471,7 @@ export default class CreateComponentLoader {
             }
         } finally {
             void CreateComponentLoader.panel.webview.postMessage({
-                action: 'getRecommendedDevfile',
-                data: {
-                    value: 90
-                }
+                action: 'getRecommendedDevfile'
             });
             const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
@@ -543,10 +540,7 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
     let command = `${git} clone ${url} ${location}`;
     command = branch ? `${command} --branch ${branch}` : command;
     void CreateComponentLoader.panel.webview.postMessage({
-        action: 'cloneExecution',
-        data: {
-            value: 25
-        }
+        action: 'cloneExecution'
     });
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) =>
