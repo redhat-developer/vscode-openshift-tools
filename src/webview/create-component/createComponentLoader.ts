@@ -425,6 +425,12 @@ export default class CreateComponentLoader {
         let analyzeRes: AnalyzeResponse[] = [];
         let compDescriptions: ComponentTypeDescription[] = [];
         try {
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'getRecommendedDevfile',
+                data: {
+                    value: 60
+                }
+            });
             analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
             compDescriptions = getCompDescription(analyzeRes);
         } catch (error) {
@@ -464,6 +470,12 @@ export default class CreateComponentLoader {
                 }
             }
         } finally {
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'getRecommendedDevfile',
+                data: {
+                    value: 90
+                }
+            });
             const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
             const devfile: Devfile =
@@ -530,6 +542,12 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
     const git = gitExtension.getAPI(1).git.path;
     let command = `${git} clone ${url} ${location}`;
     command = branch ? `${command} --branch ${branch}` : command;
+    void CreateComponentLoader.panel.webview.postMessage({
+        action: 'cloneExecution',
+        data: {
+            value: 25
+        }
+    });
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) =>
         cp.exec(command, (error: cp.ExecException) => {
