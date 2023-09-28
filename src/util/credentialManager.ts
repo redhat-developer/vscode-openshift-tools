@@ -22,17 +22,17 @@ export function getVscodeModule<T>(moduleName: string): T | undefined {
     return undefined;
 }
 
-const keytar: any = getVscodeModule('keytar');
-
 export class TokenStore {
     public static extensionContext: ExtensionContext;
 
-    static setItem(key: string, login: string, value: string): Promise<void> {
-        return keytar ? keytar.setPassword(key, login, value) : Promise.resolve();
+    static async setItem(key: string, login: string, value: string): Promise<void> {
+        const loginKey: string = JSON.stringify({key, login});
+        await this.extensionContext.secrets.store(loginKey, value);
     }
 
-    static getItem(key: string, login: string): Promise<string> {
-        return keytar ? keytar.getPassword(key, login) : '';
+    static async getItem(key: string, login: string): Promise<string> {
+        const loginKey: string = JSON.stringify({key, login});
+        return await this.extensionContext.secrets.get(loginKey);
     }
 
     static setUserName(username: string): Thenable<void> {

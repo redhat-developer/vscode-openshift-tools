@@ -12,15 +12,13 @@ import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { Cluster } from '../../../src/openshift/cluster';
 import { CliExitData } from '../../../src/util/childProcessUtil';
-import { TokenStore, getVscodeModule } from '../../../src/util/credentialManager';
+import { TokenStore } from '../../../src/util/credentialManager';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { TestItem } from './testOSItem';
 import pq = require('proxyquire');
 
 const {expect} = chai;
 chai.use(sinonChai);
-
-const keytar: any = getVscodeModule('keytar');
 
 suite('Openshift/Cluster', () => {
     let sandbox: sinon.SinonSandbox;
@@ -54,7 +52,7 @@ suite('Openshift/Cluster', () => {
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        sandbox.stub(keytar);
+        sandbox.stub(TokenStore.extensionContext.secrets);
         execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves(testData);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
@@ -180,7 +178,7 @@ suite('Openshift/Cluster', () => {
                 expect(commandStub).calledWith('setContext', 'isLoggedIn', true);
             });
 
-            (keytar ? test : test.skip)('returns with no username set', async () => {
+            test('returns with no username set', async () => {
                 quickPickStub.onSecondCall().resolves({description: 'Current Context', label: undefined});
                 const status = await Cluster.credentialsLogin();
 

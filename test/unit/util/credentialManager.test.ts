@@ -7,12 +7,10 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
 
-import { TokenStore, getVscodeModule } from '../../../src/util/credentialManager';
+import { TokenStore } from '../../../src/util/credentialManager';
 
 const {expect} = chai;
 chai.use(sinonChai);
-
-const keytar: any = getVscodeModule('keytar');
 
 suite('TokenStore', () => {
     let sandbox: sinon.SinonSandbox;
@@ -26,18 +24,22 @@ suite('TokenStore', () => {
     });
 
     suite('setItem', () => {
-        (keytar ? test : test.skip)('should set user\'s credentials', async () => {
-            sandbox.stub(keytar, 'setPassword').resolves();
+        test('should set user\'s credentials', async () => {
+            const secrets: any = TokenStore.extensionContext.secrets;
+            sandbox.stub(secrets, 'store').resolves();
             await TokenStore.setItem('login', 'username', 'password');
-            expect(keytar.setPassword).calledWith('login', 'username', 'password');
+            const loginKey: string = JSON.stringify({key: 'login', login: 'username'});
+            expect(secrets.store).calledWith(loginKey, 'password');
         });
     });
 
     suite('getItem', () => {
-        (keytar ? test : test.skip)('should call keytar.getPassword and return promise', async () => {
-            sandbox.stub(keytar, 'getPassword').resolves('password');
+        test('should call keytar.getPassword and return promise', async () => {
+            const secrets: any = TokenStore.extensionContext.secrets;
+            sandbox.stub(secrets, 'get').resolves('password');
             const result = await TokenStore.getItem('login', 'username');
-            expect(keytar.getPassword).calledWith('login', 'username');
+            const loginKey: string = JSON.stringify({key: 'login', login: 'username'});
+            expect(secrets.get).calledWith(loginKey);
             expect(result).equal('password');
         });
     });
