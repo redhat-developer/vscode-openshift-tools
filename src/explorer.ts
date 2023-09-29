@@ -24,13 +24,11 @@ import {
 import * as Helm from './helm/helm';
 import { Oc } from './oc/ocWrapper';
 import { Odo } from './odo/odoWrapper';
-import { KubeConfigUtils } from './util/kubeUtils';
+import { KubeConfigUtils, getKubeConfigFiles } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
-
-const kubeConfigFolder: string = path.join(Platform.getUserHomePath(), '.kube');
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem;
 
@@ -42,7 +40,7 @@ type PackageJSON = {
 const CREATE_OR_SET_PROJECT_ITEM = {
     label: 'Create new or set active Project',
     command: {
-        title: 'Create new or ser active Project',
+        title: 'Create new or set active Project',
         command: 'openshift.project.set'
     }
 };
@@ -52,7 +50,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private treeView: TreeView<ExplorerItem>;
 
-    private fsw: FileContentChangeNotifier;
+    private kubeConfigWatchers: FileContentChangeNotifier[];
     private kubeContext: Context;
     private kubeConfig: KubeConfigUtils;
 
@@ -70,22 +68,25 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             // ignore config loading error and let odo report it on first call
         }
         try {
-            this.fsw = WatchUtil.watchFileForContextChange(kubeConfigFolder, 'config');
+            const kubeconfigFiles = getKubeConfigFiles();
+            this.kubeConfigWatchers = kubeconfigFiles.map(kubeconfigFile => WatchUtil.watchFileForContextChange(path.dirname(kubeconfigFile), path.basename(kubeconfigFile)));
         } catch (err) {
             void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
         }
-        this.fsw?.emitter?.on('file-changed', () => {
-            const ku2 = new KubeConfigUtils();
-            const newCtx = ku2.getContextObject(ku2.currentContext);
-            if (!this.kubeContext
-                || (this.kubeContext.cluster !== newCtx.cluster
-                    || this.kubeContext.user !== newCtx.user
-                    || this.kubeContext.namespace !== newCtx.namespace)) {
-                this.refresh();
-            }
-            this.kubeContext = newCtx;
-            this.kubeConfig = ku2;
-        });
+        for (const fsw of this.kubeConfigWatchers) {
+            fsw.emitter?.on('file-changed', () => {
+                const ku2 = new KubeConfigUtils();
+                const newCtx = ku2.getContextObject(ku2.currentContext);
+                if (Boolean(this.kubeContext) !== Boolean(newCtx)
+                    || (this.kubeContext.cluster !== newCtx.cluster
+                        || this.kubeContext.user !== newCtx.user
+                        || this.kubeContext.namespace !== newCtx.namespace)) {
+                    this.refresh();
+                }
+                this.kubeContext = newCtx;
+                this.kubeConfig = ku2;
+            });
+        }
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
         });
@@ -110,7 +111,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 contextValue: 'openshift.openConfigFile',
                 label: element.label,
                 collapsibleState: TreeItemCollapsibleState.None,
-                tooltip: 'Default KubeConfig',
+                tooltip: element.label as string,
                 description: element.description,
                 iconPath: new ThemeIcon('file')
             };
@@ -175,11 +176,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 await Odo.Instance.getProjects();
                 result = [this.kubeContext];
                 if (this.kubeContext) {
-                    const homeDir = this.kubeConfig.findHomeDir();
-                    if (homeDir){
-                        const config = path.join(homeDir, '.kube', 'config');
-                        result.unshift({label: 'Default KubeConfig', description: `${config}`})
-                    }
+                    const config = getKubeConfigFiles();
+                    result.unshift({label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':')})
                 }
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
@@ -246,7 +244,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     dispose(): void {
-        this.fsw?.watcher?.close();
+        for (const fsw of this.kubeConfigWatchers) {
+            fsw?.watcher?.close();
+        }
         this.treeView.dispose();
     }
 

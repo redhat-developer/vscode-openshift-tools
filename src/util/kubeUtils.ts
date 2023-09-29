@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
+import { Cluster, User } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
 import * as path from 'path';
-import { QuickPickItem } from 'vscode';
-import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
-import { User, Cluster } from '@kubernetes/client-node/dist/config_types';
+import { QuickPickItem, window } from 'vscode';
+import { Platform } from './platform';
 
 function fileExists(file: string): boolean {
     try {
@@ -101,4 +102,46 @@ export class KubeConfigUtils extends KubeConfig {
         return this.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
     }
 
+}
+
+/**
+ * Returns the list of kube config files:
+ * - If KUBECONFIG is not set, just ~/.kube/config
+ * - If KUBECONFIG is set, follows the semantics for specifying multiple config files described here:
+ *   https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#append-home-kube-config-to-your-kubeconfig-environment-variable
+ *   BUT: it shows an error if multiple configs are specified, since the Kubernetes client we are using doesn't support this use case.
+ */
+export function getKubeConfigFiles(): string[] {
+    if (process.env.KUBECONFIG) {
+        const configuredFiles: string[] = process.env.KUBECONFIG.split(path.delimiter);
+        const filesThatExist: string[] = [];
+        for (const configFile of configuredFiles) {
+            if (fs.existsSync(configFile)) {
+                filesThatExist.push(configFile);
+            }
+        }
+        return filesThatExist;
+    }
+    return [path.join(Platform.getUserHomePath(), '.kube', 'config')];
+}
+
+/**
+ * If there are multiple kube config files set, force the user to pick one to use.
+ */
+export async function setKubeConfig(): Promise<void> {
+    const kubeConfigFiles = getKubeConfigFiles();
+    if (kubeConfigFiles.length > 1) {
+        let selectedFile;
+        while(!selectedFile) {
+            try {
+                const potentialSelection = await window.showQuickPick(kubeConfigFiles, { canPickMany: false, placeHolder: 'VSCode OpenShift only supports using one kube config. Please select which one to use.' });
+                if (potentialSelection) {
+                    selectedFile = potentialSelection;
+                }
+            } catch (_) {
+                // do nothing
+            }
+        }
+        process.env.KUBECONFIG = selectedFile;
+    }
 }
