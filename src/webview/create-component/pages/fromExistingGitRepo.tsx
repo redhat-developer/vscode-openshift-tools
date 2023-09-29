@@ -250,7 +250,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 alignItems="center"
                                             >
                                                 <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                                                    <CircularProgress />
+                                                    <CircularProgress variant='determinate' value={recommendedDevfile.completionValue}/>
                                                     <Box
                                                         sx={{
                                                             top: 0,
