@@ -5,9 +5,9 @@
 
 import { Container, Theme, ThemeProvider } from '@mui/material';
 import React from 'react';
-import { FromHelm } from '../../common/fromHelm';
 import { createVSCodeTheme } from '../../common/vscode-theme';
 import { VSCodeMessage } from '../vsCodeMessage';
+import { FromHelm } from './fromHelm';
 
 type VSCodeMessage = {
     action: string;

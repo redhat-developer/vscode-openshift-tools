@@ -5,7 +5,7 @@
 import * as React from 'react';
 import 'react-dom';
 import { HelmSearch } from './helmSearch';
-import { VSCodeMessage } from '../helm-chart/vsCodeMessage';
+import { VSCodeMessage } from '../vsCodeMessage';
 
 type FromHelmProps = {
     titleText: string

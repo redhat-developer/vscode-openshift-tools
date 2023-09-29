@@ -136,7 +136,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
                 displayName: ''
             }
             res.chartName = key;
-            res.chartVersions = entries[key];
+            res.chartVersions = entries[key].reverse();
             res.displayName = res.chartVersions[0].annotations['charts.openshift.io/name'] || res.chartVersions[0].name;
             helmRes.push(res);
         })

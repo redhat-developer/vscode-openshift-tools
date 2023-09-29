@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 import { Box, Chip, Stack, SvgIcon, Typography } from '@mui/material';
 import * as React from 'react';
-import { ChartResponse } from '../helm-chart/helmChartType';
-import HelmIcon from '../../../images/helm/helm.svg';
+import HelmIcon from '../../../../images/helm/helm.svg';
+import { ChartResponse } from '../helmChartType';
 
 export type HelmListItemProps = {
     helmChart: ChartResponse;
@@ -74,8 +74,9 @@ function HelmChartListContent(props: HelmListItemProps) {
                         <SvgIcon
                             component={HelmIcon}
                             fontSize='large'
-                            style={{ maxWidth: '6em', maxHeight: '6em' }} inheritViewBox />
+                            style={{ maxWidth: '6em', maxHeight: '6em', color: 'black' }} inheritViewBox />
                 }
+
             </Box>
             <Stack
                 direction="column"
@@ -93,9 +94,6 @@ function HelmChartListContent(props: HelmListItemProps) {
                         }}
                     >
                         {capitalizeFirstLetter(props.helmChart.displayName)}
-                        {
-                            props.helmChart.chartVersions[0].annotations['charts.openshift.io/provider'] && <Typography variant='caption'>Provided by {props.helmChart.chartVersions[0].annotations['charts.openshift.io/provider']}</Typography>
-                        }
                     </Typography>
                 </Stack>
                 <Typography
