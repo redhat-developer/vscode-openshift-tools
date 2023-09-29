@@ -89,7 +89,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     }));
                     setRecommendedDevfile((prevState) => ({
                         ...prevState,
-                        completionValue: 100,
                         showRecommendation: true,
                     }));
                     setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: false }));
