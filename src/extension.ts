@@ -25,6 +25,7 @@ import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
+import { setKubeConfig } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
@@ -71,6 +72,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
+
+    // pick kube config in case multiple are configured
+    await setKubeConfig();
+
     const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
     crcStatusItem.command = 'openshift.explorer.stopCluster';
     const disposable = [

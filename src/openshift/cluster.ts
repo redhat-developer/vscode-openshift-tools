@@ -7,6 +7,7 @@ import { KubernetesObject } from '@kubernetes/client-node';
 import { ExtensionContext, InputBox, QuickInputButton, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
 import { Odo } from '../odo/odoWrapper';
@@ -48,7 +49,7 @@ export class Cluster extends OpenShiftItem {
                     ),
                 )
                 .then(async () => {
-                    Cluster.explorer.refresh();
+                    OpenShiftExplorer.getInstance().refresh();
                     Cluster.serverlessView.refresh();
                     void commands.executeCommand('setContext', 'isLoggedIn', false);
                     const logoutInfo = await window.showInformationMessage(
@@ -67,7 +68,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.explorer.refresh')
     static refresh(): void {
-        Cluster.explorer.refresh();
+        OpenShiftExplorer.getInstance().refresh();
         Cluster.serverlessView.refresh();
     }
 
@@ -806,7 +807,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async loginMessage(clusterURL: string): Promise<string> {
-        Cluster.explorer.refresh();
+        OpenShiftExplorer.getInstance().refresh();
         Cluster.serverlessView.refresh();
         await commands.executeCommand('setContext', 'isLoggedIn', true);
         return `Successfully logged in to '${clusterURL}'`;

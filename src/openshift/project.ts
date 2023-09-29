@@ -37,7 +37,7 @@ export class Project extends OpenShiftItem {
         } else {
             const projectName = selectedItem.label;
             await Odo.Instance.setProject(projectName);
-            Project.explorer.refresh();
+            OpenShiftExplorer.getInstance().refresh();
             Project.serverlessView.refresh();
             message = `Project '${projectName}' set as active.`;
         }

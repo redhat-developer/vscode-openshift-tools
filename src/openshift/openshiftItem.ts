@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { commands, QuickPickItem, window } from 'vscode';
-import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { Project } from '../odo/project';
@@ -25,8 +24,6 @@ export class QuickPickCommand implements QuickPickItem {
 
 export default class OpenShiftItem {
     protected static readonly odo = Odo.Instance;
-
-    protected static readonly explorer: OpenShiftExplorer = OpenShiftExplorer.getInstance();
 
     protected static readonly serverlessView: ServerlessFunctionView = ServerlessFunctionView.getInstance();
 
