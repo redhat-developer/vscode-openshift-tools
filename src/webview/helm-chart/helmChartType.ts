@@ -5,7 +5,7 @@
 
 export interface ChartResponse {
     chartName: string,
-    chartVersions: any[],
+    chartVersions: Chart[],
     displayName: string,
     isExpand?: boolean
 }

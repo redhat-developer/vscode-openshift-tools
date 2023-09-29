@@ -144,8 +144,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
     void panel?.webview.postMessage(
         {
             action: eventName,
-            helmRes,
-            themeValue: themeKind,
+            data: helmRes
         }
     );
 }
