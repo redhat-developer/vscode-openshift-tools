@@ -14,9 +14,10 @@ import 'xterm/css/xterm.css';
 import '../../common/scrollbar.scss';
 
 /**
- * Clone of VS Code's context menu with "Copy" and "Select All" items.
+ * Clone of VS Code's context menu with "Copy", "Select All", and "Clear" items.
  */
 const TerminalContextMenu = (props: {
+    onClearHandler: React.MouseEventHandler<HTMLButtonElement>;
     onCopyHandler: React.MouseEventHandler<HTMLButtonElement>;
     onSelectAllHandler: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
@@ -77,6 +78,28 @@ const TerminalContextMenu = (props: {
                         <Typography variant="body1">Ctrl+Shift+A</Typography>
                     </Stack>
                 </Button>
+                <Button
+                    variant="text"
+                    onClick={props.onClearHandler}
+                    sx={{
+                        width: '100%',
+                        textTransform: 'none',
+                        '&:hover': {
+                            backgroundColor:
+                                'color-mix(in srgb, var(--vscode-button-background) 50%, black)',
+                        },
+                        paddingY: '4px',
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        marginX="13px"
+                        style={{ width: '100%' }}
+                    >
+                        <Typography variant="body1">Clear</Typography>
+                    </Stack>
+                </Button>
             </Stack>
         </Paper>
     );
@@ -120,6 +143,16 @@ export const TerminalInstance = (props: {
         term.selectAll();
         setContextMenuOpen(false);
     };
+
+    const handleClear = () => {
+        term.clear();
+        window.vscodeApi.postMessage({
+            kind: 'termClear',
+            data: {
+                uuid: props.uuid,
+            },
+        });
+    }
 
     // The xtermjs addon that can be used to resize the terminal according to the size of the div
     const fitAddon = React.useMemo(() => {
@@ -336,6 +369,7 @@ export const TerminalInstance = (props: {
                 <TerminalContextMenu
                     onCopyHandler={handleCopy}
                     onSelectAllHandler={handleSelectAll}
+                    onClearHandler={handleClear}
                 />
             </div>
             <div

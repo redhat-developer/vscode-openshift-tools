@@ -340,6 +340,10 @@ class OpenShiftTerminal {
         this.forceKill();
         this._sendExitMessage();
     }
+
+    public clear(): void {
+        this._headlessTerm.clear();
+    }
 }
 
 /**
@@ -429,6 +433,8 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                             });
                     } else if (message.kind === 'termSuspend') {
                         terminal.stopRendering();
+                    } else if (message.kind === 'termClear') {
+                        terminal.clear();
                     } else if (message.kind === 'input') {
                         terminal.write(message.data.data);
                     } else if (message.kind === 'resize') {
