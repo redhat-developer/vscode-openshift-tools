@@ -6,6 +6,7 @@ import { Check, Close } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
+import DevfileLogo from '../../../images/context/devfile.png';
 
 export type DevfileListItemProps = {
     devfile: Devfile;
@@ -56,7 +57,7 @@ function DevfileListContent(props: DevfileListItemProps) {
                     borderRadius: '4px',
                 }}
             >
-                <img src={props.devfile.logoUrl} style={{ maxWidth: '6em', maxHeight: '6em' }} />
+                <img src={props.devfile.logoUrl ? props.devfile.logoUrl : DevfileLogo} style={{ maxWidth: '6em', maxHeight: '6em' }} />
             </Box>
             <Stack
                 direction="column"
@@ -75,9 +76,12 @@ function DevfileListContent(props: DevfileListItemProps) {
                     >
                         {props.devfile.name}
                     </Typography>
-                    <Typography variant="body2" fontStyle="italic">
-                        from {props.devfile.registryName}
-                    </Typography>
+
+                    {props.devfile.registryName && (
+                        <Typography variant="body2" fontStyle="italic">
+                            from {props.devfile.registryName}
+                        </Typography>
+                    )}
                 </Stack>
                 <Typography
                     variant="body2"
@@ -98,17 +102,17 @@ function DevfileListContent(props: DevfileListItemProps) {
                         icon={props.devfile.supportsDeploy ? <Check /> : <Close />}
                         color={props.devfile.supportsDeploy ? 'success' : 'error'}
                     />
-                    {props.devfile.tags.map((tag, i) => {
+                    {(props.devfile.tags && props.devfile.tags.map((tag, i) => {
                         if (i >= 4) {
                             return;
                         }
                         return <Chip size="small" label={tag} key={tag} />;
-                    })}
-                    {props.devfile.tags.length > 4 && (
+                    }))}
+                    {(props.devfile.tags && props.devfile.tags.length > 4 && (
                         <Tooltip title={props.devfile.tags.slice(4).join(', ')}>
                             <Chip size="small" label="• • •" />
                         </Tooltip>
-                    )}
+                    ))}
                 </Stack>
             </Stack>
         </Stack>
