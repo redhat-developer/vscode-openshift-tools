@@ -29,6 +29,7 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
+import { DevfileV1 } from '../../util/devfileV1Type';
 
 interface CloneProcess {
     status: boolean;
@@ -281,11 +282,19 @@ export default class CreateComponentLoader {
                         action: 'cloneFailed',
                     });
                 } else {
+                    const isGirDevfileExists = await isDevfileExists(tmpFolder);
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'devfileExists',
-                        data: await isDevfileExists(tmpFolder),
+                        data: isGirDevfileExists,
                     });
-                    void CreateComponentLoader.getRecommendedDevfile(tmpFolder);
+
+                    if (isGirDevfileExists) {
+                        // Use the Devfile existing in Gir-repo
+                        void CreateComponentLoader.getExistingDevfile(tmpFolder);
+                    } else {
+                        // Use recommended Devfile
+                        void CreateComponentLoader.getRecommendedDevfile(tmpFolder);
+                    }
                 }
                 break;
             }
@@ -295,7 +304,7 @@ export default class CreateComponentLoader {
             case 'createComponent': {
                 const componentName: string = message.data.componentName;
                 const portNumber: number = message.data.portNumber;
-                let componentFolder: string;
+                let componentFolder: string =  '';
                 try {
                     if (message.data.isFromTemplateProject) {
                         // from template project
@@ -337,14 +346,19 @@ export default class CreateComponentLoader {
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
-                        if (!await isDevfileExists(Uri.file(componentFolder))) {
+                        const componentFolderUri = Uri.file(componentFolder);
+                        if (!await isDevfileExists(componentFolderUri)) {
                             await Odo.Instance.createComponentFromLocation(
                                 devfileType,
                                 componentName,
                                 portNumber,
                                 Uri.file(componentFolder),
                             );
+                        } else {
+                            // Update component devfile with component's selected name
+                            await CreateComponentLoader.updateDevfileWithComponentName(componentFolderUri, componentName);
                         }
+
                         await sendTelemetry('newComponentCreated', {
                             strategy,
                             // eslint-disable-next-line camelcase
@@ -424,6 +438,66 @@ export default class CreateComponentLoader {
         }
     }
 
+    static async updateDevfileWithComponentName(ucomponentFolderUri: vscode.Uri, componentName: string): Promise<void> {
+        const devFilePath = path.join(ucomponentFolderUri.fsPath, 'devfile.yaml');
+        const file = await fs.readFile(devFilePath, 'utf8');
+        const devfile = JSYAML.load(file.toString()) as any;
+        if (devfile?.metadata?.name !== componentName) {
+            devfile.metadata.name = componentName;
+            await fs.unlink(devFilePath);
+            const yaml = JSYAML.dump(devfile, { sortKeys: true });
+            await fs.writeFile(devFilePath, yaml.toString(), 'utf-8');
+        }
+    }
+
+    static async getExistingDevfile(uri: Uri): Promise<void> {
+        let rawDevfile: any;
+        let supportsDebug = false;   // Initial value
+        let supportsDeploy = false;  // Initial value
+        try {
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'getRecommendedDevfileStart'
+            });
+            const componentDescription = await Odo.Instance.describeComponent(uri.fsPath);
+            if (componentDescription) {
+                rawDevfile = componentDescription.devfileData.devfile;
+                supportsDebug = componentDescription.devfileData.supportedOdoFeatures.debug;
+                supportsDeploy = componentDescription.devfileData.supportedOdoFeatures.deploy;
+            }
+        } catch (Error) {
+            // Will try reading the raw devfile
+        } finally {
+            if (!rawDevfile) {
+                //Try reading the raw devfile
+                const devFileYamlPath = path.join(tmpFolder.fsPath, 'devfile.yaml');
+                const file = await fs.readFile(devFileYamlPath, 'utf8');
+                rawDevfile = JSYAML.load(file.toString());
+            }
+
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'getRecommendedDevfile'
+            });
+
+            const devfile: Devfile = {
+                description: rawDevfile.metadata.description,
+                name: rawDevfile.metadata.displayName ? rawDevfile.metadata.displayName : rawDevfile.metadata.name,
+                id: rawDevfile.metadata.name,
+                starterProjects: rawDevfile.starterProjects,
+                tags: [],
+                yaml: JSYAML.dump(rawDevfile),
+                supportsDebug,
+                supportsDeploy,
+            } as Devfile;
+
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'recommendedDevfile',
+                data: {
+                    devfile,
+                },
+            });
+        }
+    }
+
     static async getRecommendedDevfile(uri: Uri): Promise<void> {
         let analyzeRes: AnalyzeResponse[] = [];
         let compDescriptions: ComponentTypeDescription[] = [];
@@ -444,7 +518,7 @@ export default class CreateComponentLoader {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
                         const file = await fs.readFile(devFileV1Path, 'utf8');
-                        const devfileV1 = JSYAML.load(file.toString());
+                        const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await Odo.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
@@ -475,7 +549,7 @@ export default class CreateComponentLoader {
             });
             const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
-            const devfile: Devfile =
+            const devfile: Devfile | undefined =
                 compDescriptions.length !== 0
                     ? allDevfiles.find(
                           (devfile) => devfile.name === compDescriptions[0].displayName,
@@ -515,7 +589,7 @@ function getDevfileType(devfileDisplayName: string): string {
     const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find(
         (description) => description.displayName === devfileDisplayName,
     );
-    return devfileDescription.name;
+    return devfileDescription ? devfileDescription.name : devfileDisplayName;
 }
 
 function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
