@@ -22,6 +22,7 @@ import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInf
 import { DevfileSearch } from '../../common/devfileSearch';
 import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
 import { SetNameAndFolder } from '../../common/setNameAndFolder';
+import { buildSanitizedComponentName } from '../../common/sanitize';
 
 type Message = {
     action: string;
@@ -454,7 +455,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     }}
                     createComponent={createComponentFromGitRepo}
                     devfile={recommendedDevfile.isDevfileExistsInRepo ? undefined : selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
-                    initialComponentName={gitURL.url.substring(gitURL.url.lastIndexOf('/') + 1)}
+                    initialComponentName={buildSanitizedComponentName(gitURL.url)}
                 />
             );
         case 'selectDifferentDevfile':
