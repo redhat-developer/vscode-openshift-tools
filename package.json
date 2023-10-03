@@ -139,7 +139,7 @@
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.4",
 		"esbuild-plugin-svgr": "^2.1.0",
-		"esbuild-sass-plugin": "^2.14.0",
+		"esbuild-sass-plugin": "^2.16.0",
 		"eslint": "^8.50.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
