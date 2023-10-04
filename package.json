@@ -102,7 +102,7 @@
 		"@devfile/api": "^2.2.0-alpha-1666195451",
 		"@mui/icons-material": "^5.14.12",
 		"@mui/lab": "^5.0.0-alpha.146",
-		"@mui/material": "^5.14.11",
+		"@mui/material": "^5.14.12",
 		"@mui/styles": "^5.14.11",
 		"@rjsf/core": "^5.13.0",
 		"@rjsf/validator-ajv8": "^5.13.0",
