@@ -103,7 +103,7 @@
 		"@mui/icons-material": "^5.14.12",
 		"@mui/lab": "^5.0.0-alpha.147",
 		"@mui/material": "^5.14.12",
-		"@mui/styles": "^5.14.11",
+		"@mui/styles": "^5.14.12",
 		"@rjsf/core": "^5.13.0",
 		"@rjsf/validator-ajv8": "^5.13.0",
 		"@segment/analytics-next": "^1.57.0",
