@@ -5,10 +5,11 @@
 import { Box, Chip, Stack, SvgIcon, Typography } from '@mui/material';
 import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
-import { ChartResponse } from '../helmChartType';
+import { Chart, ChartResponse } from '../helmChartType';
 
 export type HelmListItemProps = {
     helmChart: ChartResponse;
+    selectedVersion: Chart;
     buttonCallback?: () => void;
 };
 
@@ -28,12 +29,13 @@ export function HelmListItem(props: HelmListItemProps) {
                 >
                     <HelmChartListContent
                         helmChart={props.helmChart}
+                        selectedVersion={props.selectedVersion}
                         buttonCallback={props.buttonCallback}
                     />
                 </Box>
             ) : (
                 <>
-                    <HelmChartListContent helmChart={props.helmChart} />
+                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion}/>
                 </>
             )}
         </>
@@ -68,8 +70,8 @@ function HelmChartListContent(props: HelmListItemProps) {
                 }}
             >
                 {
-                    props.helmChart.chartVersions[0].icon ?
-                        <img src={props.helmChart.chartVersions[0].icon} style={{ maxWidth: '6em', maxHeight: '6em' }} />
+                    props.selectedVersion.icon ?
+                        <img src={props.selectedVersion.icon} style={{ maxWidth: '6em', maxHeight: '6em' }} />
                         :
                         <SvgIcon
                             component={HelmIcon}
@@ -100,24 +102,24 @@ function HelmChartListContent(props: HelmListItemProps) {
                     variant="body2"
                     sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                 >
-                    {props.helmChart.chartVersions[0].description}
+                    {props.selectedVersion.description}
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                    {props.helmChart.chartVersions[0].annotations['charts.openshift.io/providerType'] &&
+                    {props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
                             size="small"
-                            label={props.helmChart.chartVersions[0].annotations['charts.openshift.io/providerType']}
+                            label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
                             color={'primary'} />
                     }
                     <Chip
                         size="small"
-                        label={props.helmChart.chartVersions[0].version}
+                        label={props.selectedVersion.version}
                         color={'success'}
                     />
-                    {props.helmChart.chartVersions[0].annotations['charts.openshift.io/provider'] &&
+                    {props.selectedVersion.annotations['charts.openshift.io/provider'] &&
                         <Chip
                             size="small"
-                            label={props.helmChart.chartVersions[0].annotations['charts.openshift.io/provider']}
+                            label={props.selectedVersion.annotations['charts.openshift.io/provider']}
                             color={'error'} />
                     }
 

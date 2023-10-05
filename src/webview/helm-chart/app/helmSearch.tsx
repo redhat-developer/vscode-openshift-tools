@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Box, Button, Divider, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, MenuItem, Modal, Pagination, Paper, Select, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Button, Divider, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, MenuItem, Modal, Pagination, Paper, Select, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
 import { Chart, ChartResponse } from '../helmChartType';
@@ -84,7 +84,7 @@ const SelectTemplateProject = React.forwardRef(
                         alignItems="flex-start"
                         marginBottom={1}
                     >
-                        <HelmListItem helmChart={props.helmChart} />
+                        <HelmListItem helmChart={props.helmChart} selectedVersion={selectedVersion} />
                         <IconButton onClick={props.closeModal}>
                             <Close color="textSecondary" />
                         </IconButton>
@@ -260,6 +260,7 @@ export function HelmSearch(props: HelmSearchProps) {
                                         <HelmListItem
                                             key={`${helmChart.chartName}-${helmChart.displayName}`}
                                             helmChart={helmChart}
+                                            selectedVersion={helmChart.chartVersions[0]}
                                             buttonCallback={() => {
                                                 setselectedHelmChart(helmChart);
                                             }}
