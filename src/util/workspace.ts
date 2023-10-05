@@ -117,7 +117,8 @@ async function updateDevfileContext(_: unknown) {
         }),
     );
     const foldersArray = devfileFolders.map(folder => folder.name);
-    void commands.executeCommand('setContext', 'ext.folderContainsDevfile', foldersArray);
+    void commands.executeCommand('setContext', 'ext.folderContainsDevfile', foldersArray)
+        .then(() => void commands.executeCommand('openshift.componentsView.refresh'));
 }
 
 /**

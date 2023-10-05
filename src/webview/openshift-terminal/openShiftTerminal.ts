@@ -74,6 +74,7 @@ class OpenShiftTerminal {
     private _file: string;
     private _args: string | string[];
     private _options;
+    private _name: string;
 
     private _sendTerminalData: (data: string) => void;
     private _sendExitMessage: () => void;
@@ -133,6 +134,7 @@ class OpenShiftTerminal {
         this._file = file;
         this._args = args;
         this._options = options;
+        this._name = options.name;
 
         this._disposables = [];
         this._headlessTerm = new Terminal({ allowProposedApi: true });
@@ -193,6 +195,15 @@ class OpenShiftTerminal {
         this._sendTerminalData(msg);
         this._headlessTerm.write(msg);
         this._ptyExited = true;
+    }
+
+    /**
+     * Returns the name of this terminal.
+     *
+     * @returns the name of this terminal
+     */
+    public get name() {
+        return this._name;
     }
 
     /**
@@ -321,6 +332,18 @@ class OpenShiftTerminal {
     public stopRendering(): void {
         this._terminalRendering = false;
     }
+
+    /**
+     * Close this terminal tab, force killing the process if it's still running.
+     */
+    public closeTab(): void {
+        this.forceKill();
+        this._sendExitMessage();
+    }
+
+    public clear(): void {
+        this._headlessTerm.clear();
+    }
 }
 
 /**
@@ -410,6 +433,8 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                             });
                     } else if (message.kind === 'termSuspend') {
                         terminal.stopRendering();
+                    } else if (message.kind === 'termClear') {
+                        terminal.clear();
                     } else if (message.kind === 'input') {
                         terminal.write(message.data.data);
                     } else if (message.kind === 'resize') {
@@ -547,6 +572,14 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
             const msg = `OpenShift Toolkit internal error: could not find ${tool}`;
             void window.showErrorMessage(msg);
             throw new Error(msg);
+        }
+
+        // try to clean up an existing exited terminal in place of this one
+        for (const existingTerm of this.openShiftTerminals.values()) {
+            if (!existingTerm.isPtyLive && existingTerm.name === name) {
+                existingTerm.closeTab();
+                break;
+            }
         }
 
         const newTermUUID = randomUUID();

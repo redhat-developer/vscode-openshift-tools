@@ -93,6 +93,7 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                             variant: 'body1',
                         },
                         style: {
+                            fontSize: '0.9em',
                             color: computedStyle.getPropertyValue('--vscode-foreground'),
                         },
                     },

@@ -32,6 +32,7 @@ type RecommendedDevfileState = {
     devfile: Devfile;
     showRecommendation: boolean;
     isLoading: boolean;
+    completionValue: number;
     isDevfileExistsInRepo: boolean;
     noRecommendation: boolean;
 };
@@ -58,6 +59,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         devfile: undefined,
         showRecommendation: false,
         isLoading: false,
+        completionValue: 0,
         isDevfileExistsInRepo: false,
         noRecommendation: false,
     });
@@ -79,6 +81,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 } else {
                     setRecommendedDevfile((prevState) => ({
                         ...prevState,
+                        completionValue: 100,
+                    }));
+                    setRecommendedDevfile((prevState) => ({
+                        ...prevState,
                         devfile: message.data.devfile,
                     }));
                     setRecommendedDevfile((prevState) => ({
@@ -97,12 +103,26 @@ export function FromExistingGitRepo({ setCurrentView }) {
             case 'devfileExists': {
                 setRecommendedDevfile((prevState) => ({
                     ...prevState,
-                    isDevfileExistsInRepo: message.data,
+                    completionValue: prevState.completionValue + 10
+                }));
+                setRecommendedDevfile((prevState) => ({
+                    ...prevState,
+                    isDevfileExistsInRepo: message.data
                 }));
                 break;
             }
             case 'cloneFailed': {
                 setCloneFailed(true);
+                break;
+            }
+            case 'cloneStart':
+            case 'cloneExecution':
+            case 'getRecommendedDevfileStart': {
+                setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 10}));
+                break;
+            }
+            case 'getRecommendedDevfile': {
+                setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 45}));
                 break;
             }
             default:
@@ -125,7 +145,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 branch: branchOption,
             },
         });
-        setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
+        setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true, completionValue: 5 }));
     }
 
     function createComponentFromGitRepo(
@@ -229,7 +249,27 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 spacing={2}
                                                 alignItems="center"
                                             >
-                                                <CircularProgress />
+                                                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                                    <CircularProgress variant='determinate' value={recommendedDevfile.completionValue}/>
+                                                    <Box
+                                                        sx={{
+                                                            top: 0,
+                                                            left: 0,
+                                                            bottom: 0,
+                                                            right: 0,
+                                                            position: 'absolute',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant='caption'
+                                                            component='div'
+                                                            color='text.secondary'
+                                                        >{`${Math.round(recommendedDevfile.completionValue)}%`}</Typography>
+                                                    </Box>
+                                                </Box>
                                                 <Typography variant="body2">
                                                     Cloning git repository and scanning for
                                                     recommended devfile.
