@@ -2,25 +2,25 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
-import { VSCodeMessage } from './vsCodeMessage';
-import { Checkbox, FormControlLabel, Icon, Stack, SvgIcon, Typography } from '@mui/material';
-import HelpIcon from '@mui/icons-material/Help';
-import ChatIcon from '@mui/icons-material/Chat';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import ChatIcon from '@mui/icons-material/Chat';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import HelpIcon from '@mui/icons-material/Help';
 import LaptopMacIcon from '@mui/icons-material/LaptopMac';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import { Box, Checkbox, FormControlLabel, Icon, Stack, SvgIcon, Typography } from '@mui/material';
+import React from 'react';
 import ScrollToTop from 'react-scroll-to-top';
-import './welcome.scss';
 import OpenShiftExtensionIcon from '../../../../images/openshift_extension.png';
-import OdoLogo from '../../../../images/welcome/odo.png';
-import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
 import OpenShiftLogo from '../../../../images/title/logo.svg';
-import DevfileBranding from '../../../../images/welcome/devfile.png';
-import ComponentBranding from '../../../../images/welcome/component.png';
-import CloudBranding from '../../../../images/welcome/cloud.svg';
 import OpenShiftBranding from '../../../../images/welcome/OpenShift-Branding-box.png';
+import CloudBranding from '../../../../images/welcome/cloud.svg';
+import ComponentBranding from '../../../../images/welcome/component.png';
+import DevfileBranding from '../../../../images/welcome/devfile.png';
+import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
+import OdoLogo from '../../../../images/welcome/odo.png';
+import { VSCodeMessage } from './vsCodeMessage';
+import './welcome.scss';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -366,38 +366,36 @@ export class Welcome extends React.Component<DefaultProps, {
                             <img className='content__image__preview' src={DevfileBranding} />
                         </div>
                     </section>
-                    <section className='section--settings' style={{ gap: '3rem' }}>
-                        <div className='sticky-section'>
-                            <div className='setting__input setting__input--big' style={{ borderBottom: '0px' }}>
-                                <label style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <Typography variant='h2' className='highlight'>OpenShift extension</Typography>
-                                </label>
+                    <Stack direction='row' width='100%' alignItems='stretch' justifyContent='center' gap='1em 2em' margin='1em' padding='1em' flexWrap='wrap'>
+                        <Stack alignSelf='stretch' flexShrink='1' marginY={1}>
+                            <Box position='sticky' top='calc(50vh - 37.5px)'>
+                                <Typography variant='h2' className='highlight' textAlign='right'>OpenShift extension</Typography>
+                            </Box>
+                        </Stack>
+                        <Stack direction='column' width='max(50%, 500px)' gap='1em'>
+                            <div>
+                                <p>Allows developers to easily <b>create, deploy and live debug</b> container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
                             </div>
-                        </div>
-                        <section className='sticky-section-content'>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows developers to easily <b>create, deploy and live debug</b> container applications running on OpenShift &#38; Kubernetes. Thus enhancing the development inner loop workflow through One-click actions right from IDE.</p>
+                            <div>
+                                <p>Allows developers to <b>Push code fast and often.</b> Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
                             </div>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows developers to <b>Push code fast and often.</b> Spend less time maintaining your deployment infrastructure and more time coding. Immediately have your application running each time you compile.</p>
+                            <div>
+                                <p><b>Import your code from git</b> and deploy on OpenShift using recommended devfile.</p>
                             </div>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'><b>Import your code from git</b> and deploy on OpenShift using recommended devfile.</p>
+                            <div>
+                                <p>Allows to browse the catalog and discover <b>Helm Charts</b> and install them on the connected cluster.</p>
                             </div>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows to browse the catalog and discover <b>Helm Charts</b> and install them on the connected cluster.</p>
+                            <div>
+                                <p>Allows to connect &#38; <b>provision free OpenShift cluster</b> from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
                             </div>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows to connect &#38; <b>provision free OpenShift cluster</b> from IDE, using a guided workflow. This workflow allows you to either Run OpenShift locally or provision a free 30 days Developer Sandbox.</p>
-                            </div>
-                            <div className='sticky-section-exten'>
-                                <p className='section__header-hint sticky-section-hint'>Allows Monitoring through <b>view and stream logs</b> from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
+                            <div>
+                                <p>Allows Monitoring through <b>view and stream logs</b> from your deployments, pods and containers for Kubernetes resources, with One Click from IDE.
                                 </p>
                             </div>
-                        </section>
-                    </section>
-                    {this.footer}
+                        </Stack>
+                    </Stack>
                 </div>
+                {this.footer}
             </div>
             <div className='header__logo'>
                 <FormControlLabel control={<Checkbox checked={isChecked} onChange={this.updateShowWelcomePageConfig} sx={{ color: 'var(--vscode-foreground)', '&.Mui-checked': { color: 'var(--vscode-foreground)' } }} />}
