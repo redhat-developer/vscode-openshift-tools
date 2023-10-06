@@ -6,6 +6,7 @@
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
+import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
@@ -219,12 +220,23 @@ export class Component extends OpenShiftItem {
         if (await Odo.Instance.isPodmanPresent()) {
             return true;
         }
-        void window.showErrorMessage('Podman is not present in the system, please install podman on your machine and try again.', 'Install podman')
-            .then(async (result) => {
-                if (result === 'Install podman') {
-                    await commands.executeCommand('vscode.open', Uri.parse('https://podman.io/'));
-                }
-            });
+        const podmanOnPath = which('podman');
+        if (podmanOnPath) {
+            const SETUP_INSTRUCTIONS = 'Open setup instructions';
+            void window.showErrorMessage('Podman is present on the system, but is not fully set up yet.', SETUP_INSTRUCTIONS)
+                .then(result => {
+                    if (result === SETUP_INSTRUCTIONS) {
+                        void commands.executeCommand('vscode.open', Uri.parse('https://podman.io/docs/installation'));
+                    }
+                });
+        } else {
+            void window.showErrorMessage('Podman is not present in the system, please install podman on your machine and try again.', 'Install podman')
+                .then(async (result) => {
+                    if (result === 'Install podman') {
+                        await commands.executeCommand('vscode.open', Uri.parse('https://podman.io/'));
+                    }
+                });
+        }
         return false;
     }
 
