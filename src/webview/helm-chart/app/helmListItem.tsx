@@ -35,7 +35,7 @@ export function HelmListItem(props: HelmListItemProps) {
                 </Box>
             ) : (
                 <>
-                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion}/>
+                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion} />
                 </>
             )}
         </>
@@ -57,7 +57,7 @@ function HelmChartListContent(props: HelmListItemProps) {
     }
 
     return (
-        <Stack direction="row" spacing={3} sx={{ width: 'calc(100% - 16px)' }} alignItems="center">
+        <Stack direction='row' spacing={3} sx={{ width: 'calc(100% - 16px)' }} alignItems='center'>
             <Box
                 sx={{
                     display: 'flex',
@@ -81,14 +81,14 @@ function HelmChartListContent(props: HelmListItemProps) {
 
             </Box>
             <Stack
-                direction="column"
+                direction='column'
                 spacing={1}
                 sx={{ flexShrink: '5', minWidth: '0', maxWidth: '35rem' }}
             >
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction='row' spacing={2} alignItems='center'>
                     <Typography
-                        id="devfileName"
-                        variant="body1"
+                        id='devfileName'
+                        variant='body1'
                         sx={{
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
@@ -99,30 +99,29 @@ function HelmChartListContent(props: HelmListItemProps) {
                     </Typography>
                 </Stack>
                 <Typography
-                    variant="body2"
+                    variant='body2'
                     sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                 >
                     {props.selectedVersion.description}
                 </Typography>
-                <Stack direction="row" spacing={1}>
+                <Stack direction='row' spacing={1}>
                     {props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
-                            size="small"
+                            size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
                             color={'primary'} />
                     }
-                    <Chip
-                        size="small"
-                        label={props.selectedVersion.version}
-                        color={'success'}
-                    />
                     {props.selectedVersion.annotations['charts.openshift.io/provider'] &&
                         <Chip
-                            size="small"
+                            size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/provider']}
-                            color={'error'} />
+                            color={'success'} />
                     }
-
+                    <Chip
+                        size='small'
+                        label={props.selectedVersion.version}
+                        color={'error'}
+                    />
                 </Stack>
             </Stack>
         </Stack>

@@ -31,6 +31,10 @@ export const Home = () => {
         }
     }, []);
 
+    React.useEffect(() => {
+        VSCodeMessage.postMessage({ action: 'init' });
+    }, []);
+
     return (
         <ThemeProvider theme={theme}>
             <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>

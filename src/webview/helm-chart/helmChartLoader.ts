@@ -68,19 +68,53 @@ export class HelmCommand {
 
 function helmChartMessageListener(event: any): void {
     switch (event?.action) {
-        case 'install':
+        case 'init':
+            void panel.webview.postMessage({
+                action: 'setTheme',
+                themeValue: vscode.window.activeColorTheme.kind,
+            })
+            break;
+        case 'install': {
             void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
             break;
-        case 'openChart':
+        }
+        case 'openChart': {
             void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
             break;
-        default:
+        }
+        case 'getProviderAndTypes': {
+            const types: string[] = [];
+            const providers: string[] = []
+            helmRes.map((helm: ChartResponse) => {
+                if (helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
+                    types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType'])
+                }
+
+                if (helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
+                    providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider'])
+                }
+            });
+            types.sort((regA, regB) => regA.localeCompare(regB));
+            providers.sort((regA, regB) => regA.localeCompare(regB));
+            void panel.webview.postMessage(
+                {
+                    action: event.action,
+                    data: {
+                        types: [... new Set(types)],
+                        providers: [... new Set(providers)]
+                    }
+                }
+            );
+            break;
+        }
+        default: {
             void panel.webview.postMessage(
                 {
                     error: 'Invalid command'
                 }
             );
             break;
+        }
     }
 }
 

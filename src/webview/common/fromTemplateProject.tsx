@@ -10,12 +10,12 @@ import { SetNameAndFolder } from './setNameAndFolder';
 
 type CurrentPage = 'selectTemplateProject' | 'setNameAndFolder';
 
-type HelmChartHomeProps = {
+type FromTemplateProjectProps = {
     titleText: string
     goHome?: () => void;
 };
 
-export function FromTemplateProject(props: HelmChartHomeProps) {
+export function FromTemplateProject(props: FromTemplateProjectProps) {
     const [currentPage, setCurrentPage] = React.useState<CurrentPage>('selectTemplateProject');
     const [selectedTemplateProject, setSelectedTemplateProject] =
         React.useState<TemplateProjectIdentifier>(undefined);
