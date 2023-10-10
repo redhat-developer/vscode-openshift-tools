@@ -5,7 +5,6 @@
 import * as React from 'react';
 import 'react-dom';
 import { HelmSearch } from './helmSearch';
-import { VSCodeMessage } from '../vsCodeMessage';
 
 type FromHelmProps = {
     titleText: string
@@ -13,19 +12,8 @@ type FromHelmProps = {
 
 export function FromHelm(props: FromHelmProps) {
 
-    function installChart(name: string, chartName: string, version: number) {
-        VSCodeMessage.postMessage(
-            {
-                action: 'install',
-                name,
-                chartName,
-                version
-            });
-    }
-
     return (
         <HelmSearch
-            installChart={installChart}
             titleText={props.titleText}
         />
     );

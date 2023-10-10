@@ -25,10 +25,7 @@ type Message = {
 };
 
 export type HelmSearchProps = {
-
     titleText: string;
-
-    installChart: (name: string, chartName: string, version: number) => void;
 }
 
 function ProviderTypePicker(props: {
