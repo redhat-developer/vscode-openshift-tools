@@ -41,6 +41,7 @@ export class HelmCommand {
         });
         void Progress.execFunctionWithProgress(`Installing the chart ${event.data.name}`, async () => {
             await Helm.installHelmChart(event.data.name, event.data.chartName, event.data.version);
+        }).then(() => {
             void panel.webview.postMessage({
                 action: 'installStatus',
                 data: {
