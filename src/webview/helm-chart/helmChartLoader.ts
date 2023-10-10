@@ -14,6 +14,7 @@ import { loadWebviewHtml } from '../common-ext/utils';
 import { ChartResponse } from './helmChartType';
 import fetch = require('make-fetch-happen');
 import { validateComponentName } from '../common-ext/createComponentHelpers';
+import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
 const helmRes: ChartResponse[] = [];
@@ -31,14 +32,14 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
 export class HelmCommand {
     @vsCommand('openshift.componentTypesView.registry.helmChart.install')
     static async installHelmChart(event: any) {
-        try {
-            await panel.webview.postMessage({
-                action: 'installStatus',
-                data: {
-                    chartName: event.data.chartName,
-                    message: 'Installing'
-                }
-            });
+        await panel.webview.postMessage({
+            action: 'installStatus',
+            data: {
+                chartName: event.data.chartName,
+                message: 'Installing'
+            }
+        });
+        void Progress.execFunctionWithProgress(`Installing the chart ${event.data.name}`, async () => {
             await Helm.installHelmChart(event.data.name, event.data.chartName, event.data.version);
             void panel.webview.postMessage({
                 action: 'installStatus',
@@ -48,7 +49,7 @@ export class HelmCommand {
                 }
             });
             OpenShiftExplorer.getInstance().refresh();
-        } catch (e) {
+        }).catch((e) => {
             const message: string = e.message;
             void panel.webview.postMessage({
                 action: 'installStatus',
@@ -58,7 +59,7 @@ export class HelmCommand {
                     message: message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)
                 }
             });
-        }
+        });
     }
 
     @vsCommand('openshift.componentTypesView.registry.helmChart.open')

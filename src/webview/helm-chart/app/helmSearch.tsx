@@ -11,6 +11,7 @@ import { ChartResponse } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { LoadScreen } from '../../common/loading';
 import { HelmModal } from './helmModal';
+import { every } from 'lodash';
 
 declare module '@mui/material/SvgIcon' {
     interface SvgIconPropsColorOverrides {
@@ -218,17 +219,9 @@ export function HelmSearch(props: HelmSearchProps) {
         setProviderEnabled((_) => enabledArray);
     }, [providers]);
 
-    if (!providerTypes) {
-        return <LoadScreen title='Retrieving list of Provider Types' />;
-    }
-
-    if (!providers) {
-        return <LoadScreen title='Retrieving list of Providers' />;
-    }
-
-    if (!helmCharts) {
-        return <LoadScreen title='Retrieving Helm Charts' />;
-    }
+    React.useEffect(() => {
+        setCurrentPage((_) => 1);
+    }, [providerTypeEnabled, providerEnabled, searchText]);
 
     const activeProviderTypes = providerTypeEnabled //
         .filter((entry) => entry.enabled) //
@@ -244,11 +237,15 @@ export function HelmSearch(props: HelmSearchProps) {
             activeProviderTypes.includes(helmChart.chartVersions[0].annotations['charts.openshift.io/providerType'])) //
             .filter((helmChart: ChartResponse) => isToBeIncluded(helmChart, activeProviders)) //
             .filter(function (helmChart: ChartResponse) {
-                if (searchText !== '') {
-                    return helmChart.displayName?.toLowerCase().indexOf(searchText.toLowerCase()) !== -1 ||
-                        helmChart.chartVersions[0].name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
-                }
-                return helmChart;
+                const searchTerms = searchText.split(/\s+/);
+                return every(
+                    searchTerms.map(
+                        (searchTerm) =>
+                            helmChart.displayName?.toLowerCase().includes(searchTerm) ||
+                            helmChart.chartVersions[0].name.toLowerCase().includes(searchTerm) ||
+                            helmChart.chartVersions[0].description?.toLowerCase().includes(searchTerm)
+                    ),
+                );
             });
         filteredCharts.push(...helmResponse);
         return filteredCharts.sort(ascName);
@@ -261,91 +258,89 @@ export function HelmSearch(props: HelmSearchProps) {
     return (
         <>
             <Stack direction='column' height='100%' spacing={3}>
-                <Typography variant='h5'>{props.titleText}</Typography>
-                <Stack direction='row' spacing={2}>
-                    <Stack direction='column' sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
-                        {providerTypes.length > 1 && (
-                            <>
-                                <Typography variant='body2' marginBottom={1}>
-                                    Provider Types
-                                </Typography>
-                                <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
-                                    <ProviderTypePicker
-                                        providerTypeEnabled={providerTypeEnabled}
-                                        setProviderTypeEnabled={setProviderTypeEnabled}
-                                    />
-                                    <Divider orientation='horizontal' sx={{ width: '100%' }} />
-                                </Stack>
-                            </>
-                        )}
-                        {providers.length > 0 && (
-                            <>
-                                <Typography variant='body2' marginBottom={2}>
-                                    Filter by
-                                </Typography>
-                                <Stack direction='column' useFlexGap={true} width='100%' spacing={1}>
-                                    {providers.length > 0 && (
+                {
+                    helmCharts.length === 0 ? <LoadScreen title='Retrieving Helm Charts' /> :
+                        <>
+                            <Typography variant='h5'>{props.titleText}</Typography><Stack direction='row' spacing={2}>
+                                <Stack direction='column' sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
+                                    {providerTypes.length > 1 && (
                                         <>
-                                            <ProvidersPicker
-                                                providerEnabled={providerEnabled}
-                                                setProviderEnabled={setProviderEnabled}
-                                            />
+                                            <Typography variant='body2' marginBottom={1}>
+                                                Provider Types
+                                            </Typography>
+                                            <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                <ProviderTypePicker
+                                                    providerTypeEnabled={providerTypeEnabled}
+                                                    setProviderTypeEnabled={setProviderTypeEnabled} />
+                                                <Divider orientation='horizontal' sx={{ width: '100%' }} />
+                                            </Stack>
                                         </>
                                     )}
+                                    {providers.length > 0 && (
+                                        <>
+                                            <Typography variant='body2' marginBottom={2}>
+                                                Filter by
+                                            </Typography>
+                                            <Stack direction='column' useFlexGap={true} width='100%' spacing={1}>
+                                                {providers.length > 0 && (
+                                                    <>
+                                                        <ProvidersPicker
+                                                            providerEnabled={providerEnabled}
+                                                            setProviderEnabled={setProviderEnabled} />
+                                                    </>
+                                                )}
+                                            </Stack>
+                                        </>
+                                    )}
+                                    <Stack direction='column' sx={{ flexGrow: '1', height: '100%', width: '100%' }} spacing={0}>
+                                    </Stack>
                                 </Stack>
-                            </>
-                        )}
-                        <Stack direction='column' sx={{ flexGrow: '1', height: '100%', width: '100%' }} spacing={0}>
-                        </Stack>
-                    </Stack>
-                    <Stack direction='column' spacing={3}>
-                        <Divider orientation='vertical' sx={{ height: 'calc(100vh - 200px - 5em)' }} />
-                    </Stack>
-                    <Stack direction='column' sx={{ flexGrow: '1' }} spacing={3}>
-                        <SearchBar
-                            searchText={searchText}
-                            setSearchText={setSearchText}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            numPages={
-                                Math.floor(getFilteredCharts().length / ITEMS_PER_PAGE) +
-                                (getFilteredCharts().length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)
-                            }
-                        />
-                        {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
-                        {/* 5em is the padding at the top of the page */}
-                        <Stack
-                            id='devfileList'
-                            direction='column'
-                            sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
-                            divider={<Divider />}
-                            width='100%'
-                        >
-                            {getFilteredCharts()
-                                .slice(
-                                    (currentPage - 1) * ITEMS_PER_PAGE,
-                                    Math.min(currentPage * ITEMS_PER_PAGE, getFilteredCharts().length),
-                                )
-                                .map((helmChart) => {
-                                    return (
-                                        <HelmListItem
-                                            key={`${helmChart.chartName}-${helmChart.displayName}`}
-                                            helmChart={helmChart}
-                                            selectedVersion={helmChart.chartVersions[0]}
-                                            buttonCallback={() => {
-                                                setselectedHelmChart(helmChart);
-                                            }}
-                                        />
-                                    );
-                                })}
-                        </Stack>
-                        <Typography align='center' flexGrow='1'>
-                            Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
-                            {Math.min(currentPage * ITEMS_PER_PAGE, getFilteredCharts().length)} of{' '}
-                            {getFilteredCharts().length}
-                        </Typography>
-                    </Stack>
-                </Stack>
+                                <Stack direction='column' spacing={3}>
+                                    <Divider orientation='vertical' sx={{ height: 'calc(100vh - 200px - 5em)' }} />
+                                </Stack>
+                                <Stack direction='column' sx={{ flexGrow: '1' }} spacing={3}>
+                                    <SearchBar
+                                        searchText={searchText}
+                                        setSearchText={setSearchText}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        numPages={Math.floor(getFilteredCharts().length / ITEMS_PER_PAGE) +
+                                            (getFilteredCharts().length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)} />
+                                    {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
+                                    {/* 5em is the padding at the top of the page */}
+                                    <Stack
+                                        id='devfileList'
+                                        direction='column'
+                                        sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
+                                        divider={<Divider />}
+                                        width='100%'
+                                    >
+                                        {getFilteredCharts()
+                                            .slice(
+                                                (currentPage - 1) * ITEMS_PER_PAGE,
+                                                Math.min(currentPage * ITEMS_PER_PAGE, getFilteredCharts().length)
+                                            )
+                                            .map((helmChart) => {
+                                                return (
+                                                    <HelmListItem
+                                                        key={`${helmChart.chartName}-${helmChart.displayName}`}
+                                                        helmChart={helmChart}
+                                                        selectedVersion={helmChart.chartVersions[0]}
+                                                        buttonCallback={() => {
+                                                            setselectedHelmChart(helmChart);
+                                                        }} />
+                                                );
+                                            })}
+                                    </Stack>
+                                    <Typography align='center' flexGrow='1'>
+                                        Showing items {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{' '}
+                                        {Math.min(currentPage * ITEMS_PER_PAGE, getFilteredCharts().length)} of{' '}
+                                        {getFilteredCharts().length}
+                                    </Typography>
+                                </Stack>
+                            </Stack>
+                        </>
+                }
             </Stack>
             <Modal
                 onClose={() => {

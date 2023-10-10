@@ -76,7 +76,7 @@ function HelmChartListContent(props: HelmListItemProps) {
                         <SvgIcon
                             component={HelmIcon}
                             fontSize='large'
-                            style={{ maxWidth: '6em', maxHeight: '6em', color: 'black' }} inheritViewBox />
+                            style={{  width: '2em', height: '2em', }} inheritViewBox />
                 }
 
             </Box>
