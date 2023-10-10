@@ -104,8 +104,7 @@ function helmChartMessageListener(event: any): void {
 
                 if (helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
                     providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider']);
-                }
-                if (helm.chartVersions[0].maintainers?.length > 0) {
+                } else if (helm.chartVersions[0].maintainers?.length > 0) {
                     providers.push(helm.chartVersions[0].maintainers[0].name);
                 }
 
