@@ -76,7 +76,7 @@ function HelmChartListContent(props: HelmListItemProps) {
                         <SvgIcon
                             component={HelmIcon}
                             fontSize='large'
-                            style={{  width: '2em', height: '2em', }} inheritViewBox />
+                            style={{ width: '2em', height: '2em', }} inheritViewBox />
                 }
 
             </Box>
@@ -111,11 +111,19 @@ function HelmChartListContent(props: HelmListItemProps) {
                             label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
                             color={'primary'} />
                     }
-                    {props.selectedVersion.annotations['charts.openshift.io/provider'] &&
+                    {props.selectedVersion.annotations['charts.openshift.io/provider'] ?
                         <Chip
                             size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/provider']}
                             color={'success'} />
+                        :
+                        props.selectedVersion.maintainers?.length > 0 ?
+                            <Chip
+                                size='small'
+                                label={props.selectedVersion.maintainers[0].name}
+                                color={'success'} />
+                            :
+                            undefined
                     }
                     <Chip
                         size='small'

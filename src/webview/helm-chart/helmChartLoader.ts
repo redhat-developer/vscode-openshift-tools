@@ -99,12 +99,16 @@ function helmChartMessageListener(event: any): void {
             const providers: string[] = []
             helmRes.map((helm: ChartResponse) => {
                 if (helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
-                    types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType'])
+                    types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType']);
                 }
 
                 if (helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
-                    providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider'])
+                    providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider']);
                 }
+                if (helm.chartVersions[0].maintainers?.length > 0) {
+                    providers.push(helm.chartVersions[0].maintainers[0].name);
+                }
+
             });
             types.sort((regA, regB) => regA.localeCompare(regB));
             providers.sort((regA, regB) => regA.localeCompare(regB));

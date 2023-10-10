@@ -252,7 +252,8 @@ export function HelmSearch(props: HelmSearchProps) {
     }
 
     function isToBeIncluded(chart: ChartResponse, supportProviders: string[]): boolean {
-        return supportProviders.length === 0 || supportProviders.includes(chart.chartVersions[0].annotations['charts.openshift.io/provider']);
+        return supportProviders.length === 0 || supportProviders.includes(chart.chartVersions[0].annotations['charts.openshift.io/provider']) //
+            || (chart.chartVersions[0].maintainers && supportProviders.includes(chart.chartVersions[0].maintainers[0].name));
     }
 
     return (
