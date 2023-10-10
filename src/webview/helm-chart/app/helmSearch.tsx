@@ -4,12 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Button, Checkbox, Chip, Divider, FormControl, FormControlLabel, FormGroup, FormHelperText, IconButton, InputAdornment, InputLabel, MenuItem, Modal, Pagination, Paper, Select, Stack, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Checkbox, Chip, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
-import { Chart, ChartResponse } from '../helmChartType';
+import { ChartResponse } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { LoadScreen } from '../../common/loading';
+import { HelmModal } from './helmModal';
 
 declare module '@mui/material/SvgIcon' {
     interface SvgIconPropsColorOverrides {
@@ -28,118 +29,6 @@ export type HelmSearchProps = {
 
     installChart: (name: string, chartName: string, version: number) => void;
 }
-
-const SelectTemplateProject = React.forwardRef(
-    (
-        props: {
-            helmChart: ChartResponse;
-            closeModal: () => void;
-        },
-        ref,
-    ) => {
-        const [selectedVersion, setSelectedVersion] = React.useState<Chart>(props.helmChart.chartVersions[0]);
-        const [isInteracted, setInteracted] = React.useState(false);
-
-        const isWideEnough = useMediaQuery('(min-width: 900px)');
-
-        React.useEffect(() => {
-            if (props.helmChart.chartVersions && props.helmChart.chartVersions.length > 0) {
-                setSelectedVersion((_) => props.helmChart.chartVersions[0]);
-            }
-        }, []);
-
-        const versions = props.helmChart.chartVersions ? props.helmChart.chartVersions : [];
-        let helperText = '';
-        switch (versions.length) {
-            case 0:
-                helperText = 'No available versions';
-                break;
-            case 1:
-                helperText = 'Only one versions available in this Chart';
-                break;
-            default:
-                if (isInteracted && !selectedVersion) {
-                    helperText = 'Select a version';
-                }
-                break;
-        }
-
-        const isError = !versions.length || !selectedVersion;
-
-        return (
-            <Paper
-                elevation={24}
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    width: isWideEnough ? '900px' : 'calc(100vw - 48px)',
-                    maxHeight: 'calc(100vh - 48px)',
-                    transform: 'translate(-50%, -50%)',
-                    padding: 2,
-                }}
-            >
-                <Stack direction='column' spacing={2}>
-                    <Stack
-                        direction='row'
-                        justifyContent='space-between'
-                        alignItems='flex-start'
-                        marginBottom={1}
-                    >
-                        <HelmListItem helmChart={props.helmChart} selectedVersion={selectedVersion} />
-                        <IconButton onClick={props.closeModal}>
-                            <Close color='textSecondary' />
-                        </IconButton>
-                    </Stack>
-                    <TextField fullWidth
-                        id='chartName'
-                        variant='outlined'
-                        label='Name' />
-                    <FormControl fullWidth>
-                        <InputLabel id='template-select-label'>Versions</InputLabel>
-                        <Select
-                            value={selectedVersion?.version}
-                            onChange={(event) => {
-                                const chartVersion = props.helmChart.chartVersions.filter((chart) => chart.version === event.target.value).pop();
-                                setSelectedVersion(chartVersion);
-                            }}
-                            onClick={(_e) => {
-                                setInteracted(true);
-                            }}
-                            disabled={versions.length < 2}
-                            error={isError}
-                            sx={{ flexGrow: '1' }}
-                            label='Template Project'
-                            labelId='template-select-label'
-                        >
-                            {versions.map((chartVersion) => {
-                                return (
-                                    <MenuItem value={chartVersion.version} key={chartVersion.version}>
-                                        {chartVersion.version}
-                                    </MenuItem>
-                                );
-                            })}
-                        </Select>
-                        <Stack direction='row' justifyContent='space-between'>
-                            <FormHelperText error={isError}>{helperText}</FormHelperText>
-                            <Stack direction='row' marginTop={1} spacing={2}>
-                                <Button
-                                    variant='contained'
-                                    onClick={() => {
-                                        //props.setSelectedProject(selectedVersions);
-                                    }}
-                                    disabled={!selectedVersion}
-                                >
-                                    Install
-                                </Button>
-                            </Stack>
-                        </Stack>
-                    </FormControl>
-                </Stack>
-            </Paper>
-        );
-    },
-);
 
 function ProviderTypePicker(props: {
     providerTypeEnabled: { type: string; enabled: boolean }[];
@@ -464,7 +353,7 @@ export function HelmSearch(props: HelmSearchProps) {
                 }}
                 open={!!selectedHelmChart}
             >
-                <SelectTemplateProject
+                <HelmModal
                     helmChart={selectedHelmChart}
                     closeModal={() => {
                         setselectedHelmChart((_) => undefined);

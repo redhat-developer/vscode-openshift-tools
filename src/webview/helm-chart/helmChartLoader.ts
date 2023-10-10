@@ -13,6 +13,7 @@ import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { ChartResponse } from './helmChartType';
 import fetch = require('make-fetch-happen');
+import { validateComponentName } from '../common-ext/createComponentHelpers';
 
 let panel: vscode.WebviewPanel;
 const helmRes: ChartResponse[] = [];
@@ -32,28 +33,30 @@ export class HelmCommand {
     static async installHelmChart(event: any) {
         try {
             await panel.webview.postMessage({
-                action: 'loadScreen',
-                chartName: event.chartName,
-                show: true
+                action: 'installStatus',
+                data: {
+                    chartName: event.data.chartName,
+                    message: 'Installing'
+                }
             });
-            await Helm.installHelmChart(event.name, event.chartName, event.version);
-            void vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
-            OpenShiftExplorer.getInstance().refresh();
+            await Helm.installHelmChart(event.data.name, event.data.chartName, event.data.version);
             void panel.webview.postMessage({
-                action: 'loadScreen',
-                show: false,
-                isError: false,
-                isInstalled: true
+                action: 'installStatus',
+                data: {
+                    chartName: event.data.chartName,
+                    message: 'Installed'
+                }
             });
+            OpenShiftExplorer.getInstance().refresh();
         } catch (e) {
             const message: string = e.message;
-            void vscode.window.showErrorMessage(`Installation failed: ${message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
             void panel.webview.postMessage({
-                action: 'loadScreen',
-                chartName: event.chartName,
-                show: false,
-                isError: true,
-                error: 'Name already exists'
+                action: 'installStatus',
+                data: {
+                    chartName: event.data.chartName,
+                    error: true,
+                    message: message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)
+                }
             });
         }
     }
@@ -80,6 +83,14 @@ function helmChartMessageListener(event: any): void {
         }
         case 'openChart': {
             void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
+            break;
+        }
+        case 'validateName': {
+            const validationMessage = validateComponentName(event.data, 'Please enter a name.');
+            void panel.webview.postMessage({
+                action: 'validatedName',
+                data: validationMessage,
+            });
             break;
         }
         case 'getProviderAndTypes': {

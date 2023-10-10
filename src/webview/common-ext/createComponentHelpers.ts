@@ -88,10 +88,11 @@ export async function isValidProjectFolder(
  * Returns the validation message if the component name is invalid, and undefined otherwise.
  *
  * @param name the component name to validate
+ * @param message the help text
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
-export function validateComponentName(name: string): string {
-    let validationMessage = NameValidator.emptyName('Please enter a component name.', name);
+export function validateComponentName(name: string, message='Please enter a component name.'): string {
+    let validationMessage = NameValidator.emptyName(message, name);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
             `Not a valid component name.
