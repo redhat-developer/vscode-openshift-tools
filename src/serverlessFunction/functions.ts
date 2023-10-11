@@ -77,17 +77,10 @@ export class Functions {
         const terminalKey = `build-${context.folderURI.fsPath}`;
 
         const specificPlatform = await window.showQuickPick(['Yes', 'No'], {
-            placeHolder: 'Do you want to build it for specific platform?',
+            placeHolder: 'Do you want to build it for \'linux/amd64\' platform?',
         });
 
-        if (specificPlatform === 'Yes') {
-            const platform = await window.showQuickPick(['linux/amd64', 'linux/arm64','darwin-amd64','darwin-arm64','windows-amd64'], {
-                placeHolder: 'Select the platform',
-            });
-            await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey, platform);
-        } else {
-            await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey);
-        }
+        await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey, specificPlatform === 'Yes' ? 'linux/amd64' : undefined);
     }
 
     private async buildTerminal(context: FunctionObject, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string, platform?: string) {

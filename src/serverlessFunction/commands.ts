@@ -74,7 +74,8 @@ export class ServerlessCommand {
             new CommandOption('-v')
         ]);
         if(platform && platform.trim().length > 0) {
-            commandText.addOption(new CommandOption('--platform', platform))
+            commandText.addOption(new CommandOption('--platform', platform));
+            commandText.addOption(new CommandOption('--builder', 's2i'));
         }
         if (isOpenShiftCluster) {
             commandText.addOption(new CommandOption('-r', '""'))
