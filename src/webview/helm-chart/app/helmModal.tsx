@@ -184,7 +184,7 @@ export const HelmModal = React.forwardRef(
                                             }
                                         })
                                     }}
-                                    disabled={!isInstallNameFieldValid}
+                                    disabled={!isInstallNameFieldValid || installName.length === 0}
                                     loading={installLoading}
                                     loadingPosition='start'
                                     startIcon={<InstallDesktopIcon />}

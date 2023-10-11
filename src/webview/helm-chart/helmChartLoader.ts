@@ -13,7 +13,7 @@ import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { ChartResponse } from './helmChartType';
 import fetch = require('make-fetch-happen');
-import { validateComponentName } from '../common-ext/createComponentHelpers';
+import { validateName } from '../common-ext/createComponentHelpers';
 import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
@@ -88,7 +88,7 @@ function helmChartMessageListener(event: any): void {
             break;
         }
         case 'validateName': {
-            const validationMessage = validateComponentName(event.data, 'Please enter a name.');
+            const validationMessage = validateName(event.data, false);
             void panel.webview.postMessage({
                 action: 'validatedName',
                 data: validationMessage,

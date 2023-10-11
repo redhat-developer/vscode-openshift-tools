@@ -88,21 +88,21 @@ export async function isValidProjectFolder(
  * Returns the validation message if the component name is invalid, and undefined otherwise.
  *
  * @param name the component name to validate
- * @param message the help text
+ * @param isComponentBasedValidation component based validation or not
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
-export function validateComponentName(name: string, message='Please enter a component name.'): string {
-    let validationMessage = NameValidator.emptyName(message, name);
+export function validateName(name: string, isComponentBasedValidation=true): string {
+    let validationMessage = NameValidator.emptyName(`Please enter a ${isComponentBasedValidation? 'component' : ''} name.`, name);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
-            `Not a valid component name.
+            `Not a valid ${isComponentBasedValidation? 'component' : ''} name.
         Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
             name,
         );
     }
     if (!validationMessage) {
         validationMessage = NameValidator.lengthName(
-            'Component name should be between 2-63 characters',
+            `${isComponentBasedValidation? 'Component name' : 'Name'} should be between 2-63 characters`,
             name,
             0,
         );
