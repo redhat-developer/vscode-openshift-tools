@@ -2,137 +2,44 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Container, ImageListItem, styled } from '@mui/material';
-import { makeStyles, ThemeProvider } from '@mui/styles';
+
+import { Container, Theme, ThemeProvider } from '@mui/material';
 import React from 'react';
-import { ErrorPage } from '../../common/errorPage';
-import homeStyle, { HomeTheme } from '../../common/home.style';
-import { LoadScreen } from '../../common/loading';
-import { DefaultProps, HelmChartHomePageProps } from '../../common/propertyTypes';
-import { SearchBar } from '../../common/searchBar';
-import { ChartResponse } from '../helmChartType';
+import { createVSCodeTheme } from '../../common/vscode-theme';
 import { VSCodeMessage } from '../vsCodeMessage';
-import cardItemStyle from '../../common/cardItem.style';
-import { WrapperCardItem as CardItem } from './wrapperCardItem';
+import { FromHelm } from './fromHelm';
 
-const useCardItemStyles = makeStyles(cardItemStyle);
-const useHomeStyles = makeStyles(homeStyle);
+type VSCodeMessage = {
+    action: string;
+    themeValue?: number;
+}
 
-const ImageGalleryList = styled('ul')(({ theme }) => ({
-    display: 'grid',
-    padding: 0,
-    margin: theme.spacing(0, 4),
-    gap: 1,
-    [theme.breakpoints.up('xs')]: {
-        gridTemplateColumns: 'repeat(1, 1fr)'
-    },
-    [theme.breakpoints.up('sm')]: {
-        gridTemplateColumns: 'repeat(2, 1fr)'
-    },
-    [theme.breakpoints.up('md')]: {
-        gridTemplateColumns: 'repeat(4, 1fr)'
-    },
-    [theme.breakpoints.up('lg')]: {
-        gridTemplateColumns: 'repeat(6, 1fr)'
-    },
-    [theme.breakpoints.up('xl')]: {
-        gridTemplateColumns: 'repeat(7, 1fr)'
-    },
-}));
+export const Home = () => {
 
-const HomeItem: React.FC<HelmChartHomePageProps> = ({
-    helmEntries,
-    themeKind
-}: HelmChartHomePageProps) => {
-    const cardItemStyle = useCardItemStyles();
-    return (
-        <ThemeProvider theme={HomeTheme}>
-            <ImageGalleryList className='devfileGalleryGrid' style={{ margin: '1rem' }}>
-                {
-                    helmEntries.map((helmEntry: ChartResponse, index: number) => (
-                        <ImageListItem key={`imageList-${index}`}>
-                            <CardItem key={helmEntry.displayName} helmEntry={helmEntry}
-                                cardItemStyle={cardItemStyle}
-                                themeKind={themeKind} />
-                        </ImageListItem>
-                    ))
-                }
-            </ImageGalleryList>
-        </ThemeProvider>
-    );
-};
+    const [theme, setTheme] = React.useState<Theme>(createVSCodeTheme('light'));
 
-export const Home: React.FC<DefaultProps> = () => {
-    const [helmCharts, setHelmCharts] = React.useState([]);
-    const [filteredHelmCharts, setFilteredHelmCharts] = React.useState([]);
-    const [searchValue, setSearchValue] = React.useState('');
-    const [error, setError] = React.useState('');
-    const [themeKind, setThemeKind] = React.useState(0);
+    const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
+        if (message.data.action === 'setTheme') {
+            setTheme(createVSCodeTheme(message.data.themeValue === 1 ? 'light' : 'dark'));
+        }
+    };
 
     React.useEffect(() => {
-        return VSCodeMessage.onMessage((message) => {
-            if (message.data.action === 'getHelmCharts') {
-                if (message.data.errorMessage && message.data.errorMessage.length > 0) {
-                    setError(message.data.errorMessage);
-                    setHelmCharts(undefined);
-                    setSearchValue('');
-                } else {
-                    setError('');
-                    setSearchValue('');
-                    setThemeKind(message.data.themeValue);
-                    setHelmCharts(message.data.helmRes);
-                    setFilteredHelmCharts(getFilteredCompDesc(message.data.helmRes, searchValue));
-                }
-            } else if (message.data.action === 'loadingComponents') {
-                setError('');
-                setSearchValue('');
-                setFilteredHelmCharts(undefined);
-                setHelmCharts(undefined);
-            } else if (message.data.action === 'setTheme') {
-                setThemeKind(message.data.themeValue);
-            }
-        });
-    });
+        window.addEventListener('message', respondToMessage);
+        return () => {
+            window.removeEventListener('message', respondToMessage);
+        }
+    }, []);
 
-    const homeStyle = useHomeStyles();
+    React.useEffect(() => {
+        VSCodeMessage.postMessage({ action: 'init' });
+    }, []);
 
     return (
-        <>
-            {
-                filteredHelmCharts.length > 0 || searchValue.length > 0 ?
-                    <>
-                        <Container maxWidth='md'>
-                            <div className={homeStyle.topContainer}>
-                                <SearchBar title='Search chart by name' onSearchBarChange={function (value: string): void {
-                                    setSearchValue(value);
-                                    setFilteredHelmCharts(getFilteredCompDesc(helmCharts, value));
-                                }} searchBarValue={searchValue} resultCount={filteredHelmCharts.length} />
-                            </div>
-                        </Container>
-                        <HomeItem helmEntries={filteredHelmCharts} themeKind={themeKind} />
-                        {error?.length > 0 ? <ErrorPage message={error} /> : null}
-
-                    </>
-                    :
-                    error?.length > 0 ? <ErrorPage message={error} /> : <LoadScreen title='Loading Helm Charts' />
-            }
-        </>
+        <ThemeProvider theme={theme}>
+            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>
+                <FromHelm titleText='Helm Charts' />
+            </Container>
+        </ThemeProvider>
     );
-}
-
-function getFilteredCompDesc(helmCharts: ChartResponse[], searchValue: string): ChartResponse[] {
-    const filteredCharts: ChartResponse[] = [];
-    const helmResponse = helmCharts.filter(function (helmChart: ChartResponse) {
-        if (searchValue !== '') {
-            return helmChart.displayName?.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1 ||
-                helmChart.chartVersions[0].name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
-        }
-        return helmChart;
-    });
-    filteredCharts.push(...helmResponse);
-    return filteredCharts.sort(ascName);
-}
-
-function ascName(oldChart: ChartResponse, newChart: ChartResponse) {
-    return oldChart.displayName.localeCompare(newChart.displayName);
 }

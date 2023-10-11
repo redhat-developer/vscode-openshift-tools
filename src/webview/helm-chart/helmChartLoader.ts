@@ -13,6 +13,8 @@ import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { ChartResponse } from './helmChartType';
 import fetch = require('make-fetch-happen');
+import { validateName } from '../common-ext/createComponentHelpers';
+import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
 const helmRes: ChartResponse[] = [];
@@ -30,32 +32,35 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
 export class HelmCommand {
     @vsCommand('openshift.componentTypesView.registry.helmChart.install')
     static async installHelmChart(event: any) {
-        try {
-            await panel.webview.postMessage({
-                action: 'loadScreen',
-                chartName: event.chartName,
-                show: true
+        await panel.webview.postMessage({
+            action: 'installStatus',
+            data: {
+                chartName: event.data.chartName,
+                message: 'Installing'
+            }
+        });
+        void Progress.execFunctionWithProgress(`Installing the chart ${event.data.name}`, async () => {
+            await Helm.installHelmChart(event.data.name, event.data.chartName, event.data.version);
+        }).then(() => {
+            void panel.webview.postMessage({
+                action: 'installStatus',
+                data: {
+                    chartName: event.data.chartName,
+                    message: 'Installed'
+                }
             });
-            await Helm.installHelmChart(event.name, event.chartName, event.version);
-            void vscode.window.showInformationMessage(`Helm Chart: ${event.name} is successfully installed and will be reflected in the tree view.`);
             OpenShiftExplorer.getInstance().refresh();
-            void panel.webview.postMessage({
-                action: 'loadScreen',
-                show: false,
-                isError: false,
-                isInstalled: true
-            });
-        } catch (e) {
+        }).catch((e) => {
             const message: string = e.message;
-            void vscode.window.showErrorMessage(`Installation failed: ${message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)}`);
             void panel.webview.postMessage({
-                action: 'loadScreen',
-                chartName: event.chartName,
-                show: false,
-                isError: true,
-                error: 'Name already exists'
+                action: 'installStatus',
+                data: {
+                    chartName: event.data.chartName,
+                    error: true,
+                    message: message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)
+                }
             });
-        }
+        });
     }
 
     @vsCommand('openshift.componentTypesView.registry.helmChart.open')
@@ -68,19 +73,64 @@ export class HelmCommand {
 
 function helmChartMessageListener(event: any): void {
     switch (event?.action) {
-        case 'install':
+        case 'init':
+            void panel.webview.postMessage({
+                action: 'setTheme',
+                themeValue: vscode.window.activeColorTheme.kind,
+            })
+            break;
+        case 'install': {
             void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
             break;
-        case 'openChart':
+        }
+        case 'openChart': {
             void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
             break;
-        default:
+        }
+        case 'validateName': {
+            const validationMessage = validateName(event.data, false);
+            void panel.webview.postMessage({
+                action: 'validatedName',
+                data: validationMessage,
+            });
+            break;
+        }
+        case 'getProviderAndTypes': {
+            const types: string[] = [];
+            const providers: string[] = []
+            helmRes.map((helm: ChartResponse) => {
+                if (helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
+                    types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType']);
+                }
+
+                if (helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
+                    providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider']);
+                } else if (helm.chartVersions[0].maintainers?.length > 0) {
+                    providers.push(helm.chartVersions[0].maintainers[0].name);
+                }
+
+            });
+            types.sort((regA, regB) => regA.localeCompare(regB));
+            providers.sort((regA, regB) => regA.localeCompare(regB));
+            void panel.webview.postMessage(
+                {
+                    action: event.action,
+                    data: {
+                        types: [... new Set(types)],
+                        providers: [... new Set(providers)]
+                    }
+                }
+            );
+            break;
+        }
+        default: {
             void panel.webview.postMessage(
                 {
                     error: 'Invalid command'
                 }
             );
             break;
+        }
     }
 }
 
@@ -136,7 +186,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
                 displayName: ''
             }
             res.chartName = key;
-            res.chartVersions = entries[key];
+            res.chartVersions = entries[key].reverse();
             res.displayName = res.chartVersions[0].annotations['charts.openshift.io/name'] || res.chartVersions[0].name;
             helmRes.push(res);
         })
@@ -144,8 +194,7 @@ async function getHelmCharts(eventName: string): Promise<void> {
     void panel?.webview.postMessage(
         {
             action: eventName,
-            helmRes,
-            themeValue: themeKind,
+            data: helmRes
         }
     );
 }

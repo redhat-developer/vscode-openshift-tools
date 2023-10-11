@@ -24,7 +24,7 @@ import {
     getDevfileRegistries,
     getDevfileTags,
     isValidProjectFolder,
-    validateComponentName,
+    validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
@@ -188,7 +188,7 @@ export default class CreateComponentLoader {
              * The panel requested to validate the entered component name. Respond with error status and message.
              */
             case 'validateComponentName': {
-                const validationMessage = validateComponentName(message.data);
+                const validationMessage = validateName(message.data);
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'validatedComponentName',
                     data: validationMessage,
