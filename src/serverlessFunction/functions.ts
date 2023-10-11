@@ -63,31 +63,45 @@ export class Functions {
                     });
 
                     // start new build
-                    await this.buildProcess(context, view);
+                    await this.buildProcess(context);
                 }
             });
         } else {
-            await this.buildProcess(context, view);
+            await this.buildProcess(context);
         }
     }
 
-    private async buildProcess(context: FunctionObject, view: FunctionView) {
+    private async buildProcess(context: FunctionObject) {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
 
+        const specificPlatform = await window.showQuickPick(['Yes', 'No'], {
+            placeHolder: 'Do you want to build it for specific platform?',
+        });
+
+        if (specificPlatform === 'Yes') {
+            const platform = await window.showQuickPick(['linux/amd64', 'linux/arm64','darwin-amd64','darwin-arm64','windows-amd64'], {
+                placeHolder: 'Select the platform',
+            });
+            await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey, platform);
+        } else {
+            await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey);
+        }
+    }
+
+    private async buildTerminal(context: FunctionObject, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string, platform?: string) {
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, isOpenShiftCluster),
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, isOpenShiftCluster, platform),
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,
             {
                 onExit: () => {
-                    this.buildTerminalMap.delete(terminalKey)
+                    this.buildTerminalMap.delete(terminalKey);
                 }
             }
         );
-
         this.buildTerminalMap.set(terminalKey, terminal);
     }
 
@@ -196,7 +210,7 @@ export class Functions {
         await OpenShiftTerminalManager.getInstance().createTerminal(
             ServerlessCommand.invokeFunction(invokeFunData),
             `Invoke ${functionName}`,
-            );
+        );
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
@@ -228,7 +242,7 @@ export class Functions {
             return null;
         }
         openshiftTerminalApi.sendText(`${userName}\n`);
-        await new Promise(resolve => {setTimeout(resolve, 100)});
+        await new Promise(resolve => { setTimeout(resolve, 100) });
         openshiftTerminalApi.sendText(`${userPassword}\n`);
     }
 
