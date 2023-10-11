@@ -5,10 +5,8 @@
 
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { DebugSession, Disposable, TreeItem, debug } from 'vscode';
+import { DebugSession, Disposable, debug } from 'vscode';
 import { DebugSessionsView } from '../../src/debug';
-import { ContextType } from '../../src/odo';
-import { TestItem } from './openshift/testOSItem';
 import sinon = require('sinon');
 
 const {expect} = chai;
@@ -20,10 +18,6 @@ suite('Debug Sessions View', () => {
     let view: DebugSessionsView;
     let startEmitter: (session:DebugSession)=> void;
     let stopEmitter: (session:DebugSession)=> void;
-    const clusterItem = new TestItem(null, 'cluster', ContextType.CLUSTER);
-    const projectItem = new TestItem(clusterItem, 'project', ContextType.PROJECT);
-    const appItem = new TestItem(projectItem, 'application', ContextType.APPLICATION);
-    const componentItem = new TestItem(appItem, 'component', ContextType.COMPONENT);
     const debugSession: any = {
         id: 'unique',
         name: 'name',
@@ -63,7 +57,6 @@ suite('Debug Sessions View', () => {
         const children = await view.getChildren();
         expect(children.length).equals(1);
         expect(view.getParent()).undefined;
-        expect((view.getTreeItem(children[0]) as TreeItem).label).includes(componentItem.label);
     });
 
     test('removes component from view after debugger disconnect command executed', async () => {

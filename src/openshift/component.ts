@@ -3,18 +3,16 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
-import { CliChannel } from '../cli';
+import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
-import { ascDevfileFirst, ComponentTypeAdapter, ComponentTypeDescription } from '../odo/componentType';
+import { ascDevfileFirst, ComponentTypeAdapter } from '../odo/componentType';
 import { CommandProvider, StarterProject } from '../odo/componentTypeDescription';
+import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import * as odo3 from '../odo3';
 import sendTelemetry, { NewComponentCommandProps } from '../telemetry';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -221,10 +219,9 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.binding.add')
     static async addBinding(component: ComponentWorkspaceFolder) {
-        const odo: odo3.Odo3 = odo3.newInstance();
 
         const services = await Progress.execFunctionWithProgress('Looking for bindable services', (progress) => {
-            return odo.getBindableServices();
+            return Odo.Instance.getBindableServices();
         });
 
         if (!services || services.length === 0) {
@@ -281,7 +278,7 @@ export class Component extends OpenShiftItem {
 
         void sendTelemetry('finishAddBindingWizard');
 
-        await odo.addBinding(
+        await Odo.Instance.addBinding(
             component.contextPath,
             selectedServiceObject.metadata.namespace,
             selectedServiceObject.metadata.name,
@@ -301,7 +298,11 @@ export class Component extends OpenShiftItem {
         cs.runOn = runOn;
         Component.stateChanged.fire(component.contextPath)
         if (!runOn) {
-            await CliChannel.getInstance().executeTool(Command.deletePreviouslyPushedResources(component.component.devfileData.devfile.metadata.name), undefined, false);
+            try {
+                await Oc.Instance.deleteDeploymentByComponentLabel(component.component.devfileData.devfile.metadata.name);
+            } catch (e) {
+                // do nothing, it probably was already deleted
+            }
         }
         try {
             cs.devTerminal = await OpenShiftTerminalManager.getInstance().createTerminal(
@@ -534,11 +535,8 @@ export class Component extends OpenShiftItem {
                 } else {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
-                    const descr = await CliChannel.getInstance().executeTool(Command.describeCatalogComponent(componentType.name, componentType.registryName));
-                    const starterProjects: StarterProject[] = Component.odo.loadItems<StarterProject>(descr, (data: ComponentTypeDescription[]) => {
-                        const dfCompType = data.find((comp) => comp.registry.name === componentType.registryName);
-                        return dfCompType.devfileData.devfile.starterProjects
-                    });
+
+                    const starterProjects: StarterProject[] = await this.odo.getStarterProjects(componentType);
                     progressIndicator.hide();
                     if (starterProjects?.length && starterProjects.length > 0) {
                         const create = await window.showQuickPick(['Yes', 'No'], { placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?` });
@@ -563,7 +561,6 @@ export class Component extends OpenShiftItem {
 
         const componentName = opts?.compName || await Component.getName(
             'Name',
-            Promise.resolve([]),
             initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
         );
 

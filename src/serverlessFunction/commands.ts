@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import { load } from 'js-yaml';
 import * as path from 'path';
 import { CommandOption, CommandText } from '../base/command';
-import { ClusterVersion, FunctionContent, InvokeFunction } from './types';
+import { FunctionContent, InvokeFunction } from './types';
 
 export class Utils {
     static async getFuncYamlContent(dir: string): Promise<FunctionContent> {
@@ -67,14 +67,14 @@ export class ServerlessCommand {
         ]);
     }
 
-    static buildFunction(location: string, image: string, clusterVersion: ClusterVersion | null): CommandText {
+    static buildFunction(location: string, image: string, isOpenShiftCluster: boolean): CommandText {
         const commandText = new CommandText('func', 'build', [
             new CommandOption('-p', location),
             new CommandOption('-i', image),
             new CommandOption('-v')
         ]);
-        if (clusterVersion) {
-            commandText.addOption(new CommandOption('-r', ''))
+        if (isOpenShiftCluster) {
+            commandText.addOption(new CommandOption('-r', '""'))
         }
         return commandText
     }
@@ -90,7 +90,7 @@ export class ServerlessCommand {
     static deployFunction(location: string,
         image: string,
         namespace: string,
-        clusterVersion: ClusterVersion | null): CommandText {
+        isOpenShiftCluster: boolean): CommandText {
         const commandText = new CommandText('func', 'deploy', [
             new CommandOption('-p', location),
             new CommandOption('-i', image),
@@ -99,8 +99,8 @@ export class ServerlessCommand {
         if (namespace) {
             commandText.addOption(new CommandOption('-n', namespace))
         }
-        if (clusterVersion) {
-            commandText.addOption(new CommandOption('-r', ''))
+        if (isOpenShiftCluster) {
+            commandText.addOption(new CommandOption('-r', '""'))
         }
         return commandText;
     }
@@ -114,12 +114,6 @@ export class ServerlessCommand {
         const commandText = new CommandText('func', 'templates');
         commandText.addOption(new CommandOption('--json'))
         return commandText
-    }
-
-    static getClusterVersion(): CommandText {
-        return new CommandText('oc', 'get clusterversion', [
-            new CommandOption('-o', 'josn')
-        ]);
     }
 
     static config(functionPath: string, mode: string, isAdd: boolean): CommandText {

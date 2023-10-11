@@ -5,15 +5,15 @@
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
 import * as fs from 'fs/promises';
+import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import * as JSYAML from 'js-yaml';
-import { OdoImpl } from '../../odo';
 import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
+import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
@@ -21,8 +21,8 @@ import { DevfileConverter } from '../../util/devfileConverter';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import {
     getDevfileCapabilities,
-    getDevfileTags,
     getDevfileRegistries,
+    getDevfileTags,
     isValidProjectFolder,
     validateName,
     validatePortNumber
@@ -304,7 +304,7 @@ export default class CreateComponentLoader {
                             message.data.templateProject;
                         componentFolder = path.join(projectFolder, componentName);
                         await fs.mkdir(componentFolder);
-                        await OdoImpl.Instance.createComponentFromTemplateProject(
+                        await Odo.Instance.createComponentFromTemplateProject(
                             componentFolder,
                             componentName,
                             portNumber,
@@ -338,7 +338,7 @@ export default class CreateComponentLoader {
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
                         if (!await isDevfileExists(Uri.file(componentFolder))) {
-                            await OdoImpl.Instance.createComponentFromLocation(
+                            await Odo.Instance.createComponentFromLocation(
                                 devfileType,
                                 componentName,
                                 portNumber,
@@ -431,7 +431,7 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfileStart'
             });
-            analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
+            analyzeRes = await Odo.Instance.analyze(uri.fsPath);
             compDescriptions = getCompDescription(analyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
@@ -446,7 +446,7 @@ export default class CreateComponentLoader {
                         const file = await fs.readFile(devFileV1Path, 'utf8');
                         const devfileV1 = JSYAML.load(file.toString());
                         await fs.unlink(devFileV1Path);
-                        analyzeRes = await OdoImpl.Instance.analyze(uri.fsPath);
+                        analyzeRes = await Odo.Instance.analyze(uri.fsPath);
                         compDescriptions = getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
                         const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(

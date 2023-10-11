@@ -6,13 +6,14 @@
 import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
-import { OdoImpl } from '../odo';
+import { Oc } from '../oc/ocWrapper';
+import { Odo } from '../odo/odoWrapper';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { multiStep } from './multiStepInput';
-import { ClusterVersion, FunctionContent, FunctionObject, FunctionView, InvokeFunction } from './types';
+import { FunctionContent, FunctionObject, FunctionView, InvokeFunction } from './types';
 
 export class Functions {
 
@@ -34,18 +35,6 @@ export class Functions {
 
     checkRunning(fsPath: string): boolean {
         return this.runTerminalMap.has(`run-${fsPath}`);
-    }
-
-    public async checkOpenShiftCluster(): Promise<ClusterVersion> {
-        try {
-            const result = await OdoImpl.Instance.execute(ServerlessCommand.getClusterVersion());
-            if (result?.stdout?.trim()) {
-                return JSON.parse(result?.stdout) as ClusterVersion;
-            }
-            return null;
-        } catch (err) {
-            return null;
-        }
     }
 
     private pollForBuildTerminalDead(resolve: () => void, functionUri: Uri, timeout: number) {
@@ -83,12 +72,12 @@ export class Functions {
     }
 
     private async buildProcess(context: FunctionObject, view: FunctionView) {
-        const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
+        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
 
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, clusterVersion),
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, isOpenShiftCluster),
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,
@@ -130,7 +119,7 @@ export class Functions {
 
     public undeploy(context: FunctionObject) {
         void Progress.execFunctionWithProgress(`Undeploying the function ${context.name}`, async () => {
-            const result = await OdoImpl.Instance.execute(ServerlessCommand.undeployFunction(context.name));
+            const result = await Odo.Instance.execute(ServerlessCommand.undeployFunction(context.name));
             if (result.error) {
                 void window.showErrorMessage(result.error.message);
             } else {
@@ -140,7 +129,7 @@ export class Functions {
     }
 
     public async getTemplates(): Promise<any[]> {
-        const result = await OdoImpl.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+        const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
         if (result.error) {
             void window.showErrorMessage(result.error.message);
         }
@@ -148,7 +137,7 @@ export class Functions {
     }
 
     public async deploy(context: FunctionObject) {
-        const currentNamespace: string = await OdoImpl.Instance.getActiveProject();
+        const currentNamespace: string = await Odo.Instance.getActiveProject();
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
             const deployedNamespace = yamlContent.deploy?.namespace || undefined;
@@ -170,14 +159,14 @@ export class Functions {
             void window.showErrorMessage(`Function ${context.name} has invalid imaage`)
             return;
         }
-        const clusterVersion: ClusterVersion | null = await this.checkOpenShiftCluster();
+        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
 
         // fail after two failed login attempts
         let triedLoginTwice = false;
 
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, clusterVersion),
+            ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, isOpenShiftCluster),
             `Deploy ${context.name}`,
             context.folderURI.fsPath,
             undefined,

@@ -10,17 +10,16 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
-import { ContextType, OdoImpl } from '../../../src/odo';
 import { Command } from '../../../src/odo/command';
 import { ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { CommandProvider } from '../../../src/odo/componentTypeDescription';
+import { Odo } from '../../../src/odo/odoWrapper';
 import { Project } from '../../../src/odo/project';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
 import * as Util from '../../../src/util/async';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-import { TestItem } from './testOSItem';
 import pq = require('proxyquire');
 import fs = require('fs-extra');
 
@@ -37,7 +36,6 @@ suite('OpenShift/Component', function () {
     const wsFolder1 = { uri: comp1Uri, index: 0, name: 'comp1' };
     const wsFolder2 = { uri: comp2Uri, index: 1, name: 'comp2' };
     const projectItem = { name: 'myproject', active: false } as Project;
-    const componentItem = new TestItem(undefined, 'comp1', ContextType.COMPONENT_PUSHED, [], comp1Uri, 'https://host/proj/app/comp1', 'nodejs');
     const componentItem1: ComponentWorkspaceFolder = {
         contextPath: comp1Folder,
         component: {
@@ -130,10 +128,10 @@ suite('OpenShift/Component', function () {
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
         Component = pq('../../../src/openshift/component', {}).Component;
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(OdoImpl.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
-        sandbox.stub(OdoImpl.prototype, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(OdoImpl.prototype, 'getProjects').resolves([projectItem]);
-        sandbox.stub(OdoImpl.prototype, 'describeComponent').resolves(componentItem1.component);
+        execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
+        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
+        sandbox.stub(Odo.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Odo.prototype, 'describeComponent').resolves(componentItem1.component);
         sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
         sandbox.stub(Util, 'wait').resolves();
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
@@ -150,116 +148,6 @@ suite('OpenShift/Component', function () {
             await Component.revealContextInExplorer(componentItem1);
             expect(commandStub).calledWith('revealInExplorer', componentItem1.contextPath);
         });
-    });
-
-    suite.skip('createFromFolder', () => {
-        let inputStub: sinon.SinonStub;
-        const pathOne: string = path.join('some', 'path');
-        const folder: vscode.Uri = vscode.Uri.file(pathOne);
-        const componentType = new ComponentTypeAdapter('nodejs', 'latest', 'builder,nodejs');
-
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            inputStub = sandbox.stub(vscode.window, 'showInputBox');
-        });
-
-        test('returns empty string and step name in cancelled_step property when no option selected from quick pick', async () => {
-            quickPickStub.onFirstCall().resolves(undefined);
-            const result = await Component.createFromRootWorkspaceFolder(null, [], {});
-            expect(result.toString()).equals('');
-        });
-
-        test('returns empty string and step name in cancelled_step property when no component type selected', async () => {
-            inputStub.resolves(componentItem.getName());
-            quickPickStub.onSecondCall().resolves(null);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {});
-            expect(result.toString()).equals('');
-        });
-
-        test('returns empty string and step name in cancelled_step property when no component name is provided', async () => {
-            inputStub.resolves();
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {});
-            expect(result.toString()).equals('');
-        });
-
-        test('happy path works', async () => {
-            inputStub.resolves(componentItem.getName());
-            quickPickStub.onSecondCall().resolves(componentType);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], {});
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
-        });
-
-        test('skips component type selection if componentTypeName provided and only one type found in registries', async () => {
-            inputStub.resolves(componentItem.getName());
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
-                new ComponentTypeAdapter(
-                    'componentType1',
-                    undefined,
-                    'description',
-                    ''
-                )
-            ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
-            expect(quickPickStub).calledOnce;
-            expect(quickPickStub).have.not.calledWith({ placeHolder: 'Component type' })
-        });
-
-        test('when componentTypeName provided and there are more than one type found in registries, asks to pick component type from list of found types', async () => {
-            inputStub.resolves(componentItem.getName());
-            const componentType1 = new ComponentTypeAdapter(
-                'componentType1',
-                undefined,
-                'description',
-                '',
-                'reg1'
-            );
-            const componentType2 = new ComponentTypeAdapter(
-                'componentType1',
-                undefined,
-                'description',
-                '',
-                'reg2'
-            );
-            quickPickStub.onSecondCall().resolves(componentType1)
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
-                componentType1, componentType2
-            ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
-            expect(quickPickStub).calledTwice;
-            expect(quickPickStub).calledWith([componentType1, componentType2]);
-        });
-
-        test('when componentTypeName provided and there is no type found in registries, asks to select from all available registries', async () => {
-            inputStub.resolves(componentItem.getName());
-            const componentType1 = new ComponentTypeAdapter(
-                'componentType2',
-                undefined,
-                'description',
-                ''
-            );
-            quickPickStub.onSecondCall().resolves(componentType1)
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
-                componentType1
-            ]);
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
-            expect(quickPickStub).calledTwice;
-            expect(quickPickStub).calledWith([componentType1]);
-        });
-
-        test('skips component type selection if devfile exists and use devfile name as initial value for component name', async () => {
-            sandbox.stub(fs, 'existsSync').returns(true);
-            sandbox.stub(Component, 'getName').resolves(componentItem.getName());
-            sandbox.stub(fs, 'readFileSync').returns(
-                'metadata:\n' +
-                '  name: componentName'
-            );
-            const result = await Component.createFromRootWorkspaceFolder(folder, [], { componentTypeName: 'componentType1' });
-            expect(result.toString()).equals(`Component '${componentItem.getName()}' successfully created. Perform actions on it from Components View.`);
-        });
-
     });
 
     suite('deleteConfigurationFiles', function () {
@@ -364,36 +252,16 @@ suite('OpenShift/Component', function () {
 
     });
 
-    suite('describe', () => {
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onSecondCall().resolves(componentItem);
-        });
+    suite('describe', function() {
 
-        // Skipped due to 'null' argument value is not supported by `Component..describe'
-        test.skip('returns null when cancelled', async () => {
-            quickPickStub.onFirstCall().resolves();
-            const result = await Component.describe(null);
-            expect(result).null;
-        });
-
-        test('calls the correct odo command', async () => {
+        test('calls the correct odo command', async function () {
             await Component.describe(componentItem1);
             expect(termStub).calledOnceWith(Command.describeComponent());
         });
 
-        // Skipped due to 'null' argument value is not supported by `Component..describe'
-        test.skip('works with no context', async () => {
-            await Component.describe(null);
-            expect(termStub).calledOnceWith(Command.describeComponent());
-        });
     });
 
-    suite('component commands tree', () => {
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onSecondCall().resolves(componentItem);
-        });
+    suite('component commands tree', function () {
 
         test('returns correct component commands tree nodes', async () => {
             const treeDataProvider = ComponentsTreeDataProvider.instance;
@@ -432,13 +300,9 @@ suite('OpenShift/Component', function () {
         });
     });
 
-    suite.skip('log', () => {
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onSecondCall().resolves(componentItem);
-        });
+    suite.skip('log', function () {
 
-        test('log calls the correct odo command', async () => {
+        test('log calls the correct odo command', async function () {
             await Component.log(componentItem1);
             expect(termStub).calledOnceWith(Command.showLog());
         });
@@ -449,25 +313,21 @@ suite('OpenShift/Component', function () {
         });
     });
 
-    suite.skip('followLog', () => {
-        setup(() => {
-            quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
-            quickPickStub.onSecondCall().resolves(componentItem);
-        });
+    suite.skip('followLog', function() {
 
-        test('returns null when cancelled', async () => {
+        test('returns null when cancelled', async function () {
             quickPickStub.onFirstCall().resolves();
             const result = await Component.followLog(null);
 
             expect(result).null;
         });
 
-        test('followLog calls the correct odo command', async () => {
+        test('followLog calls the correct odo command', async function () {
             await Component.followLog(componentItem1);
             expect(termStub).calledOnceWith(Command.showLogAndFollow());
         });
 
-        test('works with no context', async () => {
+        test('works with no context', async function () {
             await Component.followLog(null);
             expect(termStub).calledOnceWith(Command.showLogAndFollow());
         });
@@ -516,7 +376,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([
+            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([
                 new ComponentTypeAdapter(
                     'componentType3',
                     undefined,
@@ -568,7 +428,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             const result = await resultPromise;
@@ -584,7 +444,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             const result = await resultPromise;
@@ -600,7 +460,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             let caughtError;
@@ -621,7 +481,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(OdoImpl.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             let caughtError;

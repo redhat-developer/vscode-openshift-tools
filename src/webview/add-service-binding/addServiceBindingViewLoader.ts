@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getInstance } from '../../odo';
+import { Odo } from '../../odo/odoWrapper';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 
@@ -99,7 +99,7 @@ export default class AddServiceBindingViewLoader {
         });
         void panel.webview.postMessage({
             action: 'setComponentName',
-            componentName: (await getInstance().describeComponent(contextPath)).devfileData.devfile.metadata.name,
+            componentName: (await Odo.Instance.describeComponent(contextPath)).devfileData.devfile.metadata.name,
         });
 
         return Promise.resolve(panel);

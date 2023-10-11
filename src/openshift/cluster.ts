@@ -4,16 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { ExtensionContext, InputBox, QuickInputButton, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, Progress as VProgress, commands, env, window, workspace } from 'vscode';
+import { ExtensionContext, InputBox, QuickInputButton, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { getInstance } from '../odo';
+import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
+import { Odo } from '../odo/odoWrapper';
 import * as NameValidator from '../openshift/nameValidator';
-import { CliExitData } from '../util/childProcessUtil';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { KubeConfigUtils } from '../util/kubeUtils';
+import { LoginUtil } from '../util/loginUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
@@ -21,37 +22,45 @@ import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShif
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
 
-interface Versions {
-    'openshift_version':  string;
-    'kubernetes_version': string;
-}
-
 class quickBtn implements QuickInputButton {
     constructor(public iconPath: ThemeIcon, public tooltip: string) { }
 }
 
 export class Cluster extends OpenShiftItem {
+
     public static extensionContext: ExtensionContext;
-    private static cli = CliChannel.getInstance();
+
     @vsCommand('openshift.explorer.logout')
     static async logout(): Promise<string> {
-        const value = await window.showWarningMessage('Do you want to logout of cluster?', 'Logout', 'Cancel');
+        const value = await window.showWarningMessage(
+            'Do you want to logout of cluster?',
+            'Logout',
+            'Cancel',
+        );
         if (value === 'Logout') {
-            return Cluster.cli.executeTool(Command.odoLogout())
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to logout of the current cluster with '${error}'!`, 'Failed to logout of the current cluster')))
-            .then(async (result) => {
-                if (result.stderr === '') {
+            return Oc.Instance.logout()
+                .catch((error) =>
+                    Promise.reject(
+                        new VsCommandError(
+                            `Failed to logout of the current cluster with '${error}'!`,
+                            'Failed to logout of the current cluster',
+                        ),
+                    ),
+                )
+                .then(async () => {
                     Cluster.explorer.refresh();
                     Cluster.serverlessView.refresh();
                     void commands.executeCommand('setContext', 'isLoggedIn', false);
-                    const logoutInfo = await window.showInformationMessage('Successfully logged out. Do you want to login to a new cluster', 'Yes', 'No');
+                    const logoutInfo = await window.showInformationMessage(
+                        'Successfully logged out. Do you want to login to a new cluster',
+                        'Yes',
+                        'No',
+                    );
                     if (logoutInfo === 'Yes') {
                         return Cluster.login(undefined, true);
                     }
                     return null;
-                }
-                throw new VsCommandError(`Failed to logout of the current cluster with '${result.stderr}'!`, 'Failed to logout of the current cluster');
-            });
+                });
         }
         return null;
     }
@@ -69,7 +78,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.oc.about')
     static async ocAbout(): Promise<void> {
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOcVersion(), undefined, 'Show OKD CLI Tool Version');
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText('oc', 'version'), undefined, 'Show OKD CLI Tool Version');
     }
 
     @vsCommand('openshift.output')
@@ -77,26 +86,12 @@ export class Cluster extends OpenShiftItem {
         CliChannel.getInstance().showOutput();
     }
 
-    static async getConsoleUrl(progress: VProgress<{increment: number, message: string}>): Promise<string> {
-        let consoleUrl: string;
-        try {
-            progress.report({increment: 0, message: 'Detecting cluster type'});
-            const getUrlObj = await Cluster.cli.executeTool(Command.showConsoleUrl());
-            progress.report({increment: 30, message: 'Getting URL'});
-            consoleUrl = JSON.parse(getUrlObj.stdout).data.consoleURL;
-        } catch (ignore) {
-            const serverUrl = await Cluster.cli.executeTool(Command.showServerUrl());
-            consoleUrl = `${serverUrl.stdout}/console`;
-        }
-        return consoleUrl;
-    }
-
     @vsCommand('openshift.open.developerConsole', true)
     @clusterRequired()
     static async openOpenshiftConsole(): Promise<void> {
         return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
-            const consoleUrl = await Cluster.getConsoleUrl(progress);
-            progress.report({increment: 100, message: 'Starting default browser'});
+            const consoleUrl = (await Oc.Instance.getConsoleInfo()).url;
+            progress.report({ increment: 100, message: 'Starting default browser' });
             return commands.executeCommand('vscode.open', Uri.parse(consoleUrl));
         });
     }
@@ -104,24 +99,39 @@ export class Cluster extends OpenShiftItem {
     @vsCommand('openshift.open.operatorBackedServiceCatalog')
     @clusterRequired()
     static async openOpenshiftConsoleTopography(): Promise<void> {
-        return Progress.execFunctionWithProgress('Opening Operator Backed Service Catalog', async (progress) => {
-            const [consoleUrl, namespace] = await Promise.all([
-                Cluster.getConsoleUrl(progress),
-                getInstance().getActiveProject()
-            ]);
-            progress.report({increment: 100, message: 'Starting default browser'});
-            // eg. https://console-openshift-console.apps-crc.testing/catalog/ns/default?catalogType=OperatorBackedService
-            return commands.executeCommand('vscode.open', Uri.parse(`${consoleUrl}/catalog/ns/${namespace}?catalogType=OperatorBackedService`));
-        });
+        return Progress.execFunctionWithProgress(
+            'Opening Operator Backed Service Catalog',
+            async (progress) => {
+                const [consoleInfo, namespace] = await Promise.all([
+                    Oc.Instance.getConsoleInfo(),
+                    Odo.Instance.getActiveProject(),
+                ]);
+                progress.report({ increment: 100, message: 'Starting default browser' });
+                // eg. https://console-openshift-console.apps-crc.testing/catalog/ns/default?catalogType=OperatorBackedService
+                // FIXME: handle standard k8s dashboard
+                return commands.executeCommand(
+                    'vscode.open',
+                    Uri.parse(
+                        `${consoleInfo.url}/catalog/ns/${namespace}?catalogType=OperatorBackedService`,
+                    ),
+                );
+            },
+        );
     }
 
     @vsCommand('openshift.resource.openInDeveloperConsole')
     @clusterRequired()
     static async openInDeveloperConsole(resource: KubernetesObject): Promise<void> {
         return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
-            const consoleUrl = await Cluster.getConsoleUrl(progress);
-            progress.report({increment: 100, message: 'Starting default browser'});
-            return commands.executeCommand('vscode.open', Uri.parse(`${consoleUrl}/topology/ns/${resource.metadata.namespace}?selectId=${resource.metadata.uid}&view=graph`));
+            const consoleInfo = await Oc.Instance.getConsoleInfo();
+            progress.report({ increment: 100, message: 'Starting default browser' });
+            // FIXME: handle standard k8s dashboard
+            return commands.executeCommand(
+                'vscode.open',
+                Uri.parse(
+                    `${consoleInfo.url}/topology/ns/${resource.metadata.namespace}?selectId=${resource.metadata.uid}&view=graph`,
+                ),
+            );
         });
     }
 
@@ -129,20 +139,30 @@ export class Cluster extends OpenShiftItem {
     static async switchContext(): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const k8sConfig = new KubeConfigUtils();
-            const contexts = k8sConfig.contexts.filter((item) => item.name !== k8sConfig.currentContext);
+            const contexts = k8sConfig.contexts.filter(
+                (item) => item.name !== k8sConfig.currentContext,
+            );
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = contexts.map((ctx) => ({ label: `${ctx.name}`, buttons: [deleteBtn] }));
+            const contextNames: QuickPickItem[] = contexts.map((ctx) => ({
+                label: `${ctx.name}`,
+                buttons: [deleteBtn],
+            }));
             quickPick.items = contextNames;
             quickPick.buttons = [QuickInputButtons.Back];
             if (contextNames.length === 0) {
-                void window.showInformationMessage('You have no Kubernetes contexts yet, please login to a cluster.', 'Login', 'Cancel')
+                void window
+                    .showInformationMessage(
+                        'You have no Kubernetes contexts yet, please login to a cluster.',
+                        'Login',
+                        'Cancel',
+                    )
                     .then((command: string) => {
                         if (command === 'Login') {
                             resolve(Cluster.login(undefined, true));
                         }
                         resolve(null);
-                    })
+                    });
             } else {
                 let selection: readonly QuickPickItem[] | undefined;
                 const hideDisposable = quickPick.onDidHide(() => resolve(null));
@@ -153,7 +173,7 @@ export class Cluster extends OpenShiftItem {
                     const choice = selection[0];
                     hideDisposable.dispose();
                     quickPick.hide();
-                    Cluster.odo.execute(Command.setOpenshiftContext(choice.label))
+                    Oc.Instance.setContext(choice.label)
                         .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
                         .catch(reject);
                 });
@@ -170,7 +190,7 @@ export class Cluster extends OpenShiftItem {
                                     const context = k8sConfig.getContextObject(event.item.label);
                                     const index = contexts.indexOf(context);
                                     if (index > -1) {
-                                        CliChannel.getInstance().executeTool(Command.deleteContext(context.name))
+                                        Oc.Instance.deleteContext(context.name)
                                             .then(() => resolve(`Context ${context.name} deleted.`))
                                             .catch(reject);
                                     }
@@ -195,7 +215,10 @@ export class Cluster extends OpenShiftItem {
             const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...' };
             const clusterItems = k8sConfig.getServers();
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({ ...ctx, buttons: ctx.description ? [] : [deleteBtn] }));
+            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({
+                ...ctx,
+                buttons: ctx.description ? [] : [deleteBtn],
+            }));
             quickPick.items = [createUrl, ...contextNames];
             quickPick.buttons = [QuickInputButtons.Back];
             let selection: readonly QuickPickItem[] | undefined;
@@ -237,10 +260,22 @@ export class Cluster extends OpenShiftItem {
                                 // find users and remove duplicates
                                 const users = [ ...new Set(contexts.map(context => k8sConfig.getUser(context.user)))];
 
-                                await Promise.all(contexts.map((context) => CliChannel.getInstance().executeTool(Command.deleteContext(context.name))))
-                                    .then(() => Promise.all(users.map(user => CliChannel.getInstance().executeTool(Command.deleteUser(user.name)))))
-                                    .then(() => CliChannel.getInstance().executeTool(Command.deleteCluster(cluster.name)))
-                                    .catch(reject)
+                                await Promise.all(
+                                    contexts.map((context) =>
+                                        Oc.Instance.deleteContext(context.name),
+                                    ),
+                                )
+                                    .then(() =>
+                                        Promise.all(
+                                            users.map((user) =>
+                                                Oc.Instance.deleteUser(user.name)
+                                            ),
+                                        ),
+                                    )
+                                    .then(() =>
+                                        Oc.Instance.deleteCluster(cluster.name)
+                                    )
+                                    .catch(reject);
                             }
                         });
                 }
@@ -254,12 +289,17 @@ export class Cluster extends OpenShiftItem {
         let pathSelectionDialog;
         let newPathPrompt;
         let crcBinary;
-        const crcPath: string = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
-        if(crcPath) {
-            newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path'};
-            pathSelectionDialog = await window.showQuickPick([{label:`${crcPath}`, description: 'Fetched from settings'}, newPathPrompt], {placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true});
+        const crcPath: string = workspace
+            .getConfiguration('openshiftToolkit')
+            .get('crcBinaryLocation');
+        if (crcPath) {
+            newPathPrompt = { label: '$(plus) Provide different OpenShift Local file path' };
+            pathSelectionDialog = await window.showQuickPick(
+                [{ label: `${crcPath}`, description: 'Fetched from settings' }, newPathPrompt],
+                { placeHolder: 'Select OpenShift Local file path', ignoreFocusOut: true },
+            );
         }
-        if(!pathSelectionDialog) return;
+        if (!pathSelectionDialog) return;
         if (pathSelectionDialog.label === newPathPrompt.label) {
             const crcBinaryLocation = await window.showOpenDialog({
                 canSelectFiles: true,
@@ -274,32 +314,6 @@ export class Cluster extends OpenShiftItem {
             crcBinary = crcPath;
         }
         void OpenShiftTerminalManager.getInstance().executeInTerminal(new CommandText(`${crcBinary}`, 'stop'), undefined, 'Stop OpenShift Local');
-    }
-
-    public static async getVersions(): Promise<Versions> {
-        const result = await Cluster.cli.executeTool(Command.printOcVersionJson(), undefined, false);
-        const versions: Versions = {
-            'kubernetes_version': undefined,
-            'openshift_version': undefined
-        };
-        if (!result.error) {
-            try {
-                // try to fetch versions for stdout
-                const versionsJson = JSON.parse(result.stdout);
-                if (versionsJson?.serverVersion?.major && versionsJson?.serverVersion?.minor) {
-                    // eslint-disable-next-line camelcase
-                    versions.kubernetes_version = `${versionsJson.serverVersion.major}.${versionsJson.serverVersion.minor}`;
-                }
-                if (versionsJson?.openshiftVersion) {
-                    // eslint-disable-next-line camelcase
-                    versions.openshift_version = versionsJson.openshiftVersion;
-                }
-
-            } catch(err) {
-                // ignore and return undefined
-            }
-        }
-        return versions;
     }
 
     /*
@@ -433,7 +447,7 @@ export class Cluster extends OpenShiftItem {
                 }
                 case Step.loginUsingCredentials: // Drop down
                 case Step.loginUsingToken: {
-                    let clusterVersions:any = step === Step.loginUsingCredentials
+                    const clusterVersions: string = step === Step.loginUsingCredentials
                         ? await Cluster.credentialsLogin(true, clusterURL)
                             : await Cluster.tokenLogin(clusterURL, true);
                     if (!clusterVersions) { // Back Button is hit
@@ -441,13 +455,8 @@ export class Cluster extends OpenShiftItem {
                     } else if (clusterVersions === null) { // User cancelled the operation
                         return null;
                     } else {
-                        const versions = await Cluster.getVersions();
-                        if (versions) {
-                            clusterVersions = new String(clusterVersions);
-                            // get cluster information using 'oc version'
-                            clusterVersions.properties = versions;
-                        }
-                        return clusterVersions;
+                        // login successful
+                        return null;
                     }
                     break;
                 }
@@ -459,21 +468,32 @@ export class Cluster extends OpenShiftItem {
 
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
         let response = 'Yes';
-        if (!skipConfirmation && !await Cluster.odo.requireLogin()) {
+        if (!skipConfirmation && !(await LoginUtil.Instance.requireLogin())) {
             const cluster = new KubeConfigUtils().getCurrentCluster();
-            response = await window.showInformationMessage(`You are already logged into ${cluster.server} cluster. Do you want to login to a different cluster?`, 'Yes', 'No');
+            response = await window.showInformationMessage(
+                `You are already logged into ${cluster.server} cluster. Do you want to login to a different cluster?`,
+                'Yes',
+                'No',
+            );
         }
         return response;
     }
 
-    private static async save(username: string, password: string, checkpassword: string, result: CliExitData): Promise<CliExitData> {
-        if (password === checkpassword) return result;
-        const response = await window.showInformationMessage('Do you want to save username and password?', 'Yes', 'No');
+    private static async save(
+        username: string,
+        password: string,
+        checkpassword: string,
+    ): Promise<void> {
+        if (password === checkpassword) return;
+        const response = await window.showInformationMessage(
+            'Do you want to save username and password?',
+            'Yes',
+            'No',
+        );
         if (response === 'Yes') {
             await TokenStore.setUserName(username);
             await TokenStore.setItem('login', username, password);
         }
-        return result;
     }
 
     /*
@@ -646,16 +666,24 @@ export class Cluster extends OpenShiftItem {
         // If there is saved password for the username - read it
         password = await TokenStore.getItem('login', username);
         try {
-            const result = await Progress.execFunctionWithProgress(
-                `Login to the cluster: ${clusterURL}`,
-                () => Cluster.cli.executeTool(Command.odoLoginWithUsernamePassword(clusterURL, username, passwd), undefined, true));
-            await Cluster.save(username, passwd, password, result);
-            return await Cluster.loginMessage(clusterURL, result);
+            await Oc.Instance.loginWithUsernamePassword(clusterURL, username, passwd);
+            await Cluster.save(username, passwd, password);
+            return await Cluster.loginMessage(clusterURL);
         } catch (error) {
             if (error instanceof VsCommandError) {
-                throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, `Failed to login to cluster. ${error.telemetryMessage}`);
+                throw new VsCommandError(
+                    `Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(
+                        error.message,
+                    )}'!`,
+                    `Failed to login to cluster. ${error.telemetryMessage}`,
+                );
             } else {
-                throw new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(error.message)}'!`, 'Failed to login to cluster');
+                throw new VsCommandError(
+                    `Failed to login to cluster '${clusterURL}' with '${Filters.filterPassword(
+                        error.message,
+                    )}'!`,
+                    'Failed to login to cluster',
+                );
             }
         }
     }
@@ -672,12 +700,18 @@ export class Cluster extends OpenShiftItem {
 
     static async getUrlFromClipboard(): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if (NameValidator.ocLoginCommandMatches(clipboard)) return NameValidator.clusterURL(clipboard);
+        if (NameValidator.ocLoginCommandMatches(clipboard)) {
+            return NameValidator.clusterURL(clipboard);
+        }
         return null;
     }
 
     @vsCommand('openshift.explorer.login.tokenLogin')
-    static async tokenLogin(userClusterUrl: string, skipConfirmation = false, userToken?: string): Promise<string | null> {
+    static async tokenLogin(
+        userClusterUrl: string,
+        skipConfirmation = false,
+        userToken?: string,
+    ): Promise<string | null> {
         let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
@@ -690,7 +724,10 @@ export class Cluster extends OpenShiftItem {
             clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
         }
 
-        if (!clusterURL && clusterUrlFromClipboard || clusterURL?.trim() === clusterUrlFromClipboard) {
+        if (
+            (!clusterURL && clusterUrlFromClipboard) ||
+            clusterURL?.trim() === clusterUrlFromClipboard
+        ) {
             token = NameValidator.getToken(await Cluster.readFromClipboard());
             clusterURL = clusterUrlFromClipboard;
         }
@@ -713,10 +750,19 @@ export class Cluster extends OpenShiftItem {
         } else {
             ocToken = userToken;
         }
-        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`,
-            () => Cluster.cli.executeTool(Command.odoLoginWithToken(clusterURL, ocToken.trim()))
-            .then((result) => Cluster.loginMessage(clusterURL, result))
-            .catch((error) => Promise.reject(new VsCommandError(`Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(error.message)}'!`, 'Failed to login to cluster')))
+        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`, () =>
+            Oc.Instance.loginWithToken(clusterURL, token)
+                .then(() => Cluster.loginMessage(clusterURL))
+                .catch((error) =>
+                    Promise.reject(
+                        new VsCommandError(
+                            `Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(
+                                error.message,
+                            )}'!`,
+                            'Failed to login to cluster',
+                        ),
+                    ),
+                ),
         );
     }
 
@@ -726,11 +772,16 @@ export class Cluster extends OpenShiftItem {
     }
 
     @vsCommand('openshift.explorer.login.clipboard')
-    static async loginUsingClipboardToken(apiEndpointUrl: string, oauthRequestTokenUrl: string): Promise<string | null> {
+    static async loginUsingClipboardToken(
+        apiEndpointUrl: string,
+        oauthRequestTokenUrl: string,
+    ): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
-        if(!clipboard) {
-            const choice = await window.showErrorMessage('Cannot parse token in clipboard. Please click `Get token` button below, copy token into clipboard and press `Login to Sandbox` button again.',
-                'Get token');
+        if (!clipboard) {
+            const choice = await window.showErrorMessage(
+                'Cannot parse token in clipboard. Please click `Get token` button below, copy token into clipboard and press `Login to Sandbox` button again.',
+                'Get token',
+            );
             if (choice === 'Get token') {
                 await commands.executeCommand('vscode.open', Uri.parse(oauthRequestTokenUrl));
             }
@@ -754,13 +805,10 @@ export class Cluster extends OpenShiftItem {
         return Cluster.tokenLogin(url, true, token);
     }
 
-    static async loginMessage(clusterURL: string, result: CliExitData): Promise<string | undefined> {
-        if (result.stderr === '') {
-            Cluster.explorer.refresh();
-            Cluster.serverlessView.refresh();
-            await commands.executeCommand('setContext', 'isLoggedIn', true);
-            return `Successfully logged in to '${clusterURL}'`;
-        }
-        throw new VsCommandError(result.stderr, 'Failed to login to cluster with output in stderr');
+    static async loginMessage(clusterURL: string): Promise<string> {
+        Cluster.explorer.refresh();
+        Cluster.serverlessView.refresh();
+        await commands.executeCommand('setContext', 'isLoggedIn', true);
+        return `Successfully logged in to '${clusterURL}'`;
     }
 }

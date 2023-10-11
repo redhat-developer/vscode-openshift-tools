@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
 import * as sinon from 'sinon';
-import * as fixtures from '../../fixtures';
-import { OdoWorkspace } from '../../../src/odo/workspace';
-import { OdoImpl } from '../../../src/odo';
-import path = require('path');
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 import { ComponentDescription } from '../../../src/odo/componentTypeDescription';
-import { Odo3Impl } from '../../../src/odo3';
+import { Odo } from '../../../src/odo/odoWrapper';
+import { OdoWorkspace } from '../../../src/odo/workspace';
+import * as fixtures from '../../fixtures';
+import path = require('path');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -28,7 +27,7 @@ suite('Odo/Workspace', () => {
     });
 
     function stubDescribeComponentCall() {
-        return sandbox.stub(Odo3Impl.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
+        return sandbox.stub(Odo.Instance, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
             if (contextPath.includes(`${path.sep}comp`, contextPath.lastIndexOf(path.sep))) {
                 return Promise.resolve({} as ComponentDescription);
             }
@@ -78,7 +77,7 @@ suite('Odo/Workspace', () => {
         const changeWorkspaceFolders = new vscode.EventEmitter<vscode.WorkspaceFoldersChangeEvent>();
         sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').value(changeWorkspaceFolders.event);
         const onDidChangeComponentsStub = sandbox.stub(OdoWorkspace.prototype, 'onDidChangeComponents');
-        sandbox.stub(OdoImpl.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
+        sandbox.stub(Odo.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
             if (contextPath.includes('/comp', contextPath.lastIndexOf(path.sep))) {
                 return Promise.resolve({} as ComponentDescription);
             }
