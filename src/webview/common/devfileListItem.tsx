@@ -7,11 +7,19 @@ import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
 import DevfileLogo from '../../../images/context/devfile.png';
+import validator from 'validator'
 
 export type DevfileListItemProps = {
     devfile: Devfile;
     buttonCallback?: () => void;
 };
+
+function checkedDevfileLogoUrl(logoUrl?: string) {
+    if (logoUrl && validator.isURL(logoUrl)) {
+        return logoUrl;
+    }
+    return DevfileLogo;
+}
 
 export function DevfileListItem(props: DevfileListItemProps) {
     return (
@@ -57,7 +65,7 @@ function DevfileListContent(props: DevfileListItemProps) {
                     borderRadius: '4px',
                 }}
             >
-                <img src={props.devfile.logoUrl ? props.devfile.logoUrl : DevfileLogo} style={{ maxWidth: '6em', maxHeight: '6em' }} />
+                <img src={checkedDevfileLogoUrl(props.devfile.logoUrl)} style={{ maxWidth: '6em', maxHeight: '6em' }} />
             </Box>
             <Stack
                 direction="column"
