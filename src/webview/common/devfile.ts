@@ -8,10 +8,10 @@ import { StarterProject } from '../../odo/componentTypeDescription';
 export type Devfile = {
     name: string;
     id: string;
-    port: number;
-    registryName: string;
+    port?: number;
+    registryName?: string;
     description: string;
-    logoUrl: string;
+    logoUrl?: string;
     supportsDebug: boolean;
     supportsDeploy: boolean;
     tags: string[];

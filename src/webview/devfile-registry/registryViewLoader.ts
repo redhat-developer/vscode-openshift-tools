@@ -12,7 +12,7 @@ import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
-import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateComponentName, validatePortNumber } from '../common-ext/createComponentHelpers';
+import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateName, validatePortNumber } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { TemplateProjectIdentifier } from '../common/devfile';
 
@@ -81,7 +81,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         }
         case 'validateComponentName': {
-            const validationMessage = validateComponentName(event.data);
+            const validationMessage = validateName(event.data);
             void panel.webview.postMessage({
                 action: 'validatedComponentName',
                 data: validationMessage,

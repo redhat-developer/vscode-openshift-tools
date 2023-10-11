@@ -149,6 +149,18 @@ export function FromExistingGitRepo({ setCurrentView }) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true, completionValue: 5 }));
     }
 
+    function getEffectiveDevfile() {
+        return recommendedDevfile.isDevfileExistsInRepo ?
+            recommendedDevfile.devfile // An existing Git-Repo devfile
+                : selectedDevfile ?
+                    selectedDevfile // A selected Devfile
+                        : recommendedDevfile.devfile // A recommended Devfile
+    }
+
+    function getInitialComponentName() {
+        return getEffectiveDevfile()?.name;
+    }
+
     function createComponentFromGitRepo(
         projectFolder: string,
         componentName: string,
@@ -454,8 +466,8 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         setCurrentPage('fromGitRepo');
                     }}
                     createComponent={createComponentFromGitRepo}
-                    devfile={recommendedDevfile.isDevfileExistsInRepo ? undefined : selectedDevfile ? selectedDevfile : recommendedDevfile.devfile}
-                    initialComponentName={buildSanitizedComponentName(gitURL.url)}
+                    devfile={getEffectiveDevfile()}
+                    initialComponentName={buildSanitizedComponentName(getInitialComponentName())}
                 />
             );
         case 'selectDifferentDevfile':
