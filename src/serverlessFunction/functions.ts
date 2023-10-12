@@ -13,7 +13,7 @@ import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { multiStep } from './multiStepInput';
-import { FunctionContent, FunctionObject, FunctionView, InvokeFunction } from './types';
+import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 
 export class Functions {
 
@@ -47,7 +47,7 @@ export class Functions {
         }
     }
 
-    public async build(context: FunctionObject, view: FunctionView): Promise<void> {
+    public async build(context: FunctionObject, s2iBuild: boolean, platformSpecific = false): Promise<void> {
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
 
         if (existingTerminal) {
@@ -63,29 +63,24 @@ export class Functions {
                     });
 
                     // start new build
-                    await this.buildProcess(context);
+                    await this.buildProcess(context, s2iBuild, platformSpecific);
                 }
             });
         } else {
-            await this.buildProcess(context);
+            await this.buildProcess(context, s2iBuild, platformSpecific);
         }
     }
 
-    private async buildProcess(context: FunctionObject) {
+    private async buildProcess(context: FunctionObject, s2iBuild: boolean, platformSpecific: boolean) {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
-
-        const specificPlatform = await window.showQuickPick(['Yes', 'No'], {
-            placeHolder: 'Do you want to build it for \'linux/amd64\' platform?',
-        });
-
-        await this.buildTerminal(context, buildImage, isOpenShiftCluster, terminalKey, specificPlatform === 'Yes' ? 'linux/amd64' : undefined);
+        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack',buildImage, isOpenShiftCluster, terminalKey, platformSpecific ? 'linux/amd64' : undefined);
     }
 
-    private async buildTerminal(context: FunctionObject, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string, platform?: string) {
+    private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string, platform?: string) {
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, isOpenShiftCluster, platform),
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, builder, buildImage, isOpenShiftCluster, platform),
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,
