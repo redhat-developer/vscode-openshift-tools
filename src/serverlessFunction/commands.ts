@@ -67,9 +67,10 @@ export class ServerlessCommand {
         ]);
     }
 
-    static buildFunction(location: string, image: string, isOpenShiftCluster: boolean): CommandText {
+    static buildFunction(location: string, builder:string, image: string, isOpenShiftCluster: boolean): CommandText {
         const commandText = new CommandText('func', 'build', [
-            new CommandOption('-p', location),
+            new CommandOption('--path', location),
+            new CommandOption('--builder', builder),
             new CommandOption('-i', image),
             new CommandOption('-v')
         ]);

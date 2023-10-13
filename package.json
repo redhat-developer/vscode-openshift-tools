@@ -788,8 +788,13 @@
 				"icon": "$(refresh)"
 			},
 			{
-				"command": "openshift.Serverless.build",
-				"title": "Build",
+				"command": "openshift.Serverless.baseBuild",
+				"title": "Base Build",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.s2iBuild",
+				"title": "S2I Build",
 				"category": "OpenShift"
 			},
 			{
@@ -883,6 +888,10 @@
 			{
 				"id": "serverlessfunction/removeConfig",
 				"label": "Remove"
+			},
+			{
+				"id": "serverlessfunction/buildConfig",
+				"label": "Build Configuration"
 			}
 		],
 		"viewsContainers": {
@@ -1189,7 +1198,11 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.Serverless.build",
+					"command": "openshift.Serverless.baseBuild",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.s2iBuild",
 					"when": "false"
 				},
 				{
@@ -1363,6 +1376,18 @@
 					"command": "openshift.Serverless.removeVolume",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@3"
+				}
+			],
+			"serverlessfunction/buildConfig": [
+				{
+					"command": "openshift.Serverless.baseBuild",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@0"
+				},
+				{
+					"command": "openshift.Serverless.s2iBuild",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@1"
 				}
 			],
 			"view/item/context": [
@@ -1625,10 +1650,6 @@
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
 				},
 				{
-					"command": "openshift.Serverless.build",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
-				},
-				{
 					"command": "openshift.Serverless.buildAndRun",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/"
 				},
@@ -1660,6 +1681,11 @@
 				{
 					"submenu": "serverlessfunction/removeConfig",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctionsWithBuild|localDeployFunctions)$/",
+					"group": "c1@2"
+				},
+				{
+					"submenu": "serverlessfunction/buildConfig",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@2"
 				},
 				{

@@ -13,7 +13,7 @@ import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { multiStep } from './multiStepInput';
-import { FunctionContent, FunctionObject, FunctionView, InvokeFunction } from './types';
+import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 
 export class Functions {
 
@@ -47,7 +47,7 @@ export class Functions {
         }
     }
 
-    public async build(context: FunctionObject, view: FunctionView): Promise<void> {
+    public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
 
         if (existingTerminal) {
@@ -63,31 +63,33 @@ export class Functions {
                     });
 
                     // start new build
-                    await this.buildProcess(context, view);
+                    await this.buildProcess(context, s2iBuild);
                 }
             });
         } else {
-            await this.buildProcess(context, view);
+            await this.buildProcess(context, s2iBuild);
         }
     }
 
-    private async buildProcess(context: FunctionObject, view: FunctionView) {
+    private async buildProcess(context: FunctionObject, s2iBuild: boolean) {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
+        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack',buildImage, isOpenShiftCluster, terminalKey);
+    }
 
+    private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string) {
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.buildFunction(context.folderURI.fsPath, buildImage, isOpenShiftCluster),
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, builder, buildImage, isOpenShiftCluster),
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,
             {
                 onExit: () => {
-                    this.buildTerminalMap.delete(terminalKey)
+                    this.buildTerminalMap.delete(terminalKey);
                 }
             }
         );
-
         this.buildTerminalMap.set(terminalKey, terminal);
     }
 
@@ -196,7 +198,7 @@ export class Functions {
         await OpenShiftTerminalManager.getInstance().createTerminal(
             ServerlessCommand.invokeFunction(invokeFunData),
             `Invoke ${functionName}`,
-            );
+        );
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
@@ -228,7 +230,7 @@ export class Functions {
             return null;
         }
         openshiftTerminalApi.sendText(`${userName}\n`);
-        await new Promise(resolve => {setTimeout(resolve, 100)});
+        await new Promise(resolve => { setTimeout(resolve, 100) });
         openshiftTerminalApi.sendText(`${userPassword}\n`);
     }
 
