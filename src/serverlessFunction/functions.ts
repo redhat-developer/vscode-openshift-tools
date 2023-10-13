@@ -47,7 +47,7 @@ export class Functions {
         }
     }
 
-    public async build(context: FunctionObject, s2iBuild: boolean, platformSpecific = false): Promise<void> {
+    public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
 
         if (existingTerminal) {
@@ -63,24 +63,24 @@ export class Functions {
                     });
 
                     // start new build
-                    await this.buildProcess(context, s2iBuild, platformSpecific);
+                    await this.buildProcess(context, s2iBuild);
                 }
             });
         } else {
-            await this.buildProcess(context, s2iBuild, platformSpecific);
+            await this.buildProcess(context, s2iBuild);
         }
     }
 
-    private async buildProcess(context: FunctionObject, s2iBuild: boolean, platformSpecific: boolean) {
+    private async buildProcess(context: FunctionObject, s2iBuild: boolean) {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
-        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack',buildImage, isOpenShiftCluster, terminalKey, platformSpecific ? 'linux/amd64' : undefined);
+        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack',buildImage, isOpenShiftCluster, terminalKey);
     }
 
-    private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string, platform?: string) {
+    private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string) {
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.buildFunction(context.folderURI.fsPath, builder, buildImage, isOpenShiftCluster, platform),
+            ServerlessCommand.buildFunction(context.folderURI.fsPath, builder, buildImage, isOpenShiftCluster),
             `Build ${context.name}`,
             context.folderURI.fsPath,
             process.env,

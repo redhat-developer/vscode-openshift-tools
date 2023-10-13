@@ -173,11 +173,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
         await Functions.getInstance().build(context, true);
     }
 
-    @vsCommand('openshift.Serverless.linuxAMD64Build')
-    static async linuxAMD64BuildFunction(context: FunctionObject) {
-        await Functions.getInstance().build(context, true , true);
-    }
-
     @vsCommand('openshift.Serverless.buildAndRun')
     static async buildAndRunFunction(context: FunctionObject) {
         await Functions.getInstance().run(context, true);

@@ -798,11 +798,6 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.Serverless.linuxAMD64Build",
-				"title": "Linux/amd64 Build",
-				"category": "OpenShift"
-			},
-			{
 				"command": "openshift.Serverless.deploy",
 				"title": "Deploy",
 				"category": "OpenShift"
@@ -1211,10 +1206,6 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.Serverless.linuxAMD64Build",
-					"when": "false"
-				},
-				{
 					"command": "openshift.Serverless.deploy",
 					"when": "false"
 				},
@@ -1397,11 +1388,6 @@
 					"command": "openshift.Serverless.s2iBuild",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@1"
-				},
-				{
-					"command": "openshift.Serverless.linuxAMD64Build",
-					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
-					"group": "c1@2"
 				}
 			],
 			"view/item/context": [
