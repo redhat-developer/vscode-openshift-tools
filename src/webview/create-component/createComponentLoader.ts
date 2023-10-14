@@ -312,7 +312,7 @@ export default class CreateComponentLoader {
                         const templateProject: TemplateProjectIdentifier =
                             message.data.templateProject;
                         componentFolder = path.join(projectFolder, componentName);
-                        await fs.mkdir(componentFolder);
+                        await fs.mkdir(componentFolder, {recursive: true});
                         await Odo.Instance.createComponentFromTemplateProject(
                             componentFolder,
                             componentName,
@@ -342,7 +342,7 @@ export default class CreateComponentLoader {
                                 message.data.gitDestinationPath,
                                 componentName,
                             );
-                            await fs.mkdir(componentFolder);
+                            await fs.mkdir(componentFolder, {recursive: true});
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
                         const devfileType = getDevfileType(message.data.devfileDisplayName);
