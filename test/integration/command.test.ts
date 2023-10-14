@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { V220Devfile, V220DevfileCommandsItemsExecGroup } from '@devfile/api';
+import { V221Devfile, V221DevfileCommandsItemsExecGroup } from '@devfile/api';
 import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
@@ -368,7 +368,7 @@ suite('odo commands integration', function () {
             //
             // and then save into the same debfile.yaml
             const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile = JSYAML.load(file.toString()) as V220Devfile;
+            const devfile = JSYAML.load(file.toString()) as V221Devfile;
             if (!devfile || !devfile.commands) {
                 fail(`DevFile '${devfilePath}' cannot be read`);
             }
@@ -383,7 +383,7 @@ suite('odo commands integration', function () {
             if (helloWorldCommand) {
                 helloWorldCommand.exec = {
                     group:{
-                        kind: V220DevfileCommandsItemsExecGroup.KindEnum.Run
+                        kind: V221DevfileCommandsItemsExecGroup.KindEnum.Run
                     },
                     commandLine: helloWorldCommandExecCommandLine,
                     component: 'runtime'
@@ -392,7 +392,7 @@ suite('odo commands integration', function () {
                 devfileCommands.push({
                     exec: {
                         group:{
-                            kind: V220DevfileCommandsItemsExecGroup.KindEnum.Run
+                            kind: V221DevfileCommandsItemsExecGroup.KindEnum.Run
                         },
                         commandLine: helloWorldCommandExecCommandLine,
                         component: 'runtime'

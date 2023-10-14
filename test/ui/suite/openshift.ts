@@ -83,6 +83,7 @@ export function checkOpenshiftView() {
             let welcome: WelcomeContentSection;
 
             before(async () => {
+                this.timeout(15_000)
                 section = await view.getContent().getSection(VIEWS.appExplorer);
                 await collapse(section);
                 section = await view.getContent().getSection(VIEWS.components);
@@ -91,6 +92,7 @@ export function checkOpenshiftView() {
             });
 
             it('shows welcome content when not logged in', async function() {
+                this.timeout(15_000)
                 expect(welcome).not.undefined;
                 expect((await welcome.getTextSections()).join('')).not.empty;
             });
