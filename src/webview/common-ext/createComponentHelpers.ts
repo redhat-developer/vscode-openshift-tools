@@ -10,22 +10,7 @@ import { Registry } from '../../odo/componentType';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ComponentTypesView } from '../../registriesView';
 import { Devfile, DevfileRegistry } from '../common/devfile';
-
-/**
- * Represents if something if valid, and if not, why
- */
-type ValidationResult = {
-    /**
-     * True if the project folder is valid and false otherwise
-     */
-    valid: boolean;
-
-    /**
-     * A message explaining why the project folder is invalid,
-     * or providing further information in the case that the project folder is valid
-     */
-    message: string;
-};
+import { ValidationResult, ValidationStatus } from '../common/validationResult';
 
 /**
  * Returns a ValidationResult indicating whether the project folder is valid.
@@ -36,8 +21,15 @@ type ValidationResult = {
  */
 export async function isValidProjectFolder(
     folder: string,
-    componentName: string,
+    componentName: string
 ): Promise<ValidationResult> {
+    if (!folder) { // Folder cannot be Undefined
+        return {
+            status: ValidationStatus.error,
+            message:  'Please specify a valid folder path'
+        };
+    }
+
     let projectFolderExists = false;
     try {
         const stats = await fs.stat(folder);
@@ -68,20 +60,71 @@ export async function isValidProjectFolder(
     }
 
     let validationMessage: string = undefined;
+    let validationStatus: ValidationStatus = ValidationStatus.ok;
     if (!projectFolderExists) {
-        validationMessage = `Project folder ${folder} doesn't exist`;
+        if (await canRecursivelyCreateProjectFolder(folder)) {
+            validationStatus = ValidationStatus.warning;
+            validationMessage = `Project can be created in ${childFolder}`;
+        } else {
+            validationStatus = ValidationStatus.error;
+            validationMessage = `Project folder ${folder} doesn't exist`;
+        }
     } else if (!projectFolderWritable) {
+        validationStatus = ValidationStatus.error;
         validationMessage = `Project folder ${folder} is not writable`;
     } else if (childFolderExists) {
+        validationStatus = ValidationStatus.error;
         validationMessage = `There is already a folder ${componentName} in ${folder}`;
     } else {
         validationMessage = `Project will be created in ${childFolder}`;
     }
 
-    return {
-        valid: projectFolderExists && projectFolderWritable && !childFolderExists,
-        message: validationMessage,
-    };
+    return { status: validationStatus, message: validationMessage };
+}
+
+/**
+ * Checks if project folder can be created, in case it doesn't exit.
+ * In case of non-existing project folder - it is required tthat it can be created,
+ * so it's nearest existing parent folder should be writable
+ *
+ * @param folder Expected (non-existing) project folder
+ * @returns true if there is an existing and writable parent folder. false otherwise.
+ */
+async function canRecursivelyCreateProjectFolder(
+    folder: string
+): Promise<boolean> {
+    if (!folder) return false; // Parent doesn't exist
+
+    const folderPath = path.parse(folder);
+    const root = folderPath.root;
+
+     // Reconstruct the folder to avoid having `/` (or `\` on Windows) at the end
+    let parentFolder: string = path.join(folderPath.dir, folderPath.base).toString();
+    let parentFolderExists = false;
+    while (parentFolder !== root && !parentFolderExists) {
+        parentFolderExists = false;
+        try {
+            const stats = await fs.stat(parentFolder);
+            parentFolderExists = stats.isDirectory();
+            if (!parentFolderExists) {
+                return false; // Parent exists, but not a directory
+            }
+        } catch (_) {
+            // do nothing
+        }
+
+        if (parentFolderExists) {
+            try {
+                await fs.access(parentFolder, fs.constants.W_OK);
+                return true; // Parent exists and is writable
+            } catch (_) {
+                return false; // Parent folder exists, but isn;t writable
+            }
+        }
+        parentFolder = path.parse(parentFolder).dir;
+    }
+
+    return false; // Parent folder doesn't exist
 }
 
 /**

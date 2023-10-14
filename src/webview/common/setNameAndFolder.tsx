@@ -20,6 +20,7 @@ import { CreateComponentButton, CreateComponentErrorAlert } from './createCompon
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
 import { PortNumberInput } from './portNumberInput';
+import { ValidationStatus } from './validationResult';
 
 type Message = {
     action: string;
@@ -46,7 +47,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
         'Port number auto filled based on devfile selection',
     );
     const [componentParentFolder, setComponentParentFolder] = React.useState('');
-    const [isFolderFieldValid, setFolderFieldValid] = React.useState(false);
+    const [folderFieldStatus, setFolderFieldStatus] = React.useState(ValidationStatus.error);
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
     const [isFolderFieldInteracted, setFolderFieldInteracted] = React.useState(false);
 
@@ -60,7 +61,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
         const message = messageEvent.data as Message;
         switch (message.action) {
             case 'isValidProjectFolder': {
-                setFolderFieldValid((_) => message.data.valid);
+                setFolderFieldStatus((_) => message.data.status);
                 setFolderFieldErrorMessage((_) => message.data.message);
                 break;
             }
@@ -183,7 +184,9 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                             onClick={(e) => {
                                 setFolderFieldInteracted((_) => true);
                             }}
-                            error={isFolderFieldInteracted && !isFolderFieldValid}
+                            error={isFolderFieldInteracted && folderFieldStatus === ValidationStatus.error}
+                            color={folderFieldStatus === ValidationStatus.error ? 'error' :
+                                    folderFieldStatus === ValidationStatus.warning ? 'warning' : 'primary'}
                             value={componentParentFolder}
                         />
                         <Button
@@ -231,7 +234,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         portNumber={portNumber}
                         isComponentNameFieldValid={isComponentNameFieldValid}
                         isPortNumberFieldValid={isPortNumberFieldValid}
-                        isFolderFieldValid={isFolderFieldValid}
+                        isFolderFieldValid={folderFieldStatus !== ValidationStatus.error}
                         isLoading={isLoading}
                         createComponent={props.createComponent}
                         setLoading={setLoading}
