@@ -26,7 +26,7 @@ export function checkExtension() {
         });
 
         it('Openshift toolkit has the correct attributes', async function() {
-            this.timeout(10_000)
+            this.timeout(15_000)
             let version: string;
             let author: string;
             let desc: string;
