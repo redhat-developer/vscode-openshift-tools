@@ -205,8 +205,21 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev.onPodman')
     static async devOnPodman(component: ComponentWorkspaceFolder) {
-        if (await Component.odo.isPodmanPresent()) {
+        if (await Component.checkForPodman()) {
             return Component.devRunOn(component, 'podman');
+        }
+    }
+
+    @vsCommand('openshift.component.dev.onPodman.manual')
+    static async devOnPodmanManualRebuild(component: ComponentWorkspaceFolder) {
+        if (await Component.checkForPodman()) {
+            return Component.devRunOn(component, 'podman', true);
+        }
+    }
+
+    private static async checkForPodman(): Promise<boolean> {
+        if (await Component.odo.isPodmanPresent()) {
+            return true;
         }
         void window.showErrorMessage('Podman is not present in the system, please install podman on your machine and try again.', 'Install podman')
             .then(async (result) => {
@@ -214,7 +227,7 @@ export class Component extends OpenShiftItem {
                     await commands.executeCommand('vscode.open', Uri.parse('https://podman.io/'));
                 }
             });
-        return;
+        return false;
     }
 
     @vsCommand('openshift.component.binding.add')
@@ -292,7 +305,13 @@ export class Component extends OpenShiftItem {
         return Component.devRunOn(component, undefined);
     }
 
-    static async devRunOn(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman') {
+    @vsCommand('openshift.component.dev.manual')
+    @clusterRequired()
+    static async devManual(component: ComponentWorkspaceFolder): Promise<void> {
+        await Component.devRunOn(component, undefined, true);
+    }
+
+    static async devRunOn(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman', manualRebuild: boolean = false) {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;
@@ -306,7 +325,7 @@ export class Component extends OpenShiftItem {
         }
         try {
             cs.devTerminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-                Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn),
+                Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn, manualRebuild),
                 `odo dev: ${component.component.devfileData.devfile.metadata.name}`,
                 component.contextPath,
                 process.env,
