@@ -422,6 +422,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.dev.manual",
+				"title": "Start Dev (manually trigger rebuild)",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.component.binding.add",
 				"title": "Bind Service",
 				"category": "OpenShift"
@@ -742,6 +747,11 @@
 			{
 				"command": "openshift.component.dev.onPodman",
 				"title": "Start Dev on Podman",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.dev.onPodman.manual",
+				"title": "Start Dev on Podman (manually trigger rebuild)",
 				"category": "OpenShift"
 			},
 			{
@@ -1094,7 +1104,15 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.component.dev.manual",
+					"when": "false"
+				},
+				{
 					"command": "openshift.component.dev.onPodman",
+					"when": "false"
+				},
+				{
+					"command": "openshift.component.dev.onPodman.manual",
 					"when": "false"
 				},
 				{
@@ -1542,19 +1560,29 @@
 					"group": "c1@1"
 				},
 				{
-					"command": "openshift.component.dev.onPodman",
+					"command": "openshift.component.dev.manual",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c1@2"
 				},
 				{
+					"command": "openshift.component.dev.onPodman",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c1@3"
+				},
+				{
+					"command": "openshift.component.dev.onPodman.manual",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"group": "c1@4"
+				},
+				{
 					"command": "openshift.component.exitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-(?:str)|(?:run).*/",
-					"group": "c1@3"
+					"group": "c1@5"
 				},
 				{
 					"command": "openshift.component.forceExitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
-					"group": "c1@4"
+					"group": "c1@6"
 				},
 				{
 					"command": "openshift.component.deploy",

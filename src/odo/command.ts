@@ -19,7 +19,7 @@ export class Command {
         return command;
     }
 
-    static dev(debug: boolean, runOn?: undefined | 'podman'): CommandText {
+    static dev(debug: boolean, runOn?: undefined | 'podman', manualRebuild: boolean = false): CommandText {
         const command = new CommandText('odo', 'dev');
         if (debug) {
             command.addOption(new CommandOption('--debug'));
@@ -27,6 +27,9 @@ export class Command {
         if (runOn) {
             command.addOption(new CommandOption('--platform', 'podman'));
             command.addOption(new CommandOption('--forward-localhost'));
+        }
+        if (manualRebuild) {
+            command.addOption(new CommandOption('--no-watch'));
         }
         return command;
     }
