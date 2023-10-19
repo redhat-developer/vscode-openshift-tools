@@ -118,7 +118,7 @@
 		"@types/react": "^17.0.67",
 		"@types/react-copy-to-clipboard": "^5.0.6",
 		"@types/react-dom": "^17.0.21",
-		"@types/react-lazylog": "^4.5.2",
+		"@types/react-lazylog": "^4.5.3",
 		"@types/react-syntax-highlighter": "^15.5.9",
 		"@types/shelljs": "^0.8.14",
 		"@types/sinon": "^10.0.19",
