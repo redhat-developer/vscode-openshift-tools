@@ -114,7 +114,7 @@ export function checkOpenshiftView() {
             let registries: CustomTreeSection;
 
             before(async function() {
-                registries = await view.getContent().getSection(VIEWS.compRegistries) as CustomTreeSection;
+                registries = await view.getContent().getSection(VIEWS.compRegistries);
                 await registries.expand();
             });
 
