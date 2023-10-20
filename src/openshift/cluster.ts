@@ -150,7 +150,8 @@ export class Cluster extends OpenShiftItem {
                 buttons: [deleteBtn],
             }));
             quickPick.items = contextNames;
-            quickPick.buttons = [QuickInputButtons.Back];
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
             if (contextNames.length === 0) {
                 void window
                     .showInformationMessage(
@@ -179,9 +180,7 @@ export class Cluster extends OpenShiftItem {
                         .catch(reject);
                 });
                 quickPick.onDidTriggerButton((button) => {
-                    if (button === QuickInputButtons.Back) {
-                        quickPick.hide();
-                    }
+                    if (button === QuickInputButtons.Back || button === cancelBtn) quickPick.hide();
                 });
                 quickPick.onDidTriggerItemButton(async (event: QuickPickItemButtonEvent<QuickPickItem>) => {
                     if (event.button === deleteBtn) {
@@ -204,7 +203,7 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
-    static async getUrl(): Promise<string | null> {
+    static async getUrl(): Promise<string | null | undefined> {
         const clusterURl = await Cluster.getUrlFromClipboard();
         return await Cluster.showQuickPick(clusterURl);
     }
@@ -221,7 +220,8 @@ export class Cluster extends OpenShiftItem {
                 buttons: ctx.description ? [] : [deleteBtn],
             }));
             quickPick.items = [createUrl, ...contextNames];
-            quickPick.buttons = [QuickInputButtons.Back];
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
             quickPick.onDidAccept(async () => {
@@ -232,13 +232,9 @@ export class Cluster extends OpenShiftItem {
                     const prompt = 'Provide new Cluster URL to connect';
                     const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
                     const newURL = await this.enterValue(prompt, '', false, validateInput);
-                    if (!newURL) {
-                        resolve(await Cluster.showQuickPick(clusterURl)); // Back
-                    } else if (newURL === null) {
-                        return null; // Cancel
-                    } else {
-                       resolve(newURL);
-                    }
+                    if (newURL === null) return null; // Cancel
+                    else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl)); // Back
+                    else resolve(newURL);
                 } else {
                     resolve(choice.label);
                 }
@@ -247,9 +243,10 @@ export class Cluster extends OpenShiftItem {
                 selection = selects;
             });
             quickPick.onDidTriggerButton((button) => {
-                if (button === QuickInputButtons.Back) {
-                    quickPick.hide();
-                }
+                hideDisposable.dispose();
+                quickPick.hide();
+                if (button === QuickInputButtons.Back) quickPick.hide();
+                else if (button === cancelBtn) resolve(null);
             });
             quickPick.onDidTriggerItemButton(async (event) => {
                 if (event.button === deleteBtn) {
@@ -325,7 +322,7 @@ export class Cluster extends OpenShiftItem {
      * @returns string contaning cluster login method name or null if cancelled or undefined if Back is pressed
      */
     private static async getLoginMethod(): Promise<string | null | undefined> {
-        return new Promise<string | null>((resolve, reject) => {
+        return new Promise<string | null | undefined>((resolve, reject) => {
             const loginActions: QuickPickItem[] = [
                 {
                     label: 'Credentials',
@@ -338,7 +335,8 @@ export class Cluster extends OpenShiftItem {
             ];
             const quickPick = window.createQuickPick();
             quickPick.items = [...loginActions];
-            quickPick.buttons = [QuickInputButtons.Back];
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
             quickPick.onDidAccept(() => {
@@ -351,9 +349,10 @@ export class Cluster extends OpenShiftItem {
                 selection = selects;
             });
             quickPick.onDidTriggerButton((button) => {
-                if (button === QuickInputButtons.Back) {
-                    resolve(undefined);
-                }
+                hideDisposable.dispose();
+                quickPick.hide();
+                if (button === QuickInputButtons.Back) resolve(undefined);
+                else if (button === cancelBtn) resolve(null);
             });
             quickPick.show();
         });
@@ -395,8 +394,13 @@ export class Cluster extends OpenShiftItem {
                             // so it's running
                             clusterIsUp = true;
                         } catch (e) {
-                            const clusterURLObj = new URL(clusterURL);
-                            if (clusterURLObj.hostname === 'api.crc.testing') {
+                            let clusterURLObj: any = undefined;
+                            try {
+                                clusterURLObj = new URL(clusterURL);
+                            } catch (_) {
+                                // Ignore
+                            }
+                            if (clusterURLObj && clusterURLObj.hostname === 'api.crc.testing') {
                                 const startCrc = 'Start OpenShift Local';
                                 const promptResponse = await window.showWarningMessage(
                                     'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
@@ -409,7 +413,7 @@ export class Cluster extends OpenShiftItem {
                                     // it will take the cluster a few minutes to stabilize
                                     return null;
                                 }
-                            } else if (/api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
+                            } else if (clusterURLObj && /api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
                                 const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
                                 const promptResponse = await window.showWarningMessage(
                                     'The cluster appears to be a OpenShift Dev Sandbox cluster, but it isn\'t running',
@@ -435,10 +439,10 @@ export class Cluster extends OpenShiftItem {
                 }
                 case Step.selectLoginMethod: {
                     const result = await Cluster.getLoginMethod();
-                    if (!result) { // Back Button is hit
-                        step = Step.selectCluster;
-                    } if (result === null) { // User cancelled the operation
+                    if (result === null) { // User cancelled the operation
                         return null;
+                    } else if (!result) { // Back button is hit
+                        step = Step.selectCluster;
                     } else if(result === 'Credentials') {
                         step = Step.loginUsingCredentials;
                     } else if (result === 'Token') {
@@ -451,10 +455,11 @@ export class Cluster extends OpenShiftItem {
                     const clusterVersions: string = step === Step.loginUsingCredentials
                         ? await Cluster.credentialsLogin(true, clusterURL)
                             : await Cluster.tokenLogin(clusterURL, true);
-                    if (!clusterVersions) { // Back Button is hit
-                        step = Step.selectLoginMethod;
-                    } else if (clusterVersions === null) { // User cancelled the operation
+
+                    if (clusterVersions === null) { // User cancelled the operation
                         return null;
+                    } else if (!clusterVersions) { // Back button is hit
+                        step = Step.selectLoginMethod;
                     } else {
                         // login successful
                         return null;
@@ -511,7 +516,8 @@ export class Cluster extends OpenShiftItem {
 
             const quickPick = window.createQuickPick();
             quickPick.items = [addUser, ...users];
-            quickPick.buttons = [QuickInputButtons.Back];
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
             quickPick.onDidAccept(() => {
@@ -524,9 +530,10 @@ export class Cluster extends OpenShiftItem {
                 selection = selects;
             });
             quickPick.onDidTriggerButton((button) => {
-                if (button === QuickInputButtons.Back) {
-                    resolve(undefined);
-                }
+                hideDisposable.dispose();
+                quickPick.hide();
+                if (button === QuickInputButtons.Back) resolve(undefined);
+                else if (button === cancelBtn) resolve(null);
             });
             quickPick.show();
         });
@@ -545,14 +552,15 @@ export class Cluster extends OpenShiftItem {
             input.value = initialValue;
             input.prompt = prompt;
             input.password = password;
-            input.buttons = [QuickInputButtons.Back];
-            const validationMessage: string = validate(input.value);
+            const enterBtn = new quickBtn(new ThemeIcon('check'), 'Enter');
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            input.buttons = [QuickInputButtons.Back, enterBtn, cancelBtn];
+            const validationMessage: string = validate(input.value? input.value : '');
             input.ignoreFocusOut = true;
             if (validationMessage) {
                 input.validationMessage = validationMessage;
             }
-
-            input.onDidAccept(async () => {
+            const acceptInput = async () => {
                 const value = input.value;
                 input.enabled = false;
                 input.busy = true;
@@ -562,21 +570,25 @@ export class Cluster extends OpenShiftItem {
                 }
                 input.enabled = true;
                 input.busy = false;
-            });
+            };
+            input.onDidAccept(acceptInput);
             input.onDidChangeValue(async text => {
                 const current = validate(text);
                 const validating = current;
                 const validationMessage = await current;
                 if (current === validating) {
-                input.validationMessage = validationMessage;
+                    input.validationMessage = validationMessage;
                 }
             });
             input.onDidHide(() => {
                 input.dispose();
             })
-            input.onDidTriggerButton((event) => {
-                if (event === QuickInputButtons.Back) {
-                    resolve(undefined);
+            input.onDidTriggerButton(async (event) => {
+                if (event === QuickInputButtons.Back) resolve(undefined);
+                else if (event === enterBtn) await acceptInput();
+                else if (event === cancelBtn) {
+                    resolve(null);
+                    input.dispose();
                 }
             });
             input.show();
@@ -614,8 +626,7 @@ export class Cluster extends OpenShiftItem {
                     if (!username)  {
                         const addUserLabel = '$(plus) Add new user...';
                         const choice = await this.getUserName(clusterURL, addUserLabel);
-                        if (!choice || choice === null) return choice; // Back or Cancel
-
+                        if (!choice) return choice; // Back or Cancel
                         if (choice === addUserLabel) {
                             step = Step.enterUserName;
                         } else {
@@ -629,11 +640,12 @@ export class Cluster extends OpenShiftItem {
                         const prompt = 'Provide Username for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value);
                         const newUsername = await this.enterValue(prompt, '', false, validateInput);
-                        if (!newUsername) {
+
+                        if (newUsername === null) {
+                            return null; // Cancel
+                        } else if (!newUsername) {
                             username = undefined;
                             step = Step.getUserName; // Back
-                        } else if (newUsername === null) {
-                            return null; // Cancel
                         } else {
                             username = newUsername;
                             step = Step.enterPassword;
@@ -646,11 +658,12 @@ export class Cluster extends OpenShiftItem {
                         const prompt = 'Provide Password for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value);
                         const newPassword = await this.enterValue(prompt, password, true, validateInput);
-                        if (!newPassword) {
+
+                        if (newPassword === null) {
+                            return null; // Cancel
+                        } else if (!newPassword) {
                             username = undefined;
                             step = Step.getUserName; // Back
-                        } else if (newPassword === null) {
-                            return null; // Cancel
                         } else {
                             passwd = newPassword;
                             step = undefined;
@@ -743,10 +756,10 @@ export class Cluster extends OpenShiftItem {
             const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value);
             const initialValue = token ? token : '';
             ocToken = await this.enterValue(prompt, initialValue, true, validateInput);
-            if (!ocToken) {
-                return undefined; // Back
-            } else if (ocToken === null) {
+            if (ocToken === null) {
                 return null; // Cancel
+            } else if (!ocToken) {
+                return undefined; // Back
             }
         } else {
             ocToken = userToken;
