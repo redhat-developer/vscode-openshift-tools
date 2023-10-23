@@ -129,7 +129,7 @@
 		"@types/validator": "^13.11.5",
 		"@types/vscode": "1.64.0",
 		"@typescript-eslint/eslint-plugin": "^6.8.0",
-		"@typescript-eslint/parser": "^6.8.0",
+		"@typescript-eslint/parser": "^6.9.0",
 		"@vscode/test-electron": "^2.3.5",
 		"bootstrap": "^5.3.2",
 		"chai": "^4.3.10",
