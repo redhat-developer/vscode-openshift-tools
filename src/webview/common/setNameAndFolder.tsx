@@ -33,6 +33,7 @@ type SetNameAndFolderProps = {
     devfile: Devfile;
     templateProject?: string;
     initialComponentName?: string;
+    initialComponentParentFolder?: string;
 };
 
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
@@ -46,7 +47,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [portNumberErrorMessage, setPortNumberErrorMessage] = React.useState(
         'Port number auto filled based on devfile selection',
     );
-    const [componentParentFolder, setComponentParentFolder] = React.useState('');
+    const [componentParentFolder, setComponentParentFolder] = React.useState(props.initialComponentParentFolder);
     const [folderFieldStatus, setFolderFieldStatus] = React.useState(ValidationStatus.error);
     const [folderFieldErrorMessage, setFolderFieldErrorMessage] = React.useState('');
     const [isFolderFieldInteracted, setFolderFieldInteracted] = React.useState(false);
@@ -126,6 +127,18 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     }, []);
 
     React.useEffect(() => {
+        if (props.initialComponentParentFolder) {
+            window.vscodeApi.postMessage({
+                action: 'isValidProjectFolder',
+                data: {
+                    folder: props.initialComponentParentFolder,
+                    componentName,
+                },
+            });
+        }
+    }, [componentName]);
+
+    React.useEffect(() => {
         if (props.devfile.port) {
             window.vscodeApi.postMessage({
                 action: 'validatePortNumber',
@@ -195,6 +208,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                             onClick={(e) => {
                                 window.vscodeApi.postMessage({
                                     action: 'selectProjectFolderNewProject',
+                                    data: componentParentFolder
                                 });
                             }}
                         >

@@ -63,6 +63,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
     );
     const [isLoading, setLoading] = React.useState(false);
     const [isLoaded, setLoaded] = React.useState(false);
+    const [initialComponentParentFolder, setInitialComponentParentFolder] = React.useState<string>(undefined);
 
     const [recommendedDevfile, setRecommendedDevfile] = React.useState<RecommendedDevfileState>({
         devfile: undefined,
@@ -134,6 +135,10 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 setCreateComponentErrorMessage(message.data);
                 break;
             }
+            case 'initialWorkspaceFolder': {
+                setInitialComponentParentFolder(message.data);
+                break;
+            }
             default:
                 break;
         }
@@ -157,6 +162,10 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 data: componentNameFromFolder,
             });
         }
+    }, []);
+
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getInitialWokspaceFolder' });
     }, []);
 
     function handleNext() {
@@ -255,6 +264,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                         onClick={(e) => {
                                             window.vscodeApi.postMessage({
                                                 action: 'selectProjectFolder',
+                                                data: initialComponentParentFolder
                                             });
                                         }}
                                     >

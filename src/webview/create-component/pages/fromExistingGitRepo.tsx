@@ -65,6 +65,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         noRecommendation: false,
     });
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
+    const [initialComponentParentFolder, setInitialComponentParentFolder] = React.useState<string>(undefined);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -126,6 +127,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 45}));
                 break;
             }
+            case 'initialWorkspaceFolder': {
+                setInitialComponentParentFolder(message.data);
+                break;
+            }
             default:
                 break;
         }
@@ -136,6 +141,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
         return () => {
             window.removeEventListener('message', respondToMessage);
         };
+    }, []);
+
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getInitialWokspaceFolder' });
     }, []);
 
     function handleNext() {
@@ -468,6 +477,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     createComponent={createComponentFromGitRepo}
                     devfile={getEffectiveDevfile()}
                     initialComponentName={buildSanitizedComponentName(getInitialComponentName())}
+                    initialComponentParentFolder={initialComponentParentFolder}
                 />
             );
         case 'selectDifferentDevfile':

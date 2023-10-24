@@ -18,7 +18,7 @@ import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
-import { selectWorkspaceFolder } from '../../util/workspace';
+import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
     getDevfileCapabilities,
     getDevfileRegistries,
@@ -186,6 +186,20 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
+             * The panel requested the root workspace folder.
+             * Once the  `vscode.workspace.rootPath` is deprected, we'll use the first path
+             * from the list of workspace folders as the initial one.
+             * Respond with this folder path.
+             */
+            case 'getInitialWokspaceFolder': {
+                const initialWorkspaceFolder = getInitialWorkspaceFolder();
+                initialWorkspaceFolder && void CreateComponentLoader.panel.webview.postMessage({
+                    action: 'initialWorkspaceFolder',
+                    data: initialWorkspaceFolder
+                });
+                break;
+            }
+            /**
              * The panel requested to validate the entered component name. Respond with error status and message.
              */
             case 'validateComponentName': {
@@ -211,7 +225,8 @@ export default class CreateComponentLoader {
              * The panel requested to select a project folder.
              */
             case 'selectProjectFolder': {
-                const workspaceUri: Uri = await selectWorkspaceFolder(true);
+                const workspaceUri: Uri = await selectWorkspaceFolder(true, undefined, undefined, message.data);
+                if (!workspaceUri) return;
                 const workspaceFolderUris: Uri[] = vscode.workspace.workspaceFolders
                     ? vscode.workspace.workspaceFolders.map((wsFolder) => wsFolder.uri)
                     : [];
@@ -237,8 +252,8 @@ export default class CreateComponentLoader {
              * 'template project' workflow
              */
             case 'selectProjectFolderNewProject': {
-                const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
-                void CreateComponentLoader.panel.webview.postMessage({
+                const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  message.data );
+                workspaceUri && void CreateComponentLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
                     data: workspaceUri.fsPath,
                 });

@@ -50,7 +50,7 @@ export function selectWorkspaceFolders(): Uri[] {
     return workspacePaths;
 }
 
-export async function selectWorkspaceFolder(skipWindowPick = false, label?: string, folderName?: string): Promise<Uri> {
+export async function selectWorkspaceFolder(skipWindowPick = false, label?: string, folderName?: string, initialFolder?: string): Promise<Uri> {
     let folders: WorkspaceFolderItem[] = [];
     let choice:WorkspaceFolderItem | QuickPickItem;
     let workspacePath: Uri;
@@ -78,7 +78,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
-            defaultUri: Uri.file(Platform.getUserHomePath()),
+            defaultUri: Uri.file(initialFolder ? initialFolder : Platform.getUserHomePath()),
             openLabel: label || 'Add context folder for component in workspace.',
         });
         if (!selectedFolders) return null;
@@ -86,18 +86,44 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
             void window.showInformationMessage(
                 'The selected folder already contains a component. Please select a different folder.',
             );
-            return selectWorkspaceFolder(skipWindowPick);
+            return selectWorkspaceFolder(skipWindowPick, label, folderName, initialFolder);
         } else if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
             void window.showInformationMessage(
                 `The folder ${folderName} already exists. Please select a different folder.`,
             );
-            return selectWorkspaceFolder(skipWindowPick, label, folderName);
+            return selectWorkspaceFolder(skipWindowPick, label, folderName, initialFolder);
         }
         [workspacePath] = selectedFolders;
     } else if (choice) {
         workspacePath = (choice as WorkspaceFolderItem).uri;
     }
     return workspacePath;
+}
+
+export function getInitialWorkspaceFolder(): string | undefined {
+    const wsFolders: path.ParsedPath[] = [];
+    workspace.rootPath && wsFolders.push(path.parse(workspace.rootPath));
+    workspace?.workspaceFolders?.forEach((f) => wsFolders.push(path.parse(f.uri.fsPath)));
+
+    if (wsFolders.length > 0) {
+        const fsRoot = wsFolders[0].root;
+        let prefix = path.join(wsFolders[0].dir, wsFolders[0].name);
+        while(fsRoot !== prefix ) {
+            const count = wsFolders.filter((f) => {
+                    try {
+                        const diff = path.relative(prefix, path.join(f.dir, f.name));
+                        return diff.length >= 0 && !diff.startsWith('..');
+                    } catch(Error) {
+                        return false;
+                    }
+                }).length;
+            if(wsFolders.length === count) {
+                return prefix;
+            }
+            prefix = path.parse(prefix).dir;
+       }
+    }
+    return undefined;
 }
 
 /**

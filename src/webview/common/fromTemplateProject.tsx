@@ -15,11 +15,40 @@ type FromTemplateProjectProps = {
     goHome?: () => void;
 };
 
+type Message = {
+    action: string;
+    data: any;
+};
+
 export function FromTemplateProject(props: FromTemplateProjectProps) {
     const [currentPage, setCurrentPage] = React.useState<CurrentPage>('selectTemplateProject');
     const [selectedTemplateProject, setSelectedTemplateProject] =
         React.useState<TemplateProjectIdentifier>(undefined);
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
+    const [initialComponentParentFolder, setInitialComponentParentFolder] = React.useState<string>(undefined);
+
+    function respondToMessage(messageEvent: MessageEvent) {
+        const message = messageEvent.data as Message;
+        switch (message.action) {
+            case 'initialWorkspaceFolder': {
+                setInitialComponentParentFolder(message.data);
+                break;
+            }
+            default:
+                break;
+       }
+    }
+
+    React.useEffect(() => {
+        window.addEventListener('message', respondToMessage);
+        return () => {
+            window.removeEventListener('message', respondToMessage);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getInitialWokspaceFolder' });
+    }, []);
 
     function setSelectedProjectAndAdvance(value: TemplateProjectIdentifier) {
         setSelectedTemplateProject((_) => value);
@@ -60,6 +89,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                     devfile={selectedDevfile}
                     templateProject={selectedTemplateProject.templateProjectName}
                     initialComponentName={selectedTemplateProject.templateProjectName}
+                    initialComponentParentFolder={initialComponentParentFolder}
                 />
             );
         default:
