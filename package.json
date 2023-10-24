@@ -101,7 +101,7 @@
 	"devDependencies": {
 		"@devfile/api": "^2.2.1-alpha-1667236163",
 		"@mui/icons-material": "^5.14.14",
-		"@mui/lab": "^5.0.0-alpha.149",
+		"@mui/lab": "^5.0.0-alpha.150",
 		"@mui/material": "^5.14.14",
 		"@mui/styles": "^5.14.14",
 		"@rjsf/core": "^5.13.2",
