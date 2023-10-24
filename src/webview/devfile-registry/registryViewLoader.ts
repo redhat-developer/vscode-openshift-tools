@@ -10,7 +10,7 @@ import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
-import { selectWorkspaceFolder } from '../../util/workspace';
+import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
 import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateName, validatePortNumber } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
@@ -80,6 +80,20 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             }
             break;
         }
+        /**
+         * The panel requested the root workspace folder.
+         * Once the  `vscode.workspace.rootPath` is deprected, we'll use the first path
+         * from the list of workspace folders as the initial one.
+         * Respond with this folder path.
+         */
+        case 'getInitialWokspaceFolder': {
+            const initialWorkspaceFolder = getInitialWorkspaceFolder();
+            initialWorkspaceFolder && void panel.webview.postMessage({
+                action: 'initialWorkspaceFolder',
+                data: initialWorkspaceFolder
+            });
+            break;
+        }
         case 'validateComponentName': {
             const validationMessage = validateName(event.data);
             void panel.webview.postMessage({
@@ -100,8 +114,8 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         }
         case 'selectProjectFolderNewProject': {
-            const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true);
-            void panel.webview.postMessage({
+            const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  event?.data );
+            workspaceUri && void panel.webview.postMessage({
                 action: 'selectedProjectFolder',
                 data: workspaceUri.fsPath,
             });
