@@ -152,6 +152,13 @@ suite('./oc/ocWrapper.ts', function () {
             const deployments = await Oc.Instance.getKubernetesObjects('Deployment');
             expect(deployments).to.have.length(0);
         });
+
+        test('deleteKubernetesObjectFromFile()', async function() {
+            await Oc.Instance.createKubernetesObjectFromFile(yamlFile);
+            await Oc.Instance.deleteKubernetesObjectFromFile(yamlFile);
+            const deployments = await Oc.Instance.getKubernetesObjects('Deployment');
+            expect(deployments).to.have.length(0);
+        });
     });
 
     test('getConsoleInfo()', async function() {

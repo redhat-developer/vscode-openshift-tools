@@ -31,6 +31,7 @@ import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { WelcomePage } from './welcomePage';
+import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 
 import fsx = require('fs-extra');
 
@@ -103,6 +104,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
         setupWorkspaceDevfileContext(),
         window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
+        ...registerYamlHandlers(),
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
