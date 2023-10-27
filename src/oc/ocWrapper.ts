@@ -125,6 +125,17 @@ export class Oc {
     }
 
     /**
+     * Delete the Kubernetes object described by the given file.
+     *
+     * @param file the file containing the spec of the kubernetes object to delete
+     */
+    public async deleteKubernetesObjectFromFile(file: string): Promise<void> {
+        await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'delete', [new CommandOption('-f', file)])
+        );
+    }
+
+    /**
      * Returns the username of the current user.
      *
      * @returns the username of the current user

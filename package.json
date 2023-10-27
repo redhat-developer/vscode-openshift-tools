@@ -190,6 +190,7 @@
 		"onCommand:openshift.oc.about",
 		"onCommand:openshift.output",
 		"onCommand:openshift.create",
+		"onCommand:openshift.delete",
 		"onCommand:openshift.open.developerConsole",
 		"onCommand:openshift.open.developerConsole.palette",
 		"onCommand:openshift.explorer.addCluster",
@@ -261,6 +262,11 @@
 			{
 				"command": "openshift.create",
 				"title": "Create",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.delete",
+				"title": "Delete",
 				"category": "OpenShift"
 			},
 			{

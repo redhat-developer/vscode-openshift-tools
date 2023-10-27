@@ -54,4 +54,47 @@ export class YamlFileCommands {
         await OcWrapper.Instance.createKubernetesObjectFromFile(document.fileName);
         return 'Resources were successfully created.';
     }
+
+    @vsCommand('openshift.delete')
+    @clusterRequired()
+    public static async delete(): Promise<string | null> {
+        const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
+        const pleaseSave = 'Please save your changes before executing \'OpenShift: Delete\' command.';
+        let message: string;
+
+        if (!document
+            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
+            message =
+                '\'OpenShift: Delete\' command requires a .yaml or a .json file opened in editor.';
+        }
+
+        if (!message && document.isUntitled) {
+            message = pleaseSave;
+        }
+
+        if (!message && document.isDirty) {
+            const save = 'Save';
+            const action = await window.showInformationMessage('Editor has unsaved changes.', save);
+            if (action !== save) {
+                message = pleaseSave;
+            } else {
+                await document.save();
+            }
+        }
+
+        const activeProject = await YamlFileCommands.odo.getActiveProject();
+
+        if (!message && !activeProject) {
+            message = '\'OpenShift: Delete\' requires setting a project as active, and none is currently set.';
+        }
+
+        if (message) {
+            void window.showWarningMessage(message);
+            return null;
+        }
+
+        await OcWrapper.Instance.deleteKubernetesObjectFromFile(document.fileName);
+        return 'Resources were successfully deleted.';
+    }
+
 }
