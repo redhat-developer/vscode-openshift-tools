@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as JSYAML from 'js-yaml';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
-import { ExtCommandTelemetryEvent } from '../../telemetry';
+import sendTelemetry, { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
@@ -121,6 +121,15 @@ function helmChartMessageListener(event: any): void {
                     }
                 }
             );
+            break;
+        }
+        /**
+         * Send a telemetry message
+         */
+        case 'sendTelemetry': {
+            const actionName: string = event.data.actionName;
+            const properties: {[key: string]: string} = event.data.properties;
+            void sendTelemetry(actionName, properties);
             break;
         }
         default: {

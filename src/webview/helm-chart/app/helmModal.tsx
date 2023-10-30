@@ -118,7 +118,7 @@ export const HelmModal = React.forwardRef(
                         alignItems='flex-start'
                         marginBottom={1}
                     >
-                        <HelmListItem helmChart={props.helmChart} selectedVersion={selectedVersion} />
+                        <HelmListItem helmChart={props.helmChart} selectedVersion={selectedVersion} isDetailedPage={true} />
                         <IconButton onClick={() => {
                             props.closeModal()
                         }}>
