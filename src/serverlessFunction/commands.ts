@@ -8,6 +8,7 @@ import { load } from 'js-yaml';
 import * as path from 'path';
 import { CommandOption, CommandText } from '../base/command';
 import { FunctionContent, InvokeFunction } from './types';
+import { GitModel } from './git/git';
 
 export class Utils {
     static async getFuncYamlContent(dir: string): Promise<FunctionContent> {
@@ -73,6 +74,22 @@ export class ServerlessCommand {
             new CommandOption('--builder', builder),
             new CommandOption('-i', image),
             new CommandOption('-v')
+        ]);
+        if (isOpenShiftCluster) {
+            commandText.addOption(new CommandOption('-r', '""'))
+        }
+        return commandText
+    }
+
+    static onClusterBuildFunction(fsPath: string, namespace: string, buildImage: string, gitModel: GitModel, isOpenShiftCluster: boolean): CommandText {
+        const commandText = new CommandText('func', 'deploy', [
+            new CommandOption('--path', fsPath),
+            new CommandOption('-i', buildImage),
+            new CommandOption('-n', namespace),
+            new CommandOption('-v'),
+            new CommandOption('--remote'),
+            new CommandOption('--git-url', gitModel.remoteUrl),
+            new CommandOption('--git-branch', gitModel.branchName)
         ]);
         if (isOpenShiftCluster) {
             commandText.addOption(new CommandOption('-r', '""'))

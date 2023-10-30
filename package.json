@@ -808,6 +808,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.Serverless.onClusterBuild",
+				"title": "On Cluster Build",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.Serverless.deploy",
 				"title": "Deploy",
 				"category": "OpenShift"
@@ -1224,6 +1229,10 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.Serverless.onClusterBuild",
+					"when": "false"
+				},
+				{
 					"command": "openshift.Serverless.deploy",
 					"when": "false"
 				},
@@ -1406,6 +1415,11 @@
 					"command": "openshift.Serverless.s2iBuild",
 					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/",
 					"group": "c1@1"
+				},
+				{
+					"command": "openshift.Serverless.onClusterBuild",
+					"when": "view == openshiftServerlessFunctionsView && viewItem =~ /^(localFunctions|localFunctionsWithBuild|localDeployFunctions)$/ && isLoggedIn",
+					"group": "c1@2"
 				}
 			],
 			"view/item/context": [
