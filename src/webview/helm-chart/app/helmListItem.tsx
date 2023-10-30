@@ -104,6 +104,10 @@ function HelmChartListContent(props: HelmListItemProps) {
                 >
                     {props.selectedVersion.description}
                 </Typography>
+                <Typography
+                    variant='body2'
+                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                >Repo: https://charts.openshift.io/</Typography>
                 <Stack direction='row' spacing={1}>
                     {props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
