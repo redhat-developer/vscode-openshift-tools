@@ -2,14 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Box, Chip, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Button, Chip, Link, Stack, SvgIcon, Typography } from '@mui/material';
 import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
 import { Chart, ChartResponse } from '../helmChartType';
+import { VSCodeMessage } from '../vsCodeMessage';
+import { Launch } from '@mui/icons-material';
 
 export type HelmListItemProps = {
     helmChart: ChartResponse;
     selectedVersion: Chart;
+    isDetailedPage?: boolean;
     buttonCallback?: () => void;
 };
 
@@ -30,12 +33,13 @@ export function HelmListItem(props: HelmListItemProps) {
                     <HelmChartListContent
                         helmChart={props.helmChart}
                         selectedVersion={props.selectedVersion}
+                        isDetailedPage={props.isDetailedPage}
                         buttonCallback={props.buttonCallback}
                     />
                 </Box>
             ) : (
                 <>
-                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion} />
+                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion} isDetailedPage={props.isDetailedPage}/>
                 </>
             )}
         </>
@@ -54,6 +58,26 @@ function HelmChartListContent(props: HelmListItemProps) {
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+    }
+
+    function LinkButton(props: { href: string; onClick: () => void; children }) {
+        return (
+            <Link href={props.href} underline='none' variant='body2'>
+                <Button
+                    variant='text'
+                    style={{ textTransform: 'none' }}
+                    onClick={(e) => {
+                        if (props.onClick) {
+                            props.onClick();
+                        }
+                        e.preventDefault();
+                    }}
+                    endIcon={<Launch />}
+                >
+                    {props.children}
+                </Button>
+            </Link>
+        );
     }
 
     return (
@@ -104,6 +128,25 @@ function HelmChartListContent(props: HelmListItemProps) {
                 >
                     {props.selectedVersion.description}
                 </Typography>
+                {props.isDetailedPage &&
+                    <LinkButton
+                        href='https://charts.openshift.io/'
+                        onClick={() => {
+                            VSCodeMessage.postMessage({
+                                action: 'sendTelemetry',
+                                data: {
+                                    actionName: 'helmRepoInBrowser',
+                                    properties: {
+                                        // eslint-disable-next-line camelcase
+                                        url: 'https://charts.openshift.io/',
+                                        // eslint-disable-next-line camelcase
+                                        helmChartName: props.helmChart.displayName,
+                                    },
+                                },
+                            });
+                        }} >https://charts.openshift.io/
+                    </LinkButton>
+                }
                 <Stack direction='row' spacing={1}>
                     {props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
