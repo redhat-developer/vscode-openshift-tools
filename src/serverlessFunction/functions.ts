@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import validator from 'validator';
-import { Uri, commands, window } from 'vscode';
+import { ExtensionContext, Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
@@ -15,11 +15,12 @@ import { ServerlessCommand, Utils } from './commands';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
-import { contextGlobalState } from '../extension';
 
 export class Functions {
 
     private static instance: Functions;
+
+    public static extensionContext: ExtensionContext;
 
     protected static readonly cli = CliChannel.getInstance();
 
@@ -69,7 +70,7 @@ export class Functions {
 
     public async onClusterBuild(context: FunctionObject): Promise<void> {
 
-        if (!contextGlobalState.globalState.get('hasTekton')) {
+        if (!Functions.extensionContext.globalState.get('hasTekton')) {
             await window.showWarningMessage(
                 'This action requires Tekton to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
             );

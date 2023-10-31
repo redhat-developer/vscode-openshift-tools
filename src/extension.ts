@@ -33,8 +33,7 @@ import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShift
 import { WelcomePage } from './welcomePage';
 
 import fsx = require('fs-extra');
-
-export let contextGlobalState: ExtensionContext;
+import { Functions } from './serverlessFunction/functions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -69,12 +68,12 @@ async function registerKubernetesCloudProvider(): Promise<void> {
 
 export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
     void WelcomePage.createOrShow();
-    contextGlobalState = extensionContext;
-    await contextGlobalState.globalState.update('hasTekton', await isTektonAware());
     await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
+    void extensionContext.globalState.update('hasTekton', await isTektonAware());
     Cluster.extensionContext = extensionContext;
+    Functions.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
 
     // pick kube config in case multiple are configured
