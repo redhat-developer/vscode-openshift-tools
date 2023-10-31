@@ -67,8 +67,8 @@
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
 		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/install-vscode.js && node ./out/build/run-tests.js unit",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
-		"cluster-ui-test": "extest setup-and-run out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c 1.83.1 -i",
-		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c 1.83.1 -i"
+		"cluster-ui-test": "extest setup-and-run out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i",
+		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max -i"
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.19.0",
@@ -172,7 +172,7 @@
 		"source-map-support": "^0.5.21",
 		"survey-react-ui": "^1.9.115",
 		"typescript": "^5.2.2",
-		"vscode-extension-tester": "^5.0.0 <5.7.0",
+		"vscode-extension-tester": "^5.10",
 		"xterm-addon-fit": "^0.8.0",
 		"xterm-addon-web-links": "^0.9.0",
 		"xterm-addon-webgl": "^0.16.0"
