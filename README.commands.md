@@ -39,9 +39,9 @@ Commands available in context for the compenent
    * `Start Dev on Podman` - Run the above start dev workflow for applications deployed on Podman.
    * `Stop Dev` - Stop the dev command workflow and resources are cleaned, hence the application is not running on the cluster
    * `Show Dev Terminal` - Directly opens the VSCode terminal where the dev command is running.
-   * `Describe` - Describe the given Component in terminal window or inside a webview editor.
-   * `Show Log` - Retrieve the log for the given Component in the terminal or inside a webview editor (can be changed in VSCode Settings)
-   * `Follow Log` - Follow logs for the given Component in the terminal or inside a webview editor (can be changed in VSCode Settings)
+   * `Describe` - Describe the given Component in terminal window.
+   * `Show Log` - Retrieve the log for the given Component in the terminal window.
+   * `Follow Log` - Follow logs for the given Component in the terminal window.
    * `Open in Browser` - Open the exposed URL in default browser.
    * `Deploy` - Deploys a Component on the cluster by first building the images of the containers to deploy, then by deploying the Kubernetes resources necessary to deploy the components.
    * `Undeploy` - Undeploys a Component from the cluster. The component still resides in the local config.
@@ -56,7 +56,6 @@ future releases.
    * `OpenShift Toolkit: Show Channel On Output` - Show OpenShift Toolkit output channel when new text added to output stream
    * `OpenShift Toolkit: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
    * `OpenShift Toolkit: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
-   * `OpenShift Toolkit: Use Webview based editors to show 'Show Log', 'Follow Log' and 'Describe' commands output` - Use Webview based editors instead of Terminal view to show or follow logs
    * `OpenShift Toolkit: CRC Executable Location` - Provide the path where OpenShift Local is installed.
    * `OpenShift Toolkit: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
    * `OpenShift Toolkit: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
