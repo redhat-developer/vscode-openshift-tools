@@ -5,9 +5,9 @@
 import * as fs from 'fs-extra';
 import * as pth from 'path';
 import { expect } from 'chai';
-import { ActivityBar, EditorView, SideBarView, ViewSection, WelcomeContentButton } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, SideBarView, ViewSection, WelcomeContentButton } from 'vscode-extension-tester';
 import { VIEWS, BUTTONS } from '../common/constants';
-import { CreateComponentWebView, GitProjectPage, SetNameAndFolderPage } from '../common/ui/webview/newComponentWebViewEditor';
+import { CreateComponentWebView, GitProjectPage, LocalCodeBasePage, SetNameAndFolderPage } from '../common/ui/webview/newComponentWebViewEditor';
 import { RegistryWebViewDevfileWindow, RegistryWebViewEditor } from '../common/ui/webview/registryWebViewEditor';
 import { afterEach } from 'mocha';
 import { collapse } from '../common/overdrives';
@@ -20,38 +20,29 @@ export function testCreateComponent(path: string) {
         let section: ViewSection;
         let button: WelcomeContentButton
         let componentName: string
+        let dlt = true;
 
         before(async function context() {
+            this.timeout(10_000)
+            await new EditorView().closeAllEditors();
             fs.ensureDirSync(path, 0o6777);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             for (const item of [VIEWS.appExplorer, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions]) {
                 await collapse(await view.getContent().getSection(item))
             }
+            await loadCreateComponentButton();
         });
-
-        beforeEach(async function context() {
-            componentName = undefined;
-            section = await view.getContent().getSection(VIEWS.components);
-            await new EditorView().closeAllEditors();
-            const buttons = await (await section.findWelcomeContent()).getButtons();
-            for(const btn of buttons) {
-                if(await btn.getTitle() === BUTTONS.newComponent) {
-                    button = btn;
-                }
-            }
-        })
 
         it('Shows default actions when no component exists', function test() {
             if(!button) {
                 expect.fail('No Create Component button found')
             }
-        })
+        });
 
         it('Create component from git URL', async function test() {
             this.timeout(25_000);
 
-            await button.click();
-            await new Promise((res) => { setTimeout(res, 3_000); });
+            await clickCreateComponent();
 
             const createCompView = await initializeEditor();
             await createCompView.createComponentFromGit();
@@ -67,16 +58,43 @@ export function testCreateComponent(path: string) {
 
             componentName = 'node-js-runtime';
             expect(await section.findItem(componentName)).to.be.not.undefined;
+
+            dlt = false
         });
 
-        it('Create component from local folder');
+        it('Create component from local folder', async function test() {
+            this.timeout(25_000)
+            fs.rmSync(pth.join(path, componentName, 'devfile.yaml'), {force: true});
+            await refreshView();
+            await loadCreateComponentButton();
+            await clickCreateComponent();
+
+            const createCompView = await initializeEditor();
+            await createCompView.createComponentFromLocalCodebase();
+
+            const localCodeBasePage = new LocalCodeBasePage();
+            await localCodeBasePage.initializeEditor();
+            await localCodeBasePage.insertComponentName(componentName)
+            await localCodeBasePage.clickSelectFolderButton();
+
+            const input = await InputBox.create();
+            await input.setText(pth.join(path, componentName));
+            await input.confirm();
+
+            await localCodeBasePage.clickNextButton();
+            await new Promise((res) => { setTimeout(res, 500); });
+            await localCodeBasePage.clickCreateComponent();
+            await new Promise((res) => { setTimeout(res, 6_000); });
+
+            expect(await section.findItem(componentName)).to.be.not.undefined;
+            dlt = true
+        });
 
         it('Create component from template project', async function test() {
             this.timeout(25_000);
 
             //Click on create component
-            await button.click();
-            await new Promise((res) => { setTimeout(res, 3_000); });
+            await clickCreateComponent();
 
             //Initialize create component editor and select create from template
             const createCompView = await initializeEditor();
@@ -105,28 +123,51 @@ export function testCreateComponent(path: string) {
         //Delete the component using file system
         afterEach(async function context() {
             this.timeout(30_000)
-            if(componentName) {
+            if(componentName && dlt) {
                 fs.rmSync(pth.join(path, componentName), {recursive: true, force: true});
-                await section.collapse();
-                await section.expand();
-                const refresh = await section.getAction('Refresh Components View');
-                await refresh.click();
-                await new Promise((res  => {setTimeout(res, 1_000)}));
+                componentName = undefined;
+                await refreshView();
+                await loadCreateComponentButton();
             }
+            await new EditorView().closeAllEditors();
         });
+
+        async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
+            const page = new SetNameAndFolderPage(createCompView.editorName);
+            await page.initializeEditor();
+            await page.clearProjectFolderPath();
+            await page.insertProjectFolderPath(path);
+            await page.clickCreateComponentButton();
+            await new Promise((res  => {setTimeout(res, 6_000)}))
+        }
+
+        async function initializeEditor(): Promise<CreateComponentWebView> {
+            const createCompView = new CreateComponentWebView();
+            await createCompView.initializeEditor();
+            return createCompView;
+        }
+
+        async function refreshView() {
+            await section.collapse();
+            await section.expand();
+            const refresh = await section.getAction('Refresh Components View');
+            await refresh.click();
+            await new Promise((res  => {setTimeout(res, 1_000)}));
+        }
+
+        async function clickCreateComponent() {
+            await button.click();
+            await new Promise((res) => { setTimeout(res, 3_000); });
+        }
+
+        async function loadCreateComponentButton() {
+            section = await view.getContent().getSection(VIEWS.components);
+            const buttons = await (await section.findWelcomeContent()).getButtons();
+            for(const btn of buttons) {
+                if(await btn.getTitle() === BUTTONS.newComponent) {
+                    button = btn;
+                }
+            }
+        }
     });
-
-    async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
-        const page = new SetNameAndFolderPage(createCompView.editorName);
-        await page.initializeEditor();
-        await page.insertProjectFolderPath(path);
-        await page.clickCreateComponentButton();
-        await new Promise((res  => {setTimeout(res, 6_000)}))
-    }
-
-    async function initializeEditor(): Promise<CreateComponentWebView> {
-        const createCompView = new CreateComponentWebView();
-        await createCompView.initializeEditor();
-        return createCompView;
-    }
 }
