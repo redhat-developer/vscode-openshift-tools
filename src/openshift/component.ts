@@ -18,8 +18,6 @@ import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingViewLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
-import DescribeViewLoader from '../webview/describe/describeViewLoader';
-import LogViewLoader from '../webview/log/LogViewLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 
@@ -400,12 +398,6 @@ export class Component extends OpenShiftItem {
         return 'No forwarded ports available for component yet. Pleas wait and try again.';
     }
 
-    static isUsingWebviewEditor(): boolean {
-        return workspace
-            .getConfiguration('openshiftToolkit')
-            .get<boolean>('useWebviewInsteadOfTerminalView');
-    }
-
     static createExperimentalEnv(componentFolder: ComponentWorkspaceFolder) {
         return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
     }
@@ -417,43 +409,30 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.describe', true)
     static async describe(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const command = Command.describeComponent();
-        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
-        if (Component.isUsingWebviewEditor()) {
-            await DescribeViewLoader.loadView(`${componentName} Description`, command, componentFolder);
-        } else {
-            void OpenShiftTerminalManager.getInstance().executeInTerminal(
-                command,
-                componentFolder.contextPath,
-                `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
-        }
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(
+            command,
+            componentFolder.contextPath,
+            `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
     }
 
     @vsCommand('openshift.component.log', true)
     static async log(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         const showLogCmd = Command.showLog(Component.getDevPlatform(componentFolder));
-        if (Component.isUsingWebviewEditor()) {
-            await LogViewLoader.loadView(`${componentName} Log`, showLogCmd, componentFolder);
-        } else {
-            await OpenShiftTerminalManager.getInstance().executeInTerminal(
-                showLogCmd,
-                componentFolder.contextPath,
-                `Show '${componentName}' Component Log`);
-        }
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(
+            showLogCmd,
+            componentFolder.contextPath,
+            `Show '${componentName}' Component Log`);
     }
 
     @vsCommand('openshift.component.followLog', true)
     static async followLog(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         const showLogCmd = Command.showLogAndFollow(Component.getDevPlatform(componentFolder));
-        if (Component.isUsingWebviewEditor()) {
-            await LogViewLoader.loadView(`${componentName} Follow Log`, showLogCmd, componentFolder);
-        } else {
-            await OpenShiftTerminalManager.getInstance().executeInTerminal(
-                showLogCmd,
-                componentFolder.contextPath,
-                `Follow '${componentName}' Component Log`);
-        }
+        await OpenShiftTerminalManager.getInstance().executeInTerminal(
+            showLogCmd,
+            componentFolder.contextPath,
+            `Follow '${componentName}' Component Log`);
     }
 
     @vsCommand('openshift.component.openCreateComponent')
@@ -844,15 +823,11 @@ export class Component extends OpenShiftItem {
         if ('getCommand' in componentFolder) {
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
             const command = Command.runComponentCommand(componentCommand.id);
-            if (Component.isUsingWebviewEditor()) {
-                void DescribeViewLoader.loadView('Component ${componentName}: Run \'${componentCommand.id}\' Command', command, componentFolder);
-            } else {
-                void OpenShiftTerminalManager.getInstance().createTerminal(
-                    command,
-                    `Component ${componentName}: Run '${componentCommand.id}' Command`,
-                    componentFolder.contextPath,
-                );
-            }
+            void OpenShiftTerminalManager.getInstance().createTerminal(
+                command,
+                `Component ${componentName}: Run '${componentCommand.id}' Command`,
+                componentFolder.contextPath,
+            );
         } else {
             void window.showErrorMessage(`No Command found in Component '${componentName}`);
         }
