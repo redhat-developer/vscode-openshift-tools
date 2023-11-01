@@ -1,5 +1,32 @@
 # Change Log
 
+## 1.10.0 (November 2, 2023)
+ * [#3491](https://github.com/redhat-developer/vscode-openshift-tools/pull/3491) Deploy a serverless function using Tekton.
+ * [#3352](https://github.com/redhat-developer/vscode-openshift-tools/issues/3352) Support different build configurations for serverless functions.
+ * [#2873](https://github.com/redhat-developer/vscode-openshift-tools/issues/2873) CodeLenses to Apply/Delete a Kubernetes YAML file.
+ * [#3508](https://github.com/redhat-developer/vscode-openshift-tools/pull/3508) List Operator-backed services in the Application Explorer sidebar.
+ * [#3475](https://github.com/redhat-developer/vscode-openshift-tools/pull/3475) Add "OK" and "Cancel" buttons to cluster login input fields.
+ * [#3452](https://github.com/redhat-developer/vscode-openshift-tools/issues/3452) When creating a component, use the first workspace folder as an initial path value.
+ * [#3386](https://github.com/redhat-developer/vscode-openshift-tools/issues/3386) Fix creating a component from Git when a Devfile exists in git repo.
+ * [#3384](https://github.com/redhat-developer/vscode-openshift-tools/issues/3384) Fix scrolling section in welcome page for some display scaling settings.
+ * [#3357](https://github.com/redhat-developer/vscode-openshift-tools/issues/3357) Add possibility to "go back" when logging into a cluster.
+ * [#3354](https://github.com/redhat-developer/vscode-openshift-tools/issues/3354) Improve the Helm UI so that it resembles the "Create Component" > "From Template" UI.
+ * [#3353](https://github.com/redhat-developer/vscode-openshift-tools/issues/3353) Keybinding and context menu for copy and select all in terminal.
+ * [#3339](https://github.com/redhat-developer/vscode-openshift-tools/issues/3339) Use VSCode SecretStorage API instead of 'keytar'.
+ * [#3318](https://github.com/redhat-developer/vscode-openshift-tools/issues/3318) Refresh the components tree view when Devfiles are deleted.
+ * [#3294](https://github.com/redhat-developer/vscode-openshift-tools/issues/3294) Sanitize the suggested component name in the "Create Component" > "Import from Git" workflow.
+ * [#3138](https://github.com/redhat-developer/vscode-openshift-tools/issues/3138) In the terminal, if a command is rerun after exiting, close the old tab.
+ * [#3137](https://github.com/redhat-developer/vscode-openshift-tools/issues/3137) "Select All" functionality for OpenShift Terminal.
+ * [#3135](https://github.com/redhat-developer/vscode-openshift-tools/issues/3135) Add button to clear contents of terminal in OpenShift Terminal view.
+ * [#3134](https://github.com/redhat-developer/vscode-openshift-tools/issues/3134) Automatically create a component folder for manually typed in path in "Create Component" workflow.
+ * [#3081](https://github.com/redhat-developer/vscode-openshift-tools/issues/3081) Fix "Create Service" view.
+ * [#3040](https://github.com/redhat-developer/vscode-openshift-tools/issues/3040) Display Progress Information when cloning project during "Create Component" > "Import From Git".
+ * [#2589](https://github.com/redhat-developer/vscode-openshift-tools/issues/2589) Add support for running 'odo dev' without watching resources for changes and instead rebuild when 'p' is pressed in the terminal.
+ * [#1803](https://github.com/redhat-developer/vscode-openshift-tools/issues/1803) Make it easier to select all "Watch log" content in the terminal, and remove the alternative editor.
+ * [#3382](https://github.com/redhat-developer/vscode-openshift-tools/issues/3382) Support `KUBECONFIG` environment variable.
+ * [#3492](https://github.com/redhat-developer/vscode-openshift-tools/pull/3492) Add repo URL in the Helm UI.
+ * [#3514](https://github.com/redhat-developer/vscode-openshift-tools/issues/3514) Fix error that prevents logging into a cluster using a token.
+
 ## 1.9.1 (September 28, 2023)
  * [#3342](https://github.com/redhat-developer/vscode-openshift-tools/issues/3342) Sandbox page in `Add OpenShift Cluster` editor stays in 'Detecting' status forever.
  * [#3356](https://github.com/redhat-developer/vscode-openshift-tools/issues/3356) Extension fails to activate when a deleted folder is in the workspace.
