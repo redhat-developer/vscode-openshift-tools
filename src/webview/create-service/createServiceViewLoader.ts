@@ -8,13 +8,14 @@ import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { OpenShiftExplorer } from '../../explorer';
 import { ClusterServiceVersionKind, CustomResourceDefinitionKind } from '../../k8s/olm/types';
 import { Oc } from '../../oc/ocWrapper';
 import { Odo } from '../../odo/odoWrapper';
+import { getServiceKindStubs } from '../../openshift/serviceHelpers';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 import type {
-    ClusterServiceVersion,
     CustomResourceDefinitionStub,
     SpecDescriptor
 } from '../common/createServiceTypes';
@@ -147,6 +148,7 @@ export default class CreateServiceViewLoader {
                     void vscode.window.showInformationMessage(`Service ${(message.data as unknown as any).metadata.name} successfully created.` );
                     CreateServiceViewLoader.panel.dispose();
                     CreateServiceViewLoader.panel = undefined;
+                    OpenShiftExplorer.getInstance().refresh();
                 } catch (err) {
                     void CreateServiceViewLoader.panel.webview.postMessage({
                         action: 'error',
@@ -160,21 +162,6 @@ export default class CreateServiceViewLoader {
                 void vscode.window.showErrorMessage(`Unrecognized message ${message.command}`);
         }
     }
-}
-
-async function getServiceKindStubs(): Promise<CustomResourceDefinitionStub[]> {
-    const clusterServiceVersions = (await Oc.Instance.getKubernetesObjects(
-        'csv',
-    )) as ClusterServiceVersion[];
-    return clusterServiceVersions.flatMap(
-        (clusterServiceVersion) => {
-            const serviceKinds = clusterServiceVersion.spec.customresourcedefinitions.owned;
-            for (const serviceKind of serviceKinds) {
-                serviceKind.csvDescription = clusterServiceVersion.spec.description;
-            }
-            return serviceKinds;
-        },
-    );
 }
 
 /**
