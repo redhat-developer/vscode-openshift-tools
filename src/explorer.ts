@@ -24,11 +24,13 @@ import {
 import * as Helm from './helm/helm';
 import { Oc } from './oc/ocWrapper';
 import { Odo } from './odo/odoWrapper';
+import { getServiceKindStubs } from './openshift/serviceHelpers';
 import { KubeConfigUtils, getKubeConfigFiles } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
+import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem;
 
@@ -223,11 +225,27 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else {
-            result = [
-                ...await Oc.Instance.getKubernetesObjects('DeploymentConfig'),
-                ...await Oc.Instance.getKubernetesObjects('Deployment'),
-                ...await Helm.getHelmReleases()
+
+            let serviceKinds: CustomResourceDefinitionStub[] = [];
+            try {
+                serviceKinds = await getServiceKindStubs();
+            } catch (_) {
+                // operator framework is not installed on cluster; do nothing
+            }
+
+            const toCollect = [
+                Oc.Instance.getKubernetesObjects('Deployment'),
+                Helm.getHelmReleases(),
+                ...serviceKinds.map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
             ];
+            if (await Oc.Instance.isOpenShiftCluster()) {
+                toCollect.push(
+                    Oc.Instance.getKubernetesObjects('DeploymentConfig'),
+                )
+            }
+
+            result = await Promise.all(toCollect).then(listOfLists => listOfLists.flatMap(a => a as ExplorerItem[]));
+
         }
         // don't show Open In Developer Dashboard if not openshift cluster
         const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
