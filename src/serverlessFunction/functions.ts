@@ -8,11 +8,13 @@ import { ExtensionContext, Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
+import { isTektonAware } from '../tekton/tekton';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
+import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 
@@ -70,9 +72,16 @@ export class Functions {
 
     public async onClusterBuild(context: FunctionObject): Promise<void> {
 
-        if (!Functions.extensionContext.globalState.get('hasTekton')) {
+        if (!await isTektonAware()) {
             await window.showWarningMessage(
                 'This action requires Tekton to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
+            );
+            return null;
+        }
+
+        if (!await isKnativeServingAware()) {
+            await window.showWarningMessage(
+                'This action requires Knative Serving to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
             );
             return null;
         }

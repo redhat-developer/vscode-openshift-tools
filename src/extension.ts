@@ -21,6 +21,7 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
+import { Functions } from './serverlessFunction/functions';
 import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
@@ -33,7 +34,6 @@ import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShift
 import { WelcomePage } from './welcomePage';
 
 import fsx = require('fs-extra');
-import { Functions } from './serverlessFunction/functions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -71,7 +71,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
-    void extensionContext.globalState.update('hasTekton', await isTektonAware());
     Cluster.extensionContext = extensionContext;
     Functions.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
@@ -210,14 +209,4 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     return {
         verifyBundledBinaries,
     };
-}
-
-async function isTektonAware(): Promise<boolean> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    let isTekton = false;
-    if (kubectl.available) {
-      const sr = await kubectl.api.invokeCommand('api-versions');
-      isTekton = sr && sr.code === 0 && sr.stdout.includes('tekton.dev/v1beta1');
-    }
-    return isTekton;
 }
