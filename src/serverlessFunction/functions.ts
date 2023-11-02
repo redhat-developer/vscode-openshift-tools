@@ -12,9 +12,9 @@ import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
+import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, InvokeFunction } from './types';
-import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
 
 export class Functions {
 
@@ -51,7 +51,7 @@ export class Functions {
     }
 
     private async getGitModel(fsPath?: string): Promise<GitModel> {
-        const gitState = getGitStateByPath(fsPath);
+        const gitState = await getGitStateByPath(fsPath);
 
         const gitRemote = await getGitRepoInteractively(gitState);
         if (!gitRemote) {

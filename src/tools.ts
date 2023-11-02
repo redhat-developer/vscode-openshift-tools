@@ -92,10 +92,10 @@ export class ToolsConfig {
     public static async selectTool(locations: string[], versionRange: string): Promise<string> {
         let result: string;
         // Array.find cannot be used here because of async calls
-        // eslint-disable-next-line no-restricted-syntax
         for (const location of locations) {
+            // FIXME: see https://github.com/knative/func/issues/2067
             // eslint-disable-next-line no-await-in-loop
-            if (location && semver.satisfies(await ToolsConfig.getVersion(location), versionRange)) {
+            if (location && (location.endsWith('func') || semver.satisfies(await ToolsConfig.getVersion(location), versionRange))) {
                 result = location;
                 break;
             }

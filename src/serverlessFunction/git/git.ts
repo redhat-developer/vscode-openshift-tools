@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { API, Branch, Ref, Remote } from './git.d';
+import type { API, Branch, Ref, Remote } from '../../@types/git';
 
 const GIT_EXTENSION_ID = 'vscode.git';
 
@@ -61,7 +61,7 @@ function getRemoteByCommit(refs: Ref[], remotes: Remote[], branch: Branch): Remo
   return undefined;
 }
 
-export function getGitStateByPath(rootPath?: string): GitState {
+export async function getGitStateByPath(rootPath?: string): Promise<GitState> {
   let remotes: Remote[] = [];
   let refs: Ref[] = [];
   let remote: Remote;
@@ -75,7 +75,7 @@ export function getGitStateByPath(rootPath?: string): GitState {
     if (isGit) {
       const repo = repositories[0];
       remotes = repo.state.remotes;
-      refs = repo.state.refs;
+      refs = await repo.getRefs({});
       branch = repo.state.HEAD;
       if (branch.commit) {
         remote = getRemoteByCommit(refs, remotes, branch);
