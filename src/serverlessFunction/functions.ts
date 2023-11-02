@@ -8,10 +8,13 @@ import { Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
+import { isTektonAware } from '../tekton/tekton';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
+import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
+import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 
@@ -45,6 +48,78 @@ export class Functions {
                 setTimeout(this.pollForBuildTerminalDead(resolve, functionUri, timeout * 2), timeout * 2);
             }
         }
+    }
+
+    private async getGitModel(fsPath?: string): Promise<GitModel> {
+        const gitState = await getGitStateByPath(fsPath);
+
+        const gitRemote = await getGitRepoInteractively(gitState);
+        if (!gitRemote) {
+            return null;
+        }
+
+        const gitBranch = await getGitBranchInteractively(gitState, gitRemote);
+        if (!gitBranch) {
+            return null;
+        }
+        return {
+            remoteUrl: gitState.remotes.filter((r) => r.name === gitRemote).map((r) => r.fetchUrl)[0],
+            branchName: gitBranch,
+        };
+    }
+
+    public async onClusterBuild(context: FunctionObject): Promise<void> {
+
+        if (!await isTektonAware()) {
+            await window.showWarningMessage(
+                'This action requires Tekton to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
+            );
+            return null;
+        }
+
+        if (!await isKnativeServingAware()) {
+            await window.showWarningMessage(
+                'This action requires Knative Serving to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
+            );
+            return null;
+        }
+
+        const gitModel = await this.getGitModel(context.folderURI?.fsPath);
+        if (!gitModel) {
+            return null;
+        }
+
+        const buildImage = await this.getImage(context.folderURI);
+        if (!buildImage) {
+            return null;
+        }
+
+        const currentNamespace: string = await Odo.Instance.getActiveProject();
+        const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
+        if (!yamlContent) {
+            return null;
+        }
+
+        const deployedNamespace = yamlContent.deploy?.namespace || undefined;
+        if (deployedNamespace && deployedNamespace !== currentNamespace) {
+            const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to current namespace ${currentNamespace}?`,
+                'Ok',
+                'Cancel');
+            if (response !== 'Ok') {
+                return null;
+            }
+        }
+        await this.clustrBuildTerminal(context, currentNamespace, buildImage, gitModel);
+    }
+
+    private async clustrBuildTerminal(context: FunctionObject, namespace: string, buildImage: string, gitModel: GitModel) {
+        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
+        await OpenShiftTerminalManager.getInstance().createTerminal(
+            ServerlessCommand.onClusterBuildFunction(context.folderURI.fsPath, namespace, buildImage, gitModel, isOpenShiftCluster),
+            `On Cluster Build - ${context.name}`,
+            context.folderURI.fsPath,
+            process.env
+        );
     }
 
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
