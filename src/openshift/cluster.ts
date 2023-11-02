@@ -765,7 +765,7 @@ export class Cluster extends OpenShiftItem {
             ocToken = userToken;
         }
         return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`, () =>
-            Oc.Instance.loginWithToken(clusterURL, token)
+            Oc.Instance.loginWithToken(clusterURL, ocToken)
                 .then(() => Cluster.loginMessage(clusterURL))
                 .catch((error) =>
                     Promise.reject(
