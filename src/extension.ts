@@ -21,7 +21,6 @@ import { extendClusterExplorer } from './k8s/clusterExplorer';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { ComponentTypesView } from './registriesView';
-import { Functions } from './serverlessFunction/functions';
 import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
@@ -72,7 +71,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
     migrateFromOdo018();
     Cluster.extensionContext = extensionContext;
-    Functions.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
 
     // pick kube config in case multiple are configured

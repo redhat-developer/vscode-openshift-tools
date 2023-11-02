@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import validator from 'validator';
-import { ExtensionContext, Uri, commands, window } from 'vscode';
+import { Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
@@ -21,8 +21,6 @@ import { FunctionContent, FunctionObject, InvokeFunction } from './types';
 export class Functions {
 
     private static instance: Functions;
-
-    public static extensionContext: ExtensionContext;
 
     protected static readonly cli = CliChannel.getInstance();
 

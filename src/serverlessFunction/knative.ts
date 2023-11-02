@@ -14,12 +14,13 @@ export async function isKnativeServingAware(): Promise<boolean> {
     const kubectl = await k8s.extension.kubectl.v1;
     let isKnative = false;
     if (kubectl.available) {
-      const sr = await kubectl.api.invokeCommand('api-versions');
-      isKnative = sr && sr.code === 0 && (
-        sr.stdout.includes('serving.knative.dev/v1')
-        || sr.stdout.includes('serving.knative.dev/v1alpha1')
-        || sr.stdout.includes('serving.knative.dev/v1beta1')
-      );
+        const sr = await kubectl.api.invokeCommand('api-versions');
+        isKnative =
+            sr &&
+            sr.code === 0 &&
+            (sr.stdout.includes('serving.knative.dev/v1') ||
+                sr.stdout.includes('serving.knative.dev/v1alpha1') ||
+                sr.stdout.includes('serving.knative.dev/v1beta1'));
     }
     return isKnative;
 }
