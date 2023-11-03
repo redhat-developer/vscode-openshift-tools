@@ -176,6 +176,25 @@ export class Oc {
     }
 
     /**
+     * Returns true if the current user is authorized to create a namespace on the cluster, and false otherwise.
+     *
+     * @returns true if the current user is authorized to create namespace on the cluster, and false otherwise
+     */
+    public async canCreateNamespace(): Promise<boolean> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'auth can-i create projectrequests'),
+            );
+            if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    /**
      * Deletes all deployments in the current namespace that have a label "component" with a value `componentName`.
      *
      * @param componentName the value of the component label to match

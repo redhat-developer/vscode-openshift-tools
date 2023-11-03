@@ -179,6 +179,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 result = [this.kubeContext];
                 if (this.kubeContext) {
                     const config = getKubeConfigFiles();
+                    const canCreateNamespace = await Oc.Instance.canCreateNamespace();
+                    void commands.executeCommand('setContext', 'canCreateNamespace', canCreateNamespace);
                     result.unshift({label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':')})
                 }
             } catch (err) {
