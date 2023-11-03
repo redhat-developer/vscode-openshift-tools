@@ -4,7 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { ExtensionContext, InputBox, QuickInputButton, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
+import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
+import { quickBtn, inputValue } from '../util/inputValue';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
@@ -22,10 +23,6 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
-
-class quickBtn implements QuickInputButton {
-    constructor(public iconPath: ThemeIcon, public tooltip: string) { }
-}
 
 export class Cluster extends OpenShiftItem {
 
@@ -231,7 +228,7 @@ export class Cluster extends OpenShiftItem {
                 if (choice.label === createUrl.label) {
                     const prompt = 'Provide new Cluster URL to connect';
                     const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
-                    const newURL = await Cluster.enterValue(prompt, '', false, validateInput);
+                    const newURL = await inputValue(prompt, '', false, validateInput);
                     if (newURL === null) return null; // Cancel
                     else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl)); // Back
                     else resolve(newURL);
@@ -245,7 +242,7 @@ export class Cluster extends OpenShiftItem {
             quickPick.onDidTriggerButton((button) => {
                 hideDisposable.dispose();
                 quickPick.hide();
-                if (button === QuickInputButtons.Back) quickPick.hide();
+                if (button === QuickInputButtons.Back) resolve(undefined);
                 else if (button === cancelBtn) resolve(null);
             });
             quickPick.onDidTriggerItemButton(async (event) => {
@@ -539,62 +536,6 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
-    /*
-     * Shows a Input Field to type in a username. Returns either:
-     * - username string, or
-     * - `null` in case of user cancelled (pressed `ESC`), or
-     * - `undefined` if user pressed `Back` button
-     * @returns string contaning user name or null if cancelled or undefined if Back is pressed
-     */
-    private static async enterValue(prompt: string, initialValue: string, password: boolean, validate ): Promise<string | null | undefined> {
-        return new Promise<string | null | undefined>((resolve, reject) => {
-            const input: InputBox = window.createInputBox();
-            input.value = initialValue;
-            input.prompt = prompt;
-            input.password = password;
-            const enterBtn = new quickBtn(new ThemeIcon('check'), 'Enter');
-            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
-            input.buttons = [QuickInputButtons.Back, enterBtn, cancelBtn];
-            const validationMessage: string = validate(input.value? input.value : '');
-            input.ignoreFocusOut = true;
-            if (validationMessage) {
-                input.validationMessage = validationMessage;
-            }
-            const acceptInput = async () => {
-                const value = input.value;
-                input.enabled = false;
-                input.busy = true;
-                if (!(await validate(value))) {
-                    input.hide();
-                    resolve(value);
-                }
-                input.enabled = true;
-                input.busy = false;
-            };
-            input.onDidAccept(acceptInput);
-            input.onDidChangeValue(async text => {
-                const current = validate(text);
-                const validating = current;
-                const validationMessage = await current;
-                if (current === validating) {
-                    input.validationMessage = validationMessage;
-                }
-            });
-            input.onDidHide(() => {
-                input.dispose();
-            })
-            input.onDidTriggerButton(async (event) => {
-                if (event === QuickInputButtons.Back) resolve(undefined);
-                else if (event === enterBtn) await acceptInput();
-                else if (event === cancelBtn) {
-                    resolve(null);
-                    input.dispose();
-                }
-            });
-            input.show();
-        });
-    }
-
     @vsCommand('openshift.explorer.login.credentialsLogin')
     static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string): Promise<string | null | undefined> {
         let password: string;
@@ -639,7 +580,7 @@ export class Cluster extends OpenShiftItem {
                     if (!username)  {
                         const prompt = 'Provide Username for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value);
-                        const newUsername = await Cluster.enterValue(prompt, '', false, validateInput);
+                        const newUsername = await inputValue(prompt, '', false, validateInput);
 
                         if (newUsername === null) {
                             return null; // Cancel
@@ -657,7 +598,7 @@ export class Cluster extends OpenShiftItem {
                         password = await TokenStore.getItem('login', username);
                         const prompt = 'Provide Password for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value);
-                        const newPassword = await Cluster.enterValue(prompt, password, true, validateInput);
+                        const newPassword = await inputValue(prompt, password, true, validateInput);
 
                         if (newPassword === null) {
                             return null; // Cancel
@@ -755,7 +696,7 @@ export class Cluster extends OpenShiftItem {
             const prompt = 'Provide Bearer token for authentication to the API server';
             const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value);
             const initialValue = token ? token : '';
-            ocToken = await Cluster.enterValue(prompt, initialValue, true, validateInput);
+            ocToken = await inputValue(prompt, initialValue, true, validateInput);
             if (ocToken === null) {
                 return null; // Cancel
             } else if (!ocToken) {

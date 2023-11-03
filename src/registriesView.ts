@@ -6,10 +6,11 @@ import { Subject } from 'rxjs';
 import validator from 'validator';
 import * as vscode from 'vscode';
 import {
-    commands, Event,
-    EventEmitter, TreeDataProvider,
+    commands, Event, EventEmitter,
+    QuickInputButtons, QuickPickItem, ThemeIcon, TreeDataProvider,
     TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
+import { quickBtn, inputValue } from './util/inputValue';
 import {
     ComponentTypeAdapter,
     ComponentTypeDescription,
@@ -223,90 +224,157 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         }
     }
 
+    private static async isRegistrySecure(): Promise<string | null | undefined> {
+        return new Promise<string | null | undefined>((resolve, reject) => {
+            const quickPick = window.createQuickPick();
+            quickPick.items = [{label: 'Yes'}, {label: 'No'}];
+            const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
+            quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
+            quickPick.placeholder = 'Is it a secure registry?';
+            let selection: readonly QuickPickItem[] | undefined;
+            const hideDisposable = quickPick.onDidHide(() => resolve(null));
+            quickPick.onDidAccept(() => {
+                const choice = selection[0];
+                hideDisposable.dispose();
+                quickPick.hide();
+                resolve(choice.label);
+            });
+            quickPick.onDidChangeSelection((selects) => {
+                selection = selects;
+            });
+            quickPick.onDidTriggerButton((button) => {
+                hideDisposable.dispose();
+                quickPick.hide();
+                if (button === QuickInputButtons.Back) resolve(undefined);
+                else if (button === cancelBtn) resolve(null);
+            });
+            quickPick.show();
+        });
+    }
+
     @vsCommand('openshift.componentTypesView.registry.edit')
     public static async editRegistry(registryContext: Registry): Promise<void> {
-        // ask for registry
         const registries = await ComponentTypesView.instance.getRegistries();
-        const regName = await window.showInputBox({
-            value: registryContext?.name,
-            prompt: registryContext ? 'Edit registry name' : 'Provide registry name to display in the view',
-            placeHolder: 'Registry Name',
-            validateInput: (value) => {
-                const trimmedValue = value.trim();
-                if (trimmedValue.length === 0) {
-                    return 'Registry name cannot be empty';
+        enum Step {
+            enterRegistryName,
+            enterRegistryURL,
+            enterRegistryIsSecure,
+            enterRegistryToken,
+            createOrChangeRegistry
+        };
+
+        let regName: string = registryContext?.name;
+        let regURL: string = registryContext?.url;
+        let secure: string = undefined;
+        let token: string = '';
+
+        let step: Step = Step.enterRegistryName;
+        while (step !== undefined) {
+            switch (step) {
+                case Step.enterRegistryName: {
+                    // ask for registry
+                    regName = await inputValue(
+                        registryContext ? 'Edit registry name' : 'Provide registry name to display in the view',
+                        regName,
+                        false,
+                        (value: string) => {
+                            const trimmedValue = value.trim();
+                            if (trimmedValue.length === 0) {
+                                return 'Registry name cannot be empty';
+                            }
+                            if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
+                                return 'Registry name can have only alphabet characters and numbers';
+                            }
+                            if (registries?.find((registry) => registry.name !== registryContext?.name && registry.name === value)) {
+                                return `Registry name '${value}' is already used`;
+                            }
+                        },
+                        'Registry Name'
+                    );
+                    if (!regName) return null; // Back or cancel
+                    step = Step.enterRegistryURL;
+                    break;
                 }
-                if (!validator.matches(trimmedValue, '^[a-zA-Z0-9]+$')) {
-                    return 'Registry name can have only alphabet characters and numbers';
+                case Step.enterRegistryURL: {
+                    regURL = await inputValue(
+                        registryContext ? 'Edit registry URL' : 'Provide registry URL to display in the view',
+                        regURL,
+                        false,
+                        (value: string) => {
+                            try {
+                                const trimmedValue = value.trim();
+                                if (!validator.isURL(trimmedValue)) {
+                                    return 'Entered URL is invalid';
+                                }
+                                if (registries?.find((registry) => registry.name !== registryContext?.name && new URL(registry.url).hostname === new URL(value).hostname)) {
+                                    return `Registry with entered URL '${value}' already exists`;
+                                }
+                            } catch (Error) {
+                                return 'Entered URL is invalid';
+                            }
+                        },
+                        'Registry URL'
+                    );
+                    if (regURL === null) return null; // Cancel
+                    if (!regURL) step = Step.enterRegistryName; // Back
+                    else step = Step.enterRegistryIsSecure;
+                    break;
                 }
-                if (registries?.find((registry) => registry.name !== registryContext?.name && registry.name === value)) {
-                    return `Registry name '${value}' is already used`;
+                case Step.enterRegistryIsSecure: {
+                    secure = await ComponentTypesView.isRegistrySecure();
+                    if (secure === null) return null; // Cancel
+                    if (!secure) step = Step.enterRegistryURL; // Back
+                    else if (secure === 'Yes') step = Step.enterRegistryToken;
+                    else step = Step.createOrChangeRegistry;
+                    break;
                 }
-            },
-        });
-
-        if (!regName) return null;
-
-        const regURL = await window.showInputBox({
-            ignoreFocusOut: true,
-            value: registryContext?.url,
-            prompt: registryContext ? 'Edit registry URL' : 'Provide registry URL to display in the view',
-            placeHolder: 'Registry URL',
-            validateInput: (value) => {
-                const trimmedValue = value.trim();
-                if (!validator.isURL(trimmedValue)) {
-                    return 'Entered URL is invalid';
+                case Step.enterRegistryToken: {
+                    token = await inputValue(
+                        'Provide token to access the registry',
+                        token,
+                        true,
+                        (value: string) => value?.trim().length > 0 ? undefined : 'Token cannot be empty',
+                        'Token to access the registry'
+                    );
+                    if (token === null) return null; // Cancel
+                    if (!token) step = Step.enterRegistryIsSecure; // Back
+                    else step = Step.createOrChangeRegistry;
+                    break;
                 }
-                if (registries?.find((registry) => registry.name !== registryContext?.name && new URL(registry.url).hostname === new URL(value).hostname)) {
-                    return `Registry with entered URL '${value}' already exists`;
+                case Step.createOrChangeRegistry: {
+                    /**
+                     * For edit, remove the existing registry
+                     */
+                    if (registryContext) {
+                        const notChangedRegisty = registries?.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
+                        if (notChangedRegisty) {
+                            return null;
+                        }
+                        await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
+                    }
+
+                    try {
+                        const response = await fetch(regURL, {
+                            method: 'GET',
+                        });
+                        const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
+                        if (componentTypes.length > 0) {
+                            void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
+                                const newRegistry = await Odo.Instance.addRegistry(regName, regURL, token);
+                                ComponentTypesView.instance.addRegistry(newRegistry);
+                                await ComponentTypesView.instance.getAllComponents();
+                                ComponentTypesView.instance.refresh(false);
+                            })
+                        }
+                    } catch (error: unknown) {
+                        void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
+                    }
+                    return;
                 }
-            },
-        });
-
-        if (!regURL) return null;
-
-        const secure = await window.showQuickPick(['Yes', 'No'], {
-            placeHolder: 'Is it a secure registry?',
-        });
-
-        if (!secure) return null;
-
-        let token: string;
-        if (secure === 'Yes') {
-            token = await window.showInputBox({
-                placeHolder: 'Token to access the registry',
-                validateInput: (value) => value?.trim().length > 0 ? undefined : 'Token cannot be empty'
-            });
-            if (!token) return null;
-        }
-
-        /**
-         * For edit, remove the existing registry
-         */
-
-        if (registryContext) {
-            const notChangedRegisty = registries?.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
-            if (notChangedRegisty) {
-                return null;
+                default: {
+                    return; // Shouldn't happen. Exit
+                }
             }
-            await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
-        }
-
-        try {
-            const response = await fetch(regURL, {
-                method: 'GET',
-            });
-            const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
-            if (componentTypes.length > 0) {
-                void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
-                    const newRegistry = await Odo.Instance.addRegistry(regName, regURL, token);
-                    ComponentTypesView.instance.addRegistry(newRegistry);
-                    await ComponentTypesView.instance.getAllComponents();
-                    ComponentTypesView.instance.refresh(false);
-                })
-            }
-        } catch (error: unknown) {
-            void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
         }
     }
 
