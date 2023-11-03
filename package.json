@@ -71,7 +71,7 @@
 		"public-ui-test": "extest setup-and-run out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c 1.83.1 -i"
 	},
 	"dependencies": {
-		"@kubernetes/client-node": "^0.19.0",
+		"@kubernetes/client-node": "^0.20.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.0",
 		"clsx": "^2.0.0",
 		"fs-extra": "^11.1.1",
