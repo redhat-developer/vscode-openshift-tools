@@ -63,6 +63,19 @@ suite('./oc/ocWrapper.ts', function () {
         }
     });
 
+    test('canCreateNamespace()', async function () {
+        const canCreateNamespace1 = await Oc.Instance.canCreateNamespace();
+        expect(canCreateNamespace1).to.exist;
+        expect(canCreateNamespace1).to.equal(true);
+        if (isOpenShift) {
+            await Oc.Instance.logout();
+            const canCreateNamespace2 = await Oc.Instance.canCreateNamespace();
+            expect(canCreateNamespace2).to.exist;
+            expect(canCreateNamespace2).to.equal(false);
+            await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
+        }
+    });
+
     suite('create, list, and delete kubernetes objects', function () {
         const serviceName = 'my-test-service';
         const projectName = 'my-test-service-project2';

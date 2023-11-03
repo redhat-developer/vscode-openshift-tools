@@ -1521,7 +1521,7 @@
 				},
 				{
 					"command": "openshift.project.create",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace",
 					"group": "c1"
 				},
 				{
@@ -1667,7 +1667,7 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext || viewItem == openshift.project",
+					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem == openshift.project) && canCreateNamespace",
 					"group": "inline"
 				},
 				{
