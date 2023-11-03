@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { commands, QuickPickItem, window } from 'vscode';
+import { inputValue } from '../util/inputValue';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { Project } from '../odo/project';
@@ -28,25 +29,19 @@ export default class OpenShiftItem {
     protected static readonly serverlessView: ServerlessFunctionView = ServerlessFunctionView.getInstance();
 
     static async getName(message: string, offset?: string, defaultValue = ''): Promise<string> {
-        return window.showInputBox({
-            value: defaultValue,
-            prompt: `Provide ${message}`,
-            ignoreFocusOut: true,
-            validateInput: (value: string) => {
+        return await inputValue(`Provide ${message}`, defaultValue, false,
+            (value: string) => {
                 let validationMessage = NameValidator.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = NameValidator.validateMatches(`Not a valid ${message}. Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = NameValidator.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
                 return validationMessage;
             }
-        });
+        );
     }
 
     static async getProjectName(message: string, data: Promise<Array<Project>>, offset?: string, defaultValue = ''): Promise<string> {
-        return window.showInputBox({
-            value: defaultValue,
-            prompt: `Provide ${message}`,
-            ignoreFocusOut: true,
-            validateInput: async (value: string) => {
+        return await inputValue(`Provide ${message}`, defaultValue, false,
+            async (value: string) => {
                 let validationMessage = NameValidator.emptyName(`Empty ${message}`, value.trim());
                 if (!validationMessage) validationMessage = NameValidator.validateRFC1123DNSLabel(`Not a valid ${message}. Please enter name that starts with an alphanumeric character, use lower case alphanumeric characters or '-' and end with an alphanumeric character`, value);
                 if (!validationMessage) validationMessage = NameValidator.lengthName(`${message} should be between 2-63 characters`, value, offset ? offset.length : 0);
@@ -61,9 +56,8 @@ export default class OpenShiftItem {
                 }
                 return validationMessage;
             }
-        });
+        );
     }
-
 }
 
 export function clusterRequired() {
