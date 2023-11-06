@@ -35,7 +35,8 @@ async function extractTool(toolsFolder: string, platform: PlatformData, currentF
         toolLocation = path.join(toolsFolder, platform.cmdFileName);
     }
     console.log(`Extracting ${currentFile} to ${toolLocation}`);
-    if (!currentFile.endsWith('.exe') && currentFile.includes('.')) {
+    const fileBasename = path.basename(currentFile);
+    if (!fileBasename.endsWith('.exe') && fileBasename.includes('.')) {
         await Archive.extract(currentFile, toolsFolder, platform.cmdFileName, platform.filePrefix);
     } else {
         fs.copyFileSync(currentFile, toolLocation);
