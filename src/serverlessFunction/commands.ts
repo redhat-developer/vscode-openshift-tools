@@ -100,7 +100,7 @@ export class ServerlessCommand {
     static runFunction(location: string, runBuild: boolean): CommandText {
         const commandText = new CommandText('func', 'run', [
             new CommandOption('-p', location),
-            new CommandOption('-b', runBuild.toString())
+            new CommandOption('--build', runBuild.toString())
         ]);
         return commandText;
     }
