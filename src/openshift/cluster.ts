@@ -231,7 +231,7 @@ export class Cluster extends OpenShiftItem {
                 if (choice.label === createUrl.label) {
                     const prompt = 'Provide new Cluster URL to connect';
                     const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
-                    const newURL = await this.enterValue(prompt, '', false, validateInput);
+                    const newURL = await Cluster.enterValue(prompt, '', false, validateInput);
                     if (newURL === null) return null; // Cancel
                     else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl)); // Back
                     else resolve(newURL);
@@ -625,7 +625,7 @@ export class Cluster extends OpenShiftItem {
                 case Step.getUserName:
                     if (!username)  {
                         const addUserLabel = '$(plus) Add new user...';
-                        const choice = await this.getUserName(clusterURL, addUserLabel);
+                        const choice = await Cluster.getUserName(clusterURL, addUserLabel);
                         if (!choice) return choice; // Back or Cancel
                         if (choice === addUserLabel) {
                             step = Step.enterUserName;
@@ -639,7 +639,7 @@ export class Cluster extends OpenShiftItem {
                     if (!username)  {
                         const prompt = 'Provide Username for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value);
-                        const newUsername = await this.enterValue(prompt, '', false, validateInput);
+                        const newUsername = await Cluster.enterValue(prompt, '', false, validateInput);
 
                         if (newUsername === null) {
                             return null; // Cancel
@@ -657,7 +657,7 @@ export class Cluster extends OpenShiftItem {
                         password = await TokenStore.getItem('login', username);
                         const prompt = 'Provide Password for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value);
-                        const newPassword = await this.enterValue(prompt, password, true, validateInput);
+                        const newPassword = await Cluster.enterValue(prompt, password, true, validateInput);
 
                         if (newPassword === null) {
                             return null; // Cancel
@@ -755,7 +755,7 @@ export class Cluster extends OpenShiftItem {
             const prompt = 'Provide Bearer token for authentication to the API server';
             const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value);
             const initialValue = token ? token : '';
-            ocToken = await this.enterValue(prompt, initialValue, true, validateInput);
+            ocToken = await Cluster.enterValue(prompt, initialValue, true, validateInput);
             if (ocToken === null) {
                 return null; // Cancel
             } else if (!ocToken) {
