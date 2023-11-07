@@ -1,6 +1,10 @@
 # Change Log
 
+## 1.10.2 (November 7, 2023)
+ * [#3522](https://github.com/redhat-developer/vscode-openshift-tools/issues/3522) "Build and run" for Serverless Function fails
+
 ## 1.10.1 (November 6, 2023)
+ * [#3336](https://github.com/redhat-developer/vscode-openshift-tools/pull/3519) Creating project into sandbox has user limitation
  * [#3525](https://github.com/redhat-developer/vscode-openshift-tools/issues/3525) func CLI not available in latest OpenShift toolkit v1.10.0 on windows
  * [#3527](https://github.com/redhat-developer/vscode-openshift-tools/issues/3527) Build cannot download func dependency, if the project is checked out to a directory with a dot character
 
