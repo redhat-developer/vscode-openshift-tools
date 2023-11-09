@@ -119,7 +119,7 @@ function HelmChartListContent(props: HelmListItemProps) {
                             textOverflow: 'ellipsis',
                         }}
                     >
-                        {capitalizeFirstLetter(props.helmChart.displayName)}
+                        {capitalizeFirstLetter(props.helmChart.displayName || props.helmChart.chartName)}
                     </Typography>
                 </Stack>
                 <Typography
@@ -130,7 +130,7 @@ function HelmChartListContent(props: HelmListItemProps) {
                 </Typography>
                 {props.isDetailedPage &&
                     <LinkButton
-                        href='https://charts.openshift.io/'
+                        href={props.helmChart.repoURL}
                         onClick={() => {
                             VSCodeMessage.postMessage({
                                 action: 'sendTelemetry',
@@ -138,23 +138,23 @@ function HelmChartListContent(props: HelmListItemProps) {
                                     actionName: 'helmRepoInBrowser',
                                     properties: {
                                         // eslint-disable-next-line camelcase
-                                        url: 'https://charts.openshift.io/',
+                                        url: props.helmChart.repoURL,
                                         // eslint-disable-next-line camelcase
                                         helmChartName: props.helmChart.displayName,
                                     },
                                 },
                             });
-                        }} >https://charts.openshift.io/
+                        }} >{props.helmChart.repoURL}
                     </LinkButton>
                 }
                 <Stack direction='row' spacing={1}>
-                    {props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
+                    {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
                             size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
                             color={'primary'} />
                     }
-                    {props.selectedVersion.annotations['charts.openshift.io/provider'] ?
+                    {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/provider'] ?
                         <Chip
                             size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/provider']}

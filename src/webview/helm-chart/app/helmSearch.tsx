@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Checkbox, Chip, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Typography } from '@mui/material';
+import { Checkbox, Chip, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
-import { ChartResponse } from '../helmChartType';
+import { ChartResponse, HelmRepo } from '../helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { LoadScreen } from '../../common/loading';
 import { HelmModal } from './helmModal';
@@ -62,6 +62,54 @@ function ProviderTypePicker(props: {
                         label={provider.type}
                         key={provider.type}
                     />
+                );
+            })}
+        </FormGroup>
+    );
+}
+
+function RepoPicker(props: {
+    repoEnabled: { name: string; url: string; enabled: boolean }[];
+    setRepoEnabled: React.Dispatch<
+        React.SetStateAction<{ name: string; url: string; enabled: boolean }[]>
+    >;
+}) {
+    function onCheckboxClick(clickedCapability: string, url: string, checked: boolean) {
+        const updatedList = [...props.repoEnabled] //
+            .filter((entry) => entry.name !== clickedCapability);
+        updatedList.push({
+            name: clickedCapability,
+            url,
+            enabled: checked
+        });
+        const filteredUpdatedList = updatedList
+            .sort((capA, capB) => {
+                return capA.name.localeCompare(capB.name)
+            });
+        props.setRepoEnabled([...filteredUpdatedList]);
+    }
+
+    return (
+        <FormGroup>
+            {props.repoEnabled.map((repo) => {
+                return (
+                    <Tooltip title={repo.url}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    size='small'
+                                    //disabled={repo.url.toLowerCase().indexOf('charts.openshift.io') !== -1}
+                                    //checked={repo.url.toLowerCase().indexOf('charts.openshift.io') !== -1 ? true : repo.enabled}
+                                    checked={repo.enabled}
+                                    onChange={(_e, checked) =>
+                                        onCheckboxClick(repo.name, repo.url, checked)
+                                    }
+                                />
+                            }
+                            label={repo.name}
+                            key={repo.name}
+                        />
+                    </Tooltip>
                 );
             })}
         </FormGroup>
@@ -152,7 +200,11 @@ function SearchBar(props: {
 
 export function HelmSearch(props: HelmSearchProps) {
     const ITEMS_PER_PAGE = 6;
+    const [helmRepos, setHelmRepos] = React.useState<HelmRepo[]>([]);
     const [helmCharts, sethelmCharts] = React.useState<ChartResponse[]>([]);
+    const [helmChartEnabled, setHelmChartEnabled] = React.useState<
+        { name: string; url: string; enabled: boolean }[]
+    >([]);
     const [providerTypes, setProviderTypes] = React.useState<string[]>([]);
     const [providerTypeEnabled, setProviderTypeEnabled] = React.useState<
         { type: string; enabled: boolean }[]
@@ -166,7 +218,13 @@ export function HelmSearch(props: HelmSearchProps) {
     const [searchText, setSearchText] = React.useState('');
 
     function ascName(oldChart: ChartResponse, newChart: ChartResponse) {
-        return oldChart.displayName.localeCompare(newChart.displayName);
+        const oldChartName = oldChart.displayName || oldChart.chartName;
+        const newChartName = newChart.displayName || newChart.chartName;
+        return oldChartName.localeCompare(newChartName);
+    }
+
+    function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
+        return oldRepo.name.localeCompare(newRepo.name);
     }
 
     function respondToMessage(messageEvent: MessageEvent) {
@@ -177,8 +235,12 @@ export function HelmSearch(props: HelmSearchProps) {
                 setProviders((_providers) => message.data.providers as string[]);
                 break;
             }
+            case 'getHelmRepos': {
+                setHelmRepos((_helmRepos) => (message.data.helmRepos as HelmRepo[]).sort(ascRepoName));
+                break;
+            }
             case 'getHelmCharts': {
-                sethelmCharts((_helmCharts) => message.data as ChartResponse[]);
+                sethelmCharts((_helmCharts) => message.data.helmCharts as ChartResponse[]);
                 VSCodeMessage.postMessage({ action: 'getProviderAndTypes' });
                 break;
             }
@@ -193,6 +255,18 @@ export function HelmSearch(props: HelmSearchProps) {
             window.removeEventListener('message', respondToMessage);
         };
     }, []);
+
+    React.useEffect(() => {
+        const enabledArray = [];
+        for (const helmRepo of helmRepos) {
+            enabledArray.push({
+                name: helmRepo.name,
+                url: helmRepo.url,
+                enabled: true,
+            });
+        }
+        setHelmChartEnabled((_) => enabledArray);
+    }, [helmRepos]);
 
     React.useEffect(() => {
         const enabledArray = [];
@@ -218,7 +292,7 @@ export function HelmSearch(props: HelmSearchProps) {
 
     React.useEffect(() => {
         setCurrentPage((_) => 1);
-    }, [providerTypeEnabled, providerEnabled, searchText]);
+    }, [helmChartEnabled, providerTypeEnabled, providerEnabled, searchText]);
 
     const activeProviderTypes = providerTypeEnabled //
         .filter((entry) => entry.enabled) //
@@ -228,11 +302,16 @@ export function HelmSearch(props: HelmSearchProps) {
         .filter((entry) => entry.enabled) //
         .map((entry) => entry.name);
 
+    const activeRepos = helmChartEnabled //
+        .filter((entry) => entry.enabled) //
+        .map((entry) => entry.name);
+
     function getFilteredCharts(): ChartResponse[] {
         const filteredCharts = [];
         const helmResponse = helmCharts.filter((helmChart: ChartResponse) =>
-            activeProviderTypes.includes(helmChart.chartVersions[0].annotations['charts.openshift.io/providerType'])) //
-            .filter((helmChart: ChartResponse) => isToBeIncluded(helmChart, activeProviders)) //
+            activeRepos.includes(helmChart.repoName))
+            .filter((helmChart: ChartResponse) => isProviderTypesToBeIncluded(helmChart))
+            .filter((helmChart: ChartResponse) => isProvidersToBeIncluded(helmChart)) //
             .filter(function (helmChart: ChartResponse) {
                 const searchTerms = searchText.split(/\s+/);
                 return every(
@@ -248,9 +327,16 @@ export function HelmSearch(props: HelmSearchProps) {
         return filteredCharts.sort(ascName);
     }
 
-    function isToBeIncluded(chart: ChartResponse, supportProviders: string[]): boolean {
-        return supportProviders.length === 0 || supportProviders.includes(chart.chartVersions[0].annotations['charts.openshift.io/provider']) //
-            || (chart.chartVersions[0].maintainers && supportProviders.includes(chart.chartVersions[0].maintainers[0].name));
+    function isProviderTypesToBeIncluded(chart: ChartResponse): boolean {
+        return activeProviderTypes.length === 0 || //
+            chart.repoURL.toLowerCase().indexOf('charts.openshift.io') === -1 || //
+            activeProviderTypes.includes(chart.chartVersions[0].annotations && chart.chartVersions[0].annotations['charts.openshift.io/providerType']);
+    }
+
+    function isProvidersToBeIncluded(chart: ChartResponse): boolean {
+        return activeProviders.length === 0 || //
+            activeProviders.includes(chart.chartVersions[0].annotations && chart.chartVersions[0].annotations['charts.openshift.io/provider']) //
+            || (chart.chartVersions[0].maintainers && activeProviders.includes(chart.chartVersions[0].maintainers[0].name));
     }
 
     return (
@@ -261,6 +347,19 @@ export function HelmSearch(props: HelmSearchProps) {
                         <>
                             <Typography variant='h5'>{props.titleText}</Typography><Stack direction='row' spacing={2}>
                                 <Stack direction='column' sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
+                                    {helmRepos.length > 1 && (
+                                        <>
+                                            <Typography variant='body2' marginBottom={1}>
+                                                Chart Repositories
+                                            </Typography>
+                                            <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                <RepoPicker
+                                                    repoEnabled={helmChartEnabled}
+                                                    setRepoEnabled={setHelmChartEnabled} />
+                                                <Divider orientation='horizontal' sx={{ width: '100%' }} />
+                                            </Stack>
+                                        </>
+                                    )}
                                     {providerTypes.length > 1 && (
                                         <>
                                             <Typography variant='body2' marginBottom={1}>
@@ -277,7 +376,7 @@ export function HelmSearch(props: HelmSearchProps) {
                                     {providers.length > 0 && (
                                         <>
                                             <Typography variant='body2' marginBottom={2}>
-                                                Filter by
+                                                Filter by Providers
                                             </Typography>
                                             <Stack direction='column' useFlexGap={true} width='100%' spacing={1}>
                                                 {providers.length > 0 && (

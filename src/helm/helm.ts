@@ -35,6 +35,10 @@ export async function addHelmRepo(): Promise<CliExitData> {
     return await CliChannel.getInstance().executeTool(HelmCommands.addHelmRepo());
 }
 
+export async function getHelmRepos(): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.getRepos());
+}
+
 /**
  * Updates the content of all the Helm repos.
  *

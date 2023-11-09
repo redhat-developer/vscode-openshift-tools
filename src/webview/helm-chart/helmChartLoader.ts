@@ -11,13 +11,13 @@ import sendTelemetry, { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { ChartResponse } from './helmChartType';
+import { ChartResponse, HelmRepo } from './helmChartType';
 import fetch = require('make-fetch-happen');
 import { validateName } from '../common-ext/createComponentHelpers';
 import { Progress } from '../../util/progress';
 
 let panel: vscode.WebviewPanel;
-const helmRes: ChartResponse[] = [];
+const helmCharts: ChartResponse[] = [];
 let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
 
 vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
@@ -98,12 +98,12 @@ function helmChartMessageListener(event: any): void {
         case 'getProviderAndTypes': {
             const types: string[] = [];
             const providers: string[] = []
-            helmRes.map((helm: ChartResponse) => {
-                if (helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
+            helmCharts.map((helm: ChartResponse) => {
+                if (helm.chartVersions[0].annotations && helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
                     types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType']);
                 }
 
-                if (helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
+                if (helm.chartVersions[0].annotations && helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
                     providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider']);
                 } else if (helm.chartVersions[0].maintainers?.length > 0) {
                     providers.push(helm.chartVersions[0].maintainers[0].name);
@@ -128,7 +128,7 @@ function helmChartMessageListener(event: any): void {
          */
         case 'sendTelemetry': {
             const actionName: string = event.data.actionName;
-            const properties: {[key: string]: string} = event.data.properties;
+            const properties: { [key: string]: string } = event.data.properties;
             void sendTelemetry(actionName, properties);
             break;
         }
@@ -169,7 +169,7 @@ export default class HelmChartLoader {
             });
             panel.webview.onDidReceiveMessage(helmChartMessageListener);
         }
-        await getHelmCharts('getHelmCharts');
+        await getHelmCharts();
         return panel;
     }
 
@@ -179,31 +179,56 @@ export default class HelmChartLoader {
     }
 }
 
-async function getHelmCharts(eventName: string): Promise<void> {
-    if (helmRes.length === 0) {
-        await Helm.addHelmRepo();
-        await Helm.updateHelmRepo();
-        const signupResponse = await fetch('https://charts.openshift.io/index.yaml', {
-            method: 'GET'
-        });
-        const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
-        const entries = yamlResponse.entries;
-        Object.keys(entries).forEach((key) => {
-            const res: ChartResponse = {
-                chartName: '',
-                chartVersions: [],
-                displayName: ''
-            }
-            res.chartName = key;
-            res.chartVersions = entries[key].reverse();
-            res.displayName = res.chartVersions[0].annotations['charts.openshift.io/name'] || res.chartVersions[0].name;
-            helmRes.push(res);
-        })
+async function getHelmCharts(): Promise<void> {
+    if (helmCharts.length === 0) {
+        const cliData = await Helm.getHelmRepos();
+        if (!cliData.error && !cliData.stderr) {
+            const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+            void panel?.webview.postMessage(
+                {
+                    action: 'getHelmRepos',
+                    data: {
+                        helmRepos
+                    }
+                }
+            );
+            helmRepos.forEach((helmRepo: HelmRepo) => {
+                let url = helmRepo.url;
+                url = url.endsWith('/') ? url : url.concat('/');
+                url = url.concat('index.yaml');
+                void fetchURL(helmRepo, url);
+            });
+        }
     }
+}
+
+async function fetchURL(repo: HelmRepo, url: string) {
+    const signupResponse = await fetch(url, {
+        method: 'GET'
+    });
+    const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
+    const entries = yamlResponse.entries;
+    Object.keys(entries).forEach((key) => {
+        const res: ChartResponse = {
+            repoName: '',
+            repoURL: '',
+            chartName: '',
+            chartVersions: [],
+            displayName: ''
+        };
+        res.repoName = repo.name;
+        res.repoURL = repo.url;
+        res.chartName = key;
+        res.chartVersions = entries[key].reverse();
+        res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
+        helmCharts.push(res);
+    });
     void panel?.webview.postMessage(
         {
-            action: eventName,
-            data: helmRes
+            action: 'getHelmCharts',
+            data: {
+                helmCharts
+            }
         }
     );
 }
