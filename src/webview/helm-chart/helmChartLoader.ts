@@ -97,27 +97,25 @@ function helmChartMessageListener(event: any): void {
         }
         case 'getProviderAndTypes': {
             const types: string[] = [];
-            const providers: string[] = []
+            const keywords: string[] = [];
             helmCharts.map((helm: ChartResponse) => {
                 if (helm.chartVersions[0].annotations && helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
                     types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType']);
                 }
 
-                if (helm.chartVersions[0].annotations && helm.chartVersions[0].annotations['charts.openshift.io/provider']) {
-                    providers.push(helm.chartVersions[0].annotations['charts.openshift.io/provider']);
-                } else if (helm.chartVersions[0].maintainers?.length > 0) {
-                    providers.push(helm.chartVersions[0].maintainers[0].name);
+                if  (helm.chartVersions[0].keywords) {
+                    helm.chartVersions[0].keywords.map((keyword) => keywords.push(keyword));
                 }
 
             });
             types.sort((regA, regB) => regA.localeCompare(regB));
-            providers.sort((regA, regB) => regA.localeCompare(regB));
+            keywords.sort((regA, regB) => regA.localeCompare(regB));
             void panel.webview.postMessage(
                 {
                     action: event.action,
                     data: {
                         types: [... new Set(types)],
-                        providers: [... new Set(providers)]
+                        keywords: [... new Set(keywords)]
                     }
                 }
             );

@@ -116,14 +116,14 @@ function RepoPicker(props: {
     );
 }
 
-function ProvidersPicker(props: {
-    providerEnabled: { name: string; enabled: boolean }[];
-    setProviderEnabled: React.Dispatch<
+function ChipsPicker(props: {
+    ChipEnabled: { name: string; enabled: boolean }[];
+    setChipEnabled: React.Dispatch<
         React.SetStateAction<{ name: string; enabled: boolean }[]>
     >;
 }) {
     function onClick(clickedCapability: string, checked: boolean) {
-        const updatedList = [...props.providerEnabled] //
+        const updatedList = [...props.ChipEnabled] //
             .filter((entry) => entry.name !== clickedCapability);
         updatedList.push({
             name: clickedCapability,
@@ -133,12 +133,12 @@ function ProvidersPicker(props: {
             .sort((capA, capB) => {
                 return capA.name.localeCompare(capB.name)
             });
-        props.setProviderEnabled([...filteredUpdatedList]);
+        props.setChipEnabled([...filteredUpdatedList]);
     }
 
     return (
         <Stack spacing={1} useFlexGap direction='row' flexWrap='wrap'>
-            {props.providerEnabled.map((_cap) => {
+            {props.ChipEnabled.map((_cap) => {
                 return (
                     <Chip
                         size='small'
@@ -209,8 +209,8 @@ export function HelmSearch(props: HelmSearchProps) {
     const [providerTypeEnabled, setProviderTypeEnabled] = React.useState<
         { type: string; enabled: boolean }[]
     >([]);
-    const [providers, setProviders] = React.useState<string[]>([]);
-    const [providerEnabled, setProviderEnabled] = React.useState<
+    const [keywords, setKeywords] = React.useState<string[]>([]);
+    const [keywordEnabled, setKeywordEnabled] = React.useState<
         { name: string; enabled: boolean }[]
     >([]);
     const [selectedHelmChart, setselectedHelmChart] = React.useState<ChartResponse>();
@@ -232,7 +232,7 @@ export function HelmSearch(props: HelmSearchProps) {
         switch (message.action) {
             case 'getProviderAndTypes': {
                 setProviderTypes((_types) => message.data.types as string[]);
-                setProviders((_providers) => message.data.providers as string[]);
+                setKeywords((_keywords) => message.data.keywords as string[]);
                 break;
             }
             case 'getHelmRepos': {
@@ -273,7 +273,7 @@ export function HelmSearch(props: HelmSearchProps) {
         for (const providerType of providerTypes) {
             enabledArray.push({
                 type: providerType,
-                enabled: true,
+                enabled: false,
             });
         }
         setProviderTypeEnabled((_) => enabledArray);
@@ -281,24 +281,24 @@ export function HelmSearch(props: HelmSearchProps) {
 
     React.useEffect(() => {
         const enabledArray = [];
-        for (const provider of providers) {
+        for (const keyword of keywords) {
             enabledArray.push({
-                name: provider,
+                name: keyword,
                 enabled: false,
             });
         }
-        setProviderEnabled((_) => enabledArray);
-    }, [providers]);
+        setKeywordEnabled((_) => enabledArray);
+    }, [keywords]);
 
     React.useEffect(() => {
         setCurrentPage((_) => 1);
-    }, [helmChartEnabled, providerTypeEnabled, providerEnabled, searchText]);
+    }, [helmChartEnabled, providerTypeEnabled, keywordEnabled, searchText]);
 
     const activeProviderTypes = providerTypeEnabled //
         .filter((entry) => entry.enabled) //
         .map((entry) => entry.type);
 
-    const activeProviders = providerEnabled //
+    const activeKeywords = keywordEnabled //
         .filter((entry) => entry.enabled) //
         .map((entry) => entry.name);
 
@@ -311,15 +311,18 @@ export function HelmSearch(props: HelmSearchProps) {
         const helmResponse = helmCharts.filter((helmChart: ChartResponse) =>
             activeRepos.includes(helmChart.repoName))
             .filter((helmChart: ChartResponse) => isProviderTypesToBeIncluded(helmChart))
-            .filter((helmChart: ChartResponse) => isProvidersToBeIncluded(helmChart)) //
+            .filter((helmChart: ChartResponse) => isKeywordsToBeIncluded(helmChart)) //
             .filter(function (helmChart: ChartResponse) {
                 const searchTerms = searchText.split(/\s+/);
                 return every(
                     searchTerms.map(
                         (searchTerm) =>
                             helmChart.displayName?.toLowerCase().includes(searchTerm) ||
+                            helmChart.chartName.includes(searchTerm) ||
                             helmChart.chartVersions[0].name.toLowerCase().includes(searchTerm) ||
-                            helmChart.chartVersions[0].description?.toLowerCase().includes(searchTerm)
+                            helmChart.chartVersions[0].description?.toLowerCase().includes(searchTerm) ||
+                            (helmChart.chartVersions[0].keywords && helmChart.chartVersions[0].keywords.some((keyword) => keyword.includes(searchTerm))) ||
+                            (helmChart.chartVersions[0].annotations && helmChart.chartVersions[0].annotations['charts.openshift.io/providerType']?.toLowerCase().includes(searchTerm))
                     ),
                 );
             });
@@ -329,14 +332,12 @@ export function HelmSearch(props: HelmSearchProps) {
 
     function isProviderTypesToBeIncluded(chart: ChartResponse): boolean {
         return activeProviderTypes.length === 0 || //
-            chart.repoURL.toLowerCase().indexOf('charts.openshift.io') === -1 || //
             activeProviderTypes.includes(chart.chartVersions[0].annotations && chart.chartVersions[0].annotations['charts.openshift.io/providerType']);
     }
 
-    function isProvidersToBeIncluded(chart: ChartResponse): boolean {
-        return activeProviders.length === 0 || //
-            activeProviders.includes(chart.chartVersions[0].annotations && chart.chartVersions[0].annotations['charts.openshift.io/provider']) //
-            || (chart.chartVersions[0].maintainers && activeProviders.includes(chart.chartVersions[0].maintainers[0].name));
+    function isKeywordsToBeIncluded(chart: ChartResponse): boolean {
+        return activeKeywords.length === 0 || //
+            chart.chartVersions[0].keywords && chart.chartVersions[0].keywords.some((keyword) => activeKeywords.includes(keyword));
     }
 
     return (
@@ -373,19 +374,15 @@ export function HelmSearch(props: HelmSearchProps) {
                                             </Stack>
                                         </>
                                     )}
-                                    {providers.length > 0 && (
+                                    {keywords.length > 0 && (
                                         <>
                                             <Typography variant='body2' marginBottom={2}>
-                                                Filter by Providers
+                                                Keywords
                                             </Typography>
                                             <Stack direction='column' useFlexGap={true} width='100%' spacing={1}>
-                                                {providers.length > 0 && (
-                                                    <>
-                                                        <ProvidersPicker
-                                                            providerEnabled={providerEnabled}
-                                                            setProviderEnabled={setProviderEnabled} />
-                                                    </>
-                                                )}
+                                                <ChipsPicker
+                                                    ChipEnabled={keywordEnabled}
+                                                    setChipEnabled={setKeywordEnabled} />
                                             </Stack>
                                         </>
                                     )}

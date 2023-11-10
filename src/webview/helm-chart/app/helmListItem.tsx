@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Box, Button, Chip, Link, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Button, Chip, Link, Stack, SvgIcon, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
 import { Chart, ChartResponse } from '../helmChartType';
@@ -39,7 +39,7 @@ export function HelmListItem(props: HelmListItemProps) {
                 </Box>
             ) : (
                 <>
-                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion} isDetailedPage={props.isDetailedPage}/>
+                    <HelmChartListContent helmChart={props.helmChart} selectedVersion={props.selectedVersion} isDetailedPage={props.isDetailedPage} />
                 </>
             )}
         </>
@@ -148,26 +148,29 @@ function HelmChartListContent(props: HelmListItemProps) {
                     </LinkButton>
                 }
                 <Stack direction='row' spacing={1}>
+                    <Tooltip title={props.helmChart.repoURL}>
+                        <Chip
+                            size='small'
+                            label={props.helmChart.repoName}
+                            color={'success'} />
+                    </Tooltip>
                     {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
                         <Chip
                             size='small'
                             label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
                             color={'primary'} />
                     }
-                    {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/provider'] ?
-                        <Chip
-                            size='small'
-                            label={props.selectedVersion.annotations['charts.openshift.io/provider']}
-                            color={'success'} />
-                        :
-                        props.selectedVersion.maintainers?.length > 0 ?
-                            <Chip
-                                size='small'
-                                label={props.selectedVersion.maintainers[0].name}
-                                color={'success'} />
-                            :
-                            undefined
-                    }
+                    {(props.selectedVersion.keywords && props.selectedVersion.keywords.map((tag, i) => {
+                        if (i >= 2) {
+                            return;
+                        }
+                        return <Chip size="small" label={tag} key={tag} />;
+                    }))}
+                    {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 2 && (
+                        <Tooltip title={props.selectedVersion.keywords.slice(2).join(', ')}>
+                            <Chip size="small" label="• • •" />
+                        </Tooltip>
+                    ))}
                     <Chip
                         size='small'
                         label={props.selectedVersion.version}
