@@ -224,6 +224,13 @@ export function HelmSearch(props: HelmSearchProps) {
     }
 
     function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
+        const oldURLCheck = oldRepo.url.includes('charts.openshift.io');
+        const newURLCheck = newRepo.url.includes('charts.openshift.io');
+        if (oldURLCheck && !newURLCheck) {
+            return -1;
+        } else if (newURLCheck && !oldURLCheck) {
+            return 1;
+        }
         return oldRepo.name.localeCompare(newRepo.name);
     }
 
