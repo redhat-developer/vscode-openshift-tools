@@ -27,13 +27,13 @@ jobs:
         run: |
           jq --indent 4 '.func.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.func.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.func.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }}"' > src/tools.json.new
           mv src/tools.json.new src/tools.json
-          for platform in win32 darwin linux; do
-            old_url=`jq -r .func.platform.${platform}.url src/tools.json`
-            dlFileName=`jq -r .func.platform.${platform}.dlFileName src/tools.json`
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
+            old_url=`jq -r ".func.platform[\"${platform}\"].url" src/tools.json`
+            dlFileName=`jq -r ".func.platform[\"${platform}\"].dlFileName" src/tools.json`
             new_url=`echo ${old_url} | sed "s|${{ env.REPO_FUNC_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
             checksum_url=`echo ${new_url} | sed "s|${dlFileName}|checksums.txt|"`
             checksum=`curl -s -L ${checksum_url} | grep "${dlFileName}" | sed "s|${dlFileName}||" | sed "s| ||g"`
-            jq --indent 4 ".func.platform.${platform}.url = \"${new_url}\"" src/tools.json | jq --indent 4 ".func.platform.${platform}.sha256sum = \"${checksum}\"" > src/tools.json.new
+            jq --indent 4 ".func.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json | jq --indent 4 ".func.platform[\"${platform}\"].sha256sum = \"${checksum}\"" > src/tools.json.new
             mv src/tools.json.new src/tools.json
           done
       - name: Create pull request
@@ -45,4 +45,3 @@ jobs:
           git commit -am "Update func to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "func-${{ env.LATEST_TOOL_RELEASE }}"
           gh pr create --title "Update func to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
-
