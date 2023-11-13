@@ -3,21 +3,23 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import {
-    V221Devfile,
-    V221DevfileCommands,
-    V221DevfileComponents,
-    V221DevfileComponentsItemsContainerEndpoints,
-    V221DevfileComponentsItemsContainerEnv,
-    V221DevfileComponentsItemsContainerVolumeMounts, V221DevfileMetadata, V221DevfileProjects
+    V222Devfile,
+    V222DevfileCommands,
+    V222DevfileComponents,
+    V222DevfileComponentsItemsContainerEndpoints,
+    V222DevfileComponentsItemsContainerEnv,
+    V222DevfileComponentsItemsContainerVolumeMounts,
+    V222DevfileMetadata,
+    V222DevfileProjects
 } from '@devfile/api';
 import { Data, Endpoint, Metadata } from '../odo/componentTypeDescription';
 import { ComponentV1, DevfileCommandV1, DevfileV1, DevfileVolumeV1, EndpointV1, EnvV1, MetadataV1, ProjectV1 } from './devfileV1Type';
 
-export type DevfileMetadataLike = V221DevfileMetadata & object;
+export type DevfileMetadataLike = V222DevfileMetadata & object;
 
 export type DevfileMetadata = DevfileMetadataLike & Required<Pick<DevfileMetadataLike, 'name'>>;
 
-export type DevfileLike = V221Devfile & {
+export type DevfileLike = V222Devfile & {
     metadata?: DevfileMetadataLike;
 };
 
@@ -133,7 +135,7 @@ export class DevfileConverter {
         return devfileMetadataV2;
     }
 
-    projectV1toProjectV2(projectV1: ProjectV1): V221DevfileProjects {
+    projectV1toProjectV2(projectV1: ProjectV1): V222DevfileProjects {
         // the name can't have spaces
         // replace space by dash and then remove all special characters
         const projectName = projectV1.name
@@ -189,7 +191,7 @@ export class DevfileConverter {
         return devfileV2Project;
     }
 
-    componentV1toComponentV2(componentV1: ComponentV1): V221DevfileComponents {
+    componentV1toComponentV2(componentV1: ComponentV1): V222DevfileComponents {
         const devfileV2Component: any = {};
 
         if (componentV1.alias) {
@@ -238,7 +240,7 @@ export class DevfileConverter {
         return devfileV2Component;
     }
 
-    commandV1toCommandV2(commandV1: DevfileCommandV1): V221DevfileCommands {
+    commandV1toCommandV2(commandV1: DevfileCommandV1): V222DevfileCommands {
 
         const devfileV2Command: any = {};
 
@@ -283,7 +285,7 @@ export class DevfileConverter {
 
     componentEnvV1toComponentEnvV2(
         componentEnvs?: EnvV1[]
-    ): V221DevfileComponentsItemsContainerEnv[] | undefined {
+    ): V222DevfileComponentsItemsContainerEnv[] | undefined {
         if (componentEnvs) {
             return componentEnvs.map(envV1 => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -302,7 +304,7 @@ export class DevfileConverter {
 
     componentVolumeV1toComponentVolumeV2(
         componentVolumes?: DevfileVolumeV1[]
-    ): V221DevfileComponentsItemsContainerVolumeMounts[] | undefined {
+    ): V222DevfileComponentsItemsContainerVolumeMounts[] | undefined {
         if (componentVolumes) {
             return componentVolumes.map(volumeV1 => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -323,7 +325,7 @@ export class DevfileConverter {
 
     componentEndpointV1toComponentEndpointV2(
         componentEndpoints?: EndpointV1[]
-    ): V221DevfileComponentsItemsContainerEndpoints[] | undefined {
+    ): V222DevfileComponentsItemsContainerEndpoints[] | undefined {
         if (componentEndpoints) {
             return componentEndpoints.map(endpointV1 => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
