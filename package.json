@@ -97,7 +97,7 @@
 		"xterm-headless": "^5.3.0"
 	},
 	"devDependencies": {
-		"@devfile/api": "^2.2.1-alpha-1667236163",
+		"@devfile/api": "^2.2.2-1699873895",
 		"@mui/icons-material": "^5.14.16",
 		"@mui/lab": "^5.0.0-alpha.152",
 		"@mui/material": "^5.14.17",
