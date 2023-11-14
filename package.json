@@ -171,7 +171,7 @@
 		"sinon": "^17.0.1",
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
-		"survey-react-ui": "^1.9.116",
+		"survey-react-ui": "^1.9.117",
 		"typescript": "^5.2.2",
 		"vscode-extension-tester": "^5.10",
 		"xterm-addon-fit": "^0.8.0",
