@@ -1,0 +1,48 @@
+name: check-helm
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+jobs:
+  check-helm-repo:
+    runs-on: ubuntu-latest
+    env:
+        TOOL_REPO: helm/helm
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Get latest HELM version
+        run: |
+          echo "REPO_HELM_VERSION=$(cat src/tools.json | jq -r .helm.version)" >> $GITHUB_ENV
+          baseUrl="https://mirror.openshift.com/pub/openshift-v4/clients/helm"
+          echo "LATEST_TOOL_URL=$(echo ${baseUrl})" >> $GITHUB_ENV
+          echo "LATEST_TOOL_RELEASE=$(curl -s -L ${baseUrl} | grep "${baseUrl}" | sed "s|${baseUrl}||" | grep -v "latest" | sed 's/[^"]*"\([^"]*\).*/\1/' | sed "s|/||g" | sort -V | tail -n 1)" >> $GITHUB_ENV
+      - name: Find existing PR for HELM version
+        run: |
+          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update helm ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
+      - name: Update src/tools.json with latest helm version
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) }}
+        run: |
+          jq --indent 4 '.helm.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.helm.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.helm.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }}"' > src/tools.json.new
+          mv src/tools.json.new src/tools.json
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
+            old_url=`jq -r ".helm.platform[\"${platform}\"].url" src/tools.json`
+            dlFileName=`jq -r ".helm.platform[\"${platform}\"].dlFileName" src/tools.json`
+            new_url=`echo ${old_url} | sed "s|${{ env.REPO_HELM_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
+            checksum_url=`echo "${new_url}.sha256"`
+            checksum=`curl -s -L ${checksum_url} | sed "s| ||g"`
+            jq --indent 4 ".helm.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json \
+              | jq --indent 4 ".helm.platform[\"${platform}\"].sha256sum = \"${checksum}\"" > src/tools.json.new
+            mv src/tools.json.new src/tools.json
+          done
+      - name: Create pull request
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_HELM_VERSION) && (env.PR_EXISTS == 0) }}
+        run: |
+          git config --global user.email "openshifttools-bot@users.noreply.github.com"
+          git config --global user.name "openshifttools-bot"
+          git checkout -b "helm-${{ env.LATEST_TOOL_RELEASE }}"
+          git commit -am "Update helm to ${{ env.LATEST_TOOL_RELEASE }}"
+          git push origin "helm-${{ env.LATEST_TOOL_RELEASE }}"
+          gh pr create --title "Update helm to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}/${{ env.LATEST_TOOL_RELEASE }}"

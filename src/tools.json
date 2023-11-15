@@ -124,10 +124,22 @@
                 "dlFileName": "helm-darwin-amd64.tar.gz",
                 "cmdFileName": "helm-darwin-amd64"
             },
+            "darwin-arm64": {
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-darwin-arm64.tar.gz",
+                "sha256sum": "7edbba9ab680eaf6ce4b02693909c944dcde2ac60d22b26363852fee736579ef",
+                "dlFileName": "helm-darwin-arm64.tar.gz",
+                "cmdFileName": "helm-darwin-arm64"
+            },
             "linux": {
                 "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-linux-amd64.tar.gz",
                 "sha256sum": "55a8ac91018650964ccaccc66a6d6b963428a2afa0a824e708e63509dbbd3316",
                 "dlFileName": "helm-linux-amd64.tar.gz",
+                "cmdFileName": "helm-linux-amd64"
+            },
+            "linux-arm64": {
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-linux-arm64.tar.gz",
+                "sha256sum": "b84fb1eca6e1c8f77a047d2731157a5da8c92bf402fb4d4a76ff7bbeb6175e31",
+                "dlFileName": "helm-linux-arm64.tar.gz",
                 "cmdFileName": "helm-linux-amd64"
             }
         }
