@@ -106,39 +106,39 @@
         "description": "oc helm CLI",
         "vendor": "Red Hat, Inc.",
         "name": "helm",
-        "version": "3.11.1",
-        "versionRange": "^3.11.1",
-        "versionRangeLabel": "version >= 3.11.1",
+        "version": "3.12.1",
+        "versionRange": "^3.12.1",
+        "versionRangeLabel": "version >= 3.12.1",
         "dlFileName": "helm",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-windows-amd64.exe.zip",
-                "sha256sum": "2ee9c0bec16252171aec7bb709219e069d4d747c5e40341d652708fa2a78640c",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-windows-amd64.exe.zip",
+                "sha256sum": "d3f39983d4237d0551ffd0c9855d59e9ca4066a5c73c5ee056242360c31fbacc",
                 "dlFileName": "helm-windows-amd64.exe.zip",
                 "cmdFileName": "helm-windows-amd64.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-darwin-amd64.tar.gz",
-                "sha256sum": "0930908a9a43a32c9a7dc859bc82b2d0d822d99b53d75979a6da64a824d80837",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-darwin-amd64.tar.gz",
+                "sha256sum": "7adaac63bc918c059417315713203d99567e3732bb66e885ef335a1ed8d816e0",
                 "dlFileName": "helm-darwin-amd64.tar.gz",
                 "cmdFileName": "helm-darwin-amd64"
             },
             "darwin-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-darwin-arm64.tar.gz",
-                "sha256sum": "7edbba9ab680eaf6ce4b02693909c944dcde2ac60d22b26363852fee736579ef",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-darwin-arm64.tar.gz",
+                "sha256sum": "04945c78f2677d4eba150a310639403fdddb847d8f2a1a84c8a7cf847107b878",
                 "dlFileName": "helm-darwin-arm64.tar.gz",
                 "cmdFileName": "helm-darwin-arm64"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-linux-amd64.tar.gz",
-                "sha256sum": "55a8ac91018650964ccaccc66a6d6b963428a2afa0a824e708e63509dbbd3316",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-linux-amd64.tar.gz",
+                "sha256sum": "a03b252cfdbfd8e9c02cd131018b87c2b7858058eec93283d6b1492b9bde8880",
                 "dlFileName": "helm-linux-amd64.tar.gz",
                 "cmdFileName": "helm-linux-amd64"
             },
             "linux-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.11.1/helm-linux-arm64.tar.gz",
-                "sha256sum": "b84fb1eca6e1c8f77a047d2731157a5da8c92bf402fb4d4a76ff7bbeb6175e31",
+                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-linux-arm64.tar.gz",
+                "sha256sum": "2eb64b3d1772ae4ca0f2b34c50826860222c01f8f7306965c9aa84c11b5a83b4",
                 "dlFileName": "helm-linux-arm64.tar.gz",
                 "cmdFileName": "helm-linux-amd64"
             }
