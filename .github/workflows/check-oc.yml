@@ -23,11 +23,11 @@ jobs:
         run: |
           echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update oc ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
       - name: Update src/tools.json with latest oc version
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           jq --indent 4 '.oc.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.oc.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.oc.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }} and < 5.0.0"' > src/tools.json.new
           mv src/tools.json.new src/tools.json
-          for platform in win32 darwin linux; do
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
             old_url=`jq -r ".oc.platform[\"${platform}\"].url" src/tools.json`
             dlFileName=`jq -r ".oc.platform[\"${platform}\"].dlFileName" src/tools.json | sed "s|${{ env.REPO_OC_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|g"`
             new_url=`echo ${old_url} | sed "s|${{ env.REPO_OC_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|g"`
@@ -39,7 +39,7 @@ jobs:
             mv src/tools.json.new src/tools.json
           done
       - name: Create pull request
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           release_url=`echo "${{ env.LATEST_TOOL_URL }}" | sed "s|stable|${{ env.LATEST_TOOL_RELEASE }}|"`
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
