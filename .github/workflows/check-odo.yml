@@ -23,11 +23,11 @@ jobs:
         run: |
           echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update odo ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
       - name: Update src/tools.json with latest odo version
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           jq --indent 4 '.odo.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.odo.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.odo.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }}"' > src/tools.json.new
           mv src/tools.json.new src/tools.json
-          for platform in win32 darwin linux; do
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
             old_url=`jq -r .odo.platform.${platform}.url src/tools.json`
             new_url=`echo ${old_url} | sed "s|${{ env.REPO_ODO_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
             checksum=`curl -s ${new_url}.sha256`
@@ -35,7 +35,7 @@ jobs:
             mv src/tools.json.new src/tools.json
           done
       - name: Create pull request
-        if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
           git config --global user.name "openshifttools-bot"
