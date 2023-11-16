@@ -10,21 +10,33 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.15.0/odo-windows-amd64.exe.zip",
+                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-windows-amd64.exe.zip",
                 "sha256sum": "cf8ddcd46025325dd9e5f8b5f38ef8ea45d49a79c127b48c2b9c5b2ccb93afaa",
                 "dlFileName": "odo-windows-amd64.exe.zip",
                 "cmdFileName": "odo-windows-amd64.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-amd64.tar.gz",
+                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-amd64.tar.gz",
                 "sha256sum": "45e96d490c593d994689156d17f5e1f1bf208f651ce19d74160ef12cb741b113",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
                 "cmdFileName": "odo-darwin-amd64"
             },
+            "darwin-arm64": {
+                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-arm64.tar.gz",
+                "sha256sum": "dade9c0679d2624d80818ed66a5d80d161c291b6a9e72dde8c6b7573843c175e",
+                "dlFileName": "odo-darwin-arm64.tar.gz",
+                "cmdFileName": "odo-darwin-arm64"
+            },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/odo/v3.15.0/odo-linux-amd64.tar.gz",
+                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-linux-amd64.tar.gz",
                 "sha256sum": "77e999ec3eca99ea17e9345496866afc9c1ae67d3069c9433659b801dab9c302",
                 "dlFileName": "odo-linux-amd64.tar.gz",
+                "cmdFileName": "odo"
+            },
+            "linux-arm64": {
+                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-linux-arm64.tar.gz",
+                "sha256sum": "b154cb06fbc423006b8892b302d5e6701986c9bbaa872efc2a7056b787a152e1",
+                "dlFileName": "odo-linux-arm64.tar.gz",
                 "cmdFileName": "odo"
             }
         }
