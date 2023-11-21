@@ -374,8 +374,8 @@ export function HelmSearch(props: HelmSearchProps) {
 }
 
 function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
-    const oldURLCheck = oldRepo.url.includes('charts.openshift.io');
-    const newURLCheck = newRepo.url.includes('charts.openshift.io');
+    const oldURLCheck = oldRepo.url.toLowerCase().includes('charts.openshift.io');
+    const newURLCheck = newRepo.url.toLowerCase().includes('charts.openshift.io');
     if (oldURLCheck && !newURLCheck) {
         return -1;
     } else if (newURLCheck && !oldURLCheck) {
