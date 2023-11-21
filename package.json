@@ -108,7 +108,7 @@
 		"@rjsf/validator-ajv8": "^5.14.2",
 		"@segment/analytics-next": "^1.61.0",
 		"@svgr/plugin-jsx": "^8.1.0",
-		"@types/chai": "^4.3.10",
+		"@types/chai": "^4.3.11",
 		"@types/express": "^4.17.21",
 		"@types/fs-extra": "^11.0.4",
 		"@types/lodash": "^4.14.201",
