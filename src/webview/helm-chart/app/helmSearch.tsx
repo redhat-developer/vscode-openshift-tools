@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Checkbox, Chip, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
 import { ChartResponse, HelmRepo } from '../helmChartType';
@@ -83,9 +83,7 @@ function RepoPicker(props: {
             enabled: checked
         });
         const filteredUpdatedList = updatedList
-            .sort((capA, capB) => {
-                return capA.name.localeCompare(capB.name)
-            });
+            .sort(ascRepoName);
         props.setRepoEnabled([...filteredUpdatedList]);
     }
 
@@ -93,13 +91,12 @@ function RepoPicker(props: {
         <FormGroup>
             {props.repoEnabled.map((repo) => {
                 return (
-                    <Tooltip title={repo.url}>
+                    <Tooltip title={repo.url}
+                        placement='right'>
                         <FormControlLabel
                             control={
                                 <Checkbox
                                     size='small'
-                                    //disabled={repo.url.toLowerCase().indexOf('charts.openshift.io') !== -1}
-                                    //checked={repo.url.toLowerCase().indexOf('charts.openshift.io') !== -1 ? true : repo.enabled}
                                     checked={repo.enabled}
                                     onChange={(_e, checked) =>
                                         onCheckboxClick(repo.name, repo.url, checked)
@@ -113,45 +110,6 @@ function RepoPicker(props: {
                 );
             })}
         </FormGroup>
-    );
-}
-
-function ChipsPicker(props: {
-    ChipEnabled: { name: string; enabled: boolean }[];
-    setChipEnabled: React.Dispatch<
-        React.SetStateAction<{ name: string; enabled: boolean }[]>
-    >;
-}) {
-    function onClick(clickedCapability: string, checked: boolean) {
-        const updatedList = [...props.ChipEnabled] //
-            .filter((entry) => entry.name !== clickedCapability);
-        updatedList.push({
-            name: clickedCapability,
-            enabled: checked,
-        });
-        const filteredUpdatedList = updatedList
-            .sort((capA, capB) => {
-                return capA.name.localeCompare(capB.name)
-            });
-        props.setChipEnabled([...filteredUpdatedList]);
-    }
-
-    return (
-        <Stack spacing={1} useFlexGap direction='row' flexWrap='wrap'>
-            {props.ChipEnabled.map((_cap) => {
-                return (
-                    <Chip
-                        size='small'
-                        sx={{ borderSpacing: '3', margin: '1' }}
-                        clickable={true}
-                        color={_cap.enabled ? 'success' : 'default'}
-                        onClick={(_) => { onClick(_cap.name, !_cap.enabled) }}
-                        label={_cap.name}
-                        key={_cap.name}
-                    />
-                );
-            })}
-        </Stack>
     );
 }
 
@@ -209,10 +167,6 @@ export function HelmSearch(props: HelmSearchProps) {
     const [providerTypeEnabled, setProviderTypeEnabled] = React.useState<
         { type: string; enabled: boolean }[]
     >([]);
-    const [keywords, setKeywords] = React.useState<string[]>([]);
-    const [keywordEnabled, setKeywordEnabled] = React.useState<
-        { name: string; enabled: boolean }[]
-    >([]);
     const [selectedHelmChart, setselectedHelmChart] = React.useState<ChartResponse>();
     const [currentPage, setCurrentPage] = React.useState(1);
     const [searchText, setSearchText] = React.useState('');
@@ -223,23 +177,11 @@ export function HelmSearch(props: HelmSearchProps) {
         return oldChartName.localeCompare(newChartName);
     }
 
-    function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
-        const oldURLCheck = oldRepo.url.includes('charts.openshift.io');
-        const newURLCheck = newRepo.url.includes('charts.openshift.io');
-        if (oldURLCheck && !newURLCheck) {
-            return -1;
-        } else if (newURLCheck && !oldURLCheck) {
-            return 1;
-        }
-        return oldRepo.name.localeCompare(newRepo.name);
-    }
-
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
         switch (message.action) {
-            case 'getProviderAndTypes': {
+            case 'getProviderTypes': {
                 setProviderTypes((_types) => message.data.types as string[]);
-                setKeywords((_keywords) => message.data.keywords as string[]);
                 break;
             }
             case 'getHelmRepos': {
@@ -248,7 +190,7 @@ export function HelmSearch(props: HelmSearchProps) {
             }
             case 'getHelmCharts': {
                 sethelmCharts((_helmCharts) => message.data.helmCharts as ChartResponse[]);
-                VSCodeMessage.postMessage({ action: 'getProviderAndTypes' });
+                VSCodeMessage.postMessage({ action: 'getProviderTypes' });
                 break;
             }
             default:
@@ -287,27 +229,12 @@ export function HelmSearch(props: HelmSearchProps) {
     }, [providerTypes]);
 
     React.useEffect(() => {
-        const enabledArray = [];
-        for (const keyword of keywords) {
-            enabledArray.push({
-                name: keyword,
-                enabled: false,
-            });
-        }
-        setKeywordEnabled((_) => enabledArray);
-    }, [keywords]);
-
-    React.useEffect(() => {
         setCurrentPage((_) => 1);
-    }, [helmChartEnabled, providerTypeEnabled, keywordEnabled, searchText]);
+    }, [helmChartEnabled, providerTypeEnabled, searchText]);
 
     const activeProviderTypes = providerTypeEnabled //
         .filter((entry) => entry.enabled) //
         .map((entry) => entry.type);
-
-    const activeKeywords = keywordEnabled //
-        .filter((entry) => entry.enabled) //
-        .map((entry) => entry.name);
 
     const activeRepos = helmChartEnabled //
         .filter((entry) => entry.enabled) //
@@ -318,7 +245,6 @@ export function HelmSearch(props: HelmSearchProps) {
         const helmResponse = helmCharts.filter((helmChart: ChartResponse) =>
             activeRepos.includes(helmChart.repoName))
             .filter((helmChart: ChartResponse) => isProviderTypesToBeIncluded(helmChart))
-            .filter((helmChart: ChartResponse) => isKeywordsToBeIncluded(helmChart)) //
             .filter(function (helmChart: ChartResponse) {
                 const searchTerms = searchText.split(/\s+/);
                 return every(
@@ -340,11 +266,6 @@ export function HelmSearch(props: HelmSearchProps) {
     function isProviderTypesToBeIncluded(chart: ChartResponse): boolean {
         return activeProviderTypes.length === 0 || //
             activeProviderTypes.includes(chart.chartVersions[0].annotations && chart.chartVersions[0].annotations['charts.openshift.io/providerType']);
-    }
-
-    function isKeywordsToBeIncluded(chart: ChartResponse): boolean {
-        return activeKeywords.length === 0 || //
-            chart.chartVersions[0].keywords && chart.chartVersions[0].keywords.some((keyword) => activeKeywords.includes(keyword));
     }
 
     return (
@@ -378,18 +299,6 @@ export function HelmSearch(props: HelmSearchProps) {
                                                     providerTypeEnabled={providerTypeEnabled}
                                                     setProviderTypeEnabled={setProviderTypeEnabled} />
                                                 <Divider orientation='horizontal' sx={{ width: '100%' }} />
-                                            </Stack>
-                                        </>
-                                    )}
-                                    {keywords.length > 0 && (
-                                        <>
-                                            <Typography variant='body2' marginBottom={2}>
-                                                Keywords
-                                            </Typography>
-                                            <Stack direction='column' useFlexGap={true} width='100%' spacing={1}>
-                                                <ChipsPicker
-                                                    ChipEnabled={keywordEnabled}
-                                                    setChipEnabled={setKeywordEnabled} />
                                             </Stack>
                                         </>
                                     )}
@@ -459,4 +368,15 @@ export function HelmSearch(props: HelmSearchProps) {
         </>
     );
 
+}
+
+function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
+    const oldURLCheck = oldRepo.url.includes('charts.openshift.io');
+    const newURLCheck = newRepo.url.includes('charts.openshift.io');
+    if (oldURLCheck && !newURLCheck) {
+        return -1;
+    } else if (newURLCheck && !oldURLCheck) {
+        return 1;
+    }
+    return oldRepo.name.localeCompare(newRepo.name);
 }

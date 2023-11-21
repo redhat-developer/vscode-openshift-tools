@@ -95,27 +95,19 @@ function helmChartMessageListener(event: any): void {
             });
             break;
         }
-        case 'getProviderAndTypes': {
+        case 'getProviderTypes': {
             const types: string[] = [];
-            const keywords: string[] = [];
             helmCharts.map((helm: ChartResponse) => {
                 if (helm.chartVersions[0].annotations && helm.chartVersions[0].annotations['charts.openshift.io/providerType']) {
                     types.push(helm.chartVersions[0].annotations['charts.openshift.io/providerType']);
                 }
-
-                if  (helm.chartVersions[0].keywords) {
-                    helm.chartVersions[0].keywords.map((keyword) => keywords.push(keyword));
-                }
-
             });
             types.sort((regA, regB) => regA.localeCompare(regB));
-            keywords.sort((regA, regB) => regA.localeCompare(regB));
             void panel.webview.postMessage(
                 {
                     action: event.action,
                     data: {
                         types: [... new Set(types)],
-                        keywords: [... new Set(keywords)]
                     }
                 }
             );
