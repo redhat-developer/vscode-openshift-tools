@@ -1,0 +1,50 @@
+name: check-oc
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+jobs:
+  check-oc-repo:
+    runs-on: ubuntu-latest
+    env:
+        TOOL_REPO: openshift/oc
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Get latest OC version
+        run: |
+          echo "REPO_OC_VERSION=$(cat src/tools.json | jq -r .oc.version)" >> $GITHUB_ENV
+          LATEST_TOOL_URL='https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/release.txt'
+          echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_URL})" >> $GITHUB_ENV
+          echo "LATEST_TOOL_RELEASE=$(curl -s -L ${LATEST_TOOL_URL} | grep "Name:" | head -n 1 | sed 's|Name:||' | sed 's| ||g')" >> $GITHUB_ENV
+      - name: Find existing PR for OC version
+        run: |
+          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update oc ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
+      - name: Update src/tools.json with latest oc version
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
+        run: |
+          jq --indent 4 '.oc.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.oc.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.oc.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }} and < 5.0.0"' > src/tools.json.new
+          mv src/tools.json.new src/tools.json
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
+            old_url=`jq -r ".oc.platform[\"${platform}\"].url" src/tools.json`
+            dlFileName=`jq -r ".oc.platform[\"${platform}\"].dlFileName" src/tools.json | sed "s|${{ env.REPO_OC_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|g"`
+            new_url=`echo ${old_url} | sed "s|${{ env.REPO_OC_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|g"`
+            checksum_url=`echo "${new_url}" | sed "s|${dlFileName}|sha256sum.txt|"`
+            checksum=`curl -s -L ${checksum_url} | grep "${dlFileName}" | sed "s|${dlFileName}||" | sed "s| ||g"`
+            jq --indent 4 ".oc.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json \
+             | jq --indent 4 ".oc.platform[\"${platform}\"].sha256sum = \"${checksum}\"" \
+             | jq --indent 4 ".oc.platform[\"${platform}\"].dlFileName = \"${dlFileName}\"" > src/tools.json.new
+            mv src/tools.json.new src/tools.json
+          done
+      - name: Create pull request
+        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_OC_VERSION) && (env.PR_EXISTS == 0) }}
+        run: |
+          release_url=`echo "${{ env.LATEST_TOOL_URL }}" | sed "s|stable|${{ env.LATEST_TOOL_RELEASE }}|"`
+          git config --global user.email "openshifttools-bot@users.noreply.github.com"
+          git config --global user.name "openshifttools-bot"
+          git checkout -b "oc-${{ env.LATEST_TOOL_RELEASE }}"
+          git commit -am "Update oc to ${{ env.LATEST_TOOL_RELEASE }}"
+          git push origin "oc-${{ env.LATEST_TOOL_RELEASE }}"
+          gh pr create --title "Update oc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${release_url}"
