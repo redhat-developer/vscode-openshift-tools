@@ -97,9 +97,6 @@ function RepoPicker(props: {
                             control={
                                 <Checkbox
                                     size='small'
-                                    disabled={
-                                        repo.url.toLowerCase().includes('charts.openshift.io')
-                                    }
                                     checked={repo.enabled}
                                     onChange={(_e, checked) =>
                                         onCheckboxClick(repo.name, repo.url, checked)
@@ -301,7 +298,6 @@ export function HelmSearch(props: HelmSearchProps) {
                                                 <ProviderTypePicker
                                                     providerTypeEnabled={providerTypeEnabled}
                                                     setProviderTypeEnabled={setProviderTypeEnabled} />
-                                                <Divider orientation='horizontal' sx={{ width: '100%' }} />
                                             </Stack>
                                         </>
                                     )}

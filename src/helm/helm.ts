@@ -58,11 +58,12 @@ export async function updateHelmRepo(): Promise<CliExitData> {
  */
 export async function installHelmChart(
     name: string,
+    repoName: string,
     chartName: string,
     version: string,
 ): Promise<CliExitData> {
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.installHelmChart(name, chartName, version),
+        HelmCommands.installHelmChart(name, repoName, chartName, version),
     );
 }
 

@@ -179,6 +179,7 @@ export const HelmModal = React.forwardRef(
                                             action: 'install',
                                             data: {
                                                 name: installName,
+                                                repoName: props.helmChart.repoName,
                                                 chartName: props.helmChart.chartName,
                                                 version: selectedVersion.version
                                             }
