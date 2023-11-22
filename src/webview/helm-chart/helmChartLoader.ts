@@ -30,7 +30,7 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
 });
 
 export class HelmCommand {
-    @vsCommand('openshift.componentTypesView.registry.helmChart.install')
+    @vsCommand('openshift.helm.install')
     static async installHelmChart(event: any) {
         await panel.webview.postMessage({
             action: 'installStatus',
@@ -63,9 +63,9 @@ export class HelmCommand {
         });
     }
 
-    @vsCommand('openshift.componentTypesView.registry.helmChart.open')
+    @vsCommand('openshift.helm.open')
     static async openedHelmChart(chartName: any): Promise<void> {
-        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.componentTypesView.registry.helmChart.open');
+        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.helm.open');
         openedHelmChart.send(chartName);
         return Promise.resolve();
     }
@@ -80,11 +80,11 @@ function helmChartMessageListener(event: any): void {
             })
             break;
         case 'install': {
-            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
+            void vscode.commands.executeCommand('openshift.helm.install', event);
             break;
         }
         case 'openChart': {
-            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
+            void vscode.commands.executeCommand('openshift.helm.open', event.chartName);
             break;
         }
         case 'validateName': {
@@ -163,7 +163,7 @@ export default class HelmChartLoader {
         return panel;
     }
 
-    @vsCommand('openshift.componentTypesView.registry.openHelmChartsInView')
+    @vsCommand('openshift.helm.openView')
     public static async openHelmChartInWebview(): Promise<void> {
         await HelmChartLoader.loadView('Helm Charts');
     }

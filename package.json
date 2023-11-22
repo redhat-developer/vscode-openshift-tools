@@ -242,7 +242,7 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
-		"onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
+		"onCommand:openshift.helm.openView",
 		"onCommand:openshift.component.deleteConfigurationFiles",
 		"onCommand:openshift.component.deleteSourceFolder",
 		"onWalkthrough:openshiftWalkthrough",
@@ -364,18 +364,33 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+				"command": "openshift.helm.openView",
+				"title": "Open Helm View",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.install",
 				"title": "Open Helm Charts",
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.helmChart.install",
+				"command": "openshift.helm.add",
+				"title": "Add Repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.open",
 				"title": "Open Helm Charts",
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.helmChart.open",
-				"title": "Open Helm Charts",
+				"command": "openshift.helm.repo.delete",
+				"title": "Delete",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.repo.update",
+				"title": "Update",
 				"category": "OpenShift"
 			},
 			{
@@ -1171,15 +1186,27 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"command": "openshift.helm.add",
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.helmChart.install",
+					"command": "openshift.helm.openView",
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.helmChart.open",
+					"command": "openshift.helm.install",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.open",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.repo.delete",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.repo.update",
 					"when": "false"
 				},
 				{
@@ -1434,7 +1461,7 @@
 			],
 			"view/item/context/createService": [
 				{
-					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"command": "openshift.helm.openView",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c2"
 				},
@@ -1751,6 +1778,26 @@
 					"command": "openshift.component.commands.command.run",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\-component-command.*\\.dev-run.*/",
 					"group": "inline"
+				},
+				{
+					"command": "openshift.helm.add",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c1"
+				},
+				{
+					"command": "openshift.helm.openView",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.helm.repo.delete",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c1"
+				},
+				{
+					"command": "openshift.helm.repo.update",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c2"
 				}
 			]
 		},
@@ -1808,13 +1855,13 @@
 					{
 						"id": "helmChart",
 						"title": "Work with Helm Charts",
-						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.componentTypesView.registry.openHelmChartsInView)",
+						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.helm.openView)",
 						"media": {
 							"image": "images/walkthrough/helm.gif",
 							"altText": "helm chart"
 						},
 						"completionEvents": [
-							"onCommand:openshift.componentTypesView.registry.openHelmChartsInView"
+							"onCommand:openshift.helm.openView"
 						]
 					},
 					{
