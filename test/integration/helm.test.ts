@@ -19,6 +19,7 @@ suite('helm integration', function () {
     const odo = Odo.Instance;
 
     const RELEASE_NAME = 'my-helm-release';
+    const REPO_NAME = 'openshift';
     const CHART_NAME = 'fredco-samplechart';
     const CHART_VERSION = '0.1.3';
     const HELM_NAMESPACE = 'my-helm-charts';
@@ -58,7 +59,7 @@ suite('helm integration', function () {
     });
 
     test('installs a chart as a release', async function () {
-        await Helm.installHelmChart(RELEASE_NAME, CHART_NAME, CHART_VERSION);
+        await Helm.installHelmChart(RELEASE_NAME, REPO_NAME, CHART_NAME, CHART_VERSION);
         const releases = await Helm.getHelmReleases();
         const sampleChartRelease = releases.find((release) => release.name === RELEASE_NAME);
         expect(sampleChartRelease).to.exist;
