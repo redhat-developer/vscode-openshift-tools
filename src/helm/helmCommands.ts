@@ -13,8 +13,14 @@ export function updateHelmRepo(): CommandText {
     return new CommandText('helm', 'repo update');
 }
 
-export function installHelmChart(name: string, chartName: string, version: string): CommandText {
-    return new CommandText('helm', `install ${name} openshift/${chartName}`, [new CommandOption('--version', version)]);
+export function getRepos(): CommandText {
+    const commandText = new CommandText('helm','repo list')
+    commandText.addOption(new CommandOption('-o','json'));
+    return commandText;
+}
+
+export function installHelmChart(name: string, repoName: string, chartName: string, version: string): CommandText {
+    return new CommandText('helm', `install ${name} ${repoName}/${chartName}`, [new CommandOption('--version', version)]);
 }
 
 export function unInstallHelmChart(name: string): CommandText {

@@ -4,10 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 export interface ChartResponse {
+    repoName: string,
+    repoURL: string,
     chartName: string,
     chartVersions: Chart[],
     displayName: string,
     isExpand?: boolean
+}
+
+export interface HelmRepo {
+    name: string;
+    url: string;
 }
 
 export interface Annotation {
@@ -24,7 +31,9 @@ export interface Annotation {
 }
 
 export interface Maintainer {
-    name: string
+    name: string;
+    email: string;
+    url: string;
 }
 
 export interface Chart {
