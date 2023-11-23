@@ -7,7 +7,7 @@ import React from 'react';
 import { Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
-import { ChartResponse, HelmRepo } from '../helmChartType';
+import { ChartResponse, HelmRepo } from '../../../helm/helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { LoadScreen } from '../../common/loading';
 import { HelmModal } from './helmModal';

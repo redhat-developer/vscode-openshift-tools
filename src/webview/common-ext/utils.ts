@@ -9,7 +9,8 @@ import { extensions, Uri, WebviewPanel, WebviewView } from 'vscode';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
-import { validateGitURLProps } from '../common/propertyTypes';
+import { validateURLProps } from '../common/propertyTypes';
+import validator from 'validator';
 export type Message = {
     action: string;
     data: any;
@@ -60,13 +61,34 @@ function isGitURL(host: string): boolean {
     ].includes(host);
 }
 
-export function validateGitURL(event: Message): validateGitURLProps {
+export function validateURL(event: Message): validateURLProps {
+    if (typeof event.data === 'string' && (event.data).trim().length === 0) {
+        return {
+            url: event.data,
+            error: true,
+            helpText: 'Please enter a URL.'
+        } as validateURLProps
+    } else if (!validator.isURL(event.data)) {
+        return {
+            url: event.data,
+            error: true,
+            helpText: 'Entered URL is invalid'
+        } as validateURLProps
+    }
+    return {
+        url: event.data,
+        error: false,
+        helpText: 'URL is valid'
+    } as validateURLProps
+}
+
+export function validateGitURL(event: Message): validateURLProps {
     if (typeof event.data === 'string' && (event.data).trim().length === 0) {
         return {
             url: event.data,
             error: true,
             helpText: 'Please enter a Git URL.'
-        } as validateGitURLProps
+        } as validateURLProps
     }
     try {
         const parse = gitUrlParse(event.data);
@@ -79,20 +101,20 @@ export function validateGitURL(event: Message): validateGitURLProps {
                 url: event.data,
                 error: false,
                 helpText: 'The git repo URL is valid.'
-            } as validateGitURLProps
+            } as validateURLProps
         }
         return {
             url: event.data,
             error: true,
             helpText: 'URL is missing organization or repo name.'
-        } as validateGitURLProps
+        } as validateURLProps
 
     } catch (e) {
         return {
             url: event.data,
             error: true,
             helpText: 'Invalid Git URL.'
-        } as validateGitURLProps
+        } as validateURLProps
     }
 }
 

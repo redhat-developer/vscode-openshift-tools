@@ -14,6 +14,7 @@ const webviews = [
     'create-component',
     'devfile-registry',
     'helm-chart',
+    'helm-manage-repository',
     'welcome',
     'feedback',
     'serverless-function',

@@ -5,12 +5,16 @@
 
 import { CommandOption, CommandText } from '../base/command';
 
-export function addHelmRepo(): CommandText {
-    return new CommandText('helm', 'repo add openshift https://charts.openshift.io/');
+export function addHelmRepo(repoName: string, url: string): CommandText {
+    return new CommandText('helm', `repo add ${repoName} ${url}`);
 }
 
-export function updateHelmRepo(): CommandText {
-    return new CommandText('helm', 'repo update');
+export function deleteRepo(repoName: string): CommandText {
+    return new CommandText('helm', `repo remove ${repoName}`);
+}
+
+export function updateHelmRepo(repoName: string): CommandText {
+    return new CommandText('helm', `repo update ${repoName}`);
 }
 
 export function getRepos(): CommandText {

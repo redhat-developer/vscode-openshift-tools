@@ -31,7 +31,7 @@ import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
-import { HelmRepo } from './webview/helm-chart/helmChartType';
+import { HelmRepo } from './helm/helmChartType';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -264,7 +264,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             if (!cliData.error && !cliData.stderr) {
                 const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
                 if (helmRepos?.length > 0) {
-                    result = [...helmRepos];
+                    result = [...helmRepos.sort(Helm.ascRepoName)];
                 }
             }
         } else {

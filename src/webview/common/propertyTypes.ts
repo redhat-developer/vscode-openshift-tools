@@ -6,7 +6,7 @@
 import { Uri } from 'vscode';
 import { ComponentTypeDescription, Registry } from '../../odo/componentType';
 import { StarterProject } from '../../odo/componentTypeDescription';
-import { ChartResponse } from '../helm-chart/helmChartType';
+import { ChartResponse } from '../../helm/helmChartType';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -87,7 +87,7 @@ export interface RunFunctionPageProps extends DefaultProps {
     onRunSubmit: (folderPath: Uri, build: boolean) => void;
 }
 
-export interface validateGitURLProps {
+export interface validateURLProps {
     url: string;
     error: boolean;
     helpText: string;

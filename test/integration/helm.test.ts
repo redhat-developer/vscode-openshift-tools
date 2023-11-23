@@ -50,7 +50,7 @@ suite('helm integration', function () {
     });
 
     test('installs OpenShift repo', async function () {
-        await Helm.addHelmRepo();
+        await Helm.addHelmRepo('openshift','https://charts.openshift.io/');
         const repoListOutput = (
             await CliChannel.getInstance().executeTool(new CommandText('helm', 'repo list'))
         ).stdout;

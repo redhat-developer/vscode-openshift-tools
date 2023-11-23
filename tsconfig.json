@@ -37,6 +37,7 @@
         "src/webview/welcome/app",
         "src/webview/git-import/app",
         "src/webview/helm-chart/app",
+        "src/webview/helm-manage-repository/app",
         "src/webview/feedback/app",
         "src/webview/serverless-function/app",
         "src/webview/serverless-manage-repository/app",

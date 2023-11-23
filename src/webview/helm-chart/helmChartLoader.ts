@@ -11,10 +11,10 @@ import sendTelemetry, { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { ChartResponse, HelmRepo } from './helmChartType';
 import fetch = require('make-fetch-happen');
 import { validateName } from '../common-ext/createComponentHelpers';
 import { Progress } from '../../util/progress';
+import { ChartResponse, HelmRepo } from '../../helm/helmChartType';
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];
