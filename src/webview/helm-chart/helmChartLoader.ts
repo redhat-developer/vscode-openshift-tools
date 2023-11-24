@@ -169,6 +169,7 @@ export default class HelmChartLoader {
     }
 
     public static async getHelmCharts(): Promise<void> {
+        helmCharts.length = 0;
         const cliData = await Helm.getHelmRepos();
         if (!cliData.error && !cliData.stderr) {
             const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
