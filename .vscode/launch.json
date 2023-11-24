@@ -72,7 +72,7 @@
                 "${workspaceFolder}/out/**/*.js"
             ],
             "sourceMaps": true,
-            "preLaunchTask": "instrument",
+            "preLaunchTask": "compile",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true",
                 "IS_OPENSHIFT": "true",
