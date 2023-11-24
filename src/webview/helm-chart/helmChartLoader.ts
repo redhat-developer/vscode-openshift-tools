@@ -134,13 +134,12 @@ function helmChartMessageListener(event: any): void {
 }
 
 export default class HelmChartLoader {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
     static get extensionPath() {
         return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
-    // eslint-disable-next-line @typescript-eslint/require-await
-    static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
+    static async loadView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'out', 'helmChartViewer'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -154,10 +153,11 @@ export default class HelmChartLoader {
             });
             panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
             panel.webview.html = await loadWebviewHtml('helmChartViewer', panel);
+            const messageDisposable = panel.webview.onDidReceiveMessage(helmChartMessageListener);
             panel.onDidDispose(() => {
+                messageDisposable.dispose();
                 panel = undefined;
             });
-            panel.webview.onDidReceiveMessage(helmChartMessageListener);
         }
         await HelmChartLoader.getHelmCharts();
         return panel;
@@ -169,29 +169,27 @@ export default class HelmChartLoader {
     }
 
     public static async getHelmCharts(): Promise<void> {
-        //if (helmCharts.length === 0) {
-            const cliData = await Helm.getHelmRepos();
-            if (!cliData.error && !cliData.stderr) {
-                const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
-                void panel?.webview.postMessage(
-                    {
-                        action: 'getHelmRepos',
-                        data: {
-                            helmRepos
-                        }
+        const cliData = await Helm.getHelmRepos();
+        if (!cliData.error && !cliData.stderr) {
+            const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+            void panel?.webview.postMessage(
+                {
+                    action: 'getHelmRepos',
+                    data: {
+                        helmRepos
                     }
-                );
-                helmRepos.forEach((helmRepo: HelmRepo) => {
-                    let url = helmRepo.url;
-                    url = url.endsWith('/') ? url : url.concat('/');
-                    url = url.concat('index.yaml');
-                    void HelmChartLoader.fetchURL(helmRepo, url);
-                });
-            }
-        //}
+                }
+            );
+            helmRepos.forEach((helmRepo: HelmRepo) => {
+                let url = helmRepo.url;
+                url = url.endsWith('/') ? url : url.concat('/');
+                url = url.concat('index.yaml');
+                void HelmChartLoader.fetchURL(helmRepo, url);
+            });
+        }
     }
 
-    static async fetchURL(repo: HelmRepo, url: string) {
+    private static async fetchURL(repo: HelmRepo, url: string) {
         const signupResponse = await fetch(url, {
             method: 'GET'
         });
