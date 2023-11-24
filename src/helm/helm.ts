@@ -50,14 +50,14 @@ export async function getHelmRepos(): Promise<CliExitData> {
 }
 
 /**
- * Updates the content of all the Helm repos.
+ * sync the repository to get latest
  *
  * @param repo name
  *
  * @returns the CLI output data from running the necessary command
  */
-export async function updateHelmRepo(renameRepo: string): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.updateHelmRepo(renameRepo), undefined, false);
+export async function syncHelmRepo(repoName: string): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.syncHelmRepo(repoName), undefined, false);
 }
 
 /**

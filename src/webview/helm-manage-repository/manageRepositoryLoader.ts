@@ -7,10 +7,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ManageRepository } from '../../helm/manageRepository';
 import { ExtensionID } from '../../util/constants';
-import { Progress } from '../../util/progress';
 import { loadWebviewHtml, Message, validateName, validateURL } from '../common-ext/utils';
 import { vsCommand } from '../../vscommand';
-import { OpenShiftExplorer } from '../../explorer';
 import { ascRepoName } from '../../helm/helm';
 
 export default class ManageRepositoryViewLoader {
@@ -116,16 +114,10 @@ export default class ManageRepositoryViewLoader {
                 break;
             }
             case 'addRepo': {
-                let addRepoStatus: boolean;
-                await Progress.execFunctionWithProgress(`Adding repository ${message.data.repoName}`, async () => {
-                    addRepoStatus = await ManageRepository.getInstance().addRepo(message.data.repoName, message.data.repoURL);
-                });
-                if (addRepoStatus) {
-                    OpenShiftExplorer.getInstance().refresh();
-                }
+                const status = await vscode.commands.executeCommand('openshift.helm.add', undefined, message.data.repoName, message.data.repoURL, true);
                 void ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action,
-                    status: addRepoStatus
+                    status
                 });
                 break;
             }
@@ -137,34 +129,16 @@ export default class ManageRepositoryViewLoader {
                 });
                 break;
             }
-            case 'updateRepo': {
-                await Progress.execFunctionWithProgress(`Updating the  repository ${message.data} with latest`, async () => {
-                    await ManageRepository.getInstance().updateRepo(message.data);
-                });
+            case 'syncRepo': {
+                await vscode.commands.executeCommand('openshift.helm.sync', message.data);
                 break;
             }
             case 'deleteRepo': {
-                const status = await ManageRepository.getInstance().deleteRepo(message.data.name);
-                if (status) {
-                    OpenShiftExplorer.getInstance().refresh();
-                    const repositories = (await ManageRepository.getInstance().list()).sort(ascRepoName);
-                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
-                        action: 'getRepositoryList',
-                        repositories
-                    });
-                }
+                await vscode.commands.executeCommand('openshift.helm.delete', message.data.repo, true);
                 break;
             }
-            case 'renameRepo': {
-                const renameRepoStatus = await ManageRepository.getInstance().editRepo(message.data.oldRepo, message.data.newName, message.data.newURL);
-                if (renameRepoStatus) {
-                    OpenShiftExplorer.getInstance().refresh();
-                    const repositories = (await ManageRepository.getInstance().list()).sort(ascRepoName);
-                    void ManageRepositoryViewLoader.panel?.webview.postMessage({
-                        action: 'getRepositoryList',
-                        repositories
-                    });
-                }
+            case 'editRepo': {
+                await vscode.commands.executeCommand('openshift.helm.edit', message.data.oldRepo, message.data.newName, message.data.newURL, false, true);
                 break;
             }
             default:

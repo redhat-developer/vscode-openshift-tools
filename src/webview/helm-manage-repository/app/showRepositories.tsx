@@ -88,10 +88,10 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         });
     }
 
-    updateRepo = (repoName: string): void => {
+    syncRepo = (repo: HelmRepo): void => {
         VSCodeMessage.postMessage({
-            action: 'updateRepo',
-            data: repoName
+            action: 'syncRepo',
+            data: repo
         });
     }
 
@@ -124,7 +124,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
         VSCodeMessage.postMessage({
             action: 'deleteRepo',
             data: {
-                name: repo.name
+                repo
             }
         });
     }
@@ -170,7 +170,7 @@ export class ShowRepositories extends React.Component<DefaultProps, {
     rename(oldRepo: HelmRepo, newName: string, newURL: string): void {
         this.CloseDialog();
         VSCodeMessage.postMessage({
-            action: 'renameRepo',
+            action: 'editRepo',
             data: {
                 oldRepo,
                 newName,
@@ -276,8 +276,8 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                                                                                 <Delete className={'erroricon'} />
                                                                             </IconButton>
                                                                         </Tooltip>
-                                                                        <Tooltip title='Update Repository'>
-                                                                            <IconButton onClick={() => this.updateRepo(repo.name)}
+                                                                        <Tooltip title='Sync'>
+                                                                            <IconButton onClick={() => this.syncRepo(repo)}
                                                                             >
                                                                                 <Sync className='updateIcon'/>
                                                                             </IconButton>

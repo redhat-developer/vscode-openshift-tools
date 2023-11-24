@@ -370,7 +370,7 @@
 			},
 			{
 				"command": "openshift.helm.install",
-				"title": "Open Helm Charts",
+				"title": "Install",
 				"category": "OpenShift"
 			},
 			{
@@ -381,6 +381,26 @@
 			{
 				"command": "openshift.helm.open",
 				"title": "Open Helm Charts",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.add",
+				"title": "Add repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.edit",
+				"title": "Edit repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.delete",
+				"title": "Delete repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.sync",
+				"title": "Sync repository",
 				"category": "OpenShift"
 			},
 			{
@@ -1188,7 +1208,23 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.helm.add",
+					"when": "false"
+				},
+				{
 					"command": "openshift.helm.open",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.edit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.delete",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.sync",
 					"when": "false"
 				},
 				{
@@ -1762,14 +1798,34 @@
 					"group": "inline"
 				},
 				{
-					"command": "openshift.helm.manageRepository",
+					"command": "openshift.helm.add",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
 					"group": "c1"
 				},
 				{
-					"command": "openshift.helm.openView",
+					"command": "openshift.helm.manageRepository",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
 					"group": "c2"
+				},
+				{
+					"command": "openshift.helm.openView",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c3"
+				},
+				{
+					"command": "openshift.helm.edit",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c1"
+				},
+				{
+					"command": "openshift.helm.delete",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.helm.sync",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c3"
 				}
 			]
 		},

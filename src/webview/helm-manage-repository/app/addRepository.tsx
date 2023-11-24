@@ -6,8 +6,8 @@
 import * as React from 'react';
 import { Button, Stack, TextField } from '@mui/material';
 import { DefaultProps } from '../../common/propertyTypes';
-import './home.scss';
 import { VSCodeMessage } from './vsCodeMessage';
+import './home.scss';
 
 export class AddRepository extends React.Component<DefaultProps, {
     input: {

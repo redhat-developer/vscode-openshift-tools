@@ -13,7 +13,7 @@ export function deleteRepo(repoName: string): CommandText {
     return new CommandText('helm', `repo remove ${repoName}`);
 }
 
-export function updateHelmRepo(repoName: string): CommandText {
+export function syncHelmRepo(repoName: string): CommandText {
     return new CommandText('helm', `repo update ${repoName}`);
 }
 

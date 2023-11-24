@@ -159,7 +159,7 @@ export default class HelmChartLoader {
             });
             panel.webview.onDidReceiveMessage(helmChartMessageListener);
         }
-        await getHelmCharts();
+        await HelmChartLoader.getHelmCharts();
         return panel;
     }
 
@@ -167,58 +167,58 @@ export default class HelmChartLoader {
     public static async openHelmChartInWebview(): Promise<void> {
         await HelmChartLoader.loadView('Helm Charts');
     }
-}
 
-async function getHelmCharts(): Promise<void> {
-    if (helmCharts.length === 0) {
-        const cliData = await Helm.getHelmRepos();
-        if (!cliData.error && !cliData.stderr) {
-            const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
-            void panel?.webview.postMessage(
-                {
-                    action: 'getHelmRepos',
-                    data: {
-                        helmRepos
+    public static async getHelmCharts(): Promise<void> {
+        //if (helmCharts.length === 0) {
+            const cliData = await Helm.getHelmRepos();
+            if (!cliData.error && !cliData.stderr) {
+                const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+                void panel?.webview.postMessage(
+                    {
+                        action: 'getHelmRepos',
+                        data: {
+                            helmRepos
+                        }
                     }
-                }
-            );
-            helmRepos.forEach((helmRepo: HelmRepo) => {
-                let url = helmRepo.url;
-                url = url.endsWith('/') ? url : url.concat('/');
-                url = url.concat('index.yaml');
-                void fetchURL(helmRepo, url);
-            });
-        }
-    }
-}
-
-async function fetchURL(repo: HelmRepo, url: string) {
-    const signupResponse = await fetch(url, {
-        method: 'GET'
-    });
-    const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
-    const entries = yamlResponse.entries;
-    Object.keys(entries).forEach((key) => {
-        const res: ChartResponse = {
-            repoName: '',
-            repoURL: '',
-            chartName: '',
-            chartVersions: [],
-            displayName: ''
-        };
-        res.repoName = repo.name;
-        res.repoURL = repo.url;
-        res.chartName = key;
-        res.chartVersions = entries[key].reverse();
-        res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
-        helmCharts.push(res);
-    });
-    void panel?.webview.postMessage(
-        {
-            action: 'getHelmCharts',
-            data: {
-                helmCharts
+                );
+                helmRepos.forEach((helmRepo: HelmRepo) => {
+                    let url = helmRepo.url;
+                    url = url.endsWith('/') ? url : url.concat('/');
+                    url = url.concat('index.yaml');
+                    void HelmChartLoader.fetchURL(helmRepo, url);
+                });
             }
-        }
-    );
+        //}
+    }
+
+    static async fetchURL(repo: HelmRepo, url: string) {
+        const signupResponse = await fetch(url, {
+            method: 'GET'
+        });
+        const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
+        const entries = yamlResponse.entries;
+        Object.keys(entries).forEach((key) => {
+            const res: ChartResponse = {
+                repoName: '',
+                repoURL: '',
+                chartName: '',
+                chartVersions: [],
+                displayName: ''
+            };
+            res.repoName = repo.name;
+            res.repoURL = repo.url;
+            res.chartName = key;
+            res.chartVersions = entries[key].reverse();
+            res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
+            helmCharts.push(res);
+        });
+        void panel?.webview.postMessage(
+            {
+                action: 'getHelmCharts',
+                data: {
+                    helmCharts
+                }
+            }
+        );
+    }
 }
