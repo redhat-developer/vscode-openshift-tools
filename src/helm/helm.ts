@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import { CliChannel } from '../cli';
 import { CliExitData } from '../util/childProcessUtil';
+import { HelmRepo } from './helmChartType';
 import * as HelmCommands from './helmCommands';
 
 export type HelmRelease = {
@@ -22,7 +23,7 @@ export type HelmRelease = {
  * @returns a list of all Helm releases in the current namespace on the current cluster
  */
 export async function getHelmReleases(): Promise<HelmRelease[]> {
-    const res = await CliChannel.getInstance().executeTool(HelmCommands.listHelmReleases());
+    const res = await CliChannel.getInstance().executeTool(HelmCommands.listHelmReleases(), undefined, false);
     return JSON.parse(res.stdout) as HelmRelease[];
 }
 
@@ -31,21 +32,32 @@ export async function getHelmReleases(): Promise<HelmRelease[]> {
  *
  * @returns the CLI output data from running the necessary command
  */
-export async function addHelmRepo(): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.addHelmRepo());
-}
-
-export async function getHelmRepos(): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.getRepos());
+export async function addHelmRepo(repoName: string, url: string): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.addHelmRepo(repoName, url), undefined, false);
 }
 
 /**
- * Updates the content of all the Helm repos.
+ * Delete the OpenShift Helm repo to the cluster.
  *
  * @returns the CLI output data from running the necessary command
  */
-export async function updateHelmRepo(): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.updateHelmRepo());
+export async function deleteHelmRepo(repoName: string): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.deleteRepo(repoName), undefined, false);
+}
+
+export async function getHelmRepos(): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.getRepos(), undefined, false);
+}
+
+/**
+ * sync the repository to get latest
+ *
+ * @param repo name
+ *
+ * @returns the CLI output data from running the necessary command
+ */
+export async function syncHelmRepo(repoName: string): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.syncHelmRepo(repoName), undefined, false);
 }
 
 /**
@@ -63,7 +75,7 @@ export async function installHelmChart(
     version: string,
 ): Promise<CliExitData> {
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.installHelmChart(name, repoName, chartName, version),
+        HelmCommands.installHelmChart(name, repoName, chartName, version), undefined, false
     );
 }
 
@@ -74,5 +86,22 @@ export async function installHelmChart(
  * @returns the CLI output data from running the necessary command
  */
 export async function unInstallHelmChart(name: string): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.unInstallHelmChart(name));
+    return await CliChannel.getInstance().executeTool(HelmCommands.unInstallHelmChart(name), undefined, false);
+}
+
+/**
+ * sort the repo list.
+ *
+ * @param helm repo
+ * @returns the CLI output data from running the necessary command
+ */
+export function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
+    const oldURLCheck = oldRepo.url.toLowerCase().includes('charts.openshift.io');
+    const newURLCheck = newRepo.url.toLowerCase().includes('charts.openshift.io');
+    if (oldURLCheck && !newURLCheck) {
+        return -1;
+    } else if (newURLCheck && !oldURLCheck) {
+        return 1;
+    }
+    return oldRepo.name.localeCompare(newRepo.name);
 }

@@ -91,6 +91,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             './componentsView',
             './webview/devfile-registry/registryViewLoader',
             './webview/helm-chart/helmChartLoader',
+            './webview/helm-manage-repository/manageRepositoryLoader',
             './feedback'
         )),
         commands.registerCommand('clusters.openshift.useProject', (context) =>

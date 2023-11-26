@@ -34,7 +34,7 @@ export class VsCommandError extends Error {
 const vsCommands: VsCommand[] = [];
 
 function displayResult(result: string | undefined): void {
-    if (result && `${result}`) {
+    if (result && typeof result === 'string' && `${result}`) {
         void window.showInformationMessage(`${result}`);
     }
 }

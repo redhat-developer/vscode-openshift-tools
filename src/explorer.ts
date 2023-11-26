@@ -31,12 +31,20 @@ import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
+import { HelmRepo } from './helm/helmChartType';
 
-type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem;
+type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
+
+export type OpenShiftObject = {
+    kind: string,
+    metadata: {
+        name: string
+    },
+}
 
 type PackageJSON = {
-  version: string;
-  bugs: string;
+    version: string;
+    bugs: string;
 };
 
 const CREATE_OR_SET_PROJECT_ITEM = {
@@ -108,8 +116,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             return element;
         }
 
-        if('label' in element) {
-            return  {
+        if ('label' in element) {
+            return {
                 contextValue: 'openshift.openConfigFile',
                 label: element.label,
                 collapsibleState: TreeItemCollapsibleState.None,
@@ -122,11 +130,21 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // check if element is Context instance
         if ('name' in element && 'cluster' in element && 'user' in element) { // Context instance could be without namespace
             void commands.executeCommand('setContext', 'isLoggedIn', true);
-            return  {
+            return {
                 contextValue: 'openshift.k8sContext',
                 label: this.kubeConfig.getCluster(element.cluster).server,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
                 iconPath: path.resolve(__dirname, '../../images/context/cluster-node.png')
+            };
+        }
+
+        if ('name' in element && 'url' in element) {
+            return {
+                contextValue: 'openshift.helm.repo',
+                label: element.name,
+                tooltip: element.url,
+                collapsibleState: TreeItemCollapsibleState.None,
+                iconPath: new ThemeIcon('repo')
             };
         }
 
@@ -149,6 +167,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     label: element.metadata.name,
                     collapsibleState: TreeItemCollapsibleState.Collapsed,
                     iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
+                }
+            } else if (element.kind === 'helm') {
+                return {
+                    contextValue: 'openshift.helm.repos',
+                    label: element.metadata.name,
+                    collapsibleState: TreeItemCollapsibleState.Collapsed,
+                    description: 'Repositories',
+                    iconPath: path.resolve(__dirname, '../../images/context/helm.png')
                 }
             }
             return {
@@ -181,7 +207,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     const config = getKubeConfigFiles();
                     const canCreateNamespace = await Oc.Instance.canCreateNamespace();
                     void commands.executeCommand('setContext', 'canCreateNamespace', canCreateNamespace);
-                    result.unshift({label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':')})
+                    result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
                 }
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
@@ -198,6 +224,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
             const namespaces = await Odo.Instance.getProjects();
+            const helmContext = {
+                kind: 'helm',
+                metadata: {
+                    name: 'Helm'
+                },
+            } as OpenShiftObject
             if (this.kubeContext.namespace) {
                 if (namespaces.find(item => item.name === this.kubeContext.namespace)) {
                     result = [{
@@ -226,8 +258,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     result = [CREATE_OR_SET_PROJECT_ITEM]
                 }
             }
+            result.push(helmContext);
+        } else if ('kind' in element && element.kind === 'helm') {
+            const cliData = await Helm.getHelmRepos();
+            if (!cliData.error && !cliData.stderr) {
+                const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+                if (helmRepos?.length > 0) {
+                    result = [...helmRepos.sort(Helm.ascRepoName)];
+                }
+            }
         } else {
-
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {
                 serviceKinds = await getServiceKindStubs();
@@ -249,6 +289,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             result = await Promise.all(toCollect).then(listOfLists => listOfLists.flatMap(a => a as ExplorerItem[]));
 
         }
+
         // don't show Open In Developer Dashboard if not openshift cluster
         const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
         void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
@@ -272,7 +313,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
-        void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
+        void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
     }
 
     @vsCommand('openshift.resource.unInstall')
@@ -285,13 +326,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.openInConsole')
     public static openInConsole(component: KubernetesObject) {
-        void commands.executeCommand('extension.vsKubernetesLoad', {namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}`});
+        void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
     }
 
     @vsCommand('openshift.explorer.reportIssue')
     static async reportIssue(): Promise<unknown> {
         const extensionPath = path.resolve(__dirname, '..', '..');
-        const templatePath = path.join(extensionPath,'resources', 'issueReport.md');
+        const templatePath = path.join(extensionPath, 'resources', 'issueReport.md');
         const template = fs.readFileSync(templatePath, 'utf-8');
         return commands.executeCommand('workbench.action.openIssueReporter', {
             extensionId: 'redhat.vscode-openshift-connector',
@@ -301,7 +342,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.open.configFile')
     async openConfigFile(context: TreeItem): Promise<void> {
-        if(context.description && typeof context.description === 'string'){
+        if (context.description && typeof context.description === 'string') {
             await commands.executeCommand('vscode.open', Uri.file(context.description));
         }
     }

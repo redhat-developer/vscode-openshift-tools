@@ -242,7 +242,7 @@
 		"onCommand:clusters.openshift.deployment.openConsole",
 		"onCommand:clusters.openshift.imagestream.openConsole",
 		"onCommand:openshift.componentTypesView.registry.openInView",
-		"onCommand:openshift.componentTypesView.registry.openHelmChartsInView",
+		"onCommand:openshift.helm.openView",
 		"onCommand:openshift.component.deleteConfigurationFiles",
 		"onCommand:openshift.component.deleteSourceFolder",
 		"onWalkthrough:openshiftWalkthrough",
@@ -364,18 +364,43 @@
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+				"command": "openshift.helm.openView",
+				"title": "Open Helm View",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.install",
+				"title": "Install",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.manageRepository",
+				"title": "Manage Repositories",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.open",
 				"title": "Open Helm Charts",
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.helmChart.install",
-				"title": "Open Helm Charts",
+				"command": "openshift.helm.add",
+				"title": "Add repository",
 				"category": "OpenShift"
 			},
 			{
-				"command": "openshift.componentTypesView.registry.helmChart.open",
-				"title": "Open Helm Charts",
+				"command": "openshift.helm.edit",
+				"title": "Edit repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.delete",
+				"title": "Delete repository",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.helm.sync",
+				"title": "Sync repository",
 				"category": "OpenShift"
 			},
 			{
@@ -1171,15 +1196,35 @@
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"command": "openshift.helm.manageRepository",
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.helmChart.install",
+					"command": "openshift.helm.openView",
 					"when": "false"
 				},
 				{
-					"command": "openshift.componentTypesView.registry.helmChart.open",
+					"command": "openshift.helm.install",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.add",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.open",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.edit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.delete",
+					"when": "false"
+				},
+				{
+					"command": "openshift.helm.sync",
 					"when": "false"
 				},
 				{
@@ -1434,7 +1479,7 @@
 			],
 			"view/item/context/createService": [
 				{
-					"command": "openshift.componentTypesView.registry.openHelmChartsInView",
+					"command": "openshift.helm.openView",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c2"
 				},
@@ -1751,6 +1796,36 @@
 					"command": "openshift.component.commands.command.run",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\-component-command.*\\.dev-run.*/",
 					"group": "inline"
+				},
+				{
+					"command": "openshift.helm.add",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c1"
+				},
+				{
+					"command": "openshift.helm.manageRepository",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.helm.openView",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repos",
+					"group": "c3"
+				},
+				{
+					"command": "openshift.helm.edit",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c1"
+				},
+				{
+					"command": "openshift.helm.delete",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.helm.sync",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.helm.repo",
+					"group": "c3"
 				}
 			]
 		},
@@ -1808,13 +1883,13 @@
 					{
 						"id": "helmChart",
 						"title": "Work with Helm Charts",
-						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.componentTypesView.registry.openHelmChartsInView)",
+						"description": "Browse the catalog to discover and install Helm Charts.\n[Browse Helm Chart](command:openshift.helm.openView)",
 						"media": {
 							"image": "images/walkthrough/helm.gif",
 							"altText": "helm chart"
 						},
 						"completionEvents": [
-							"onCommand:openshift.componentTypesView.registry.openHelmChartsInView"
+							"onCommand:openshift.helm.openView"
 						]
 					},
 					{

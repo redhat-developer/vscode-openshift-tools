@@ -11,10 +11,10 @@ import sendTelemetry, { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { ChartResponse, HelmRepo } from './helmChartType';
 import fetch = require('make-fetch-happen');
 import { validateName } from '../common-ext/createComponentHelpers';
 import { Progress } from '../../util/progress';
+import { ChartResponse, HelmRepo } from '../../helm/helmChartType';
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];
@@ -30,7 +30,7 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
 });
 
 export class HelmCommand {
-    @vsCommand('openshift.componentTypesView.registry.helmChart.install')
+    @vsCommand('openshift.helm.install')
     static async installHelmChart(event: any) {
         await panel.webview.postMessage({
             action: 'installStatus',
@@ -63,9 +63,9 @@ export class HelmCommand {
         });
     }
 
-    @vsCommand('openshift.componentTypesView.registry.helmChart.open')
+    @vsCommand('openshift.helm.open')
     static async openedHelmChart(chartName: any): Promise<void> {
-        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.componentTypesView.registry.helmChart.open');
+        const openedHelmChart = new ExtCommandTelemetryEvent('openshift.helm.open');
         openedHelmChart.send(chartName);
         return Promise.resolve();
     }
@@ -80,11 +80,11 @@ function helmChartMessageListener(event: any): void {
             })
             break;
         case 'install': {
-            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.install', event);
+            void vscode.commands.executeCommand('openshift.helm.install', event);
             break;
         }
         case 'openChart': {
-            void vscode.commands.executeCommand('openshift.componentTypesView.registry.helmChart.open', event.chartName);
+            void vscode.commands.executeCommand('openshift.helm.open', event.chartName);
             break;
         }
         case 'validateName': {
@@ -159,65 +159,65 @@ export default class HelmChartLoader {
                 panel = undefined;
             });
         }
-        await getHelmCharts();
+        await HelmChartLoader.getHelmCharts();
         return panel;
     }
 
-    @vsCommand('openshift.componentTypesView.registry.openHelmChartsInView')
+    @vsCommand('openshift.helm.openView')
     public static async openHelmChartInWebview(): Promise<void> {
         await HelmChartLoader.loadView('Helm Charts');
     }
-}
 
-async function getHelmCharts(): Promise<void> {
-    helmCharts.length = 0;
-    const cliData = await Helm.getHelmRepos();
-    if (!cliData.error && !cliData.stderr) {
-        const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+    public static async getHelmCharts(): Promise<void> {
+        helmCharts.length = 0;
+        const cliData = await Helm.getHelmRepos();
+        if (!cliData.error && !cliData.stderr) {
+            const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
+            void panel?.webview.postMessage(
+                {
+                    action: 'getHelmRepos',
+                    data: {
+                        helmRepos
+                    }
+                }
+            );
+            helmRepos.forEach((helmRepo: HelmRepo) => {
+                let url = helmRepo.url;
+                url = url.endsWith('/') ? url : url.concat('/');
+                url = url.concat('index.yaml');
+                void HelmChartLoader.fetchURL(helmRepo, url);
+            });
+        }
+    }
+
+    private static async fetchURL(repo: HelmRepo, url: string) {
+        const signupResponse = await fetch(url, {
+            method: 'GET'
+        });
+        const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
+        const entries = yamlResponse.entries;
+        Object.keys(entries).forEach((key) => {
+            const res: ChartResponse = {
+                repoName: '',
+                repoURL: '',
+                chartName: '',
+                chartVersions: [],
+                displayName: ''
+            };
+            res.repoName = repo.name;
+            res.repoURL = repo.url;
+            res.chartName = key;
+            res.chartVersions = entries[key].reverse();
+            res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
+            helmCharts.push(res);
+        });
         void panel?.webview.postMessage(
             {
-                action: 'getHelmRepos',
+                action: 'getHelmCharts',
                 data: {
-                    helmRepos
+                    helmCharts
                 }
             }
         );
-        helmRepos.forEach((helmRepo: HelmRepo) => {
-            let url = helmRepo.url;
-            url = url.endsWith('/') ? url : url.concat('/');
-            url = url.concat('index.yaml');
-            void fetchURL(helmRepo, url);
-        });
     }
-}
-
-async function fetchURL(repo: HelmRepo, url: string) {
-    const signupResponse = await fetch(url, {
-        method: 'GET'
-    });
-    const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
-    const entries = yamlResponse.entries;
-    Object.keys(entries).forEach((key) => {
-        const res: ChartResponse = {
-            repoName: '',
-            repoURL: '',
-            chartName: '',
-            chartVersions: [],
-            displayName: ''
-        };
-        res.repoName = repo.name;
-        res.repoURL = repo.url;
-        res.chartName = key;
-        res.chartVersions = entries[key].reverse();
-        res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
-        helmCharts.push(res);
-    });
-    void panel?.webview.postMessage(
-        {
-            action: 'getHelmCharts',
-            data: {
-                helmCharts
-            }
-        }
-    );
 }

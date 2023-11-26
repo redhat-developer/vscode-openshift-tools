@@ -4,8 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { CommandText } from '../../src/base/command';
-import { CliChannel } from '../../src/cli';
 import * as Helm from '../../src/helm/helm';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
@@ -50,10 +48,8 @@ suite('helm integration', function () {
     });
 
     test('installs OpenShift repo', async function () {
-        await Helm.addHelmRepo();
-        const repoListOutput = (
-            await CliChannel.getInstance().executeTool(new CommandText('helm', 'repo list'))
-        ).stdout;
+        await Helm.addHelmRepo('openshift','https://charts.openshift.io/');
+        const repoListOutput = (await Helm.getHelmRepos()).stdout;
         expect(repoListOutput).to.contain('openshift');
         expect(repoListOutput).to.contain('https://charts.openshift.io/');
     });

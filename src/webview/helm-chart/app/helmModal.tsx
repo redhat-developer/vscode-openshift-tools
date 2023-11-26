@@ -9,7 +9,7 @@ import { Close } from '@mui/icons-material';
 import { useMediaQuery, Paper, IconButton, FormControl, InputLabel, Select, MenuItem, FormHelperText, Stack, TextField, Alert } from '@mui/material';
 import { HelmListItem } from './helmListItem';
 import React from 'react';
-import { Chart, ChartResponse } from '../helmChartType';
+import { Chart, ChartResponse } from '../../../helm/helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
 
 type Message = {
