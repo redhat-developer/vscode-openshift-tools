@@ -5,7 +5,7 @@
 import * as fs from 'fs-extra';
 import * as pth from 'path';
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, SideBarView, ViewSection, WelcomeContentButton } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, ViewSection, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { VIEWS, BUTTONS } from '../common/constants';
 import { CreateComponentWebView, GitProjectPage, LocalCodeBasePage, SetNameAndFolderPage } from '../common/ui/webview/newComponentWebViewEditor';
 import { RegistryWebViewDevfileWindow, RegistryWebViewEditor } from '../common/ui/webview/registryWebViewEditor';
@@ -130,6 +130,24 @@ export function testCreateComponent(path: string) {
                 await loadCreateComponentButton();
             }
             await new EditorView().closeAllEditors();
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if(notifications.length > 0) {
+                await notificationCenter.close();
+            }
+        });
+
+        after(async function context() {
+            let prompt = await new Workbench().openCommandPrompt();
+            await prompt.setText('>Workspaces: Remove Folder From Workspace...');
+            await prompt.confirm();
+            await prompt.setText('node-js-runtime');
+            await prompt.confirm();
+            prompt = await new Workbench().openCommandPrompt();
+            await prompt.setText('>Workspaces: Remove Folder From Workspace...');
+            await prompt.confirm();
+            await prompt.setText('nodejs-starter');
+            await prompt.confirm()
         });
 
         async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
