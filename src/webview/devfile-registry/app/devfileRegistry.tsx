@@ -36,7 +36,7 @@ export const DevfileRegistry = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>
+            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '1em', paddingBottom: '16px'}}>
                 <FromTemplateProject titleText='Devfile Registry' />
             </Container>
         </ThemeProvider>

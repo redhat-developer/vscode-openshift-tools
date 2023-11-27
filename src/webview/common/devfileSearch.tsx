@@ -6,7 +6,6 @@ import { Close, FileCopy, Launch, Search } from '@mui/icons-material';
 import {
     Box,
     Button,
-    Chip,
     Checkbox,
     Divider,
     FormControl,
@@ -162,81 +161,43 @@ function RegistriesPicker(props: {
     );
 }
 
-function RegistryCapabilitiesPicker(props: {
-    capabilityEnabled: { capabilityName: string; enabled: boolean }[];
-    setCapabilityEnabled: React.Dispatch<
-        React.SetStateAction<{ capabilityName: string; enabled: boolean }[]>
-    >;
-}) {
-    function onClick(clickedCapability: string, checked: boolean) {
-        const updatedList = [...props.capabilityEnabled] //
-            .filter((entry) => entry.capabilityName !== clickedCapability);
-        updatedList.push({
-            capabilityName: clickedCapability,
-            enabled: checked,
-        });
-        const filteredUpdatedList = updatedList
-            .sort((capA, capB) => {
-                return capA.capabilityName.localeCompare(capB.capabilityName)
-            });
-        props.setCapabilityEnabled([...filteredUpdatedList]);
-    }
-
-    return (
-        <Stack spacing={1} useFlexGap direction='row' flexWrap='wrap'>
-            {props.capabilityEnabled.map((_cap) => {
-                return (
-                    <Chip
-                        size="small"
-                        sx={{ borderSpacing: '3', margin:'1' }}
-                        clickable={true}
-                        color={_cap.enabled ? 'success':'default'}
-                        onClick={(_) => {onClick(_cap.capabilityName, !_cap.enabled)}}
-                        label={_cap.capabilityName}
-                        key={_cap.capabilityName}
-                    />
-                );
-            })}
-        </Stack>
-    );
-}
-
-function RegistryTagsPicker(props: {
-    tagEnabled: { tagName: string; enabled: boolean }[];
+function TagsPicker(props: {
+    tagEnabled: { name: string; enabled: boolean }[];
     setTagEnabled: React.Dispatch<
-        React.SetStateAction<{ tagName: string; enabled: boolean }[]>
+        React.SetStateAction<{ name: string; enabled: boolean }[]>
     >;
 }) {
-    function onClick(clickedTag: string, checked: boolean) {
+    function onCheckboxClick(clickedRegistry: string, checked: boolean) {
         const updatedList = [...props.tagEnabled] //
-            .filter((entry) => entry.tagName !== clickedTag);
+            .filter((entry) => entry.name !== clickedRegistry);
         updatedList.push({
-            tagName: clickedTag,
+            name: clickedRegistry,
             enabled: checked,
         });
-        const filteredUpdatedList = updatedList
-            .sort((tagA, tagB) => {
-                return tagA.tagName.localeCompare(tagB.tagName)
-            });
-        props.setTagEnabled([...filteredUpdatedList]);
+        updatedList.sort((regA, regB) => regA.name.localeCompare(regB.name));
+        props.setTagEnabled(updatedList);
     }
 
     return (
-        <Stack spacing={1} useFlexGap direction='row' flexWrap='wrap'>
-            {props.tagEnabled.map((_tag) => {
+        <FormGroup>
+            {props.tagEnabled.map((tag) => {
                 return (
-                    <Chip
-                        size="small"
-                        sx={{ borderSpacing: '3', margin:'1' }}
-                        clickable={true}
-                        color={_tag.enabled ? 'success':'default'}
-                        onClick={(_) => {onClick(_tag.tagName, !_tag.enabled)}}
-                        label={_tag.tagName}
-                        key={_tag.tagName}
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                size='small'
+                                checked={tag.enabled}
+                                onChange={(_e, checked) =>
+                                    onCheckboxClick(tag.name, checked)
+                                }
+                            />
+                        }
+                        label={tag.name}
+                        key={tag.name}
                     />
                 );
             })}
-        </Stack>
+        </FormGroup>
     );
 }
 
@@ -247,7 +208,6 @@ const SelectTemplateProject = React.forwardRef(
             setSelectedProject: (projectName: string) => void;
             closeModal: () => void;
         },
-        ref,
     ) => {
         const [selectedTemplateProject, setSelectedTemplateProject] = React.useState('');
         const [isInteracted, setInteracted] = React.useState(false);
@@ -410,7 +370,7 @@ const SelectTemplateProject = React.forwardRef(
                             >
                                 <Tooltip
                                     title={isYamlCopied ? 'Copied!' : 'Copy to clipboard'}
-                                    onMouseLeave={(e) => {
+                                    onMouseLeave={() => {
                                         setTimeout(() => setYamlCopied((_) => false), 200);
                                     }}
                                     arrow
@@ -478,14 +438,18 @@ export type DevfileSearchProps = {
  * @returns
  */
 function isToBeIncluded(devfile: Devfile, tagFilter: string[], debugSupportFilter: boolean, deploySupportFilter: boolean): boolean {
+    // eslint-disable-next-line no-console
+    console.log('dep',deploySupportFilter);
+    // eslint-disable-next-line no-console
+    console.log('deg',debugSupportFilter);
     const includesDebugSupport = debugSupportFilter === false || debugSupportFilter === devfile.supportsDebug;
     const includesDeploySupport = deploySupportFilter === false || deploySupportFilter === devfile.supportsDeploy;
     const includesTags = tagFilter.length === 0 || devfile.tags.filter((_devfileTag) => {
         return tagFilter.find((_selectedTags) => _devfileTag === _selectedTags) !== undefined;
     }).length > 0;
 
-    return includesDebugSupport && includesDeploySupport  &&  includesTags;
-  }
+    return includesDebugSupport && includesDeploySupport && includesTags;
+}
 
 export function DevfileSearch(props: DevfileSearchProps) {
     const ITEMS_PER_PAGE = 6;
@@ -499,13 +463,15 @@ export function DevfileSearch(props: DevfileSearchProps) {
     >([]);
     const [devfileCapabilities, setDevfileCapabilities] = React.useState<string[]>([]);
     const [capabilityEnabled, setCapabilityEnabled] = React.useState<
-        { capabilityName: string; enabled: boolean }[]
+        { name: string; enabled: boolean }[]
     >([]);
     const [devfileTags, setDevfileTags] = React.useState<string[]>([]);
     const [tagEnabled, setTagEnabled] = React.useState<
-        { tagName: string; enabled: boolean }[]
+        { name: string; enabled: boolean }[]
     >([]);
     const [searchText, setSearchText] = React.useState('');
+
+    const [showMore, setShowMore] = React.useState(false);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -543,8 +509,8 @@ export function DevfileSearch(props: DevfileSearchProps) {
         const enabledArray = [];
         for (const capability of devfileCapabilities) {
             enabledArray.push({
-                capabilityName: capability,
-                enabled: false, // All values set to false means that no filter is to be applied
+                name: capability,
+                enabled: false // All values set to false means that no filter is to be applied
             });
         }
         setCapabilityEnabled((_) => enabledArray);
@@ -554,8 +520,8 @@ export function DevfileSearch(props: DevfileSearchProps) {
         const enabledArray = [];
         for (const tag of devfileTags) {
             enabledArray.push({
-                tagName: tag,
-                enabled: false, // All values set to false means that no filter is to be applied
+                name: tag,
+                enabled: false // All values set to false means that no filter is to be applied
             });
         }
         setTagEnabled((_) => enabledArray);
@@ -592,11 +558,11 @@ export function DevfileSearch(props: DevfileSearchProps) {
         return <LoadScreen title="Retrieving list of Devfiles" />;
     }
 
-    if(!devfileCapabilities) {
+    if (!devfileCapabilities) {
         return <LoadScreen title="Retrieving list of Devfile Capabilities" />;
     }
 
-    if(!devfileTags) {
+    if (!devfileTags) {
         return <LoadScreen title="Retrieving list of Devfile Tags" />;
     }
 
@@ -605,18 +571,18 @@ export function DevfileSearch(props: DevfileSearchProps) {
         .map((entry) => entry.registryName);
 
     const debugSupport = capabilityEnabled //
-        .filter((_cap) => _cap.capabilityName === 'Debug Support') //
+        .filter((_cap) => _cap.name === 'Debug Support') //
         .filter((_cap) => _cap.enabled) //
         .length > 0;
 
     const deploySupport = capabilityEnabled //
-        .filter((_cap) => _cap.capabilityName === 'Deploy Support') //
+        .filter((_cap) => _cap.name === 'Deploy Support') //
         .filter((_cap) => _cap.enabled) //
         .length > 0;
 
     const activeTags = tagEnabled
         .filter((_tag) => _tag.enabled) //
-        .map((_tag) => _tag.tagName);
+        .map((_tag) => _tag.name);
 
     const devfiles: Devfile[] = devfileRegistries //
         .filter((devfileRegistry) => activeRegistries.includes(devfileRegistry.name)) //
@@ -654,15 +620,61 @@ export function DevfileSearch(props: DevfileSearchProps) {
     return (
         <>
             <Stack direction="column" height="100%" spacing={3}>
-                <Typography variant="h5">{props.titleText}</Typography>
                 <Stack direction="row" spacing={2}>
-                    <Stack direction="column" sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth:'30%' }} spacing={0}>
+                    <Stack direction="column" sx={{ height: 'calc(100vh - 100px)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
+                        {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
+                            <>
+                                <Stack direction="column" spacing={0}>
+                                    <Typography variant="body2" marginBottom={2}>
+                                        Filter by
+                                    </Typography>
+                                    <Stack direction="column" useFlexGap={true} width="100%" spacing={1}>
+                                        {devfileCapabilities.length > 0 && (
+                                            <>
+                                                <TagsPicker
+                                                    tagEnabled={capabilityEnabled}
+                                                    setTagEnabled={setCapabilityEnabled} />
+                                                <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                            </>
+                                        )}
+                                    </Stack>
+                                </Stack>
+                                {devfileTags.length > 0 && (
+                                    <>
+                                        <Stack direction="column" sx={{
+                                            height: !showMore ? 'calc(100vh - 100px)' : 'calc(300vh - 150px)',
+                                            overflow: !showMore ? 'hidden' : 'scroll'
+                                        }} spacing={0}>
+                                            <Typography variant="body2" marginTop={1} marginBottom={2}>
+                                                Tags
+                                            </Typography>
+                                            <TagsPicker
+                                                tagEnabled={tagEnabled}
+                                                setTagEnabled={setTagEnabled} />
+                                        </Stack>
+                                        <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                            <Link
+                                                component="button"
+                                                variant="body2"
+                                                underline='none'
+                                                onClick={() => {
+                                                    setShowMore((prev) => !prev);
+                                                }}
+                                            >
+                                                {!showMore ? 'Show more' : 'Show less'}
+                                            </Link>
+                                        </Typography>
+                                        <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                    </>
+                                )}
+                            </>
+                        )}
                         {devfileRegistries.length > 1 && (
                             <>
-                                <Typography variant="body2" marginBottom={1}>
+                                <Typography variant="body2" marginTop={1} marginBottom={2}>
                                     Devfile Registries
                                 </Typography>
-                                <Stack direction="column" sx={{width: '100%' }} width="100%" spacing={0} marginBottom={3}>
+                                <Stack direction="column" sx={{ width: '100%' }} width="100%" spacing={0} marginBottom={3}>
                                     <RegistriesPicker
                                         registryEnabled={registryEnabled}
                                         setRegistryEnabled={setRegistryEnabled}
@@ -670,35 +682,11 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                 </Stack>
                             </>
                         )}
-                        {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
-                            <>
-                                <Typography variant="body2" marginBottom={2}>
-                                    Filter by
-                                </Typography>
-                                <Stack direction="column"  useFlexGap={true} width="100%" spacing={1}>
-                                    {devfileCapabilities.length > 0 && (
-                                        <>
-                                            <RegistryCapabilitiesPicker
-                                                capabilityEnabled={capabilityEnabled}
-                                                setCapabilityEnabled={setCapabilityEnabled}
-                                            />
-                                            <Divider orientation="horizontal" sx={{width: '100%' }} />
-                                        </>
-                                    )}
-                                    {devfileTags.length > 0 && (
-                                        <RegistryTagsPicker
-                                            tagEnabled={tagEnabled}
-                                            setTagEnabled={setTagEnabled}
-                                        />
-                                    )}
-                                </Stack>
-                            </>
-                        )}
                         <Stack direction="column" sx={{ flexGrow: '1', height: '100%', width: '100%' }} spacing={0}>
                         </Stack>
                     </Stack>
                     <Stack direction="column" spacing={3}>
-                        <Divider orientation="vertical"  sx={{ height: 'calc(100vh - 200px - 5em)'}} />
+                        <Divider orientation="vertical" sx={{ height: 'calc(100vh - 170px)' }} />
                     </Stack>
                     <Stack direction="column" sx={{ flexGrow: '1' }} spacing={3}>
                         <SearchBar
@@ -716,7 +704,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         <Stack
                             id="devfileList"
                             direction="column"
-                            sx={{ height: 'calc(100vh - 320px - 5em)', overflow: 'scroll' }}
+                            sx={{ height: 'calc(100vh - 240px)', overflow: 'scroll' }}
                             divider={<Divider />}
                             width="100%"
                         >

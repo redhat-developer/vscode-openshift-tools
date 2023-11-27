@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Check, Close } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
@@ -93,23 +93,27 @@ function DevfileListContent(props: DevfileListItemProps) {
                 </Stack>
                 <Typography
                     variant="body2"
-                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    sx={{ whiteSpace: 'nowrap', overflow:'hidden', textOverflow: 'ellipsis' }}
                 >
                     {props.devfile.description}
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                    <Chip
-                        size="small"
-                        label="Debug Support"
-                        icon={props.devfile.supportsDebug ? <Check /> : <Close />}
-                        color={props.devfile.supportsDebug ? 'success' : 'error'}
-                    />
-                    <Chip
-                        size="small"
-                        label="Deploy Support"
-                        icon={props.devfile.supportsDeploy ? <Check /> : <Close />}
-                        color={props.devfile.supportsDeploy ? 'success' : 'error'}
-                    />
+                    {
+                        props.devfile.supportsDebug && <Chip
+                            size="small"
+                            label="Debug Support"
+                            icon={<Check />}
+                            color={'success'}
+                        />
+                    }
+                    {
+                        props.devfile.supportsDeploy && <Chip
+                            size="small"
+                            label="Deploy Support"
+                            icon={<Check />}
+                            color={'success'}
+                        />
+                    }
                     {(props.devfile.tags && props.devfile.tags.map((tag, i) => {
                         if (i >= 4) {
                             return;
