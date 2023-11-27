@@ -70,7 +70,7 @@ function DevfileListContent(props: DevfileListItemProps) {
             <Stack
                 direction="column"
                 spacing={1}
-                sx={{ flexShrink: '5', minWidth: '0', maxWidth: '35rem' }}
+                sx={{ flexShrink: '5', minWidth: '0', maxWidth: '45rem' }}
             >
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Typography
@@ -93,23 +93,27 @@ function DevfileListContent(props: DevfileListItemProps) {
                 </Stack>
                 <Typography
                     variant="body2"
-                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    sx={{ whiteSpace: 'pre-wrap', textAlign:'justify' }}
                 >
                     {props.devfile.description}
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                    <Chip
-                        size="small"
-                        label="Debug Support"
-                        icon={props.devfile.supportsDebug ? <Check /> : <Close />}
-                        color={props.devfile.supportsDebug ? 'success' : 'error'}
-                    />
-                    <Chip
-                        size="small"
-                        label="Deploy Support"
-                        icon={props.devfile.supportsDeploy ? <Check /> : <Close />}
-                        color={props.devfile.supportsDeploy ? 'success' : 'error'}
-                    />
+                    {
+                        props.devfile.supportsDebug && <Chip
+                            size="small"
+                            label="Debug Support"
+                            icon={<Check />}
+                            color={'success'}
+                        />
+                    }
+                    {
+                        props.devfile.supportsDeploy && <Chip
+                            size="small"
+                            label="Deploy Support"
+                            icon={<Check />}
+                            color={'success'}
+                        />
+                    }
                     {(props.devfile.tags && props.devfile.tags.map((tag, i) => {
                         if (i >= 4) {
                             return;

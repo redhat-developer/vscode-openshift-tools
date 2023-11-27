@@ -654,43 +654,43 @@ export function DevfileSearch(props: DevfileSearchProps) {
     return (
         <>
             <Stack direction="column" height="100%" spacing={3}>
-                <Typography variant="h5">{props.titleText}</Typography>
+                <Stack direction="row" useFlexGap={true}>
+                    {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
+                        <Stack direction="row" useFlexGap={true} width="100%" spacing={5}>
+                            <Typography variant="body2" style={{width: '5%'}}>
+                                Filter by
+                            </Typography>
+                            <Stack direction="row" useFlexGap={true} width="100%" spacing={1}>
+                                {devfileCapabilities.length > 0 && (
+                                    <>
+                                        <RegistryCapabilitiesPicker
+                                            capabilityEnabled={capabilityEnabled}
+                                            setCapabilityEnabled={setCapabilityEnabled}
+                                        />
+                                    </>
+                                )}
+                                {devfileTags.length > 0 && (
+                                    <RegistryTagsPicker
+                                        tagEnabled={tagEnabled}
+                                        setTagEnabled={setTagEnabled}
+                                    />
+                                )}
+                            </Stack>
+                        </Stack>
+                    )}
+                </Stack>
                 <Stack direction="row" spacing={2}>
-                    <Stack direction="column" sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth:'30%' }} spacing={0}>
+                    <Stack direction="column" sx={{ height: 'calc(100vh - 200px - 5em)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
                         {devfileRegistries.length > 1 && (
                             <>
                                 <Typography variant="body2" marginBottom={1}>
                                     Devfile Registries
                                 </Typography>
-                                <Stack direction="column" sx={{width: '100%' }} width="100%" spacing={0} marginBottom={3}>
+                                <Stack direction="column" sx={{ width: '100%' }} width="100%" spacing={0} marginBottom={3}>
                                     <RegistriesPicker
                                         registryEnabled={registryEnabled}
                                         setRegistryEnabled={setRegistryEnabled}
                                     />
-                                </Stack>
-                            </>
-                        )}
-                        {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
-                            <>
-                                <Typography variant="body2" marginBottom={2}>
-                                    Filter by
-                                </Typography>
-                                <Stack direction="column"  useFlexGap={true} width="100%" spacing={1}>
-                                    {devfileCapabilities.length > 0 && (
-                                        <>
-                                            <RegistryCapabilitiesPicker
-                                                capabilityEnabled={capabilityEnabled}
-                                                setCapabilityEnabled={setCapabilityEnabled}
-                                            />
-                                            <Divider orientation="horizontal" sx={{width: '100%' }} />
-                                        </>
-                                    )}
-                                    {devfileTags.length > 0 && (
-                                        <RegistryTagsPicker
-                                            tagEnabled={tagEnabled}
-                                            setTagEnabled={setTagEnabled}
-                                        />
-                                    )}
                                 </Stack>
                             </>
                         )}
