@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import OpenShiftIcon from '../../../../images/openshift_view.svg';
+import KnativeIcon from '../../../../images/knative.svg';
 import { createVSCodeTheme } from '../../common/vscode-theme';
 import { TerminalInstance } from './terminalInstance';
 import { VSCodeMessage } from './vscodeMessage';
@@ -32,6 +33,7 @@ import { VSCodeMessage } from './vscodeMessage';
 const TabLabel = (props: { name: string; closeTab: () => void }) => {
     const TabText = styled('div')(({ theme }) => ({
         ...theme.typography.button,
+        textTransform: 'none',
         fontSize: 'var(--vscode-font-size)',
     }));
 
@@ -88,6 +90,8 @@ export const TerminalMultiplexer = () => {
     // represents the number of terminals that were present before `terminals` was modified
     const [oldNumTerminals, setOldNumTerminals] = React.useState(0);
 
+    const [isKnative, setKnative] = React.useState(false);
+
     function reassignActiveTerminal() {
         if (terminals.length === 0) {
             setActiveTerminal(0);
@@ -137,6 +141,7 @@ export const TerminalMultiplexer = () => {
                     ),
                 },
             ]);
+            setKnative(message.data.data.isKnative);
         } else if (message.data.kind === 'termExit') {
             const uuid = message.data.data.uuid as string;
             closeTerminal(uuid);
@@ -151,6 +156,8 @@ export const TerminalMultiplexer = () => {
                     break;
                 }
             }
+        } else if (message.data.kind === 'iconCheck') {
+            setKnative(message.data.data.isKnative);
         }
     };
 
@@ -221,8 +228,8 @@ export const TerminalMultiplexer = () => {
                             <TabList onChange={handleTabChange} sx={{ minHeight: '36px' }}>
                                 <Stack justifyContent="center" width="100%">
                                     <SvgIcon
-                                        component={OpenShiftIcon}
-                                        htmlColor="red"
+                                        component={ !isKnative  ? OpenShiftIcon : KnativeIcon}
+                                        htmlColor={ !isKnative  ? 'red' : 'inherit'}
                                         inheritViewBox
                                         sx={{
                                             paddingLeft: '16px',

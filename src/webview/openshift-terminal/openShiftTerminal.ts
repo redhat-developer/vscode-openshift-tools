@@ -93,6 +93,8 @@ class OpenShiftTerminal {
 
     private _buffer: Buffer;
 
+    private _isKnative: boolean;
+
     /**
      * Creates a new OpenShiftTerminal
      *
@@ -113,6 +115,7 @@ class OpenShiftTerminal {
         file: string,
         args: string | string[],
         options,
+        isKnative: boolean,
         callbacks?: {
             onSpawn?: () => void;
             onExit?: () => void;
@@ -134,6 +137,7 @@ class OpenShiftTerminal {
         this._file = file;
         this._args = args;
         this._options = options;
+        this._isKnative = isKnative;
         this._name = options.name;
 
         this._disposables = [];
@@ -213,6 +217,15 @@ class OpenShiftTerminal {
      */
     public get uuid() {
         return this._uuid;
+    }
+
+    /**
+     * Returns the true if it serverless based this terminal.
+     *
+     * @returns true/false
+     */
+    public get knative() {
+        return this._isKnative;
     }
 
     /**
@@ -424,8 +437,15 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                                     kind: 'termInit',
                                     data: {
                                         uuid: terminal.uuid,
-                                        serializedOutput: serializedData,
-                                    },
+                                        serializedOutput: serializedData
+                                    }
+                                });
+
+                                void this.sendMessage({
+                                    kind: 'iconCheck',
+                                    data: {
+                                        isKnative: terminal.knative
+                                    }
                                 });
                             })
                             .then(() => {
@@ -546,6 +566,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
             onExit?: () => void;
             onText?: (text: string) => void;
         },
+        isKnative = false
     ): Promise<OpenShiftTerminalApi> {
         // focus the OpenShift terminal view in order to force the webview to be created
         // (if it hasn't already)
@@ -601,8 +622,9 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     env,
                     name,
                 },
-                callbacks,
-            ),
+                isKnative,
+                callbacks
+            )
         );
 
         // issue request to create terminal in the webview
