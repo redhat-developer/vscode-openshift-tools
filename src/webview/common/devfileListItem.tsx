@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { Check, Close } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
