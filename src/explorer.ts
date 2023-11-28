@@ -270,7 +270,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         } else {
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {
-                serviceKinds = await getServiceKindStubs();
+                if (await Oc.Instance.canGetKubernetesObjects('csv')) {
+                    serviceKinds = await getServiceKindStubs();
+                }
             } catch (_) {
                 // operator framework is not installed on cluster; do nothing
             }
@@ -278,7 +280,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             const toCollect = [
                 Oc.Instance.getKubernetesObjects('Deployment'),
                 Helm.getHelmReleases(),
-                ...serviceKinds.map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
+                ...serviceKinds
+                    .filter(serviceKind => Oc.Instance.canGetKubernetesObjects(serviceKind.name))
+                    .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
             ];
             if (await Oc.Instance.isOpenShiftCluster()) {
                 toCollect.push(
