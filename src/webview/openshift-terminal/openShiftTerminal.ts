@@ -14,7 +14,8 @@ import {
     WebviewView,
     WebviewViewProvider,
     WebviewViewResolveContext, window,
-    workspace
+    workspace,
+    env
 } from 'vscode';
 import { SerializeAddon } from 'xterm-addon-serialize';
 import { Terminal } from 'xterm-headless';
@@ -412,7 +413,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         // - `closeTerminal(uuid): void`: the given webview terminal was closed; kill the process if needed and dispose of all the resources for the terminal in node
         // - `termMuxUp(): void`: the webview has rendered for the first time and is ready to respond to `createTerminal` messages
         this.webview.onDidReceiveMessage(
-            (event) => {
+            async (event) => {
                 const message = event as Message;
                 const terminal = this.openShiftTerminals.get(message?.data?.uuid);
                 if (terminal) {
@@ -442,6 +443,14 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     } else if (message.kind === 'closeTerminal') {
                         terminal.dispose();
                         this.openShiftTerminals.delete(message?.data?.uuid);
+                    } else if (message.kind === 'openExternal') {
+                        if (message?.data?.url) {
+                            const result = await window.showInformationMessage(
+                                'Do you want to open the external website?', 'Yes', 'No');
+                            if (result === 'Yes') {
+                                void env.openExternal(message?.data?.url);
+                            }
+                        }
                     }
                 } else if (message.kind === 'termMuxUp') {
                     // mark the webview as resolved, to signal to `createTerminal`
