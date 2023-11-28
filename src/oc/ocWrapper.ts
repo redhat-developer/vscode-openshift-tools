@@ -195,6 +195,26 @@ export class Oc {
     }
 
     /**
+     * Returns true if the current user is authorized to get a kubernates objects on the cluster, and false otherwise.
+     *
+     * @param resourceType the string containing the [TYPE | TYPE/NAME | NONRESOURCEURL] of the kubernetes object
+     * @returns true if the current user is authorized to get a kubernates objects on the cluster, and false otherwise
+     */
+    public async canGetKubernetesObjects(resourceType: string): Promise<boolean> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText('oc', `auth can-i get ${resourceType}`),
+            );
+            if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    /**
      * Deletes all deployments in the current namespace that have a label "component" with a value `componentName`.
      *
      * @param componentName the value of the component label to match
