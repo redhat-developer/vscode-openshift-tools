@@ -159,10 +159,21 @@ export const TerminalInstance = (props: {
         return new FitAddon();
     }, []);
 
+    // A workaround to https://github.com/microsoft/vscode/issues/186043
+    function handleLink(event: MouseEvent, uri: string): void {
+        window.vscodeApi.postMessage({
+            kind: 'openExternal',
+            data: {
+                uuid: props.uuid,
+                url: uri
+            },
+        });
+    }
+
     // The xtermjs instance
     const [term] = React.useState(() => {
         const newTerm = new Terminal();
-        newTerm.loadAddon(new WebLinksAddon());
+        newTerm.loadAddon(new WebLinksAddon(handleLink));
         newTerm.loadAddon(new WebglAddon());
         newTerm.loadAddon(fitAddon);
         newTerm.attachCustomKeyEventHandler((keyboardEvent: KeyboardEvent) => {
