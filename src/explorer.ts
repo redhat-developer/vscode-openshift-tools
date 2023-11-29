@@ -109,6 +109,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return OpenShiftExplorer.instance;
     }
 
+    private static generateOpenshiftProjectContextValue(namespace: string): Thenable<string> {
+        const contextValue = `openshift.project.${namespace}`;
+        return Oc.Instance.canDeleteNamespace(namespace)
+            .then(result => (result ? `${contextValue}.canDelete` : contextValue));
+    }
+
     // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
 
@@ -162,12 +168,15 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // otherwise it is a KubernetesObject instance
         if ('kind' in element) {
             if (element.kind === 'project') {
-                return {
-                    contextValue: 'openshift.project',
-                    label: element.metadata.name,
-                    collapsibleState: TreeItemCollapsibleState.Collapsed,
-                    iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
-                }
+                return  OpenShiftExplorer.generateOpenshiftProjectContextValue(element.metadata.name)
+                    .then(namespace => {
+                        return {
+                            contextValue: namespace,
+                            label: element.metadata.name,
+                            collapsibleState: TreeItemCollapsibleState.Collapsed,
+                            iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
+                        }
+                    });
             } else if (element.kind === 'helm') {
                 return {
                     contextValue: 'openshift.helm.repos',
@@ -205,8 +214,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 result = [this.kubeContext];
                 if (this.kubeContext) {
                     const config = getKubeConfigFiles();
-                    const canCreateNamespace = await Oc.Instance.canCreateNamespace();
-                    void commands.executeCommand('setContext', 'canCreateNamespace', canCreateNamespace);
+                    void commands.executeCommand('setContext', 'canCreateNamespace', await Oc.Instance.canCreateNamespace());
                     result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
                 }
             } catch (err) {

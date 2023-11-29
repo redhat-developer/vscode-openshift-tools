@@ -1592,7 +1592,7 @@
 				},
 				{
 					"command": "openshift.project.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.project",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift\\.project.*\\.canDelete*/",
 					"group": "p3"
 				},
 				{
@@ -1713,7 +1713,7 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem == openshift.project) && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem =~ /openshift\\.project.*/) && canCreateNamespace",
 					"group": "inline"
 				},
 				{

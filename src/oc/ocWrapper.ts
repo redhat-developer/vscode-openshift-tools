@@ -195,6 +195,30 @@ export class Oc {
     }
 
     /**
+     * Returns true if the current user is authorized to delete a namespace on the cluster, and false otherwise.
+     *
+     * @param namespace the namespace to be deleted (defaults to the current namespace if none is provided)
+     * @returns true if the current user is authorized to delete namespace on the cluster, and false otherwise
+     */
+    public async canDeleteNamespace(namespace?: string): Promise<boolean> {
+        try {
+            const args: CommandOption[] = [];
+            if (namespace) {
+                args.push(new CommandOption('--namespace', namespace));
+            }
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'auth can-i delete projects', args)
+            );
+            if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    /**
      * Returns true if the current user is authorized to get a kubernates objects on the cluster, and false otherwise.
      *
      * @param resourceType the string containing the [TYPE | TYPE/NAME | NONRESOURCEURL] of the kubernetes object
