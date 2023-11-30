@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Check } from '@mui/icons-material';
-import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, Link, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { Devfile } from '../common/devfile';
 import DevfileLogo from '../../../images/context/devfile.png';
@@ -12,6 +12,7 @@ import validator from 'validator'
 export type DevfileListItemProps = {
     devfile: Devfile;
     buttonCallback?: () => void;
+    showFullDescription?: boolean;
 };
 
 function checkedDevfileLogoUrl(logoUrl?: string) {
@@ -38,11 +39,12 @@ export function DevfileListItem(props: DevfileListItemProps) {
                     <DevfileListContent
                         devfile={props.devfile}
                         buttonCallback={props.buttonCallback}
+                        showFullDescription={props.showFullDescription}
                     />
                 </Box>
             ) : (
                 <>
-                    <DevfileListContent devfile={props.devfile} />
+                    <DevfileListContent devfile={props.devfile} showFullDescription={props.showFullDescription} />
                 </>
             )}
         </>
@@ -50,6 +52,7 @@ export function DevfileListItem(props: DevfileListItemProps) {
 }
 
 function DevfileListContent(props: DevfileListItemProps) {
+    const [showMore, setShowMore] = React.useState(false);
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
     return (
@@ -70,7 +73,7 @@ function DevfileListContent(props: DevfileListItemProps) {
             <Stack
                 direction="column"
                 spacing={1}
-                sx={{ flexShrink: '5', minWidth: '0', maxWidth: '35rem' }}
+                sx={{ flexShrink: '5', minWidth: '0', maxWidth: !props.showFullDescription ? '35rem' : '45rem' }}
             >
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Typography
@@ -91,12 +94,31 @@ function DevfileListContent(props: DevfileListItemProps) {
                         </Typography>
                     )}
                 </Stack>
-                <Typography
-                    variant="body2"
-                    sx={{ whiteSpace: 'nowrap', overflow:'hidden', textOverflow: 'ellipsis' }}
-                >
-                    {props.devfile.description}
-                </Typography>
+                <Stack direction="row" spacing={1}>
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            whiteSpace: !showMore ? 'nowrap' : 'pre-wrap',
+                            overflow: !showMore ? 'hidden' : 'visible',
+                            textOverflow: !showMore ? 'ellipsis' : 'unset',
+                            textAlign: 'justify'
+                        }}
+                    >
+                        {props.devfile.description}
+                    </Typography>
+                    {
+                        props.showFullDescription && props.devfile.description.length > 102 && <Link
+                            component="button"
+                            variant="body2"
+                            underline='none'
+                            onClick={() => {
+                                setShowMore((prev) => !prev);
+                            }}
+                        >
+                            {!showMore ? 'More' : 'Less'}
+                        </Link>
+                    }
+                </Stack>
                 <Stack direction="row" spacing={1}>
                     {
                         props.devfile.supportsDebug && <Chip
