@@ -112,7 +112,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     private static generateOpenshiftProjectContextValue(namespace: string): Thenable<string> {
         const contextValue = `openshift.project.${namespace}`;
         return Oc.Instance.canDeleteNamespace(namespace)
-            .then(result => (result ? `${contextValue}.canDelete` : contextValue));
+            .then(result => (result ? `${contextValue}.can-delete` : contextValue));
     }
 
     // eslint-disable-next-line class-methods-use-this
