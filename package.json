@@ -1480,12 +1480,12 @@
 			"view/item/context/createService": [
 				{
 					"command": "openshift.helm.openView",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
 					"group": "c2"
 				},
 				{
 					"command": "openshift.service.create",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
 					"group": "c2"
 				}
 			],
@@ -1571,11 +1571,6 @@
 					"group": "c1"
 				},
 				{
-					"submenu": "view/item/context/createService",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
-					"group": "c2"
-				},
-				{
 					"command": "openshift.explorer.logout",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isLoggedIn",
 					"group": "c3"
@@ -1591,8 +1586,13 @@
 					"group": "c5"
 				},
 				{
+					"submenu": "view/item/context/createService",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && isLoggedIn",
+					"group": "p2"
+				},
+				{
 					"command": "openshift.project.delete",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift\\.project.*\\.canDelete*/",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*.can-delete/i",
 					"group": "p3"
 				},
 				{
@@ -1713,7 +1713,7 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem =~ /openshift\\.project.*/) && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem =~ /openshift.project.*/i) && canCreateNamespace",
 					"group": "inline"
 				},
 				{
