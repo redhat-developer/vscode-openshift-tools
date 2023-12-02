@@ -23,6 +23,7 @@ import {
     Select,
     Stack,
     TextField,
+    Theme,
     Tooltip,
     Typography,
     useMediaQuery
@@ -31,7 +32,7 @@ import { every } from 'lodash';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { monokai } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { monokai, qtcreatorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
@@ -83,29 +84,31 @@ function SearchBar(props: {
     return (
         <Stack direction="row" alignItems="center" width="100%" justifyContent="space-between">
             <TextField
-                variant="filled"
-                placeholder="Search Devfiles"
+                variant="outlined"
+                placeholder='Search'
+                margin='normal'
                 InputProps={{
                     startAdornment: (
-                        <InputAdornment position="start">
-                            <Search color="textSecondary" />
+                        <InputAdornment position="start" sx={{marginTop: '0px !important'}}>
+                            <Search color="textSecondary"  fontSize='small' />
                         </InputAdornment>
                     ),
                     endAdornment: (
                         <InputAdornment position="end">
                             <IconButton onClick={() => props.setSearchText('')}>
-                                <Close color="textSecondary" />
+                                <Close color="textSecondary" fontSize='small' />
                             </IconButton>
                         </InputAdornment>
                     ),
+                    disableUnderline: true
                 }}
                 value={props.searchText}
-                sx={{ flexGrow: '1', maxWidth: '650px' }}
+                sx={{ flexGrow: '1', maxWidth: '650px', py: 0, background: 'rgba(127, 127, 127, 8%)' }}
                 onChange={(event) => {
                     props.setSearchText(event.target.value.toLowerCase());
                 }}
             />
-            <Stack direction="column" justifyContent="space-between" gap={2}>
+            <Stack direction="column" justifyContent="space-between" marginTop={0.5} gap={0.5}>
                 <Pagination
                     count={props.numPages}
                     page={props.currentPage}
@@ -184,7 +187,7 @@ function ascTag(oldTag: { name: string; enabled: boolean }, newTag: { name: stri
     } else if (newTagEnabled && !oldTagEnabled) {
         return 1;
     }
-    return oldTag.name.localeCompare(newTag.name);
+    return 0;
 }
 
 function TagsPicker(props: {
@@ -233,7 +236,8 @@ const SelectTemplateProject = React.forwardRef(
             devfile: Devfile;
             setSelectedProject: (projectName: string) => void;
             closeModal: () => void;
-        },
+            theme: Theme;
+        }
     ) => {
         const [selectedTemplateProject, setSelectedTemplateProject] = React.useState('');
         const [isInteracted, setInteracted] = React.useState(false);
@@ -306,7 +310,7 @@ const SelectTemplateProject = React.forwardRef(
                     >
                         <DevfileListItem devfile={props.devfile} showFullDescription />
                         <IconButton onClick={props.closeModal}>
-                            <Close color="textSecondary" />
+                            <Close color="textSecondary" fontSize='small'/>
                         </IconButton>
                     </Stack>
                     <FormControl fullWidth>
@@ -409,7 +413,7 @@ const SelectTemplateProject = React.forwardRef(
                         </Box>
                         <SyntaxHighlighter
                             language="yaml"
-                            style={monokai}
+                            style={props.theme?.palette.mode === 'light' ? qtcreatorLight : monokai}
                             useInlineStyles
                             wrapLines
                             customStyle={{ background: 'inherit !important' }}
@@ -451,6 +455,8 @@ export type DevfileSearchProps = {
      * The function to step backwards in the UI.
      */
     goBack?: () => void;
+
+    theme?: Theme;
 };
 
 /**
@@ -474,7 +480,7 @@ function isToBeIncluded(devfile: Devfile, tagFilter: string[], debugSupportFilte
 }
 
 export function DevfileSearch(props: DevfileSearchProps) {
-    const ITEMS_PER_PAGE = 8;
+    const ITEMS_PER_PAGE = 12;
     const QUARKUS_REGEX = /[Qq]uarkus/;
 
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
@@ -644,11 +650,10 @@ export function DevfileSearch(props: DevfileSearchProps) {
     return (
         <>
             <Stack direction="column" height="100%" spacing={0.5}>
-                <Stack direction="row" spacing={1}>
-                    <Stack direction="column" sx={{
+                <Stack direction="row" spacing={1} width={'100%'}>
+                    <Stack direction="column" maxWidth={'30%'} sx={{
                         height: 'calc(100vh - 100px)',
-                        overflow: 'scroll',
-                        maxWidth: '30%'
+                        overflow: 'scroll'
                     }} spacing={0}>
                         {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
                             <>
@@ -680,12 +685,13 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                                 tagEnabled={tagEnabled}
                                                 setTagEnabled={setTagEnabled} />
                                         </Stack>
-                                        <Stack direction='row-reverse' gap={2}>
+                                        <Stack direction='row' gap={2}>
                                             <Typography variant="body2" marginTop={1} marginBottom={1}>
                                                 <Link
                                                     component="button"
                                                     variant="body2"
                                                     underline='none'
+                                                    sx={{color: 'var(--vscode-button-foreground) !important'}}
                                                     onClick={() => {
                                                         setShowMore((prev) => !prev);
                                                         if (showMore) {
@@ -694,7 +700,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                                         }
                                                     }}
                                                 >
-                                                    {!showMore ? 'Show more' : 'Show less'}
+                                                    Show {!showMore ? 'more' : 'less'}
                                                 </Link>
                                             </Typography>
                                             {
@@ -734,7 +740,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
                     <Divider orientation="vertical" sx={{ height: 'calc(100vh - 80px)' }} />
 
-                    <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1}>
+                    <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
                         <SearchBar
                             searchText={searchText}
                             setSearchText={setSearchText}
@@ -754,7 +760,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                             direction="column"
                             sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
                             divider={<Divider />}
-                            width="100%"
+                            width={'100%'}
                         >
                             {devfiles
                                 .slice(
@@ -811,6 +817,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                     closeModal={() => {
                         setSelectedDevfile((_) => undefined);
                     }}
+                    theme = {props.theme}
                 />
             </Modal>
         </>

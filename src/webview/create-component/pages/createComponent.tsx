@@ -144,6 +144,7 @@ export default function CreateComponent() {
                         goHome={() => {
                             setCurrentView((_) => 'home');
                         }}
+                        theme={theme}
                     />
                 );
             default:
