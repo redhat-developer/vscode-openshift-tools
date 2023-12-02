@@ -7,7 +7,7 @@ import * as React from 'react';
 
 export function DevfileExplanation() {
     return (
-        <Alert severity="info">
+        <Alert severity="info" sx={{padding: '0 8px !important'}}>
             Devfile: A YAML file that contains information on how to deploy
             your component to OpenShift, based on the language or framework that the project uses.
         </Alert>
