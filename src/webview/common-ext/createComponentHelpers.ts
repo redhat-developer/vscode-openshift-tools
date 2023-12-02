@@ -271,8 +271,7 @@ export function getDevfileTags(url?: string): string[] {
                 .flatMap((_devfileRegistry) => _devfileRegistry.devfiles).sort(devfileSort)
                 .flatMap((_devfile) => _devfile.tags))
     ]
-    return devfileTags.filter((devfileTag) => !devfileTag.toLowerCase().includes('deprecate'))
-        .sort((a, b) => a.localeCompare(b));
+    return devfileTags.filter((devfileTag) => !devfileTag.toLowerCase().includes('deprecate'));
 }
 
 function devfileSort(a: Devfile, b: Devfile): number {
