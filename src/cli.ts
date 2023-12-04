@@ -70,4 +70,33 @@ export class CliChannel {
         return cp.spawn(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);
     }
 
+    /**
+     * Executes a specified command in non-blocking sychronous way and returns the command output
+     *
+     * @param cmd A comand to execute
+     * @param opts Execution options that may be used to specify operation timeout, maximun buffer size, etc.
+     * @returns Output of from the command execution
+     */
+    async executeSyncTool(cmd: CommandText, opts: cp.ExecFileOptions): Promise<string> {
+        const options = {
+            ...opts,
+        } as cp.ExecFileOptionsWithStringEncoding
+
+        if (options.maxBuffer === undefined) {
+            options.maxBuffer = 2 * 1024 * 1024;
+        }
+        if (options.timeout === undefined) {
+            options.timeout = 10 * 1000; // 10 seconds
+        }
+        if (options.encoding === undefined) {
+            options.encoding = 'utf-8';
+        }
+        if (options.killSignal === undefined) {
+            options. killSignal = 'SIGILL'
+        }
+
+        const toolLocation = await ToolsConfig.detect(cmd.command);
+        const optWithTelemetryEnv = CliChannel.applyEnv(options, CliChannel.createTelemetryEnv()) as cp.ExecFileSyncOptionsWithStringEncoding;
+        return cp.execFileSync(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);
+    }
 }

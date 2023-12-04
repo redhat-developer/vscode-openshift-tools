@@ -12,6 +12,9 @@ import { promisify } from 'util';
 import { Oc } from '../../src/oc/ocWrapper';
 import { ClusterType } from '../../src/oc/types';
 import { Odo } from '../../src/odo/odoWrapper';
+import { CommandText } from '../../src/base/command';
+import { CliChannel } from '../../src/cli';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./oc/ocWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
@@ -192,6 +195,11 @@ suite('./oc/ocWrapper.ts', function () {
     suite('login/logout', function() {
         let token: string;
 
+        async function getCurrentUser(): Promise<string> {
+            return await CliChannel.getInstance().executeSyncTool(
+                new CommandText('oc', 'whoami'), { timeout: 1000 }).then(result => result.trim());
+        }
+
         suiteSetup(async function() {
             if (isOpenShift) {
                 // get current user token and logout
@@ -221,8 +229,8 @@ suite('./oc/ocWrapper.ts', function () {
 
         test('logout()', async function() {
             try {
-                await Oc.Instance.getCurrentUser();
-                expect.fail('should be unable to get current user, since you are logged out');
+                const needLogin = await LoginUtil.Instance.requireLogin();
+                expect(needLogin).to.be.true;
             } catch (_e) {
                 // do nothing
             }
@@ -234,14 +242,14 @@ suite('./oc/ocWrapper.ts', function () {
                 username,
                 password,
             );
-            const currentUser = await Oc.Instance.getCurrentUser();
-            expect(currentUser).to.equal(username);
+            const currentUser = await getCurrentUser();
+            expect(currentUser.trim()).to.equal(username);
         });
 
         test('loginWithToken()', async function() {
             await Oc.Instance.loginWithToken(clusterUrl, token);
-            const currentUser = await Oc.Instance.getCurrentUser();
-            expect(currentUser).to.equal(username);
+            const currentUser = await getCurrentUser();
+            expect(currentUser.trim()).to.equal(username);
         });
 
     });

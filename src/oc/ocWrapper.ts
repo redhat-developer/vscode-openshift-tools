@@ -150,16 +150,6 @@ export class Oc {
     }
 
     /**
-     * Returns the username of the current user.
-     *
-     * @returns the username of the current user
-     */
-    public async getCurrentUser(): Promise<string> {
-        const result = await CliChannel.getInstance().executeTool(new CommandText('oc', 'whoami'));
-        return result.stdout;
-    }
-
-    /**
      * Returns the token for the current user.
      *
      * @returns the token for the current user
@@ -341,7 +331,7 @@ export class Oc {
      * @throws if you are not currently logged into an OpenShift cluster
      */
     public async logout(): Promise<void> {
-        await CliChannel.getInstance().executeTool(new CommandText('oc', 'logout'));
+        await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'logout'), { timeout: 1000 });
     }
 
     /**
