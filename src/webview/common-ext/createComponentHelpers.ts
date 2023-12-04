@@ -253,7 +253,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
  * @returns a list of the devfile capabilities
  */
 export function getDevfileCapabilities(): string[] {
-    return ['Debug Support', 'Deploy Support'];
+    return ['Debug', 'Deploy'];
 }
 
 /**
@@ -268,27 +268,8 @@ export function getDevfileTags(url?: string): string[] {
         ...new Set(
             devfileRegistries
                 .filter((devfileRegistry) => url ? devfileRegistry.url === url : true)
-                .flatMap((_devfileRegistry) => _devfileRegistry.devfiles).sort(devfileSort)
+                .flatMap((_devfileRegistry) => _devfileRegistry.devfiles)
                 .flatMap((_devfile) => _devfile.tags))
     ]
     return devfileTags.filter((devfileTag) => !devfileTag.toLowerCase().includes('deprecate'));
-}
-
-function devfileSort(a: Devfile, b: Devfile): number {
-    const QUARKUS_REGEX = /[Qq]uarkus/;
-    const aQuarkus = QUARKUS_REGEX.test(a.name);
-        const bQuarkus = QUARKUS_REGEX.test(b.name);
-        if (aQuarkus && !bQuarkus) {
-            return -1;
-        } else if (bQuarkus && !aQuarkus) {
-            return 1;
-        }
-
-        if (a.supportsDebug && !b.supportsDebug) {
-            return -1;
-        } else if (b.supportsDebug && !a.supportsDebug) {
-            return 1;
-        }
-
-        return a.name < b.name ? -1 : 1;
 }

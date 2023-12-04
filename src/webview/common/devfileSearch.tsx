@@ -52,6 +52,8 @@ type Message = {
     data: any;
 };
 
+const QUARKUS_REGEX = /[Qq]uarkus/;
+
 function LinkButton(props: { href: string; disabled: boolean; onClick: () => void; children }) {
     return (
         <Link href={props.disabled ? undefined : props.href} underline="none">
@@ -89,8 +91,8 @@ function SearchBar(props: {
                 margin='normal'
                 InputProps={{
                     startAdornment: (
-                        <InputAdornment position="start" sx={{marginTop: '0px !important'}}>
-                            <Search color="textSecondary"  fontSize='small' />
+                        <InputAdornment position="start" sx={{ marginTop: '0px !important' }}>
+                            <Search color="textSecondary" fontSize='small' />
                         </InputAdornment>
                     ),
                     endAdornment: (
@@ -180,14 +182,33 @@ function RegistriesPicker(props: {
  * @returns number
  */
 function ascTag(oldTag: { name: string; enabled: boolean }, newTag: { name: string; enabled: boolean }) {
-    const oldTagEnabled = oldTag.enabled;
-    const newTagEnabled = newTag.enabled;
-    if (oldTagEnabled && !newTagEnabled) {
+
+    //Priority order Quarkus, Java, Node.js and Python
+    const javaPriorites = ['Java', 'Maven'];
+    const nodeJsPriorities = ['Node.js', 'Next.js', 'Express'];
+    const pythonPriorities = ['Python', 'Django', 'Pip'];
+
+    const aQuarkus = QUARKUS_REGEX.test(oldTag.name);
+    const bQuarkus = QUARKUS_REGEX.test(newTag.name);
+
+    if (aQuarkus && !bQuarkus) {
         return -1;
-    } else if (newTagEnabled && !oldTagEnabled) {
+    } else if (bQuarkus && !aQuarkus) {
+        return 1;
+    } else if (javaPriorites.includes(oldTag.name) && !javaPriorites.includes(newTag.name)) {
+        return -1;
+    } else if (!javaPriorites.includes(oldTag.name) && javaPriorites.includes(newTag.name)) {
+        return 1;
+    } else if (nodeJsPriorities.includes(oldTag.name) && !nodeJsPriorities.includes(newTag.name)) {
+        return -1;
+    } else if (!nodeJsPriorities.includes(oldTag.name) && nodeJsPriorities.includes(newTag.name)) {
+        return 1;
+    } else if (pythonPriorities.includes(oldTag.name) && !pythonPriorities.includes(newTag.name)) {
+        return -1;
+    } else if (!pythonPriorities.includes(oldTag.name) && pythonPriorities.includes(newTag.name)) {
         return 1;
     }
-    return 0;
+    return oldTag.name.localeCompare(newTag.name);
 }
 
 function TagsPicker(props: {
@@ -310,7 +331,7 @@ const SelectTemplateProject = React.forwardRef(
                     >
                         <DevfileListItem devfile={props.devfile} showFullDescription />
                         <IconButton onClick={props.closeModal}>
-                            <Close color="textSecondary" fontSize='small'/>
+                            <Close color="textSecondary" fontSize='small' />
                         </IconButton>
                     </Stack>
                     <FormControl fullWidth>
@@ -481,7 +502,6 @@ function isToBeIncluded(devfile: Devfile, tagFilter: string[], debugSupportFilte
 
 export function DevfileSearch(props: DevfileSearchProps) {
     const ITEMS_PER_PAGE = 12;
-    const QUARKUS_REGEX = /[Qq]uarkus/;
 
     const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -552,7 +572,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                 enabled: false // All values set to false means that no filter is to be applied
             });
         }
-        setTagEnabled((_) => enabledArray);
+        setTagEnabled((_) => enabledArray.sort(ascTag));
     }
 
     React.useEffect(() => clearDevfileAll(), [devfileTags]);
@@ -601,12 +621,12 @@ export function DevfileSearch(props: DevfileSearchProps) {
         .map((entry) => entry.registryName);
 
     const debugSupport = capabilityEnabled //
-        .filter((_cap) => _cap.name === 'Debug Support') //
+        .filter((_cap) => _cap.name === 'Debug') //
         .filter((_cap) => _cap.enabled) //
         .length > 0;
 
     const deploySupport = capabilityEnabled //
-        .filter((_cap) => _cap.name === 'Deploy Support') //
+        .filter((_cap) => _cap.name === 'Deploy') //
         .filter((_cap) => _cap.enabled) //
         .length > 0;
 
@@ -655,87 +675,99 @@ export function DevfileSearch(props: DevfileSearchProps) {
                         height: 'calc(100vh - 100px)',
                         overflow: 'scroll'
                     }} spacing={0}>
-                        {(devfileCapabilities.length > 0 || devfileTags.length > 0) && (
-                            <>
+                        <Typography variant="body2" marginBottom={1}>
+                            Filter by
+                        </Typography>
+
+                        {
+                            devfileRegistries.length > 1 && (
+                                <>
+                                    <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                        Devfile Registries
+                                    </Typography>
+                                    <RegistriesPicker
+                                        registryEnabled={registryEnabled}
+                                        setRegistryEnabled={setRegistryEnabled}
+                                    />
+                                    <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                </>
+                            )
+                        }
+
+                        {
+                            devfileCapabilities.length > 0 && (
                                 <Stack direction="column" spacing={0}>
-                                    <Typography variant="body2" marginBottom={1}>
-                                        Filter by
+                                    <Typography variant="body2" marginBottom={1} marginTop={1}>
+                                        Support
                                     </Typography>
                                     <Stack direction="column" useFlexGap={true} width="100%" spacing={1}>
-                                        {devfileCapabilities.length > 0 && (
-                                            <>
-                                                <TagsPicker
-                                                    tagEnabled={capabilityEnabled}
-                                                    setTagEnabled={setCapabilityEnabled} />
-                                                <Divider orientation="horizontal" sx={{ width: '100%' }} />
-                                            </>
-                                        )}
+                                        {
+                                            devfileCapabilities.length > 0 && (
+                                                <>
+                                                    <TagsPicker
+                                                        tagEnabled={capabilityEnabled}
+                                                        setTagEnabled={setCapabilityEnabled} />
+                                                    <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                                </>
+                                            )
+                                        }
                                     </Stack>
                                 </Stack>
-                                {devfileTags.length > 0 && (
-                                    <>
-                                        <Stack id='tags' direction="column" sx={{
-                                            height: !showMore ? 'calc(250vh - 100px)' : 'calc(300vh - 150px)',
-                                            overflow: !showMore ? 'hidden' : 'scroll'
-                                        }} spacing={0}>
-                                            <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                                Tags
-                                            </Typography>
-                                            <TagsPicker
-                                                tagEnabled={tagEnabled}
-                                                setTagEnabled={setTagEnabled} />
-                                        </Stack>
-                                        <Stack direction='row' gap={2}>
+                            )
+                        }
+
+                        {
+                            devfileTags.length > 0 && (
+                                <>
+                                    <Stack id='tags' direction="column" sx={{
+                                        height: !showMore ? '55vh' : 'calc(300vh - 150px)',
+                                        overflow: !showMore ? 'hidden' : 'scroll'
+                                    }} spacing={0}>
+                                        <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                            Tags
+                                        </Typography>
+                                        <TagsPicker
+                                            tagEnabled={tagEnabled}
+                                            setTagEnabled={setTagEnabled} />
+                                    </Stack>
+                                    <Stack direction='row' gap={2}>
+                                        <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                            <Link
+                                                component="button"
+                                                variant="body2"
+                                                underline='none'
+                                                sx={{ color: 'var(--vscode-button-foreground) !important' }}
+                                                onClick={() => {
+                                                    setShowMore((prev) => !prev);
+                                                    if (showMore) {
+                                                        const myDiv = document.getElementById('tags');
+                                                        myDiv.scrollTop = 0;
+                                                    }
+                                                }}
+                                            >
+                                                Show {!showMore ? 'more' : 'less'}
+                                            </Link>
+                                        </Typography>
+                                        {
+                                            activeTags.length > 0 &&
                                             <Typography variant="body2" marginTop={1} marginBottom={1}>
                                                 <Link
                                                     component="button"
+                                                    color='error'
                                                     variant="body2"
                                                     underline='none'
-                                                    sx={{color: 'var(--vscode-button-foreground) !important'}}
                                                     onClick={() => {
-                                                        setShowMore((prev) => !prev);
-                                                        if (showMore) {
-                                                            const myDiv = document.getElementById('tags');
-                                                            myDiv.scrollTop = 0;
-                                                        }
+                                                        clearDevfileAll()
                                                     }}
                                                 >
-                                                    Show {!showMore ? 'more' : 'less'}
+                                                    Clear {activeTags.length > 1 ? 'all' : ''}
                                                 </Link>
                                             </Typography>
-                                            {
-                                                activeTags.length > 0 &&
-                                                <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                                    <Link
-                                                        component="button"
-                                                        color='error'
-                                                        variant="body2"
-                                                        underline='none'
-                                                        onClick={() => {
-                                                            clearDevfileAll()
-                                                        }}
-                                                    >
-                                                        Clear {activeTags.length > 1 ? 'all' : ''}
-                                                    </Link>
-                                                </Typography>
-                                            }
-                                        </Stack>
-                                    </>
-                                )}
-                            </>
-                        )}
-                        {devfileRegistries.length > 1 && (
-                            <>
-                                <Divider orientation="horizontal" sx={{ width: '100%' }} />
-                                <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                    Devfile Registries
-                                </Typography>
-                                <RegistriesPicker
-                                    registryEnabled={registryEnabled}
-                                    setRegistryEnabled={setRegistryEnabled}
-                                />
-                            </>
-                        )}
+                                        }
+                                    </Stack>
+                                </>
+                            )
+                        }
                     </Stack>
 
                     <Divider orientation="vertical" sx={{ height: 'calc(100vh - 80px)' }} />
@@ -817,7 +849,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
                     closeModal={() => {
                         setSelectedDevfile((_) => undefined);
                     }}
-                    theme = {props.theme}
+                    theme={props.theme}
                 />
             </Modal>
         </>
