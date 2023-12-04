@@ -22,6 +22,7 @@ import {
     window
 } from 'vscode';
 import * as Helm from './helm/helm';
+import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
 import { Odo } from './odo/odoWrapper';
 import { getServiceKindStubs } from './openshift/serviceHelpers';
@@ -31,7 +32,6 @@ import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
-import { HelmRepo } from './helm/helmChartType';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -210,7 +210,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         let result: ExplorerItem[] = [];
         if (!element) {
             try {
-                await Odo.Instance.getProjects();
+                // TODO: use a setting to configure this timeout
+                await Promise.race([Odo.Instance.getProjects(), new Promise((_res, rej) => { setTimeout(rej, 5000); })]);
                 result = [this.kubeContext];
                 if (this.kubeContext) {
                     const config = getKubeConfigFiles();
@@ -302,12 +303,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         }
 
-        // don't show Open In Developer Dashboard if not openshift cluster
-        const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
-        void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
-
         if (!element) {
             await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
+        } else {
+            // only do this if the cluster is accessible
+            // don't show Open In Developer Dashboard if not openshift cluster
+            const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
+            void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
         }
         return result;
     }
