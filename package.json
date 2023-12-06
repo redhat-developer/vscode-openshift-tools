@@ -100,7 +100,7 @@
 		"@devfile/api": "^2.2.2-1700686170",
 		"@mui/icons-material": "^5.14.19",
 		"@mui/lab": "^5.0.0-alpha.155",
-		"@mui/material": "^5.14.19",
+		"@mui/material": "^5.14.20",
 		"@mui/styles": "^5.14.20",
 		"@rjsf/core": "^5.15.0",
 		"@rjsf/mui": "^5.15.0",
