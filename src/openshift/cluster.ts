@@ -386,6 +386,7 @@ export class Cluster extends OpenShiftItem {
                                 // which means this request will always fail on crc unless cert checking is disabled
                                 strictSSL: false
                             });
+
                             // since the fetch didn't throw an exception,
                             // a route to the cluster is available,
                             // so it's running
@@ -579,7 +580,7 @@ export class Cluster extends OpenShiftItem {
                 case Step.enterUserName:
                     if (!username)  {
                         const prompt = 'Provide Username for basic authentication to the API server';
-                        const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value);
+                        const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value ? value : '');
                         const newUsername = await inputValue(prompt, '', false, validateInput);
 
                         if (newUsername === null) {
@@ -597,7 +598,7 @@ export class Cluster extends OpenShiftItem {
                     if (!passwd) {
                         password = await TokenStore.getItem('login', username);
                         const prompt = 'Provide Password for basic authentication to the API server';
-                        const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value);
+                        const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value ? value : '');
                         const newPassword = await inputValue(prompt, password, true, validateInput);
 
                         if (newPassword === null) {
@@ -694,9 +695,8 @@ export class Cluster extends OpenShiftItem {
         let ocToken: string;
         if (!userToken) {
             const prompt = 'Provide Bearer token for authentication to the API server';
-            const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value);
-            const initialValue = token ? token : '';
-            ocToken = await inputValue(prompt, initialValue, true, validateInput);
+            const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value ? value : '');
+            ocToken = await inputValue(prompt,  token ? token : '', true, validateInput);
             if (ocToken === null) {
                 return null; // Cancel
             } else if (!ocToken) {
