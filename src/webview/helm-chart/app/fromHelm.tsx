@@ -6,15 +6,9 @@ import * as React from 'react';
 import 'react-dom';
 import { HelmSearch } from './helmSearch';
 
-type FromHelmProps = {
-    titleText: string
-};
-
-export function FromHelm(props: FromHelmProps) {
+export function FromHelm() {
 
     return (
-        <HelmSearch
-            titleText={props.titleText}
-        />
+        <HelmSearch />
     );
 }

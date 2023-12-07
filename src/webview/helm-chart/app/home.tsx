@@ -37,8 +37,8 @@ export const Home = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>
-                <FromHelm titleText='Helm Charts' />
+            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '1em', paddingBottom: '1em'}}>
+                <FromHelm />
             </Container>
         </ThemeProvider>
     );

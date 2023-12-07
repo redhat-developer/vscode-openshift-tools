@@ -81,12 +81,12 @@ function HelmChartListContent(props: HelmListItemProps) {
     }
 
     return (
-        <Stack direction='row' spacing={3} sx={{ width: 'calc(100% - 16px)' }} alignItems='center'>
+        <Stack direction='row' spacing={3} alignItems='center'>
             <Box
                 sx={{
                     display: 'flex',
-                    width: '7em',
-                    height: '7em',
+                    width: !props.isDetailedPage ? '4em' : '7em',
+                    height: !props.isDetailedPage ? '4em' : '7em',
                     bgcolor: 'white',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -95,19 +95,24 @@ function HelmChartListContent(props: HelmListItemProps) {
             >
                 {
                     props.selectedVersion.icon ?
-                        <img src={props.selectedVersion.icon} style={{ maxWidth: '6em', maxHeight: '6em' }} />
+                        <img src={props.selectedVersion.icon} style={{
+                            maxWidth: !props.isDetailedPage ? '3em' : '6em',
+                            maxHeight: !props.isDetailedPage ? '3em' : '6em'
+                        }} />
                         :
                         <SvgIcon
                             component={HelmIcon}
                             fontSize='large'
-                            style={{ width: '2em', height: '2em', }} inheritViewBox />
+                            style={{ maxWidth: '1em', maxHeight: '1em' }} inheritViewBox />
                 }
 
             </Box>
             <Stack
                 direction='column'
                 spacing={1}
-                sx={{ flexShrink: '5', minWidth: '0', maxWidth: '35rem' }}
+                maxWidth={!props.isDetailedPage ? '90%' : '50rem'}
+                minWidth={0}
+                sx={{ flexShrink: '10' }}
             >
                 <Stack direction='row' spacing={2} alignItems='center'>
                     <Typography
@@ -116,15 +121,51 @@ function HelmChartListContent(props: HelmListItemProps) {
                         sx={{
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
-                            textOverflow: 'ellipsis',
+                            textOverflow: 'ellipsis'
                         }}
                     >
                         {capitalizeFirstLetter(props.helmChart.displayName || props.helmChart.chartName)}
                     </Typography>
+                    <Stack direction='row' spacing={1}>
+                        <Tooltip title={props.helmChart.repoURL}>
+                            <Chip
+                                size='small'
+                                label={props.helmChart.repoName}
+                                color={'success'} />
+                        </Tooltip>
+                        {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
+                            <Chip
+                                size='small'
+                                label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
+                                color={'primary'} />
+                        }
+                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.map((tag, i) => {
+                            if (i >= 2) {
+                                return;
+                            }
+                            return <Chip size="small" label={tag} key={tag} />;
+                        }))}
+                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 2 && (
+                            <Tooltip title={props.selectedVersion.keywords.slice(2).join(', ')}>
+                                <Chip size="small" label="• • •" />
+                            </Tooltip>
+                        ))}
+                        <Chip
+                            size='small'
+                            label={props.selectedVersion.version}
+                            color={'error'}
+                        />
+                    </Stack>
                 </Stack>
                 <Typography
                     variant='body2'
-                    sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    sx={{
+                        whiteSpace: !props.isDetailedPage ? 'nowrap' : 'pre-wrap',
+                        overflow: !props.isDetailedPage ? 'hidden' : 'visible',
+                        textOverflow: !props.isDetailedPage ? 'ellipsis' : 'unset',
+                        textAlign: 'justify',
+                        maxHeight: !props.isDetailedPage ? '4rem' : 'unset'
+                    }}
                 >
                     {props.selectedVersion.description}
                 </Typography>
@@ -147,36 +188,6 @@ function HelmChartListContent(props: HelmListItemProps) {
                         }} >{props.helmChart.repoURL}
                     </LinkButton>
                 }
-                <Stack direction='row' spacing={1}>
-                    <Tooltip title={props.helmChart.repoURL}>
-                        <Chip
-                            size='small'
-                            label={props.helmChart.repoName}
-                            color={'success'} />
-                    </Tooltip>
-                    {props.selectedVersion.annotations && props.selectedVersion.annotations['charts.openshift.io/providerType'] &&
-                        <Chip
-                            size='small'
-                            label={props.selectedVersion.annotations['charts.openshift.io/providerType']}
-                            color={'primary'} />
-                    }
-                    {(props.selectedVersion.keywords && props.selectedVersion.keywords.map((tag, i) => {
-                        if (i >= 2) {
-                            return;
-                        }
-                        return <Chip size="small" label={tag} key={tag} />;
-                    }))}
-                    {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 2 && (
-                        <Tooltip title={props.selectedVersion.keywords.slice(2).join(', ')}>
-                            <Chip size="small" label="• • •" />
-                        </Tooltip>
-                    ))}
-                    <Chip
-                        size='small'
-                        label={props.selectedVersion.version}
-                        color={'error'}
-                    />
-                </Stack>
             </Stack>
         </Stack>
     );
