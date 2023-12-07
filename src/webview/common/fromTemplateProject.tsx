@@ -7,12 +7,14 @@ import 'react-dom';
 import { Devfile, TemplateProjectIdentifier } from './devfile';
 import { DevfileSearch } from './devfileSearch';
 import { SetNameAndFolder } from './setNameAndFolder';
+import { Theme } from '@mui/material';
 
 type CurrentPage = 'selectTemplateProject' | 'setNameAndFolder';
 
 type FromTemplateProjectProps = {
     titleText: string
     goHome?: () => void;
+    theme: Theme;
 };
 
 type Message = {
@@ -77,6 +79,7 @@ export function FromTemplateProject(props: FromTemplateProjectProps) {
                     setSelectedTemplateProject={setSelectedProjectAndAdvance}
                     titleText={props.titleText}
                     goBack={props.goHome}
+                    theme={props.theme}
                 />
             );
         case 'setNameAndFolder':
