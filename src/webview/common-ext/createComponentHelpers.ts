@@ -26,7 +26,7 @@ export async function isValidProjectFolder(
     if (!folder) { // Folder cannot be Undefined
         return {
             status: ValidationStatus.error,
-            message:  'Please specify a valid folder path'
+            message: 'Please specify a valid folder path'
         };
     }
 
@@ -98,7 +98,7 @@ async function canRecursivelyCreateProjectFolder(
     const folderPath = path.parse(folder);
     const root = folderPath.root;
 
-     // Reconstruct the folder to avoid having `/` (or `\` on Windows) at the end
+    // Reconstruct the folder to avoid having `/` (or `\` on Windows) at the end
     let parentFolder: string = path.join(folderPath.dir, folderPath.base).toString();
     let parentFolderExists = false;
     while (parentFolder !== root && !parentFolderExists) {
@@ -134,18 +134,18 @@ async function canRecursivelyCreateProjectFolder(
  * @param isComponentBasedValidation component based validation or not
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
-export function validateName(name: string, isComponentBasedValidation=true): string {
-    let validationMessage = NameValidator.emptyName(`Please enter a ${isComponentBasedValidation? 'component' : ''} name.`, name);
+export function validateName(name: string, isComponentBasedValidation = true): string {
+    let validationMessage = NameValidator.emptyName(`Please enter a ${isComponentBasedValidation ? 'component' : ''} name.`, name);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
-            `Not a valid ${isComponentBasedValidation? 'component' : ''} name.
+            `Not a valid ${isComponentBasedValidation ? 'component' : ''} name.
         Please use lower case alphanumeric characters or '-', start with an alphabetic character, and end with an alphanumeric character`,
             name,
         );
     }
     if (!validationMessage) {
         validationMessage = NameValidator.lengthName(
-            `${isComponentBasedValidation? 'Component name' : 'Name'} should be between 2-63 characters`,
+            `${isComponentBasedValidation ? 'Component name' : 'Name'} should be between 2-63 characters`,
             name,
             0,
         );
@@ -204,38 +204,40 @@ export function getDevfileRegistries(): DevfileRegistry[] {
             (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
         );
 
-        devfileRegistry.devfiles.push({
-            description: component.description,
-            registryName: devfileRegistry.name,
-            logoUrl: component.devfileData.devfile.metadata.icon,
-            name: component.displayName,
-            id: component.name,
-            starterProjects: component.devfileData.devfile.starterProjects,
-            tags: component.tags,
-            yaml: JSYAML.dump(component.devfileData.devfile),
-            supportsDebug:
-                Boolean(
-                    component.devfileData.devfile.commands?.find(
-                        (command) => command.exec?.group?.kind === 'debug',
+        if (!component?.tags.some((value) => value.toLowerCase().includes('deprecate'))) {
+            devfileRegistry.devfiles.push({
+                description: component.description,
+                registryName: devfileRegistry.name,
+                logoUrl: component.devfileData.devfile.metadata.icon,
+                name: component.displayName,
+                id: component.name,
+                starterProjects: component.devfileData.devfile.starterProjects,
+                tags: component.tags,
+                yaml: JSYAML.dump(component.devfileData.devfile),
+                supportsDebug:
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.exec?.group?.kind === 'debug',
+                        ),
+                    ) ||
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.composite?.group?.kind === 'debug',
+                        ),
                     ),
-                ) ||
-                Boolean(
-                    component.devfileData.devfile.commands?.find(
-                        (command) => command.composite?.group?.kind === 'debug',
+                supportsDeploy:
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.exec?.group?.kind === 'deploy',
+                        ),
+                    ) ||
+                    Boolean(
+                        component.devfileData.devfile.commands?.find(
+                            (command) => command.composite?.group?.kind === 'deploy',
+                        ),
                     ),
-                ),
-            supportsDeploy:
-                Boolean(
-                    component.devfileData.devfile.commands?.find(
-                        (command) => command.exec?.group?.kind === 'deploy',
-                    ),
-                ) ||
-                Boolean(
-                    component.devfileData.devfile.commands?.find(
-                        (command) => command.composite?.group?.kind === 'deploy',
-                    ),
-                ),
-        } as Devfile);
+            } as Devfile);
+        }
     }
     devfileRegistries.sort((a, b) => (a.name < b.name ? -1 : 1));
     return devfileRegistries;
@@ -251,7 +253,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
  * @returns a list of the devfile capabilities
  */
 export function getDevfileCapabilities(): string[] {
-    return [ 'Debug Support', 'Deploy Support'];
+    return ['Debug', 'Deploy'];
 }
 
 /**
@@ -259,17 +261,15 @@ export function getDevfileCapabilities(): string[] {
  *
  * @returns a list of the devfile tags
  */
-export function getDevfileTags(url?:string ): string[] {
+export function getDevfileTags(url?: string): string[] {
     const devfileRegistries = getDevfileRegistries();
 
     const devfileTags: string[] = [
-            ...new Set(
-                devfileRegistries
-                    .filter((devfileRegistry) => url ? devfileRegistry.url === url : true)
-                    .flatMap((_devfileRegistry) => _devfileRegistry.devfiles)
-                    .flatMap((_devfile) => _devfile.tags))
-        ]
-        .sort((a, b) => a.localeCompare(b));
-
-    return devfileTags;
+        ...new Set(
+            devfileRegistries
+                .filter((devfileRegistry) => url ? devfileRegistry.url === url : true)
+                .flatMap((_devfileRegistry) => _devfileRegistry.devfiles)
+                .flatMap((_devfile) => _devfile.tags))
+    ]
+    return devfileTags.filter((devfileTag) => !devfileTag.toLowerCase().includes('deprecate'));
 }

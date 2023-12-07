@@ -153,6 +153,8 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                 defaultProps: {
                     style: {
                         whiteSpace: 'nowrap',
+                        backgroundColor: computedStyle.getPropertyValue('--vscode-button-background'),
+                        color: computedStyle.getPropertyValue('--vscode-button-foreground'),
                     },
                 },
             },
@@ -164,7 +166,7 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
                         },
                         style: {
                             backgroundColor: computedStyle.getPropertyValue(
-                                '--vscode-tab-border',
+                                '--vscode-editor-background',
                             ),
                         },
                     },

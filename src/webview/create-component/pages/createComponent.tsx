@@ -38,7 +38,7 @@ function SelectStrategy({ setCurrentView }) {
                         display: 'flex',
                         flexDirection: 'row',
                         gap: '4em',
-                        marginTop: '4em',
+                        marginTop: '1em',
                         justifyContent: 'center',
                     }}
                 >
@@ -144,6 +144,7 @@ export default function CreateComponent() {
                         goHome={() => {
                             setCurrentView((_) => 'home');
                         }}
+                        theme={theme}
                     />
                 );
             default:
@@ -157,7 +158,7 @@ export default function CreateComponent() {
                 maxWidth="lg"
                 sx={{
                     height: '100%',
-                    paddingTop: '5em',
+                    paddingTop: '1em',
                     paddingBottom: '16px',
                 }}
             >
