@@ -65,14 +65,14 @@ function HelmChartListContent(props: HelmListItemProps) {
             <Link href={props.href} underline='none' variant='body2'>
                 <Button
                     variant='text'
-                    style={{ textTransform: 'none' }}
+                    sx={{ textTransform: 'lowercase !important' }}
                     onClick={(e) => {
                         if (props.onClick) {
                             props.onClick();
                         }
                         e.preventDefault();
                     }}
-                    endIcon={<Launch />}
+                    endIcon={<Launch  fontSize='small' />}
                 >
                     {props.children}
                 </Button>
