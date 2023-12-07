@@ -280,7 +280,7 @@ export function HelmSearch() {
                     helmCharts.length === 0 ?
                         <LoadScreen title='Retrieving Helm Charts' /> :
                         <Stack direction="row" spacing={1} width={'100%'}>
-                            <Stack direction='column' sx={{ height: 'calc(100vh - 100px)', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
+                            <Stack direction='column' sx={{ height: '100vh', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
                                 {helmRepos.length > 1 && (
                                     <>
                                         <Typography variant='body2' marginBottom={1}>
@@ -325,7 +325,7 @@ export function HelmSearch() {
                                 <Stack
                                     id='devfileList'
                                     direction='column'
-                                    sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
+                                    sx={{ height: 'calc(100vh - 100px)', overflow: 'scroll' }}
                                     divider={<Divider />}
                                     width='100%'
                                 >

@@ -140,12 +140,12 @@ function HelmChartListContent(props: HelmListItemProps) {
                                 color={'primary'} />
                         }
                         {(props.selectedVersion.keywords && props.selectedVersion.keywords.map((tag, i) => {
-                            if (i >= 2) {
+                            if (i >= 7) {
                                 return;
                             }
                             return <Chip size="small" label={tag} key={tag} />;
                         }))}
-                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 2 && (
+                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 7 && (
                             <Tooltip title={props.selectedVersion.keywords.slice(2).join(', ')}>
                                 <Chip size="small" label="• • •" />
                             </Tooltip>
