@@ -102,7 +102,7 @@
 		"@mui/lab": "^5.0.0-alpha.155",
 		"@mui/material": "^5.14.20",
 		"@mui/styles": "^5.14.20",
-		"@rjsf/core": "^5.15.0",
+		"@rjsf/core": "^5.15.1",
 		"@rjsf/mui": "^5.15.0",
 		"@rjsf/utils": "^5.15.0",
 		"@rjsf/validator-ajv8": "^5.15.0",
