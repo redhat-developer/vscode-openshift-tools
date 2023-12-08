@@ -58,6 +58,9 @@ export const HelmModal = React.forwardRef(
                     setInstallError(message.data.error ? true : false);
                     setInstallMsg(message.data.message);
                     setInstallLoading(message.data.message === 'Installed' || message.data.error ? false : true);
+                    if (message.data.message === 'Installed') {
+                        props.closeModal();
+                    }
                     break;
                 }
                 default:
