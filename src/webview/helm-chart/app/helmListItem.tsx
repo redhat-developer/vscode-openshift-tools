@@ -50,6 +50,8 @@ function HelmChartListContent(props: HelmListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
 
+    const numOfTags = !props.isDetailedPage ? 6 : 4;
+
     function capitalizeFirstLetter(value: string): string {
         if (value.indexOf('-') === -1) {
             return value[0].toUpperCase() + value.substring(1);
@@ -140,13 +142,13 @@ function HelmChartListContent(props: HelmListItemProps) {
                                 color={'primary'} />
                         }
                         {(props.selectedVersion.keywords && props.selectedVersion.keywords.map((tag, i) => {
-                            if (i >= 7) {
+                            if (i >= numOfTags) {
                                 return;
                             }
                             return <Chip size="small" label={tag} key={tag} />;
                         }))}
-                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > 7 && (
-                            <Tooltip title={props.selectedVersion.keywords.slice(2).join(', ')}>
+                        {(props.selectedVersion.keywords && props.selectedVersion.keywords.length > numOfTags && (
+                            <Tooltip title={props.selectedVersion.keywords.slice(numOfTags).join(', ')}>
                                 <Chip size="small" label="• • •" />
                             </Tooltip>
                         ))}

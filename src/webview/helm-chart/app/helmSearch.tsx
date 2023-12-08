@@ -280,36 +280,44 @@ export function HelmSearch() {
                     helmCharts.length === 0 ?
                         <LoadScreen title='Retrieving Helm Charts' /> :
                         <Stack direction="row" spacing={1} width={'100%'}>
-                            <Stack direction='column' sx={{ height: '100vh', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
-                                {helmRepos.length > 1 && (
-                                    <>
-                                        <Typography variant='body2' marginBottom={1}>
-                                            Chart Repositories
+                            {
+                                (helmRepos.length > 1 || providerTypes.length > 1) &&
+                                <>
+                                    <Stack direction='column' sx={{ height: '100vh', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
+                                        <Typography variant="body2" marginBottom={1}>
+                                            Filter by
                                         </Typography>
-                                        <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
-                                            <RepoPicker
-                                                repoEnabled={helmChartEnabled}
-                                                setRepoEnabled={setHelmChartEnabled} />
-                                            <Divider orientation='horizontal' sx={{ width: '100%' }} />
+                                        {helmRepos.length > 1 && (
+                                            <>
+                                                <Typography variant='body2' marginTop={1} marginBottom={1}>
+                                                    Repositories
+                                                </Typography>
+                                                <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                    <RepoPicker
+                                                        repoEnabled={helmChartEnabled}
+                                                        setRepoEnabled={setHelmChartEnabled} />
+                                                    <Divider orientation='horizontal' sx={{ width: '100%' }} />
+                                                </Stack>
+                                            </>
+                                        )}
+                                        {providerTypes.length > 1 && (
+                                            <>
+                                                <Typography variant='body2' marginBottom={1}>
+                                                    Provider Types
+                                                </Typography>
+                                                <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                    <ProviderTypePicker
+                                                        providerTypeEnabled={providerTypeEnabled}
+                                                        setProviderTypeEnabled={setProviderTypeEnabled} />
+                                                </Stack>
+                                            </>
+                                        )}
+                                        <Stack direction='column' sx={{ flexGrow: '1', height: '100%', width: '100%' }} spacing={0}>
                                         </Stack>
-                                    </>
-                                )}
-                                {providerTypes.length > 1 && (
-                                    <>
-                                        <Typography variant='body2' marginBottom={1}>
-                                            Provider Types
-                                        </Typography>
-                                        <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
-                                            <ProviderTypePicker
-                                                providerTypeEnabled={providerTypeEnabled}
-                                                setProviderTypeEnabled={setProviderTypeEnabled} />
-                                        </Stack>
-                                    </>
-                                )}
-                                <Stack direction='column' sx={{ flexGrow: '1', height: '100%', width: '100%' }} spacing={0}>
-                                </Stack>
-                            </Stack>
-                            <Divider orientation='vertical' sx={{ height: 'calc(100vh - 80px)' }} />
+                                    </Stack>
+                                    <Divider orientation='vertical' sx={{ height: 'calc(100vh - 40px)' }} />
+                                </>
+                            }
                             <Stack direction='column' sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
                                 <SearchBar
                                     searchText={searchText}
