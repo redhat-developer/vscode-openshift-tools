@@ -266,6 +266,19 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     result = [CREATE_OR_SET_PROJECT_ITEM]
                 }
             }
+
+            // The 'Create Service' menu visibility
+            let serviceKinds: CustomResourceDefinitionStub[] = [];
+            try {
+                if (await Oc.Instance.canGetKubernetesObjects('csv')) {
+                    serviceKinds = await getServiceKindStubs();
+                }
+            } catch (_) {
+                // operator framework is not installed on cluster; do nothing
+            }
+            void commands.executeCommand('setContext', 'showCreateService', serviceKinds.length > 0);
+
+            // Add Helm Context
             result.push(helmContext);
         } else if ('kind' in element && element.kind === 'helm') {
             const cliData = await Helm.getHelmRepos();

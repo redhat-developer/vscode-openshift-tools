@@ -1484,7 +1484,7 @@
 				},
 				{
 					"command": "openshift.service.create",
-					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i && showCreateService",
 					"group": "c2"
 				}
 			],
