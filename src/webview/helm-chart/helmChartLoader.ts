@@ -14,7 +14,7 @@ import { loadWebviewHtml } from '../common-ext/utils';
 import fetch = require('make-fetch-happen');
 import { validateName } from '../common-ext/createComponentHelpers';
 import { Progress } from '../../util/progress';
-import { ChartResponse, HelmRepo } from '../../helm/helmChartType';
+import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];
@@ -207,7 +207,7 @@ export default class HelmChartLoader {
             res.repoName = repo.name;
             res.repoURL = repo.url;
             res.chartName = key;
-            res.chartVersions = entries[key].reverse();
+            res.chartVersions = entries[key].sort(HelmChartLoader.descOrder);
             res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
             helmCharts.push(res);
         });
@@ -220,4 +220,10 @@ export default class HelmChartLoader {
             }
         );
     }
+
+    private static descOrder(oldChart: Chart, newChart: Chart): number {
+    const oldVersion = parseInt(oldChart.version, 10);
+    const newVersion = parseInt(newChart.version, 10);
+    return newVersion - oldVersion;
+}
 }

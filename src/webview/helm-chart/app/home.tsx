@@ -7,7 +7,7 @@ import { Container, Theme, ThemeProvider } from '@mui/material';
 import React from 'react';
 import { createVSCodeTheme } from '../../common/vscode-theme';
 import { VSCodeMessage } from '../vsCodeMessage';
-import { FromHelm } from './fromHelm';
+import { HelmSearch } from './helmSearch';
 
 type VSCodeMessage = {
     action: string;
@@ -37,8 +37,8 @@ export const Home = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '5em', paddingBottom: '16px'}}>
-                <FromHelm titleText='Helm Charts' />
+            <Container maxWidth='lg' sx={{ height: '100%', paddingTop: '1em', paddingBottom: '1em'}}>
+                <HelmSearch />
             </Container>
         </ThemeProvider>
     );
