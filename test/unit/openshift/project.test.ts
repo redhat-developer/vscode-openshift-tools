@@ -70,7 +70,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('validator returns undefined for valid project name', async () => {
-            let result: string | Thenable<string>;
+            let result: string | vscode.InputBoxValidationMessage;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                 result = await options.validateInput('goodvalue');
@@ -82,7 +82,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('validator returns error message for empty project name', async () => {
-            let result: string | Thenable<string>;
+            let result: string | vscode.InputBoxValidationMessage;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                 result = await options.validateInput('');
@@ -94,7 +94,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('validator returns error message for none alphanumeric project name', async () => {
-            let result: string | Thenable<string>;
+            let result: string | vscode.InputBoxValidationMessage;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                 result = await options.validateInput('name&name');
@@ -106,7 +106,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('validator returns error message if same name of project found', async () => {
-            let result: string | Thenable<string>;
+            let result: string | vscode.InputBoxValidationMessage;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                 result = await options.validateInput('project');
@@ -118,7 +118,7 @@ suite('OpenShift/Project', () => {
         });
 
         test('validator returns error message for project name longer than 63 characters', async () => {
-            let result: string | Thenable<string>;
+            let result: string | vscode.InputBoxValidationMessage;
             inputStub.restore();
             inputStub = sandbox.stub(vscode.window, 'showInputBox').onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                 result = await options.validateInput('n123456789012345678901234567890123456789012345678901234567890123');
