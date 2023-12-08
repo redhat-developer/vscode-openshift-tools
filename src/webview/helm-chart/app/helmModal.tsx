@@ -87,7 +87,7 @@ export const HelmModal = React.forwardRef(
                 helperText = 'No available versions';
                 break;
             case 1:
-                helperText = 'Only one versions available in this Chart';
+                helperText = 'Only one version is available for the Helm Chart';
                 break;
             default:
                 if (isInteracted && !selectedVersion) {
