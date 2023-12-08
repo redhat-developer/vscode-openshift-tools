@@ -213,7 +213,7 @@ suite('Openshift/Cluster', function() {
             test('checks cluster url name is valid url', async () => {
                 let result: string | vscode.InputBoxValidationMessage;
                 quickPickStub.onFirstCall().resolves({description: 'Current Context', label: '$(plus) Provide new URL...'});
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<Thenable<string>> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('http://127.0.0.1:9999');
                     return Promise.resolve('http://127.0.0.1:9999');
                 });
@@ -226,7 +226,7 @@ suite('Openshift/Cluster', function() {
                 quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
                 quickPickStub.onSecondCall().resolves({label: 'Credentials'});
                 quickPickStub.onThirdCall().resolves({description: 'Current Context', label: '$(plus) Add new user...'});
-                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<Thenable<string>> => {
+                inputStub.onFirstCall().callsFake(async (options?: vscode.InputBoxOptions): Promise<string> => {
                     result = await options.validateInput('goodvalue');
                     return Promise.resolve('goodvalue');
                 });
