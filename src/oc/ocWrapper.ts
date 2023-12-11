@@ -9,6 +9,7 @@ import * as tmp from 'tmp';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { ClusterType, KubernetesConsole } from './types';
+import { Platform } from '../util/platform';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -376,8 +377,9 @@ export class Oc {
      * @returns true if the current cluster is an OpenShift cluster, and false otherwise
      */
     public async isOpenShiftCluster(): Promise<boolean> {
+        const find = Platform.OS !== 'win32' ? 'grep' : 'FINDSTR';
         try {
-            const result = await CliChannel.getInstance().executeTool(new CommandText('oc api-resources | grep openshift'));
+            const result = await CliChannel.getInstance().executeTool(new CommandText(`oc api-resources | ${find} openshift`));
             if (result.stdout.length === 0) {
                 return false;
             }
