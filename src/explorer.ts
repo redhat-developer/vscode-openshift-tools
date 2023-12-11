@@ -22,8 +22,10 @@ import {
     window
 } from 'vscode';
 import * as Helm from './helm/helm';
+import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
 import { Odo } from './odo/odoWrapper';
+import { Component } from './openshift/component';
 import { getServiceKindStubs } from './openshift/serviceHelpers';
 import { KubeConfigUtils, getKubeConfigFiles } from './util/kubeUtils';
 import { Platform } from './util/platform';
@@ -31,7 +33,6 @@ import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
-import { HelmRepo } from './helm/helmChartType';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -99,6 +100,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         }
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
+        });
+        Component.onDidStateChanged((_context) => {
+            this.refresh();
         });
     }
 
