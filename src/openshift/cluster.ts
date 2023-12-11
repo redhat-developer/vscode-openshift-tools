@@ -133,6 +133,24 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
+    @vsCommand('openshift.resource.openInBrowser')
+    @clusterRequired()
+    static openInBrowser(resource: KubernetesObject): Promise<void> {
+        return Progress.execFunctionWithProgress('Opening in browser', async (progress) => {
+            const routeURL = await Oc.Instance.getRoute(resource.metadata.name);
+            if (routeURL) {
+                progress.report({ increment: 100, message: 'Starting default browser' });
+                // FIXME: handle standard k8s dashboard
+                return commands.executeCommand(
+                    'vscode.open',
+                    Uri.parse(
+                        `http://${routeURL}`,
+                    ),
+                );
+            }
+        });
+    }
+
     @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
         return new Promise<string>((resolve, reject) => {

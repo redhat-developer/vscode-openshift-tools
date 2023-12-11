@@ -770,6 +770,10 @@
 				"title": "Open in Developer Console"
 			},
 			{
+				"command": "openshift.resource.openInBrowser",
+				"title": "Open in Browser"
+			},
+			{
 				"command": "openshift.openStatusBar",
 				"title": "OpenShift",
 				"category": "OpenShift"
@@ -1244,6 +1248,10 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.openInBrowser",
 					"when": "false"
 				},
 				{
@@ -1751,6 +1759,10 @@
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
+				},
+				{
+					"command": "openshift.resource.openInBrowser",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && hasRoutes && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.Serverless.buildAndRun",
