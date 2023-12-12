@@ -120,7 +120,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     // eslint-disable-next-line class-methods-use-this
-    getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
+    async getTreeItem(element: ExplorerItem): Promise<TreeItem> {
 
         if ('command' in element) {
             return element;
@@ -190,8 +190,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     iconPath: path.resolve(__dirname, '../../images/context/helm.png')
                 }
             }
+
+            const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
             return {
-                contextValue: 'openshift.k8sObject',
+                contextValue: !routeURL ? 'openshift.k8sObject' : 'openshift.k8sObject.route',
                 label: element.metadata.name,
                 description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
                 collapsibleState: TreeItemCollapsibleState.None,

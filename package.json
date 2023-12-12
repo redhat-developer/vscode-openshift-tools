@@ -770,6 +770,10 @@
 				"title": "Open in Developer Console"
 			},
 			{
+				"command": "openshift.resource.openInBrowser",
+				"title": "Open in Browser"
+			},
+			{
 				"command": "openshift.openStatusBar",
 				"title": "OpenShift",
 				"category": "OpenShift"
@@ -1244,6 +1248,10 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.openInBrowser",
 					"when": "false"
 				},
 				{
@@ -1742,7 +1750,7 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
 				},
 				{
 					"command": "openshift.resource.unInstall",
@@ -1750,7 +1758,11 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject && isOpenshiftCluster || openshift.k8sObject.helm && isOpenshiftCluster"
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || openshift.k8sObject.helm || viewItem == openshift.k8sObject.route && isOpenshiftCluster"
+				},
+				{
+					"command": "openshift.resource.openInBrowser",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.route && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.Serverless.buildAndRun",

@@ -43,6 +43,19 @@ export class Oc {
         return JSON.parse(result.stdout).items;
     }
 
+    public async getRouteURL(project: string): Promise<string> {
+        try {
+            const args = [new CommandOption('-o', 'json')];
+            const commandText = new CommandText('oc', `get route ${project}`, args);
+            const result = await CliChannel.getInstance().executeTool(
+                commandText
+            );
+            return result.stdout.length > 0 ? JSON.parse(result.stdout).spec.host : undefined;
+        } catch (err) {
+            return undefined;
+        }
+    }
+
     /**
      * Returns the Kubernetes resource with the given name and type in the given namespace.
      *
