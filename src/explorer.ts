@@ -306,8 +306,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 Oc.Instance.getKubernetesObjects('Deployment'),
                 Helm.getHelmReleases(),
                 ...serviceKinds
-                    .filter(serviceKind => Oc.Instance.canGetKubernetesObjects(serviceKind.name))
-                    .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
+                    .map(async serviceKind => {
+                        if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name)) {
+                            return Oc.Instance.getKubernetesObjects(serviceKind.name);
+                        }
+                        return [];
+                    })
             ];
             if (await Oc.Instance.isOpenShiftCluster()) {
                 toCollect.push(
