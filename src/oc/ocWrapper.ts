@@ -8,8 +8,8 @@ import * as fs from 'fs/promises';
 import * as tmp from 'tmp';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { ClusterType, KubernetesConsole } from './types';
 import { Platform } from '../util/platform';
+import { ClusterType, KubernetesConsole } from './types';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -243,7 +243,7 @@ export class Oc {
             const result = await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `auth can-i get ${resourceType}`),
             );
-            if (result.stdout === 'yes') {
+            if (result.stdout === 'yes' && result.stderr.indexOf('not namespace scoped') < 0) {
                 return true;
             }
         } catch {
