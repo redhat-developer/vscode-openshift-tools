@@ -304,11 +304,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 // operator framework is not installed on cluster; do nothing
             }
 
+            const collectableServices: CustomResourceDefinitionStub[] = [];
+            await Promise.all(serviceKinds.map(async serviceKind => {
+                if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name)) {
+                    collectableServices.push(serviceKind);
+                }
+            }));
+
             const toCollect = [
                 Oc.Instance.getKubernetesObjects('Deployment'),
                 Helm.getHelmReleases(),
-                ...serviceKinds
-                    .filter(serviceKind => Oc.Instance.canGetKubernetesObjects(serviceKind.name))
+                ...collectableServices
                     .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
             ];
             if (await Oc.Instance.isOpenShiftCluster()) {
