@@ -137,7 +137,7 @@ export class Cluster extends OpenShiftItem {
     @clusterRequired()
     static openInBrowser(resource: KubernetesObject): Promise<void> {
         return Progress.execFunctionWithProgress('Opening in browser', async (progress) => {
-            const routeURL = await Oc.Instance.getRoute(resource.metadata.name);
+            const routeURL = await Oc.Instance.getRouteURL(resource.metadata.name);
             if (routeURL) {
                 progress.report({ increment: 100, message: 'Starting default browser' });
                 // FIXME: handle standard k8s dashboard

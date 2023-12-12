@@ -187,13 +187,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
 
-            const routeURL = await Oc.Instance.getRoute(element.metadata.name);
-            if (routeURL) {
-                void commands.executeCommand('setContext', 'hasRoutes', true);
-            }
-
+            const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
             return {
-                contextValue: 'openshift.k8sObject',
+                contextValue: !routeURL ? 'openshift.k8sObject' : 'openshift.k8sObject.route',
                 label: element.metadata.name,
                 description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
                 collapsibleState: TreeItemCollapsibleState.None,

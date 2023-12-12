@@ -43,10 +43,12 @@ export class Oc {
         return JSON.parse(result.stdout).items;
     }
 
-    public async getRoute(project: string): Promise<string> {
+    public async getRouteURL(project: string): Promise<string> {
         try {
+            const args = [new CommandOption('-o', 'json')];
+            const commandText = new CommandText('oc', `get route ${project}`, args);
             const result = await CliChannel.getInstance().executeTool(
-                Oc.getRouteURL(project),
+                commandText
             );
             return result.stdout.length > 0 ? JSON.parse(result.stdout).spec.host : undefined;
         } catch (err) {
@@ -437,16 +439,6 @@ export class Oc {
             args.push(new CommandOption('--namespace', namespace));
         }
         return new CommandText('oc',  `get ${resourceType}`, args);
-    }
-
-    private static getRouteURL(
-        project: string
-    ): CommandText {
-        if (!project) {
-            throw new Error('Must pass the project to get');
-        }
-        const args = [new CommandOption('-o', 'json')];
-        return new CommandText('oc', `get route ${project}`, args);
     }
 
     private static getSingleKubernetesObjectCommand(
