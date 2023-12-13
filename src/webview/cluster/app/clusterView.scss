@@ -32,6 +32,16 @@
     color: var(--vscode-foreground) !important;
 }
 
+.status-button {
+    white-space: nowrap !important;
+    display: flex !important;
+    flex-direction: row;
+    margin-top: 8px !important;
+    margin-right: 8px !important;
+    background-color: var(--vscode-button-background) !important;
+    color: var(--vscode-button-foreground) !important;
+}
+
 .button {
     white-space: nowrap !important;
     display: inline-block !important;
@@ -41,17 +51,20 @@
     color: var(--vscode-button-foreground) !important;
 }
 
+.status-button:hover
 .button:hover {
     color: var(--vscode-button-foreground) !important;
     background-color: var(--vscode-button-hoverBackground) !important;
     cursor: pointer !important;
 }
 
+.status-button:focus
 .button:focus {
     background-color: var(--vscode-button-hoverBackground) !important;
     cursor: pointer !important;
 }
 
+.status-button:disabled
 .button:disabled {
     opacity: 0.4 !important;
 }
