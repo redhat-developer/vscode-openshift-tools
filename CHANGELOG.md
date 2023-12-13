@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.11.0 (December 13, 2023)
+ * [#3726](https://github.com/redhat-developer/vscode-openshift-tools/issues/3726) Command fails when expanding project in Application Explorer on crc
+ * [#3723](https://github.com/redhat-developer/vscode-openshift-tools/issues/3723) CRC OpenShift status showed as green even though it was stopped
+ * [#3652](https://github.com/redhat-developer/vscode-openshift-tools/issues/3652) Open OpenShift resources in browser
+ * [#3720](https://github.com/redhat-developer/vscode-openshift-tools/issues/3720) Application Explorer is not refreshed when a component starts
+ * [#3715](https://github.com/redhat-developer/vscode-openshift-tools/pull/3715) added 'FINDSTR' when windows machine instead of grep
+ * [#3544](https://github.com/redhat-developer/vscode-openshift-tools/issues/3544) Create Service has empty dropdown on Sandbox
+ * [#3701](https://github.com/redhat-developer/vscode-openshift-tools/issues/3701) Update UX for Helm View
+ * [#3636](https://github.com/redhat-developer/vscode-openshift-tools/issues/3636) Update UX for Devfile Registry View
+ * [#3643](https://github.com/redhat-developer/vscode-openshift-tools/issues/3643) Error popups on trying to delete a project on sandbox due to user limitation
+ * [#3520](https://github.com/redhat-developer/vscode-openshift-tools/issues/3520) Error popup when expanding project in Application Explorer
+ * [#3637](https://github.com/redhat-developer/vscode-openshift-tools/issues/3637) Terminal icon would be knative if it is a serverless function call and the title should be in camel case
+ * [#3543](https://github.com/redhat-developer/vscode-openshift-tools/issues/3543) Ctrl+clicking a link in the OpenShift Terminal should open the URL
+ * [#3609](https://github.com/redhat-developer/vscode-openshift-tools/issues/3609) Manage helm repositories
+ * [#3622](https://github.com/redhat-developer/vscode-openshift-tools/issues/3622) Helm Chart search is stuck loading if you close then reopen it
+ * [#3113](https://github.com/redhat-developer/vscode-openshift-tools/issues/3113) Show Helm charts from all Helm repos in the Helm chart explorer
+
 ## 1.10.2 (November 7, 2023)
  * [#3522](https://github.com/redhat-developer/vscode-openshift-tools/issues/3522) "Build and run" for Serverless Function fails
 
