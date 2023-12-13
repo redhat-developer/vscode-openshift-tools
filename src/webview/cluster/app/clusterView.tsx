@@ -312,7 +312,7 @@ export default function addClusterView(props: ClusterViewProps) {
         >
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>OpenShift Status</span>
-            <Chip label={status.openshiftStatus} size='small' color={ status.openshiftStatus === 'Stopped' ? 'success' : 'error'} />
+            <Chip label={status.openshiftStatus} size='small' color={ status.openshiftStatus === 'Stopped' ? 'error' : 'success'} />
           </div>
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
