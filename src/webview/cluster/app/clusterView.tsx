@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { GetApp, InsertDriveFile, VpnKey } from '@mui/icons-material';
+import { GetApp, InsertDriveFile, Launch, VpnKey } from '@mui/icons-material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -12,7 +12,6 @@ import StopIcon from '@mui/icons-material/Stop';
 import { Alert } from '@mui/lab';
 import {
     Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
-    Badge,
     Button,
     Chip,
     Divider,
@@ -26,14 +25,13 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import { makeStyles, withStyles } from '@mui/styles';
+import { makeStyles } from '@mui/styles';
 import * as React from 'react';
 import * as ClusterViewStyles from './clusterView.style';
 import { ClusterViewProps } from '../../common/propertyTypes';
-const prettyBytes = require('pretty-bytes');
+import prettyBytes from 'pretty-bytes';
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
-const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
 
 const crcDefaults = {
 	DefaultCPUs: 4,
@@ -76,18 +74,27 @@ export default function addClusterView(props: ClusterViewProps) {
 
   const steps = getSteps();
 
-  const setCrcStatus = (message) => {
-    setStatus({
-      crcStatus: message.status.crcStatus,
-      openshiftStatus: message.status.openshiftStatus,
-      diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
-      cacheUsage: prettyBytes(message.status.cacheUsage),
-      cacheDir: message.status.cacheDir,
-      crcVer: message.versionInfo.version,
-      openshiftVer: message.versionInfo.openshiftVersion,
-      creds: message.creds
-    });
-  }
+    const setCrcStatus = (message) => {
+        if (!message.status.success) {
+            setStatus(
+                {
+                    crcStatus: 'Stopped', openshiftStatus: 'Stopped', diskUsage: 'N/A', cacheUsage: 'N/A',
+                    cacheDir: '', crcVer: '', openshiftVer: '', creds: []
+                }
+            );
+        } else {
+            setStatus({
+                crcStatus: message.status.crcStatus,
+                openshiftStatus: message.status.openshiftStatus,
+                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
+                cacheUsage: message.status.cacheUsage ? prettyBytes(message.status.cacheUsage) : 'N/A',
+                cacheDir: message.status.cacheDir,
+                crcVer: message.versionInfo.version,
+                openshiftVer: message.versionInfo.openshiftVersion,
+                creds: message.creds
+            });
+        }
+    }
 
   const messageListener = (event) => {
     if (event?.data?.action){
@@ -293,19 +300,6 @@ export default function addClusterView(props: ClusterViewProps) {
     return `${crcDefaults.DefaultCrcUrlBase}/${props.crc}/${crcBundle}`;
   }
 
-  const RunningStatus = ()=> (
-    <Chip label={status.openshiftStatus} size='small'
-      avatar={<StyledBadge
-      overlap='circular'
-      anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
-      variant='dot'></StyledBadge>}
-    />
-  )
-
-  const StoppedStatus = () => (
-    <Chip label={status.openshiftStatus} size='small' />
-  )
-
   const CrcStatusDialog = () => (
     <>
     {(!statusSkeleton && !crcStopProgress && !statusError) && (
@@ -316,7 +310,7 @@ export default function addClusterView(props: ClusterViewProps) {
         >
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>OpenShift Status</span>
-            {status.openshiftStatus === 'Stopped' ? <StoppedStatus /> : <RunningStatus />}
+            <Chip label={status.openshiftStatus} size='small' color={ status.openshiftStatus === 'Stopped' ? 'error' : 'success'} />
           </div>
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
@@ -365,17 +359,17 @@ export default function addClusterView(props: ClusterViewProps) {
               </div>))}
           </AccordionDetails><Divider /><AccordionActions>
             {(status.openshiftStatus === 'Stopped') ?
-              (<Button size='small' component='span' className='button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
-              (<Button size='small' component='span' className='button' onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
-            <Button size='small' component='span' className='button' onClick={handleRefresh} startIcon={<RefreshIcon />}>
+              (<Button size='small' component='span' className='status-button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
+              (<Button size='small' component='span' className='status-button' onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+            <Button size='small' component='span' className='status-button' onClick={handleRefresh} startIcon={<RefreshIcon />}>
               Refresh Status
             </Button>
             {(status.openshiftStatus !== 'Stopped') && (
               <div>
                 <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none' }}>
-                  <Button size='small' component='span' className='button'>
-                    Open Console Dashboard
-                  </Button>
+                    <Button size='small' component='span' className='status-button' endIcon={<Launch />}>
+                        Open Console Dashboard
+                    </Button>
                 </a>
               </div>)}
           </AccordionActions></>} />
