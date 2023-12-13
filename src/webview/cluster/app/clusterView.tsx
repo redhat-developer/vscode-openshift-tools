@@ -12,7 +12,6 @@ import StopIcon from '@mui/icons-material/Stop';
 import { Alert } from '@mui/lab';
 import {
     Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
-    Badge,
     Button,
     Chip,
     Divider,
@@ -26,14 +25,13 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import { makeStyles, withStyles } from '@mui/styles';
+import { makeStyles } from '@mui/styles';
 import * as React from 'react';
 import * as ClusterViewStyles from './clusterView.style';
 import { ClusterViewProps } from '../../common/propertyTypes';
 import prettyBytes from 'pretty-bytes';
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
-const StyledBadge = withStyles(ClusterViewStyles.badgeStyles)(Badge);
 
 const crcDefaults = {
 	DefaultCPUs: 4,
