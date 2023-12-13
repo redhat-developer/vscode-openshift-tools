@@ -302,19 +302,6 @@ export default function addClusterView(props: ClusterViewProps) {
     return `${crcDefaults.DefaultCrcUrlBase}/${props.crc}/${crcBundle}`;
   }
 
-  const RunningStatus = ()=> (
-    <Chip label={status.openshiftStatus} size='small'
-      avatar={<StyledBadge
-      overlap='circular'
-      anchorOrigin={{ vertical: 'top', horizontal: 'left'}}
-      variant='dot'></StyledBadge>}
-    />
-  )
-
-  const StoppedStatus = () => (
-    <Chip label={status.openshiftStatus} size='small' color='error' />
-  )
-
   const CrcStatusDialog = () => (
     <>
     {(!statusSkeleton && !crcStopProgress && !statusError) && (
@@ -325,7 +312,7 @@ export default function addClusterView(props: ClusterViewProps) {
         >
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>OpenShift Status</span>
-            {status.openshiftStatus === 'Stopped' ? <StoppedStatus /> : <RunningStatus />}
+            <Chip label={status.openshiftStatus} size='small' color={ status.openshiftStatus === 'Stopped' ? 'success' : 'error'} />
           </div>
           <div className={classes.column}>
             <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
