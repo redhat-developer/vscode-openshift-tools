@@ -17,7 +17,7 @@ import { CliChannel } from '../../src/cli';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./oc/ocWrapper.ts', function () {
-    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
+    const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -213,10 +213,12 @@ suite('./oc/ocWrapper.ts', function () {
 
         teardown(async function() {
             // start each test case logged out
-            try {
-                await Oc.Instance.logout();
-            } catch (e) {
-                // do nothing, probably already logged out
+            if (isOpenShift) {
+                try {
+                    await Oc.Instance.logout();
+                } catch (e) {
+                    // do nothing, probably already logged out
+                }
             }
         });
 
@@ -237,19 +239,27 @@ suite('./oc/ocWrapper.ts', function () {
         });
 
         test('loginWithUsernamePassword()', async function () {
-            await Oc.Instance.loginWithUsernamePassword(
-                clusterUrl,
-                username,
-                password,
-            );
-            const currentUser = await getCurrentUser();
-            expect(currentUser.trim()).to.equal(username);
+            if (isOpenShift) {
+                await Oc.Instance.loginWithUsernamePassword(
+                    clusterUrl,
+                    username,
+                    password,
+                );
+                const currentUser = await getCurrentUser();
+                expect(currentUser.trim()).to.equal(username);
+            } else {
+                this.skip
+            }
         });
 
         test('loginWithToken()', async function() {
-            await Oc.Instance.loginWithToken(clusterUrl, token);
-            const currentUser = await getCurrentUser();
-            expect(currentUser.trim()).to.equal(username);
+            if (isOpenShift) {
+                await Oc.Instance.loginWithToken(clusterUrl, token);
+                const currentUser = await getCurrentUser();
+                expect(currentUser.trim()).to.equal(username);
+            } else {
+                this.skip
+            }
         });
 
     });

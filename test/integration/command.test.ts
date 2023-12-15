@@ -27,7 +27,7 @@ const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
 suite('odo commands integration', function () {
 
-    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
+    const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
