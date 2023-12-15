@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
-import { Cluster, User } from '@kubernetes/client-node/dist/config_types';
+import { Cluster, User, Context } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
 import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
@@ -102,6 +102,9 @@ export class KubeConfigUtils extends KubeConfig {
         return this.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
     }
 
+    public findContext(clusterName: string): Context {
+        return this.getContexts().find((context: Context) => context.cluster === clusterName);
+    }
 }
 
 /**

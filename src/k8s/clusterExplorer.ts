@@ -14,7 +14,7 @@ let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
 let lastNamespace = '';
 
-async function isOpenShift(): Promise<boolean> {
+export async function isOpenShift(): Promise<boolean> {
   const kubectl = await k8s.extension.kubectl.v1;
   let isOS = false;
   if (kubectl.available) {
