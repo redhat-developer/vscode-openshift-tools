@@ -37,7 +37,7 @@ export class Cluster extends OpenShiftItem {
             'Cancel',
         );
         if (value === 'Logout') {
-            return Oc.Instance.logout()
+            return LoginUtil.Instance.logout()
                 .catch(async (error) =>
                     Promise.reject(
                         new VsCommandError(

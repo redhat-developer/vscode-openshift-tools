@@ -30,7 +30,7 @@ suite('loginUtil.ts', function () {
 
     test('requireLogin()', async function () {
         expect(await LoginUtil.Instance.requireLogin()).to.be.false;
-        await Oc.Instance.logout();
+        await LoginUtil.Instance.logout();
         expect(await LoginUtil.Instance.requireLogin()).to.be.true;
     });
 });

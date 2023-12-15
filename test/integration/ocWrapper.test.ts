@@ -27,7 +27,7 @@ suite('./oc/ocWrapper.ts', function () {
     suiteSetup(async function () {
         if (isOpenShift) {
             try {
-                await Oc.Instance.logout();
+                await LoginUtil.Instance.logout();
             } catch (e) {
                 // do nothing
             }
@@ -49,7 +49,7 @@ suite('./oc/ocWrapper.ts', function () {
         }
 
         if (isOpenShift) {
-            await Oc.Instance.logout();
+            await LoginUtil.Instance.logout();
         }
     });
 
@@ -58,7 +58,7 @@ suite('./oc/ocWrapper.ts', function () {
         expect(canCreatePod1).to.exist;
         expect(canCreatePod1).to.equal(true);
         if (isOpenShift) {
-            await Oc.Instance.logout();
+            await LoginUtil.Instance.logout();
             const canCreatePod2 = await Oc.Instance.canCreatePod();
             expect(canCreatePod2).to.exist;
             expect(canCreatePod2).to.equal(false);
@@ -71,7 +71,7 @@ suite('./oc/ocWrapper.ts', function () {
         expect(canCreateNamespace1).to.exist;
         expect(canCreateNamespace1).to.equal(true);
         if (isOpenShift) {
-            await Oc.Instance.logout();
+            await LoginUtil.Instance.logout();
             const canCreateNamespace2 = await Oc.Instance.canCreateNamespace();
             expect(canCreateNamespace2).to.exist;
             expect(canCreateNamespace2).to.equal(false);
@@ -205,7 +205,7 @@ suite('./oc/ocWrapper.ts', function () {
                 // get current user token and logout
                 await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
                 token = await Oc.Instance.getCurrentUserToken();
-                await Oc.Instance.logout();
+                await LoginUtil.Instance.logout();
             } else {
                 this.skip();
             }
@@ -215,7 +215,7 @@ suite('./oc/ocWrapper.ts', function () {
             // start each test case logged out
             if (isOpenShift) {
                 try {
-                    await Oc.Instance.logout();
+                    await LoginUtil.Instance.logout();
                 } catch (e) {
                     // do nothing, probably already logged out
                 }

@@ -19,6 +19,7 @@ import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { ComponentDescription } from '../../src/odo/componentTypeDescription';
 import { Odo } from '../../src/odo/odoWrapper';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 const ODO = Odo.Instance;
 
@@ -35,7 +36,7 @@ suite('odo commands integration', function () {
     suiteSetup(async function() {
         if (isOpenShift) {
             try {
-                await Oc.Instance.logout();
+                await LoginUtil.Instance.logout();
             } catch (e) {
                 // do nothing
             }

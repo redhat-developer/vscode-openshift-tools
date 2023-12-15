@@ -15,6 +15,7 @@ import { Uri, workspace } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
 import { Project } from '../../src/odo/project';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./odo/odoWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -25,7 +26,7 @@ suite('./odo/odoWrapper.ts', function () {
     suiteSetup(async function () {
         if (isOpenShift) {
             try {
-                await Oc.Instance.logout();
+                await LoginUtil.Instance.logout();
             } catch (e) {
                 // do nothing
             }
@@ -47,7 +48,7 @@ suite('./odo/odoWrapper.ts', function () {
         }
 
         if (isOpenShift) {
-            await Oc.Instance.logout();
+            await LoginUtil.Instance.logout();
         }
     });
 
