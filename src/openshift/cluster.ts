@@ -5,7 +5,6 @@
 
 import { KubernetesObject } from '@kubernetes/client-node';
 import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
-import { quickBtn, inputValue } from '../util/inputValue';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
@@ -15,6 +14,7 @@ import { Odo } from '../odo/odoWrapper';
 import * as NameValidator from '../openshift/nameValidator';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
+import { inputValue, quickBtn } from '../util/inputValue';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { LoginUtil } from '../util/loginUtil';
 import { Platform } from '../util/platform';
@@ -468,17 +468,17 @@ export class Cluster extends OpenShiftItem {
                 }
                 case Step.loginUsingCredentials: // Drop down
                 case Step.loginUsingToken: {
-                    const clusterVersions: string = step === Step.loginUsingCredentials
+                    const successMessage: string = step === Step.loginUsingCredentials
                         ? await Cluster.credentialsLogin(true, clusterURL)
                             : await Cluster.tokenLogin(clusterURL, true);
 
-                    if (clusterVersions === null) { // User cancelled the operation
+                    if (successMessage === null) { // User cancelled the operation
                         return null;
-                    } else if (!clusterVersions) { // Back button is hit
+                    } else if (!successMessage) { // Back button is hit
                         step = Step.selectLoginMethod;
                     } else {
                         // login successful
-                        return null;
+                        return successMessage;
                     }
                     break;
                 }
