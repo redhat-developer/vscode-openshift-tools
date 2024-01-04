@@ -48,13 +48,18 @@ type PackageJSON = {
     bugs: string;
 };
 
-const CREATE_OR_SET_PROJECT_ITEM = {
-    label: 'Create new or set active Project',
-    command: {
-        title: 'Create new or set active Project',
-        command: 'openshift.project.set'
-    }
-};
+function createOrSetProjectItem(projectName: string): ExplorerItem {
+    return {
+        label: `${projectName}`,
+        description: 'Missing project. Create new or set active Project',
+        tooltip: `${projectName} - Missing project. Create new or set active Project`,
+        iconPath: new ThemeIcon('warning'),
+        command: {
+            title: 'Create new or set active Project',
+            command: 'openshift.project.set'
+        }
+    };
+}
 
 export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Disposable {
     private static instance: OpenShiftExplorer;
@@ -252,11 +257,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                             name: this.kubeContext.namespace,
                         },
                     } as KubernetesObject]
-                } else if (namespaces.length >= 1) {
-                    // switch to first accessible namespace
-                    await Odo.Instance.setProject(namespaces[0].name);
                 } else {
-                    result = [CREATE_OR_SET_PROJECT_ITEM]
+                    result = [createOrSetProjectItem(this.kubeContext.namespace)];
                 }
             } else {
                 // get list of projects or namespaces
@@ -269,7 +271,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         },
                     } as KubernetesObject]
                 } else {
-                    result = [CREATE_OR_SET_PROJECT_ITEM]
+                    const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
+                    result = [createOrSetProjectItem(projectName)];
                 }
             }
 

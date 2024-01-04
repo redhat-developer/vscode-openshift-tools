@@ -102,8 +102,50 @@ export class KubeConfigUtils extends KubeConfig {
         return this.getClusters().find((cluster: Cluster) => cluster.server === clusterServer);
     }
 
-    public findContext(clusterName: string): Context {
+    public findClusterURL(clusterNameOrURL: string): string {
+        let clusterObj: Cluster = this.findCluster(clusterNameOrURL);
+        clusterObj = clusterObj || this.clusters.find((cluster: Cluster) => cluster.name === clusterNameOrURL);
+        return clusterObj ? clusterObj.server : undefined;
+    }
+
+    public findContext(contextName: string): Context {
+        return this.getContexts().find((context: Context) => context.name === contextName);
+    }
+
+    public findContextForCluster(clusterName: string): Context {
         return this.getContexts().find((context: Context) => context.cluster === clusterName);
+    }
+
+    public extractProjectNameFromCurrentContext():string {
+        const currentContextName = this.getCurrentContext();
+        return this.extractProjectNameFromContextName(currentContextName);
+    }
+
+    public extractProjectNameFromContextName(contextName: string):string {
+        if (contextName && contextName.includes('/') && !contextName.startsWith('/')) {
+            return contextName.split('/')[0];
+        }
+        return undefined;
+    }
+
+    public equalContexts(c1:string, c2:string): boolean {
+        if (c1 === c2) return true;
+        const context1 = this.findContext(c1);
+        const context2 = this.findContext(c2);
+        if (context1 === context2) return true; // Both are undefibed or reference the same object
+        if (context1 === undefined && context2 !== undefined) return false;
+        if (context1 === undefined && context2 !== undefined) return false;
+        if (context1.cluster !== context2.cluster) return false;
+        if (context1.namespace !== context2.namespace) return false;
+        if (context1.user !== context2.user) return false;
+        return true;
+    }
+
+    public equalsToCurrentContext(contextName:string): boolean {
+        const currentContext = this.findContext(this.currentContext);
+        if (!currentContext) return false;
+
+        return this.equalContexts(currentContext.name, contextName);
     }
 }
 

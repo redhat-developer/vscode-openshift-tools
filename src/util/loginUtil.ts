@@ -34,9 +34,7 @@ export class LoginUtil {
                 new CommandText('oc', 'status'), { timeout: 5000 })
             .then((server) => {
                 const serverCheck = server ? server.trim() : '';
-                return serverURI ?
-                    serverURI.toLowerCase() !== `${serverCheck}`.toLowerCase() :
-                    false;
+                return serverURI ? !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase())) : false;
             })
             .catch((error) => {
                 // In case of Kind cluster we're don't need to provide any credentials,
@@ -44,11 +42,11 @@ export class LoginUtil {
                 // "you do not have rights to view project..."
                 // Here we return 'false' in such case in order to prevent requesting for
                 // login credentials for Kind-like clusters.
-                return (error.strerr && error.stderr.toLowerCase().indexOf('error: you do not have rights to view project') !== -1) ? false : true;
+                return (error.stderr && error.stderr.toLowerCase().includes('you do not have rights to view project')) ? false : true;
             });
     }
 
-        /**
+    /**
      * Log out of the current OpenShift cluster.
      *
      * @throws if you are not currently logged into an OpenShift cluster
