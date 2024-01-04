@@ -19,6 +19,7 @@ import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { ComponentDescription } from '../../src/odo/componentTypeDescription';
 import { Odo } from '../../src/odo/odoWrapper';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 const ODO = Odo.Instance;
 
@@ -27,7 +28,7 @@ const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
 suite('odo commands integration', function () {
 
-    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
+    const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -35,7 +36,7 @@ suite('odo commands integration', function () {
     suiteSetup(async function() {
         if (isOpenShift) {
             try {
-                await Oc.Instance.logout();
+                await LoginUtil.Instance.logout();
             } catch (e) {
                 // do nothing
             }

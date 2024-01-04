@@ -23,6 +23,7 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
+import { Cluster as KcuCluster } from '@kubernetes/client-node/dist/config_types';
 
 export class Cluster extends OpenShiftItem {
 
@@ -36,11 +37,11 @@ export class Cluster extends OpenShiftItem {
             'Cancel',
         );
         if (value === 'Logout') {
-            return Oc.Instance.logout()
-                .catch((error) =>
+            return LoginUtil.Instance.logout()
+                .catch(async (error) =>
                     Promise.reject(
                         new VsCommandError(
-                            `Failed to logout of the current cluster with '${error}'!`,
+                         `Failed to logout of the current cluster with '${error}'!`,
                             'Failed to logout of the current cluster',
                         ),
                     ),
@@ -373,6 +374,34 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
+    /**
+     * Checks if we're already logged in to a cluster.
+     * So, if we are, no need to re-enter User Credentials of Token
+     *
+     * @param clusterURI URI of the cluster to login
+     * @returns true in case we should continue with asking for credentials,
+     *      false in case we're already logged in
+     */
+    static async shouldAskForLoginCredentials(clusterURI: string): Promise<boolean> {
+        const kcu = new KubeConfigUtils();
+        const cluster: KcuCluster = kcu.findCluster(clusterURI);
+        if (!cluster) return true;
+
+        const context = kcu.findContext(cluster.name);
+        if (!context) return true;
+
+        // Save `current-context`
+        const savedContext = kcu.currentContext;
+        try {
+            await Oc.Instance.setContext(context.name)
+            return await LoginUtil.Instance.requireLogin(cluster.server)
+        } catch(error) {
+            // Restore saved `current-context`
+            await Oc.Instance.setContext(savedContext)
+        }
+        return true;
+    }
+
     @vsCommand('openshift.explorer.login')
     static async login(context?: any, skipConfirmation = false): Promise<string> {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
@@ -450,6 +479,10 @@ export class Cluster extends OpenShiftItem {
                         }
                     } while (!clusterIsUp);
 
+                    // contibue if cluster requires User Credentials/Token
+                    if(!(await Cluster.shouldAskForLoginCredentials(clusterURL))) {
+                        return null;
+                    }
                     step = Step.selectLoginMethod;
                     break;
                 }

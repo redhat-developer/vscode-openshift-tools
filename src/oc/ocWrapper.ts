@@ -150,16 +150,6 @@ export class Oc {
     }
 
     /**
-     * Returns the username of the current user.
-     *
-     * @returns the username of the current user
-     */
-    public async getCurrentUser(): Promise<string> {
-        const result = await CliChannel.getInstance().executeTool(new CommandText('oc', 'whoami'));
-        return result.stdout;
-    }
-
-    /**
      * Returns the token for the current user.
      *
      * @returns the token for the current user
@@ -336,15 +326,6 @@ export class Oc {
     }
 
     /**
-     * Log out of the current OpenShift cluster.
-     *
-     * @throws if you are not currently logged into an OpenShift cluster
-     */
-    public async logout(): Promise<void> {
-        await CliChannel.getInstance().executeTool(new CommandText('oc', 'logout'));
-    }
-
-    /**
      * Switches the current Kubernetes context to the given named context.
      *
      * @param contextName the name of the context to switch to
@@ -352,6 +333,15 @@ export class Oc {
     public async setContext(contextName: string): Promise<void> {
         await CliChannel.getInstance().executeTool(
             new CommandText('oc', `config use-context ${contextName}`),
+        );
+    }
+
+    /**
+     * Clears (unsets) the current Kubernetes context.
+     */
+    public async unsetContext(): Promise<void> {
+        await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'config unset current-context'),
         );
     }
 

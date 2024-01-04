@@ -7,9 +7,10 @@ import { expect } from 'chai';
 import * as Helm from '../../src/helm/helm';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('helm integration', function () {
-    const isOpenShift: boolean = Boolean(process.env.IS_OPENSHIFT) || false;
+    const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
@@ -43,7 +44,7 @@ suite('helm integration', function () {
         // this call fails to exit on minikube/kind
         void odo.deleteProject(HELM_NAMESPACE);
         if (isOpenShift) {
-            await Oc.Instance.logout();
+            await LoginUtil.Instance.logout();
         }
     });
 

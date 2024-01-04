@@ -65,7 +65,7 @@ suite('Openshift/Cluster', function() {
         requireLoginStub = sandbox.stub(LoginUtil.prototype, 'requireLogin').resolves(true);
         passwordLoginStub = sandbox.stub(Oc.prototype, 'loginWithUsernamePassword').resolves();
         tokenLoginStub = sandbox.stub(Oc.prototype, 'loginWithToken').resolves();
-        logoutStub = sandbox.stub(Oc.prototype, 'logout').resolves();
+        logoutStub = sandbox.stub(LoginUtil.prototype, 'logout').resolves();
     });
 
     teardown(() => {
