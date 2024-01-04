@@ -92,7 +92,7 @@ export class CliChannel {
             options.encoding = 'utf-8';
         }
         if (options.killSignal === undefined) {
-            options. killSignal = 'SIGILL'
+            options.killSignal = 'SIGKILL';
         }
 
         const toolLocation = await ToolsConfig.detect(cmd.command);

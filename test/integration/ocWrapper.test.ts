@@ -248,7 +248,7 @@ suite('./oc/ocWrapper.ts', function () {
                 const currentUser = await getCurrentUser();
                 expect(currentUser.trim()).to.equal(username);
             } else {
-                this.skip
+                this.skip();
             }
         });
 
@@ -258,7 +258,7 @@ suite('./oc/ocWrapper.ts', function () {
                 const currentUser = await getCurrentUser();
                 expect(currentUser.trim()).to.equal(username);
             } else {
-                this.skip
+                this.skip();
             }
         });
 
