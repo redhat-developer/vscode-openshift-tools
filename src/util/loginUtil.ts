@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandOption, CommandText } from '../base/command';
+import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { isOpenShift } from '../k8s/clusterExplorer';
 import { Oc } from '../oc/ocWrapper';
@@ -27,20 +27,24 @@ export class LoginUtil {
      * @returns true if the user needs to log in to access the cluster, and false otherwise
      */
     public async requireLogin(serverURI?: string): Promise<boolean> {
-        const args: CommandOption[] = [];
-        if (serverURI) {
-            args.push(new CommandOption('--show-server'));
-        }
+        // Usually 'oc status' takes ~3 seconds to complete when logged in to an OS cluster,
+        // so we use 5 seconds timeout here in order to prevent false-positive 'not logged in`-like
+        // result
         return await CliChannel.getInstance().executeSyncTool(
-                new CommandText('oc', 'whoami', args), { timeout: 1000 })
+                new CommandText('oc', 'status'), { timeout: 5000 })
             .then((server) => {
-                server = server ? server.trim(): '';
+                const serverCheck = server ? server.trim() : '';
                 return serverURI ?
-                    serverURI.toLowerCase() !== `${server.trim()}`.toLowerCase() :
+                    serverURI.toLowerCase() !== `${serverCheck}`.toLowerCase() :
                     false;
             })
             .catch((error) => {
-                return true;
+                // In case of Kind cluster we're don't need to provide any credentials,
+                // but Kind normally reports lack of project access rights error:
+                // "you do not have rights to view project..."
+                // Here we return 'false' in such case in order to prevent requesting for
+                // login credentials for Kind-like clusters.
+                return error.stderr.toLowerCase().indexOf('error: you do not have rights to view project') !== -1 ? false : true;
             });
     }
 
