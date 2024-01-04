@@ -23,7 +23,12 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
-import { Cluster as KcuCluster } from '@kubernetes/client-node/dist/config_types';
+import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
+
+export interface QuickPickItemExt extends QuickPickItem {
+    name: string,
+    cluster: string
+}
 
 export class Cluster extends OpenShiftItem {
 
@@ -152,6 +157,15 @@ export class Cluster extends OpenShiftItem {
         });
     }
 
+    private static getProjectLabel(ctx: KcuContext): string {
+        const k8sConfig = new KubeConfigUtils();
+        const pn = k8sConfig.extractProjectNameFromContextName(ctx.name) || '';
+        const ns = ctx.namespace || pn;
+        let label = ns.length > 0 ? ns : '[default]';
+        if (ns !== pn && pn.length > 0) label = `${label} (${pn})`;
+        return label;
+    }
+
     @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
         return new Promise<string>((resolve, reject) => {
@@ -161,8 +175,19 @@ export class Cluster extends OpenShiftItem {
             );
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = contexts.map((ctx) => ({
-                label: `${ctx.name}`,
+            const contextNames: QuickPickItemExt[] = contexts
+            .map((ctx) => {
+                return {
+                        ...ctx,
+                        label: Cluster.getProjectLabel(ctx)
+                    }
+            })
+            .map((ctx) => ({
+                name: `${ctx.name}`,
+                cluster: `${ctx.cluster}`,
+                label: `${ctx.label}`,
+                description: `on ${ctx.cluster}`,
+                detail: `User: ${ctx.user}`,
                 buttons: [deleteBtn],
             }));
             quickPick.items = contextNames;
@@ -188,11 +213,32 @@ export class Cluster extends OpenShiftItem {
                     selection = selects;
                 });
                 quickPick.onDidAccept(() => {
-                    const choice = selection[0];
+                    const choice = selection[0] as QuickPickItemExt;
                     hideDisposable.dispose();
                     quickPick.hide();
-                    Oc.Instance.setContext(choice.label)
-                        .then(() => resolve(`Cluster context is changed to: ${choice.label}.`))
+                    Oc.Instance.setContext(choice.name)
+                        .then(async () => {
+                            const clusterURL = k8sConfig.findClusterURL(choice.cluster);
+                            if (await LoginUtil.Instance.requireLogin(clusterURL)) {
+                                const status = await Cluster.login(choice.name, true);
+                                if (status) {
+                                    if (Cluster.isSandboxCluster(clusterURL)
+                                            && !k8sConfig.equalsToCurrentContext(choice.name)) {
+                                        await window.showWarningMessage(
+                                            'The cluster appears to be a OpenShift Dev Sandbox cluster, \
+                                            but the required project doesn\'t appear to be existing. \
+                                            The cluster provided default project is selected instead. ',
+                                            'OK',
+                                        );
+                                    }
+                                }
+                            }
+                            const kcu = new KubeConfigUtils();
+                            const currentContext = kcu.findContext(kcu.currentContext);
+                            const pr = currentContext ? Cluster.getProjectLabel(currentContext) : choice.label;
+                            const cl = currentContext ? currentContext.cluster : choice.description;
+                            resolve(`Cluster context is changed to ${pr} on ${cl}.`);
+                        })
                         .catch(reject);
                 });
                 quickPick.onDidTriggerButton((button) => {
@@ -337,7 +383,7 @@ export class Cluster extends OpenShiftItem {
      * - `undefined` if user pressed `Back` button
      * @returns string contaning cluster login method name or null if cancelled or undefined if Back is pressed
      */
-    private static async getLoginMethod(): Promise<string | null | undefined> {
+    private static async getLoginMethod(clusterURL: string): Promise<string | null | undefined> {
         return new Promise<string | null | undefined>((resolve, reject) => {
             const loginActions: QuickPickItem[] = [
                 {
@@ -350,6 +396,7 @@ export class Cluster extends OpenShiftItem {
                 }
             ];
             const quickPick = window.createQuickPick();
+            quickPick.placeholder=`Select the log in method for: ${clusterURL}`;
             quickPick.items = [...loginActions];
             const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
             quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
@@ -376,18 +423,25 @@ export class Cluster extends OpenShiftItem {
 
     /**
      * Checks if we're already logged in to a cluster.
-     * So, if we are, no need to re-enter User Credentials of Token
+     * So, if we are, no need to re-enter User Credentials of Token.
+     *
+     * If contextName is specified and points to a cluster with the same URI as clusterURI,
+     * the context is used as context to be switched to. Otherwise, we'll use the first
+     * context found for the clusrtURI specified.
      *
      * @param clusterURI URI of the cluster to login
      * @returns true in case we should continue with asking for credentials,
      *      false in case we're already logged in
      */
-    static async shouldAskForLoginCredentials(clusterURI: string): Promise<boolean> {
+    static async shouldAskForLoginCredentials(clusterURI: string, contextName?: string): Promise<boolean> {
         const kcu = new KubeConfigUtils();
         const cluster: KcuCluster = kcu.findCluster(clusterURI);
         if (!cluster) return true;
 
-        const context = kcu.findContext(cluster.name);
+        let context: KcuContext = contextName && kcu.findContext(contextName);
+        if (!context || context.cluster !== context.cluster) {
+            context = kcu.findContextForCluster(cluster.name);
+        }
         if (!context) return true;
 
         // Save `current-context`
@@ -402,13 +456,42 @@ export class Cluster extends OpenShiftItem {
         return true;
     }
 
+    private static isOpenshiftLocalCluster(clusterURL: string): boolean {
+        try {
+            return new URL(clusterURL).hostname === 'api.crc.testing';
+        } catch (_) {
+            return false;
+        }
+    }
+
+    private static isSandboxCluster(clusterURL: string): boolean {
+        try {
+            return /api\.sandbox-.*openshiftapps\.com/.test(new URL(clusterURL).hostname);
+        } catch (_) {
+            return false;
+        }
+    }
+
+    /**
+     * Login to a cluster
+     *
+     * @param context - Required context name
+     * @param skipConfirmation - 'true' in case we don't need any confirmation, 'false' - otherwise
+     * @returns Successful login message, otherwise - 'null'
+     */
     @vsCommand('openshift.explorer.login')
-    static async login(context?: any, skipConfirmation = false): Promise<string> {
+    static async login(context?: string, skipConfirmation = false): Promise<string> {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
         let clusterURL: string;
+        if (context) {
+            // If context is specified, we'll initialize clusterURL from it
+            const kcu = new KubeConfigUtils();
+            const ctx = kcu.findContext(context);
+            clusterURL = ctx && kcu.findClusterURL(ctx.cluster);
+        }
 
         enum Step {
             selectCluster = 'selectCluster',
@@ -423,8 +506,9 @@ export class Cluster extends OpenShiftItem {
                 case Step.selectCluster: {
                     let clusterIsUp = false;
                     do {
-                        clusterURL = await Cluster.getUrl();
-
+                        if (!clusterURL) {
+                            clusterURL = await Cluster.getUrl();
+                        }
                         if (!clusterURL) return null;
 
                         try {
@@ -439,14 +523,7 @@ export class Cluster extends OpenShiftItem {
                             // so it's running
                             clusterIsUp = true;
                         } catch (e) {
-                            let clusterURLObj: any = undefined;
-                            try {
-                                clusterURLObj = new URL(clusterURL);
-                            } catch (_) {
-                                // Ignore
-                            }
-                            if (clusterURLObj && clusterURLObj.hostname === 'api.crc.testing') {
-                                const startCrc = 'Start OpenShift Local';
+                            if (Cluster.isOpenshiftLocalCluster(clusterURL)) {                                const startCrc = 'Start OpenShift Local';
                                 const promptResponse = await window.showWarningMessage(
                                     'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
                                     'Use a different cluster',
@@ -458,7 +535,7 @@ export class Cluster extends OpenShiftItem {
                                     // it will take the cluster a few minutes to stabilize
                                     return null;
                                 }
-                            } else if (clusterURLObj && /api\.sandbox-.*openshiftapps\.com/.test(clusterURLObj.hostname)) {
+                            } else if (Cluster.isSandboxCluster(clusterURL)) {
                                 const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
                                 const promptResponse = await window.showWarningMessage(
                                     'The cluster appears to be a OpenShift Dev Sandbox cluster, but it isn\'t running',
@@ -480,14 +557,14 @@ export class Cluster extends OpenShiftItem {
                     } while (!clusterIsUp);
 
                     // contibue if cluster requires User Credentials/Token
-                    if(!(await Cluster.shouldAskForLoginCredentials(clusterURL))) {
+                    if(!(await Cluster.shouldAskForLoginCredentials(clusterURL, context))) {
                         return null;
                     }
                     step = Step.selectLoginMethod;
                     break;
                 }
                 case Step.selectLoginMethod: {
-                    const result = await Cluster.getLoginMethod();
+                    const result = await Cluster.getLoginMethod(clusterURL);
                     if (result === null) { // User cancelled the operation
                         return null;
                     } else if (!result) { // Back button is hit
@@ -564,6 +641,7 @@ export class Cluster extends OpenShiftItem {
             const addUser: QuickPickItem = { label: addUserLabel };
 
             const quickPick = window.createQuickPick();
+            quickPick.placeholder=`Select or add username for: ${clusterURL}`;
             quickPick.items = [addUser, ...users];
             const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
             quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
@@ -632,7 +710,8 @@ export class Cluster extends OpenShiftItem {
                     if (!username)  {
                         const prompt = 'Provide Username for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('User name cannot be empty', value ? value : '');
-                        const newUsername = await inputValue(prompt, '', false, validateInput);
+                        const newUsername = await inputValue(prompt, '', false, validateInput,
+                            `Provide Username for: ${clusterURL}`);
 
                         if (newUsername === null) {
                             return null; // Cancel
@@ -650,7 +729,8 @@ export class Cluster extends OpenShiftItem {
                         password = await TokenStore.getItem('login', username);
                         const prompt = 'Provide Password for basic authentication to the API server';
                         const validateInput = (value: string) => NameValidator.emptyName('Password cannot be empty', value ? value : '');
-                        const newPassword = await inputValue(prompt, password, true, validateInput);
+                        const newPassword = await inputValue(prompt, password, true, validateInput,
+                            `Provide Password for: ${clusterURL}`);
 
                         if (newPassword === null) {
                             return null; // Cancel
@@ -747,7 +827,8 @@ export class Cluster extends OpenShiftItem {
         if (!userToken) {
             const prompt = 'Provide Bearer token for authentication to the API server';
             const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value ? value : '');
-            ocToken = await inputValue(prompt,  token ? token : '', true, validateInput);
+            ocToken = await inputValue(prompt,  token ? token : '', true, validateInput,
+                `Provide Bearer token for: ${clusterURL}`);
             if (ocToken === null) {
                 return null; // Cancel
             } else if (!ocToken) {
