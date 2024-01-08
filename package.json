@@ -128,7 +128,7 @@
 		"@types/unzip-stream": "^0.3.4",
 		"@types/validator": "^13.11.7",
 		"@types/vscode": "1.64.0",
-		"@typescript-eslint/eslint-plugin": "^6.17.0",
+		"@typescript-eslint/eslint-plugin": "^6.18.0",
 		"@typescript-eslint/parser": "^6.18.0",
 		"@vscode/test-electron": "^2.3.8",
 		"bootstrap": "^5.3.2",
