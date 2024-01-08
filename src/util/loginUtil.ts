@@ -44,7 +44,7 @@ export class LoginUtil {
                 // "you do not have rights to view project..."
                 // Here we return 'false' in such case in order to prevent requesting for
                 // login credentials for Kind-like clusters.
-                return error.stderr.toLowerCase().indexOf('error: you do not have rights to view project') !== -1 ? false : true;
+                return (error.strerr && error.stderr.toLowerCase().indexOf('error: you do not have rights to view project') !== -1) ? false : true;
             });
     }
 
