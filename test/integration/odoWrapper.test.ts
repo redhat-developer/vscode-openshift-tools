@@ -8,7 +8,6 @@ import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import { suite, suiteSetup } from 'mocha';
 import * as path from 'path';
-import { which } from 'shelljs';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
@@ -170,12 +169,6 @@ suite('./odo/odoWrapper.ts', function () {
         const componentDetails = await Odo.Instance.getDetailedComponentInformation(componentTypes[0]);
         // some Devfiles don't have starter projects, but the first Devfile is likely .NET
         expect(componentDetails.starterProjects).is.not.empty;
-    });
-
-    test('isPodmanPresent()', async function() {
-        const isPodmanPresent = await Odo.Instance.isPodmanPresent();
-        const whichImplementationPodmanPresent = which('podman') !== null;
-        expect(isPodmanPresent).to.equal(whichImplementationPodmanPresent);
     });
 
     test('getStarterProjects()', async function() {

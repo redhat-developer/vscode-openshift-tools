@@ -359,20 +359,6 @@ export class Odo {
         );
     }
 
-    public async isPodmanPresent(): Promise<boolean> {
-        try {
-            const result: CliExitData = await this.execute(
-                new CommandText('odo', 'version -o json'),
-            );
-            if ('podman' in JSON.parse(result.stdout)) {
-                return true;
-            }
-        } catch {
-            //ignore
-        }
-        return false;
-    }
-
     /**
      * Bind a component to a bindable service by modifying the devfile
      *
