@@ -5,6 +5,7 @@
 
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
+import { platform } from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
@@ -15,6 +16,7 @@ import { CommandProvider, StarterProject } from '../odo/componentTypeDescription
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import sendTelemetry, { NewComponentCommandProps } from '../telemetry';
+import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
 import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingViewLoader';
@@ -217,11 +219,20 @@ export class Component extends OpenShiftItem {
     }
 
     private static async checkForPodman(): Promise<boolean> {
-        if (await Odo.Instance.isPodmanPresent()) {
-            return true;
-        }
-        const podmanOnPath = which('podman');
-        if (podmanOnPath) {
+        const podmanPath = which('podman');
+        if (podmanPath) {
+            if (platform() === 'linux') {
+                return true;
+            }
+            try {
+                const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute(`"${podmanPath}" machine list --format json`);
+                const resultObj: { Running: boolean }[] = JSON.parse(resultRaw.stdout);
+                if (resultObj.length === 1 && resultObj[0].Running) {
+                    return true;
+                }
+            } catch (e) {
+                // do nothing; something is wrong with the podman setup
+            }
             const SETUP_INSTRUCTIONS = 'Open setup instructions';
             void window.showErrorMessage('Podman is present on the system, but is not fully set up yet.', SETUP_INSTRUCTIONS)
                 .then(result => {
