@@ -21,6 +21,7 @@ import {
     version,
     window
 } from 'vscode';
+import { CommandText } from './base/command';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
@@ -33,6 +34,7 @@ import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
+import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -350,6 +352,35 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
         void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
+    }
+
+    @vsCommand('openshift.resource.delete')
+    public static async deleteResource(component: KubernetesObject) {
+        await Oc.Instance.deleteKubernetesObject(component.kind, component.metadata.name);
+        void window.showInformationMessage(`Deleted the '${component.kind}' named '${component.metadata.name}'`);
+        OpenShiftExplorer.instance.refresh();
+    }
+
+    @vsCommand('openshift.resource.watchLogs')
+    public static async watchLogs(component: KubernetesObject) {
+         // wait until logs are available before starting to stream them
+         await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
+            return new Promise<void>(resolve => {
+
+                let intervalId: NodeJS.Timer = undefined;
+
+                function checkForPod() {
+                    void Oc.Instance.getLogs('Deployment', component.metadata.name).then((logs) => {
+                        clearInterval(intervalId);
+                        resolve();
+                    }).catch(_e => {});
+                }
+
+                intervalId = setInterval(checkForPod, 200);
+            });
+        });
+
+        void OpenShiftTerminalManager.getInstance().createTerminal(new CommandText('oc', `logs -f ${component.kind}/${component.metadata.name}`), `Watching '${component.metadata.name}' logs`);
     }
 
     @vsCommand('openshift.resource.unInstall')

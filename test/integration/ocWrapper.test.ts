@@ -4,16 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig } from '@kubernetes/client-node';
+import { fail } from 'assert';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
+import { CommandText } from '../../src/base/command';
+import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
 import { ClusterType } from '../../src/oc/types';
 import { Odo } from '../../src/odo/odoWrapper';
-import { CommandText } from '../../src/base/command';
-import { CliChannel } from '../../src/cli';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./oc/ocWrapper.ts', function () {
@@ -262,6 +263,43 @@ suite('./oc/ocWrapper.ts', function () {
             }
         });
 
+    });
+
+    suite('create/delete deployment', function() {
+
+        const PROJECT_NAME = 'deployment-from-image';
+        const DEPLOYMENT_IMAGE_URL = 'docker.io/library/mongo';
+        const DEPLOYMENT_NAME = 'my-mongo';
+
+        suiteSetup(async function(){
+            await Odo.Instance.createProject(PROJECT_NAME);
+        });
+
+        suiteTeardown(async function() {
+            void Odo.Instance.deleteProject(PROJECT_NAME);
+            await Oc.Instance.deleteKubernetesObject('Deployment', DEPLOYMENT_NAME);
+        });
+
+        test('createDeploymentFromImage()', async function() {
+            await Oc.Instance.createDeploymentFromImage(DEPLOYMENT_NAME, DEPLOYMENT_IMAGE_URL);
+            const deployments = await Oc.Instance.getKubernetesObjects('Deployment');
+            expect(deployments).to.have.length(1);
+            expect(deployments[0].metadata.name).to.equal(DEPLOYMENT_NAME);
+        });
+
+        test('getLogs()', async function() {
+            for (let i = 0; i < 40; i++) {
+                try {
+                    const logs = await Oc.Instance.getLogs('Deployment', DEPLOYMENT_NAME);
+                    expect(logs.length).to.be.greaterThan(0);
+                    return;
+                } catch (_) {
+                    // do nothing; the container is probably not ready yet
+                }
+                await new Promise<void>(resolve => void setTimeout(resolve, 200));
+            }
+            fail('unable to get the deployment logs');
+        });
     });
 
     // TODO: Context modification
