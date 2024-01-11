@@ -411,6 +411,33 @@ export class Oc {
     }
 
     /**
+     * Creates a deployment with the given name from the given image URL.
+     *
+     * @param name the name of the deployment to create
+     * @param imageUrl the url of the image to deploy
+     */
+    public async createDeploymentFromImage(name: string, imageUrl: string): Promise<void> {
+        await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `create deployment ${name}`, [new CommandOption('--image', imageUrl)])
+        );
+    }
+
+    /**
+     * Returns the logs for the given resource.
+     *
+     * @param resourceType the type of resource to get the logs for
+     * @param name the name of the resource to get the logs for
+     * @throws if the logs are not available
+     * @returns the logs for the given resource
+     */
+    public async getLogs(resourceType: string, name: string): Promise<string> {
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `logs ${resourceType}/${name}`)
+        );
+        return result.stdout;
+    }
+
+    /**
      * Returns the oc command to list all resources of the given type in the given (or current) namespace
      *
      * @param resourceType the resource type to get

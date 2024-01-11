@@ -364,7 +364,7 @@
 			},
 			{
 				"command": "openshift.helm.openView",
-				"title": "Open Helm View",
+				"title": "Browse and Install Helm Charts",
 				"category": "OpenShift"
 			},
 			{
@@ -756,8 +756,23 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.deployment.create.fromImageUrl",
+				"title": "Create Deployment from Container Image URL",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.resource.load",
 				"title": "Load",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.delete",
+				"title": "Delete",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.resource.watchLogs",
+				"title": "Watch Logs",
 				"category": "OpenShift"
 			},
 			{
@@ -944,7 +959,7 @@
 			},
 			{
 				"id": "view/item/context/createService",
-				"label": "Create Service"
+				"label": "Create..."
 			}
 		],
 		"viewsContainers": {
@@ -1243,6 +1258,14 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.resource.delete",
+					"when": "false"
+				},
+				{
+					"command": "openshift.resource.watchLogs",
+					"when": "false"
+				},
+				{
 					"command": "openshift.resource.unInstall",
 					"when": "false"
 				},
@@ -1493,6 +1516,11 @@
 				{
 					"command": "openshift.service.create",
 					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i && showCreateService",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.deployment.create.fromImageUrl",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
 					"group": "c2"
 				}
 			],
@@ -1753,6 +1781,14 @@
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
 				},
 				{
+					"command": "openshift.resource.delete",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
+				},
+				{
+					"command": "openshift.resource.watchLogs",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
+				},
+				{
 					"command": "openshift.resource.unInstall",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.helm"
 				},
@@ -1901,6 +1937,18 @@
 						},
 						"completionEvents": [
 							"onCommand:openshift.helm.openView"
+						]
+					},
+					{
+						"id": "deployContainerImage",
+						"title": "Deploy Container Image from URL",
+						"description": "In the Application Explorer sidebar panel, expand the tree item corresponding to the OpenShift/Kubernetes cluster, then right click on the project, and select \"Create...\" > \"Create Deployment from Container Image URL\". You will be asked to enter the URL to the container image and enter a name for the deployment. Once you've submitted this information, the Deployment will be created, and the logs for the first container created as a part of the Deployment will be opened in the OpenShift Terminal.",
+						"media": {
+							"image": "images/walkthrough/deploy-a-container-image.gif",
+							"altText": "Creating a Deployment of the Docker Hub MongoDB container image called my-mongo-db using the steps from the description"
+						},
+						"completionEvents": [
+							"onCommand:openshift.deployment.create.fromImageUrl"
 						]
 					},
 					{
