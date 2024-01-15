@@ -19,7 +19,6 @@ export function testDevfileRegistries() {
             driver = VSBrowser.instance.driver;
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await new Promise(res => setTimeout(res, 5_000));
-            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             registrySection = await view.getContent().getSection(VIEWS.compRegistries);
         });
 
