@@ -130,7 +130,6 @@ export function testDevfileRegistries() {
 
         after(async function context() {
             this.timeout(10_000);
-            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             await new EditorView().closeAllEditors();
         });
 
