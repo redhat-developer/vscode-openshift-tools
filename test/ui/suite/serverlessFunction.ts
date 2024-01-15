@@ -42,7 +42,7 @@ export function testCreateServerlessFunction(path: string) {
             await section.expand();
             const createButton = await section.getAction('Create Function');
             await createButton.click();
-            await new Promise((res  => {setTimeout(res, 1_000)}));
+            await new Promise((res  => {setTimeout(res, 3_000)}));
 
             const serverlessFunctionView = new ServerlessFunctionWebView();
             await serverlessFunctionView.initializeEditor();
