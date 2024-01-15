@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
-import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, ViewSection, VSBrowser, WebDriver, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, ViewSection, VSBrowser, WebDriver } from 'vscode-extension-tester';
 import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { RegistryWebViewEditor } from '../common/ui/webview/registryWebViewEditor';
