@@ -164,7 +164,7 @@
                 "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.12.1/helm-linux-arm64.tar.gz",
                 "sha256sum": "2eb64b3d1772ae4ca0f2b34c50826860222c01f8f7306965c9aa84c11b5a83b4",
                 "dlFileName": "helm-linux-arm64.tar.gz",
-                "cmdFileName": "helm-linux-amd64"
+                "cmdFileName": "helm-linux-arm64"
             }
         }
     },
