@@ -11,6 +11,7 @@ import { Odo } from '../odo/odoWrapper';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
+import { KubeConfigUtils } from '../util/kubeUtils';
 
 export class Project extends OpenShiftItem {
 
@@ -51,7 +52,19 @@ export class Project extends OpenShiftItem {
         if (!projectName) return null;
         projectName = projectName.trim();
         return Project.odo.createProject(projectName)
-            .then(() => `Project '${projectName}' successfully created`)
+            .then(() => {
+                const kcu = new KubeConfigUtils();
+                const currentContext = kcu.findContext(kcu.currentContext);
+                if (currentContext && projectName === currentContext.namespace) {
+                    // We have to force refresh on App Explorer in case of the new project name
+                    // is the same as the one set in current context (active project) because,
+                    // in case they are equal, the kube config will not be changed by `odo creare project`,
+                    // so the App Explorer will not be automatcally refreshed whle it really needs to be
+                    // refreshed
+                    OpenShiftExplorer.getInstance().refresh();
+                }
+                return `Project '${projectName}' successfully created`;
+            })
             .catch((error) => Promise.reject(new VsCommandError(`Failed to create Project with error '${error}'`, 'Failed to create Project')));
     }
 
