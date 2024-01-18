@@ -25,7 +25,6 @@ import { CommandText } from './base/command';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
-import { Odo } from './odo/odoWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs } from './openshift/serviceHelpers';
 import { KubeConfigUtils, getKubeConfigFiles } from './util/kubeUtils';
@@ -35,6 +34,7 @@ import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
+import { LoginUtil } from './util/loginUtil';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -223,12 +223,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         let result: ExplorerItem[] = [];
         if (!element) {
             try {
-                await Odo.Instance.getProjects();
-                result = [this.kubeContext];
-                if (this.kubeContext) {
-                    const config = getKubeConfigFiles();
-                    void commands.executeCommand('setContext', 'canCreateNamespace', await Oc.Instance.canCreateNamespace());
-                    result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
+                if (!await LoginUtil.Instance.requireLogin()) {
+                    result = [this.kubeContext];
+                    if (this.kubeContext) {
+                        const config = getKubeConfigFiles();
+                        void commands.executeCommand('setContext', 'canCreateNamespace', await Oc.Instance.canCreateNamespace());
+                        result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
+                    }
                 }
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
@@ -244,7 +245,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const namespaces = await Odo.Instance.getProjects();
+            const namespaces = await Oc.Instance.getProjects();
             const helmContext = {
                 kind: 'helm',
                 metadata: {

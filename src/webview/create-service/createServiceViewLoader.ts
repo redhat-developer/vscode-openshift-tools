@@ -11,7 +11,6 @@ import * as vscode from 'vscode';
 import { OpenShiftExplorer } from '../../explorer';
 import { ClusterServiceVersionKind, CustomResourceDefinitionKind } from '../../k8s/olm/types';
 import { Oc } from '../../oc/ocWrapper';
-import { Odo } from '../../odo/odoWrapper';
 import { getServiceKindStubs } from '../../openshift/serviceHelpers';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
@@ -196,7 +195,7 @@ async function getDefaultsFromServiceKindStub(clusterServiceVersion: ClusterServ
     let defaults: object = {
         metadata: {
             name: `${_.kebabCase(stub.kind)}${randomInt(100)}`,
-            namespace: await Odo.Instance.getActiveProject(),
+            namespace: await Oc.Instance.getActiveProject(),
         }
     };
     const examplesYaml: string =

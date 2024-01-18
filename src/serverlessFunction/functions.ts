@@ -94,7 +94,7 @@ export class Functions {
             return null;
         }
 
-        const currentNamespace: string = await Odo.Instance.getActiveProject();
+        const currentNamespace: string = await Oc.Instance.getActiveProject();
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (!yamlContent) {
             return null;
@@ -216,7 +216,7 @@ export class Functions {
     }
 
     public async deploy(context: FunctionObject) {
-        const currentNamespace: string = await Odo.Instance.getActiveProject();
+        const currentNamespace: string = await Oc.Instance.getActiveProject();
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
             const deployedNamespace = yamlContent.deploy?.namespace || undefined;

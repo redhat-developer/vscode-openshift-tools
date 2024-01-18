@@ -13,8 +13,9 @@ import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componen
 import { Command } from '../../../src/odo/command';
 import { ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { CommandProvider } from '../../../src/odo/componentTypeDescription';
+import { Oc } from '../../../src/oc/ocWrapper';
 import { Odo } from '../../../src/odo/odoWrapper';
-import { Project } from '../../../src/odo/project';
+import { Project } from '../../../src/oc/project';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
 import * as Util from '../../../src/util/async';
@@ -130,7 +131,7 @@ suite('OpenShift/Component', function () {
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(Odo.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(Odo.prototype, 'describeComponent').resolves(componentItem1.component);
         sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
         sandbox.stub(Util, 'wait').resolves();

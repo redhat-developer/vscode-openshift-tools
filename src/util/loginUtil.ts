@@ -53,12 +53,13 @@ export class LoginUtil {
      */
     public async logout(): Promise<void> {
         if (await isOpenShift()) {
+            // This doesn't change the 'current-context' value in Kube config, but removes the
+            // user record for the current cluster.
             await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'logout'), { timeout: 5000 });
+        } else {
+            // For non-OpenShift cluster, dropping the `current-context` in Kube confg may be the only
+            // way to logout.
+            await Oc.Instance.unsetContext();
         }
-        // For non-OpenShift cluster, dropping the `current-context` in Kube confg may be the only
-        // way to logout.
-        // However we do it also in case of OpenShift cluster in order to make logout behavior
-        // to be consistent for all kinds of clusters
-        await Oc.Instance.unsetContext();
     }
 }

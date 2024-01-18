@@ -10,6 +10,8 @@ import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Platform } from '../util/platform';
 import { ClusterType, KubernetesConsole } from './types';
+import { Project } from './project';
+import { KubeConfigUtils } from '../util/kubeUtils';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -435,6 +437,110 @@ export class Oc {
             new CommandText('oc', `logs ${resourceType}/${name}`)
         );
         return result.stdout;
+    }
+
+    public async deleteProject(projectName: string): Promise<string> {
+        const obj = await this.isOpenShiftCluster() ? 'project' : 'namespace';
+        return await CliChannel.getInstance().executeTool(
+                new CommandText('oc', `delete ${obj} ${projectName}`)
+            )
+            .then((result) => result.stdout);
+    }
+
+    public async createProject(projectName: string):  Promise<string> {
+        const cmd = await this.isOpenShiftCluster() ? 'new-project' : 'create namespace';
+
+        return await CliChannel.getInstance().executeTool(
+                new CommandText('oc', `${cmd} ${projectName}`)
+            )
+            .then(async (result) => {
+                // oc doesn't handle switching to the newly created namespace/project
+                await this.setProject(projectName);
+                return result.stdout;
+            });
+    }
+
+    /**
+     * Changes which project is currently being used.
+     *
+     * On non-OpenShift, namespaces are used instead of projects
+     *
+     * @param newProject the new project to use
+     */
+    public async setProject(projectName: string): Promise<void> {
+        if(await this.isOpenShiftCluster()) {
+            await CliChannel.getInstance().executeTool(
+                new CommandText('oc', `project ${projectName}`),
+            );
+        } else {
+            await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'config set-context', [
+                    new CommandOption('--current'),
+                    new CommandOption('--namespace', projectName)
+                ])
+            );
+        }
+    }
+
+    public async getProjects(): Promise<Project[]> {
+        return this._listProjects();
+    }
+
+    /**
+     * Returns the active project or null if no project is active
+     *
+     * @returns the active project or null if no project is active
+     */
+    public async getActiveProject(): Promise<string> {
+        const projects = await this._listProjects();
+        if (!projects.length) {
+            return null;
+        }
+        let activeProject = projects.find((project) => project.active);
+        if (activeProject) return activeProject.name;
+
+        // If not found - use Kube Config current context or 'default'
+        const kcu = new KubeConfigUtils();
+        const currentContext = kcu.findContext(kcu.currentContext);
+        if (currentContext) {
+            const active = currentContext.namespace || 'default';
+            activeProject = projects.find((project) => project.name ===active);
+        }
+        return activeProject ? activeProject.name : null;
+    }
+
+    private async _listProjects(): Promise<Project[]> {
+        const onlyOneProject = 'you have one project on this server:';
+        const namespaces: Project[] = [];
+        return await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'projects')
+            )
+            .then( (result) => {
+                const lines = result.stdout && result.stdout.split(/\r?\n/g);
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === '') continue;
+                    if (line.toLocaleLowerCase().startsWith(onlyOneProject)) {
+                        const matches = line.match(/You\shave\sone\sproject\son\sthis\sserver:\s"([a-zA-Z0-9]+[a-zA-Z0-9.-]*)"./);
+                        if (matches) {
+                            namespaces.push({name: matches[1], active: true});
+                            break; // No more projects are to be listed
+                        }
+                    } else {
+                        const words: string[] = line.split(' ');
+                        if (words.length > 0 && words.length <= 2) {
+                            // The list of projects may have eithe 1 (project name) or 2 words
+                            // (an asterisk char, indicating that the project is active, and project name).
+                            // Otherwise, it's either a header or a footer text
+                            const active = words.length === 2 && words[0].trim() === '*';
+                            const projectName = words[words.length - 1] // The last word of array
+                            namespaces.push( {name: projectName, active });
+                        }
+                    }
+                }
+                return namespaces;
+            })
+            .catch((error) => namespaces);
     }
 
     /**

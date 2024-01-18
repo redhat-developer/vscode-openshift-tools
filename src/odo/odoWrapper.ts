@@ -18,7 +18,6 @@ import { Command } from './command';
 import { AnalyzeResponse, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
 import { ComponentDescription, StarterProject } from './componentTypeDescription';
 import { BindableService } from './odoTypes';
-import { Project } from './project';
 
 /**
  * Wraps the `odo` cli tool.
@@ -76,21 +75,6 @@ export class Odo {
 
         // no active cluster
         void commands.executeCommand('setContext', 'isLoggedIn', false);
-    }
-
-    public async getProjects(): Promise<Project[]> {
-        return this._listProjects();
-    }
-
-    /**
-     * Changes which project is currently being used.
-     *
-     * On non-OpenShift, namespaces are used instead of projects
-     *
-     * @param newProject the new project to use
-     */
-    public async setProject(newProject: string): Promise<void> {
-        await this.execute(new CommandText('odo', `set namespace ${newProject}`), undefined, true);
     }
 
     public getKubeconfigEnv(): { KUBECONFIG?: string } {
@@ -181,22 +165,6 @@ export class Odo {
             );
         }
         return result;
-    }
-
-    public async deleteProject(projectName: string): Promise<void> {
-        await this.execute(
-            new CommandText('odo', `delete namespace ${projectName}`, [
-                new CommandOption('-f'),
-                new CommandOption('-w'),
-            ]),
-        );
-    }
-
-    public async createProject(projectName: string): Promise<void> {
-        await Odo.instance.execute(
-            new CommandText('odo', `create namespace ${projectName}`, [new CommandOption('-w')]),
-        );
-        // odo handles switching to the newly created namespace/project
     }
 
     public async createComponentFromFolder(
@@ -374,31 +342,6 @@ export class Odo {
                 new CommandOption('--force'),
             ]),
         );
-    }
-
-    /**
-     * Returns the active project or null if no project is active
-     *
-     * @returns the active project or null if no project is active
-     */
-    public async getActiveProject(): Promise<string> {
-        const projects = await this._listProjects();
-        if (!projects.length) {
-            return null;
-        }
-        const activeProject = projects.find((project) => project.active);
-        return activeProject ? activeProject.name : null;
-    }
-
-    private async _listProjects(): Promise<Project[]> {
-        const response = await this.execute(
-            new CommandText('odo', 'list project', [new CommandOption('-o', 'json', false)]),
-        );
-        const responseObj = JSON.parse(response.stdout);
-        if (!responseObj?.namespaces) {
-            return [];
-        }
-        return responseObj.namespaces as Project[];
     }
 
     /**

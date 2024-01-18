@@ -7,7 +7,6 @@ import { KubernetesObject } from '@kubernetes/client-node';
 import { commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
-import { Odo } from '../odo/odoWrapper';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
@@ -22,7 +21,7 @@ export class Project extends OpenShiftItem {
             label: 'Create new Project',
             description: 'Create new Project and make it active'
         };
-        const projectsAndCreateNew = Odo.Instance
+        const projectsAndCreateNew = Oc.Instance
             .getProjects() //
             .then((projects) => [
                 createNewProject,
@@ -37,7 +36,7 @@ export class Project extends OpenShiftItem {
             await commands.executeCommand('openshift.project.create');
         } else {
             const projectName = selectedItem.label;
-            await Odo.Instance.setProject(projectName);
+            await Oc.Instance.setProject(projectName);
             OpenShiftExplorer.getInstance().refresh();
             Project.serverlessView.refresh();
             message = `Project '${projectName}' set as active.`;
@@ -47,11 +46,11 @@ export class Project extends OpenShiftItem {
 
     @vsCommand('openshift.project.create')
     static async create(): Promise<string> {
-        const projectList = OpenShiftItem.odo.getProjects();
+        const projectList = Oc.Instance.getProjects();
         let projectName = await Project.getProjectName('Project name', projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
-        return Project.odo.createProject(projectName)
+        return Oc.Instance.createProject(projectName)
             .then(() => {
                 const kcu = new KubeConfigUtils();
                 const currentContext = kcu.findContext(kcu.currentContext);
@@ -80,9 +79,9 @@ export class Project extends OpenShiftItem {
                 `Deleting Project '${project.metadata.name}'`,
                 async () => {
                     // migrate to odo3.ts
-                    const projects = await Odo.Instance.getProjects();
+                    const projects = await Oc.Instance.getProjects();
                     const selectedProject = projects.find(p => p.name === project.metadata.name);
-                    await Odo.Instance.deleteProject(selectedProject.name);
+                    await Oc.Instance.deleteProject(selectedProject.name);
                     OpenShiftExplorer.getInstance().refresh();
                 })
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete Project with error '${err}'`,'Failed to delete Project')))

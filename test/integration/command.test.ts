@@ -59,8 +59,8 @@ suite('odo commands integration', function () {
         let componentLocation: string;
 
         suiteSetup(async function () {
-            await Odo.Instance.createProject(newProjectName);
-            await Odo.Instance.setProject(newProjectName);
+            await Oc.Instance.createProject(newProjectName);
+            await Oc.Instance.setProject(newProjectName);
             componentLocation = await promisify(tmp.dir)();
             if (isOpenShift) {
                 await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
@@ -79,7 +79,7 @@ suite('odo commands integration', function () {
                 workspace.updateWorkspaceFolders(toRemove, 1);
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
-            await Odo.Instance.deleteProject(newProjectName);
+            await Oc.Instance.deleteProject(newProjectName);
         });
 
         test('createLocalComponent()', async function () {
@@ -218,11 +218,11 @@ suite('odo commands integration', function () {
                 await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
             }
             try {
-                await Odo.Instance.createProject(newProjectName);
+                await Oc.Instance.createProject(newProjectName);
             } catch (e) {
                 // do nothing; already exists
             }
-            await Odo.Instance.setProject(newProjectName);
+            await Oc.Instance.setProject(newProjectName);
             componentLocation = await promisify(tmp.dir)();
         });
 
@@ -238,7 +238,7 @@ suite('odo commands integration', function () {
                 workspace.updateWorkspaceFolders(toRemove, 1);
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
-            await Odo.Instance.deleteProject(newProjectName);
+            await Oc.Instance.deleteProject(newProjectName);
         });
 
         interface TerminalListener {

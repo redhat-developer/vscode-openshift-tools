@@ -14,7 +14,6 @@ import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
-import { Project } from '../../src/odo/project';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./odo/odoWrapper.ts', function () {
@@ -37,12 +36,12 @@ suite('./odo/odoWrapper.ts', function () {
     suiteTeardown(async function () {
         // ensure projects are cleaned up
         try {
-            await Odo.Instance.deleteProject('my-test-project-1');
+            await Oc.Instance.deleteProject('my-test-project-1');
         } catch (e) {
             // do nothing
         }
         try {
-            await Odo.Instance.deleteProject('my-test-project-2');
+            await Oc.Instance.deleteProject('my-test-project-2');
         } catch (e) {
             // do nothing
         }
@@ -59,61 +58,6 @@ suite('./odo/odoWrapper.ts', function () {
         });
     });
 
-    suite('projects', function () {
-        const project1 = 'my-test-project-1';
-        const project2 = 'my-test-project-2';
-
-        suiteSetup(async function () {
-            try {
-                await Odo.Instance.deleteProject(project1);
-            } catch (e) {
-                // do nothing
-            }
-            try {
-                await Odo.Instance.deleteProject(project2);
-            } catch (e) {
-                // do nothing
-            }
-            await Odo.Instance.createProject(project1);
-            await Odo.Instance.createProject(project2);
-        });
-
-        suiteTeardown(async function () {
-            await Odo.Instance.deleteProject(project1);
-            await Odo.Instance.deleteProject(project2);
-        });
-
-        test('getProjects()', async function () {
-            const projects: Project[] = await Odo.Instance.getProjects();
-            expect(projects).length.to.be.greaterThanOrEqual(2);
-            const projectNames = projects.map((project) => project.name);
-            expect(projectNames).to.contain(project1);
-            expect(projectNames).to.contain(project2);
-        });
-
-        test('getActiveProject()', async function () {
-            const activeProject = await Odo.Instance.getActiveProject();
-            // creating a project switches to it, so we expect the active project to be the last one we created, project2
-            expect(activeProject).to.equal(project2);
-        });
-
-        test('setProject()', async function () {
-            await Odo.Instance.setProject(project1);
-            const activeNamespace = await Odo.Instance.getActiveProject();
-            expect(activeNamespace).to.contain(project1);
-        });
-
-        test('deleteProject()', async function () {
-            const project3 = 'my-test-project-3';
-            await Odo.Instance.createProject(project3);
-            await Odo.Instance.deleteProject(project3);
-            const projects = await Odo.Instance.getProjects();
-            const projectNames = projects.map((project) => project.name);
-            expect(projectNames).to.not.contain(project3);
-        });
-
-    });
-
     suite('components', function () {
         const project1 = 'my-test-project-1';
 
@@ -121,7 +65,7 @@ suite('./odo/odoWrapper.ts', function () {
         let tmpFolder2: Uri;
 
         suiteSetup(async function () {
-            await Odo.Instance.createProject(project1);
+            await Oc.Instance.createProject(project1);
             tmpFolder1 = Uri.parse(await promisify(tmp.dir)());
             tmpFolder2 = Uri.parse(await promisify(tmp.dir)());
             await Odo.Instance.createComponentFromFolder(
@@ -151,7 +95,7 @@ suite('./odo/odoWrapper.ts', function () {
             workspace.updateWorkspaceFolders(0, workspace.workspaceFolders.length, ...newWorkspaceFolders);
             await fs.rm(tmpFolder1.fsPath, { force: true, recursive: true });
             await fs.rm(tmpFolder2.fsPath, { force: true, recursive: true });
-            await Odo.Instance.deleteProject(project1);
+            await Oc.Instance.deleteProject(project1);
         });
 
         test('describeComponent()', async function () {

@@ -9,7 +9,8 @@ import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../../src/base/command';
 import { Odo } from '../../../src/odo/odoWrapper';
-import { Project as OdoProject } from '../../../src/odo/project';
+import { Oc} from '../../../src/oc/ocWrapper';
+import { Project as OdoProject } from '../../../src/oc/project';
 import { Project } from '../../../src/openshift/project';
 
 const {expect} = chai;
@@ -28,10 +29,10 @@ suite('OpenShift/Project', () => {
         projectItem = { name: 'project', active: true };
         sandbox = sinon.createSandbox();
         sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(Odo.prototype, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
-        createProjectStub = sandbox.stub(Odo.prototype, 'createProject').resolves();
-        deleteProjectStub = sandbox.stub(Odo.prototype, 'deleteProject').resolves();
+        createProjectStub = sandbox.stub(Oc.prototype, 'createProject').resolves();
+        deleteProjectStub = sandbox.stub(Oc.prototype, 'deleteProject').resolves();
     });
 
     teardown(() => {

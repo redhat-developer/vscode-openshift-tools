@@ -9,7 +9,7 @@ import * as sinonChai from 'sinon-chai';
 import { window } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
-import { Project } from '../../src/odo/project';
+import { Project } from '../../src/oc/project';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
 import { YamlFileCommands } from '../../src/yamlFileCommands';
@@ -45,10 +45,10 @@ suite('Oc', function() {
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');
-        getActiveProjectStub = sandbox.stub(Odo.Instance, 'getActiveProject').resolves('my-project');
+        getActiveProjectStub = sandbox.stub(Oc.Instance, 'getActiveProject').resolves('my-project');
         detectOrDownloadStub = sandbox.stub(ToolsConfig, 'detect').resolves('path');
         sandbox.stub(Odo.Instance, 'getActiveCluster').resolves('cluster');
-        sandbox.stub(Odo.Instance, 'getProjects').resolves([projectItem]);
+        sandbox.stub(Oc.Instance, 'getProjects').resolves([projectItem]);
         sandbox.stub(Oc.Instance, 'canCreatePod').resolves(true);
     });
 
