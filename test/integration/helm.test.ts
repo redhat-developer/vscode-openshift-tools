@@ -6,7 +6,6 @@
 import { expect } from 'chai';
 import * as Helm from '../../src/helm/helm';
 import { Oc } from '../../src/oc/ocWrapper';
-import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('helm integration', function () {
@@ -15,7 +14,7 @@ suite('helm integration', function () {
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
-    const odo = Odo.Instance;
+    const oc = Oc.Instance;
 
     const RELEASE_NAME = 'my-helm-release';
     const REPO_NAME = 'openshift';
@@ -28,11 +27,11 @@ suite('helm integration', function () {
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
         }
         try {
-            await odo.deleteProject(HELM_NAMESPACE);
+            await oc.deleteProject(HELM_NAMESPACE);
         } catch (e) {
             // do nothing
         }
-        await odo.createProject(HELM_NAMESPACE);
+        await oc.createProject(HELM_NAMESPACE);
     });
 
     suiteTeardown(async function () {
@@ -42,7 +41,7 @@ suite('helm integration', function () {
             // do nothing
         }
         // this call fails to exit on minikube/kind
-        void odo.deleteProject(HELM_NAMESPACE);
+        void oc.deleteProject(HELM_NAMESPACE);
         if (isOpenShift) {
             await LoginUtil.Instance.logout();
         }

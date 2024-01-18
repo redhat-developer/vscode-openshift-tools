@@ -216,7 +216,7 @@ export class Component extends OpenShiftItem {
     }
 
     private static async checkForPodman(): Promise<boolean> {
-        if (await Component.odo.isPodmanPresent()) {
+        if (await Odo.Instance.isPodmanPresent()) {
             return true;
         }
         void window.showErrorMessage('Podman is not present in the system, please install podman on your machine and try again.', 'Install podman')
@@ -378,7 +378,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openInBrowser')
     @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
-        const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
+        const componentDescription = await Odo.Instance.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
@@ -502,7 +502,7 @@ export class Component extends OpenShiftItem {
         let componentType: ComponentTypeAdapter;
         let componentTypeCandidates: ComponentTypeAdapter[];
         if (!useExistingDevfile && (!opts || !opts.devFilePath || opts.devFilePath.length === 0)) {
-            const componentTypes = await Component.odo.getComponentTypes();
+            const componentTypes = await Odo.Instance.getComponentTypes();
             progressIndicator.busy = true;
             progressIndicator.placeholder = opts?.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
             progressIndicator.show();
@@ -534,7 +534,7 @@ export class Component extends OpenShiftItem {
                     progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
                     progressIndicator.show();
 
-                    const starterProjects: StarterProject[] = await this.odo.getStarterProjects(componentType);
+                    const starterProjects: StarterProject[] = await Odo.Instance.getStarterProjects(componentType);
                     progressIndicator.hide();
                     if (starterProjects?.length && starterProjects.length > 0) {
                         const create = await window.showQuickPick(['Yes', 'No'], { placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?` });
@@ -574,7 +574,7 @@ export class Component extends OpenShiftItem {
         try {
             await Progress.execFunctionWithProgress(
                 `Creating new Component '${componentName}'`,
-                () => Component.odo.createComponentFromFolder(
+                () => Odo.Instance.createComponentFromFolder(
                     componentType?.name, // in case of using existing devfile
                     componentType?.registryName,
                     componentName,
@@ -706,7 +706,7 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
-            const componentDescription = await Component.odo.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
+            const componentDescription = await Odo.Instance.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
             if (componentDescription.devForwardedPorts?.length > 0) {
                 // try to find debug port
                 const debugPortsCandidates:number[] = [];
@@ -792,7 +792,7 @@ export class Component extends OpenShiftItem {
         const CANCEL = 'Cancel';
         const response = await window.showWarningMessage(`Are you sure you want to delete the configuration for the component ${context.contextPath}?\nOpenShift Toolkit will no longer recognize the project as a component.`, DELETE_CONFIGURATION, CANCEL);
         if (response === DELETE_CONFIGURATION) {
-            await Component.odo.deleteComponentConfiguration(context.contextPath);
+            await Odo.Instance.deleteComponentConfiguration(context.contextPath);
             void commands.executeCommand('openshift.componentsView.refresh');
         }
     }

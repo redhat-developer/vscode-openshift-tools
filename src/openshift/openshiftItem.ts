@@ -6,8 +6,7 @@
 import { commands, QuickPickItem, window } from 'vscode';
 import { inputValue } from '../util/inputValue';
 import { Oc } from '../oc/ocWrapper';
-import { Odo } from '../odo/odoWrapper';
-import { Project } from '../odo/project';
+import { Project } from '../oc/project';
 import { ServerlessFunctionView } from '../serverlessFunction/view';
 import * as NameValidator from './nameValidator';
 
@@ -24,8 +23,6 @@ export class QuickPickCommand implements QuickPickItem {
 }
 
 export default class OpenShiftItem {
-    protected static readonly odo = Odo.Instance;
-
     protected static readonly serverlessView: ServerlessFunctionView = ServerlessFunctionView.getInstance();
 
     static async getName(message: string, offset?: string, defaultValue = ''): Promise<string> {

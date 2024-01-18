@@ -14,8 +14,8 @@ import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
 import { ClusterType } from '../../src/oc/types';
-import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
+import { Project } from '../../src/oc/project';
 
 suite('./oc/ocWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -35,7 +35,7 @@ suite('./oc/ocWrapper.ts', function () {
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
         }
         try {
-            await Odo.Instance.createProject(PROJECT);
+            await Oc.Instance.createProject(PROJECT);
         } catch (e) {
             // do nothing, it probably already exists
         }
@@ -44,7 +44,7 @@ suite('./oc/ocWrapper.ts', function () {
     suiteTeardown(async function () {
         // ensure projects are cleaned up
         try {
-            await Odo.Instance.deleteProject(PROJECT);
+            await Oc.Instance.deleteProject(PROJECT);
         } catch (e) {
             // do nothing
         }
@@ -52,6 +52,60 @@ suite('./oc/ocWrapper.ts', function () {
         if (isOpenShift) {
             await LoginUtil.Instance.logout();
         }
+    });
+
+    suite('projects', function () {
+        const project1 = 'my-test-project-1';
+        const project2 = 'my-test-project-2';
+
+        suiteSetup(async function () {
+            try {
+                await Oc.Instance.deleteProject(project1);
+            } catch (e) {
+                // do nothing
+            }
+            try {
+                await Oc.Instance.deleteProject(project2);
+            } catch (e) {
+                // do nothing
+            }
+            await Oc.Instance.createProject(project1);
+            await Oc.Instance.createProject(project2);
+        });
+
+        suiteTeardown(async function () {
+            await Oc.Instance.deleteProject(project1);
+            await Oc.Instance.deleteProject(project2);
+        });
+
+        test('getProjects()', async function () {
+            const projects: Project[] = await Oc.Instance.getProjects();
+            expect(projects).length.to.be.greaterThanOrEqual(2);
+            const projectNames = projects.map((project) => project.name);
+            expect(projectNames).to.contain(project1);
+            expect(projectNames).to.contain(project2);
+        });
+
+        test('getActiveProject()', async function () {
+            const activeProject = await Oc.Instance.getActiveProject();
+            // creating a project switches to it, so we expect the active project to be the last one we created, project2
+            expect(activeProject).to.equal(project2);
+        });
+
+        test('setProject()', async function () {
+            await Oc.Instance.setProject(project1);
+            const activeNamespace = await Oc.Instance.getActiveProject();
+            expect(activeNamespace).to.contain(project1);
+        });
+
+        test('deleteProject()', async function () {
+            const project3 = 'my-test-project-3';
+            await Oc.Instance.createProject(project3);
+            await Oc.Instance.deleteProject(project3);
+            const projects = await Oc.Instance.getProjects();
+            const projectNames = projects.map((project) => project.name);
+            expect(projectNames).to.not.contain(project3);
+        });
     });
 
     test('canCreatePod()', async function () {
@@ -115,22 +169,22 @@ suite('./oc/ocWrapper.ts', function () {
             yamlFile = await promisify(tmp.file)();
             await fs.writeFile(yamlFile, serviceFileYaml);
             try {
-                await Odo.Instance.deleteProject(projectName);
+                await Oc.Instance.deleteProject(projectName);
             } catch (e) {
                 // do nothing
             }
             try {
-                await Odo.Instance.createProject(projectName);
+                await Oc.Instance.createProject(projectName);
             } catch (e) {
                 // do nothing
             }
-            await Odo.Instance.setProject(projectName);
+            await Oc.Instance.setProject(projectName);
         });
 
         suiteTeardown(async function () {
             await fs.unlink(yamlFile);
             // this call fails to exit on minikube/kind
-            void Odo.Instance.deleteProject(projectName);
+            void Oc.Instance.deleteProject(projectName);
         });
 
         test('createKubernetesObjectFromSpec()', async function () {
@@ -272,11 +326,11 @@ suite('./oc/ocWrapper.ts', function () {
         const DEPLOYMENT_NAME = 'my-mongo';
 
         suiteSetup(async function(){
-            await Odo.Instance.createProject(PROJECT_NAME);
+            await Oc.Instance.createProject(PROJECT_NAME);
         });
 
         suiteTeardown(async function() {
-            void Odo.Instance.deleteProject(PROJECT_NAME);
+            void Oc.Instance.deleteProject(PROJECT_NAME);
             await Oc.Instance.deleteKubernetesObject('Deployment', DEPLOYMENT_NAME);
         });
 

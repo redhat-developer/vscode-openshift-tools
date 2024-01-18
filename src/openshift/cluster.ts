@@ -10,7 +10,6 @@ import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
-import { Odo } from '../odo/odoWrapper';
 import * as NameValidator from '../openshift/nameValidator';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
@@ -108,7 +107,7 @@ export class Cluster extends OpenShiftItem {
             async (progress) => {
                 const [consoleInfo, namespace] = await Promise.all([
                     Oc.Instance.getConsoleInfo(),
-                    Odo.Instance.getActiveProject(),
+                    Oc.Instance.getActiveProject(),
                 ]);
                 progress.report({ increment: 100, message: 'Starting default browser' });
                 // eg. https://console-openshift-console.apps-crc.testing/catalog/ns/default?catalogType=OperatorBackedService

@@ -4,14 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { window } from 'vscode';
-import { Oc as OcWrapper } from './oc/ocWrapper';
-import { Odo } from './odo/odoWrapper';
+import { Oc } from './oc/ocWrapper';
 import { clusterRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
 
 export class YamlFileCommands {
-
-    private static odo = Odo.Instance;
 
     @vsCommand('openshift.create')
     @clusterRequired()
@@ -40,7 +37,7 @@ export class YamlFileCommands {
             }
         }
 
-        const activeProject = await YamlFileCommands.odo.getActiveProject();
+        const activeProject = await Oc.Instance.getActiveProject();
 
         if (!message && !activeProject) {
             message = '\'OpenShift: Create\' requires setting a project as active, and none is currently set.';
@@ -51,7 +48,7 @@ export class YamlFileCommands {
             return null;
         }
 
-        await OcWrapper.Instance.createKubernetesObjectFromFile(document.fileName);
+        await Oc.Instance.createKubernetesObjectFromFile(document.fileName);
         return 'Resources were successfully created.';
     }
 
@@ -82,7 +79,7 @@ export class YamlFileCommands {
             }
         }
 
-        const activeProject = await YamlFileCommands.odo.getActiveProject();
+        const activeProject = await Oc.Instance.getActiveProject();
 
         if (!message && !activeProject) {
             message = '\'OpenShift: Delete\' requires setting a project as active, and none is currently set.';
@@ -93,7 +90,7 @@ export class YamlFileCommands {
             return null;
         }
 
-        await OcWrapper.Instance.deleteKubernetesObjectFromFile(document.fileName);
+        await Oc.Instance.deleteKubernetesObjectFromFile(document.fileName);
         return 'Resources were successfully deleted.';
     }
 

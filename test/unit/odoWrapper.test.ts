@@ -11,6 +11,7 @@ import * as sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
+import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
@@ -137,7 +138,7 @@ suite('./odo/odoWrapper.ts', () => {
                 ),
                 stderr: ''
             });
-            const result = await odoCli.getProjects();
+            const result = await Oc.Instance.getProjects();
 
             expect(result.length).equals(1);
             expect(result[0].name).equals('project1');
@@ -155,7 +156,7 @@ suite('./odo/odoWrapper.ts', () => {
                 stderr: ''
             });
             execStub.onThirdCall().resolves({ stdout: '', stderr: '', error: null });
-            const result = await odoCli.getProjects();
+            const result = await Oc.Instance.getProjects();
 
             expect(result).empty;
         });
@@ -164,7 +165,7 @@ suite('./odo/odoWrapper.ts', () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
             sandbox.stub(odoCli, 'getActiveCluster').resolves('https://localhost:8080');
             execStub.rejects(errorMessage);
-            const result = await odoCli.getProjects();
+            const result = await Oc.Instance.getProjects();
 
             expect(result).empty;
             expect(errorStub).calledOnceWith(`Cannot retrieve projects for current cluster. Error: ${errorMessage}`);
