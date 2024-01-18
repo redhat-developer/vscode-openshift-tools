@@ -1794,7 +1794,7 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || openshift.k8sObject.helm || viewItem == openshift.k8sObject.route && isOpenshiftCluster"
+					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sObject || openshift.k8sObject.helm || viewItem == openshift.k8sObject.route) && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.resource.openInBrowser",
