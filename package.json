@@ -761,6 +761,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.deployment.shell",
+				"title": "Open Shell to Container",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.resource.load",
 				"title": "Load",
 				"category": "OpenShift"
@@ -1263,6 +1268,10 @@
 				},
 				{
 					"command": "openshift.resource.watchLogs",
+					"when": "false"
+				},
+				{
+					"command": "openshift.deployment.shell",
 					"when": "false"
 				},
 				{
@@ -1778,15 +1787,19 @@
 				},
 				{
 					"command": "openshift.resource.load",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm)/"
 				},
 				{
 					"command": "openshift.resource.delete",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm)/"
 				},
 				{
 					"command": "openshift.resource.watchLogs",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject || viewItem == openshift.k8sObject.route"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm)/"
+				},
+				{
+					"command": "openshift.deployment.shell",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
 				},
 				{
 					"command": "openshift.resource.unInstall",
@@ -1794,11 +1807,11 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sObject || openshift.k8sObject.helm || viewItem == openshift.k8sObject.route) && isOpenshiftCluster"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject/ && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.resource.openInBrowser",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.route && isOpenshiftCluster"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\..*route$/ && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.Serverless.buildAndRun",
