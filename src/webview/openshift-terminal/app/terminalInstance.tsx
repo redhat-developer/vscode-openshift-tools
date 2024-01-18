@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Box, Button, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Paper, Stack, Typography, debounce } from '@mui/material';
 import React from 'react';
 import { VSCodeMessage } from './vscodeMessage';
 import { Terminal, ITheme } from 'xterm';
@@ -20,10 +20,11 @@ const TerminalContextMenu = (props: {
     onClearHandler: React.MouseEventHandler<HTMLButtonElement>;
     onCopyHandler: React.MouseEventHandler<HTMLButtonElement>;
     onSelectAllHandler: React.MouseEventHandler<HTMLButtonElement>;
+    onPasteHandler: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
     return (
         <Paper
-            variant="outlined"
+            variant='outlined'
             sx={{
                 borderRadius: '6px',
                 backgroundColor: 'var(--vscode-editor-background)',
@@ -31,9 +32,9 @@ const TerminalContextMenu = (props: {
                 boxShadow: '0px 0px 8px var(--vscode-widget-shadow)',
             }}
         >
-            <Stack direction="column" minWidth="200px" marginX="4px" marginY="3px">
+            <Stack direction='column' minWidth='200px' marginX='4px' marginY='3px'>
                 <Button
-                    variant="text"
+                    variant='text'
                     onClick={props.onCopyHandler}
                     sx={{
                         width: '100%',
@@ -46,17 +47,17 @@ const TerminalContextMenu = (props: {
                     }}
                 >
                     <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        marginX="13px"
+                        direction='row'
+                        justifyContent='space-between'
+                        marginX='13px'
                         style={{ width: '100%' }}
                     >
-                        <Typography variant="body1">Copy</Typography>
-                        <Typography variant="body1">Ctrl+Shift+C</Typography>
+                        <Typography variant='body1'>Copy</Typography>
+                        <Typography variant='body1'>Ctrl+Shift+C</Typography>
                     </Stack>
                 </Button>
                 <Button
-                    variant="text"
+                    variant='text'
                     onClick={props.onSelectAllHandler}
                     sx={{
                         width: '100%',
@@ -69,17 +70,40 @@ const TerminalContextMenu = (props: {
                     }}
                 >
                     <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        marginX="13px"
+                        direction='row'
+                        justifyContent='space-between'
+                        marginX='13px'
                         style={{ width: '100%' }}
                     >
-                        <Typography variant="body1">Select All</Typography>
-                        <Typography variant="body1">Ctrl+Shift+A</Typography>
+                        <Typography variant='body1'>Select All</Typography>
+                        <Typography variant='body1'>Ctrl+Shift+A</Typography>
                     </Stack>
                 </Button>
                 <Button
-                    variant="text"
+                    variant='text'
+                    onClick={props.onPasteHandler}
+                    sx={{
+                        width: '100%',
+                        textTransform: 'none',
+                        '&:hover': {
+                            backgroundColor:
+                                'color-mix(in srgb, var(--vscode-button-background) 50%, black)',
+                        },
+                        paddingY: '4px',
+                    }}
+                >
+                    <Stack
+                        direction='row'
+                        justifyContent='space-between'
+                        marginX='13px'
+                        style={{ width: '100%' }}
+                    >
+                        <Typography variant='body1'>Paste</Typography>
+                        <Typography variant='body1'>Ctrl+Shift+V</Typography>
+                    </Stack>
+                </Button>
+                <Button
+                    variant='text'
                     onClick={props.onClearHandler}
                     sx={{
                         width: '100%',
@@ -92,12 +116,12 @@ const TerminalContextMenu = (props: {
                     }}
                 >
                     <Stack
-                        direction="row"
-                        justifyContent="flex-start"
-                        marginX="13px"
+                        direction='row'
+                        justifyContent='flex-start'
+                        marginX='13px'
                         style={{ width: '100%' }}
                     >
-                        <Typography variant="body1">Clear</Typography>
+                        <Typography variant='body1'>Clear</Typography>
                     </Stack>
                 </Button>
             </Stack>
@@ -139,6 +163,13 @@ export const TerminalInstance = (props: {
         setContextMenuOpen(false);
     };
 
+    const handlePaste = () => {
+        void navigator.clipboard.readText().then((clipboardContent: string) => {
+            term.paste(clipboardContent);
+        });
+        setContextMenuOpen(false);
+    };
+
     const handleSelectAll = () => {
         term.selectAll();
         setContextMenuOpen(false);
@@ -152,7 +183,7 @@ export const TerminalInstance = (props: {
                 uuid: props.uuid,
             },
         });
-    }
+    };
 
     // The xtermjs addon that can be used to resize the terminal according to the size of the div
     const fitAddon = React.useMemo(() => {
@@ -165,7 +196,7 @@ export const TerminalInstance = (props: {
             kind: 'openExternal',
             data: {
                 uuid: props.uuid,
-                url: uri
+                url: uri,
             },
         });
     }
@@ -188,6 +219,17 @@ export const TerminalInstance = (props: {
                 } else if (keyboardEvent.code === 'KeyA') {
                     // Ctrl+Shift+A selects all
                     term.selectAll();
+                    keyboardEvent.stopPropagation();
+                    return false;
+                } else if (keyboardEvent.code === 'KeyV') {
+                    // Ctrl+Shift+V pastes
+                    debounce(() => {
+                        void navigator.clipboard
+                            .readText() //
+                            .then((clipboardContent: string) => {
+                                term.paste(clipboardContent);
+                            });
+                    });
                     keyboardEvent.stopPropagation();
                     return false;
                 }
@@ -363,11 +405,11 @@ export const TerminalInstance = (props: {
     return (
         <Box
             onContextMenu={handleContextMenu}
-            marginY="8px"
-            marginX="16px"
-            width="100%"
-            height="100%"
-            overflow="scroll"
+            marginY='8px'
+            marginX='16px'
+            width='100%'
+            height='100%'
+            overflow='scroll'
         >
             <div
                 style={{
@@ -381,6 +423,7 @@ export const TerminalInstance = (props: {
                     onCopyHandler={handleCopy}
                     onSelectAllHandler={handleSelectAll}
                     onClearHandler={handleClear}
+                    onPasteHandler={handlePaste}
                 />
             </div>
             <div
