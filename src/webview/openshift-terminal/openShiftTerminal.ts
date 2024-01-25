@@ -202,6 +202,10 @@ class OpenShiftTerminal {
         this._ptyExited = true;
     }
 
+    public get file() {
+        return this._file;
+    }
+
     /**
      * Returns the name of this terminal.
      *
@@ -236,6 +240,10 @@ class OpenShiftTerminal {
      */
     public get isPtyLive() {
         return this._pty && !this._ptyExited;
+    }
+
+    public get isPtyExit() {
+        return this._ptyExited;
     }
 
     /**
@@ -461,6 +469,9 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     } else if (message.kind === 'resize') {
                         terminal.resize(message.data.cols, message.data.rows);
                     } else if (message.kind === 'closeTerminal') {
+                        if (terminal.file.endsWith('func.exe')) {
+                            void commands.executeCommand('openshift.Serverless.removeSession' , terminal.name);
+                        }
                         terminal.dispose();
                         this.openShiftTerminals.delete(message?.data?.uuid);
                     } else if (message.kind === 'openExternal') {
