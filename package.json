@@ -915,6 +915,16 @@
 				"command": "openshift.Serverless.invoke",
 				"title": "Invoke",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.showInTerminal",
+				"title": "Show in terminal",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeSession",
+				"title": "Remove Serverless Session",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -1348,6 +1358,14 @@
 				},
 				{
 					"command": "openshift.Serverless.removeGit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.showInTerminal",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeSession",
 					"when": "false"
 				}
 			],

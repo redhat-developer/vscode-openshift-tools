@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Uri } from 'vscode';
+import { OpenShiftTerminalApi } from '../webview/openshift-terminal/openShiftTerminal';
 
 export interface FunctionView {
     refresh(context?: FunctionObject);
@@ -33,6 +34,14 @@ export interface FunctionObject {
     hasImage?: boolean;
     hadBuilt?: boolean;
     isRunning?: boolean;
+    session?: FunctionSession;
+}
+
+export interface FunctionSession {
+    sessionName: string;
+    sessionPath: Uri;
+    teminal?: OpenShiftTerminalApi;
+    isDone?: boolean;
 }
 
 export interface GitModel {
