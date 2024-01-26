@@ -5,13 +5,14 @@
 
 import { window } from 'vscode';
 import { Oc } from './oc/ocWrapper';
-import { clusterRequired } from './openshift/openshiftItem';
+import { clusterRequired, projectRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
 
 export class YamlFileCommands {
 
     @vsCommand('openshift.create')
     @clusterRequired()
+    @projectRequired()
     public static async create(): Promise<string | null> {
         const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
         const pleaseSave = 'Please save your changes before executing \'OpenShift: Create\' command.';
@@ -54,6 +55,7 @@ export class YamlFileCommands {
 
     @vsCommand('openshift.delete')
     @clusterRequired()
+    @projectRequired()
     public static async delete(): Promise<string | null> {
         const document = window.activeTextEditor ? window.activeTextEditor.document : undefined;
         const pleaseSave = 'Please save your changes before executing \'OpenShift: Delete\' command.';

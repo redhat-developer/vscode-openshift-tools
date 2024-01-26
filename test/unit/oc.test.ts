@@ -8,8 +8,8 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { window } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
-import { Odo } from '../../src/odo/odoWrapper';
 import { Project } from '../../src/oc/project';
+import { Odo } from '../../src/odo/odoWrapper';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
 import { YamlFileCommands } from '../../src/yamlFileCommands';
@@ -127,11 +127,12 @@ suite('Oc', function() {
         expect(savedErr === 'error');
     });
 
-    test('errors when there is no active project', async function() {
+    test('shows warning message when there is no active project', async function() {
         getActiveProjectStub.resetBehavior();
         getActiveProjectStub.resolves(undefined);
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
-        expect(await YamlFileCommands.create()).null;
+        expect(await YamlFileCommands.create());
+        expect(warnStub).to.be.calledOnceWithExactly('The current project doesn\'t exist. Please select an existing project to work with or create a new project', 'Select or Create Project', 'Cancel');
     });
 
 });

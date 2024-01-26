@@ -19,7 +19,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingViewLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
-import OpenShiftItem, { clusterRequired } from './openshiftItem';
+import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
 
 function createCancelledResult(stepName: string): any {
     const cancelledResult: any = new String('');
@@ -299,12 +299,14 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.dev')
     @clusterRequired()
+    @projectRequired()
     static async dev(component: ComponentWorkspaceFolder) {
         return Component.devRunOn(component, undefined);
     }
 
     @vsCommand('openshift.component.dev.manual')
     @clusterRequired()
+    @projectRequired()
     static async devManual(component: ComponentWorkspaceFolder): Promise<void> {
         await Component.devRunOn(component, undefined, true);
     }
