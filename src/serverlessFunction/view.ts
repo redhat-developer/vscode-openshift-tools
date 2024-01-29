@@ -42,7 +42,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     private serverlessFunction: ServerlessFunctionModel;
 
-    private serverlessSessions: Map<string, Map<string, FunctionSession>> = new Map();
+    private serverlessFunctionTreeNodes: Map<string, FunctionObject> = new Map();
 
     private constructor() {
         this.serverlessFunction = new ServerlessFunctionModel(this);
@@ -59,7 +59,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     getTreeItem(element: ExplorerItem): TreeItem | Thenable<TreeItem> {
-
         if ('kind' in element) {
             if (element.kind === 'project') {
                 return {
@@ -72,7 +71,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             const functionObj: FunctionObject = element;
             const explorerItem: ExplorerItem = {
                 label: functionObj?.name,
-                collapsibleState: 'session' in element && !element.session.isDone ? TreeItemCollapsibleState.Expanded : TreeItemCollapsibleState.None
+                collapsibleState: element.sessions?.length > 0 ? TreeItemCollapsibleState.Expanded : TreeItemCollapsibleState.None
             }
             if (functionObj.context !== FunctionStatus.NONE) {
                     explorerItem.iconPath = new ThemeIcon('symbol-function'),
@@ -82,7 +81,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                     explorerItem.command = this.getCommand(functionObj);
             }
             return explorerItem;
-        } else if ('sessionName' in element && !element.isDone) {
+        } else if ('sessionName' in element) {
             const functionSession: FunctionSession = element;
             const explorerItem: ExplorerItem = {
                 label: element.sessionName.substring(0, element.sessionName.indexOf(':')).trim(),
@@ -93,7 +92,6 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
             explorerItem.command = this.getSessionCommand(functionSession)
             return explorerItem;
         }
-
     }
 
     getContext(functionObj: FunctionObject): string {
@@ -152,7 +150,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                 }
                 result = [functionNode]
             }
-        } else if ('session' in element) {
+        } else if ('sessions' in element && element.sessions.length > 0) {
             result = [...this.processSessions(element)];
         }
         return result;
@@ -248,7 +246,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     @vsCommand('openshift.Serverless.showInTerminal')
     static async openTerminal(context: FunctionSession) {
         if (!context || context.isDone) {
-           void window.showInformationMessage('Terminal was closed already');
+           return null;
         }
         await commands.executeCommand('openShiftTerminalView.focus');
         context.teminal.focusTerminal();
@@ -295,25 +293,22 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
     }
 
     @vsCommand('openshift.Serverless.removeSession')
-    static removeSesson(sessionName: string) {
-        //const existingContext: FunctionObject = ServerlessFunctionView.getInstance().serverlessSessionContext.get(sessionName);
-       // existingContext.session.isDone = true;
-        //ServerlessFunctionView.getInstance().refresh(existingContext);
+    static removeSesson(uuid: string ,cwdPath: string, sessionName: string) {
+        if (ServerlessFunctionView.getInstance().serverlessFunctionTreeNodes.has(cwdPath)) {
+            const element = ServerlessFunctionView.getInstance().serverlessFunctionTreeNodes.get(cwdPath);
+            const index = element.sessions.findIndex((session) => session.sessionName === sessionName && session.teminal.id === uuid);
+            if(index !== -1) {
+                element.sessions.splice(index, 1);
+                ServerlessFunctionView.getInstance().refresh(element);
+            }
+        }
     }
 
     processSessions(element: FunctionObject): FunctionSession[] {
         const functionSessions: FunctionSession[] = [];
-        let sessions: Map<string,FunctionSession> = new Map();
-        if (this.serverlessSessions.has(element.folderURI.fsPath)) {
-            sessions = this.serverlessSessions.get(element.folderURI.fsPath);
-            if (sessions.has(element.session.sessionName)) {
-                sessions.delete(element.session.sessionName);
-            }
-        }
-        sessions.set(element.session.sessionName, element.session);
-        this.serverlessSessions.set(element.folderURI.fsPath, sessions);
-        const processedSessions = this.serverlessSessions.get(element.folderURI.fsPath);
-        processedSessions.forEach((session: FunctionSession) => {
+        this.serverlessFunctionTreeNodes.set(element.folderURI.fsPath, element);
+        const treeNode = this.serverlessFunctionTreeNodes.get(element.folderURI.fsPath);
+        treeNode.sessions.forEach((session: FunctionSession) => {
             functionSessions.push(session);
         });
         return functionSessions;
