@@ -530,10 +530,10 @@ export class Cluster extends OpenShiftItem {
                                 );
                                 if (promptResponse === startCrc){
                                     await commands.executeCommand('openshift.explorer.addCluster', 'crc');
-                                    // no point in continuing with the wizard,
                                     // it will take the cluster a few minutes to stabilize
-                                    return null;
                                 }
+                                // Anyway, no point in continuing with the wizard
+                                return null;
                             } else if (Cluster.isSandboxCluster(clusterURL)) {
                                 const devSandboxSignup = 'Sign up for OpenShift Dev Sandbox';
                                 const promptResponse = await window.showWarningMessage(
@@ -543,15 +543,17 @@ export class Cluster extends OpenShiftItem {
                                 );
                                 if (promptResponse === devSandboxSignup){
                                     await commands.executeCommand('openshift.explorer.addCluster', 'sandbox');
-                                    // no point in continuing with the wizard,
                                     // the user needs to sign up for the service
-                                    return null;
                                 }
-                            } else {
-                                void window.showWarningMessage(
-                                    'Unable to contact the cluster. Is it running and accessible?',
-                                );
+                                // Anyway, no point in continuing with the wizard
+                                return null;
                             }
+
+                            // Stop trying because the cluster doesn't appear to be available
+                            void window.showWarningMessage(
+                                'Unable to contact the cluster. Is it running and accessible?',
+                            );
+                            return null;
                         }
                     } while (!clusterIsUp);
 
