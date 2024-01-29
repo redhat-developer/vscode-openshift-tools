@@ -123,12 +123,24 @@ export class Functions {
                 onExit: undefined,
             } , true
         );
-        context.session = {
+        const session = {
             sessionName: `On Cluster Build: ${context.name}`,
             sessionPath: context.folderURI,
             teminal: terminal
         };
+        this.addSession(context, session);
         ServerlessFunctionView.getInstance().refresh(context);
+    }
+
+    private addSession(context: FunctionObject, session: FunctionSession) {
+        if (context.sessions?.length > 0) {
+            const withoutExistingSameSession = context.sessions.filter((exSession) => exSession.sessionName !== session.sessionName);
+            context.sessions = withoutExistingSameSession;
+            context.sessions.push(session);
+        } else {
+            context.sessions = [];
+            context.sessions.push(session);
+        }
     }
 
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
@@ -171,6 +183,7 @@ export class Functions {
                 onExit: () => {
                     this.buildTerminalMap.delete(terminalKey);
                 },
+
             }, true
         );
         const session: FunctionSession = {
@@ -178,7 +191,7 @@ export class Functions {
             sessionPath: context.folderURI,
             teminal: terminal
         }
-        context.session = {...session};
+        this.addSession(context, session);
         ServerlessFunctionView.getInstance().refresh(context);
         this.buildTerminalMap.set(terminalKey, terminal);
     }
@@ -204,7 +217,7 @@ export class Functions {
             sessionPath: context.folderURI,
             teminal: terminal
         }
-        context.session = {...session};
+        this.addSession(context, session);
         ServerlessFunctionView.getInstance().refresh(context);
         this.runTerminalMap.set(`run-${context.folderURI.fsPath}`, terminal);
     }
@@ -290,11 +303,12 @@ export class Functions {
             }, true
         );
 
-        context.session = {
+        const session = {
             sessionName: `Deploy: ${context.name}`,
             sessionPath: context.folderURI,
             teminal: terminal
         };
+        this.addSession(context, session);
         ServerlessFunctionView.getInstance().refresh(context);
     }
 

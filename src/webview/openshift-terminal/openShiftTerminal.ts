@@ -65,6 +65,8 @@ export interface OpenShiftTerminalApi {
      * Close the terminal. If the extension is not running on Windows, the process will be terminated using SIGABRT.
      */
     forceKill: () => void;
+
+    id: string;
 }
 
 /**
@@ -202,8 +204,22 @@ class OpenShiftTerminal {
         this._ptyExited = true;
     }
 
+    /**
+     * Returns the exe file of the execution.
+     *
+     * @returns the exe file of the execution.
+     */
     public get file() {
         return this._file;
+    }
+
+    /**
+     * Returns the current working directory of the execution.
+     *
+     * @returns the current working directory.
+     */
+    public get cwd(): string {
+        return this._options?.cwd;
     }
 
     /**
@@ -470,7 +486,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                         terminal.resize(message.data.cols, message.data.rows);
                     } else if (message.kind === 'closeTerminal') {
                         if (terminal.file.endsWith('func.exe')) {
-                            void commands.executeCommand('openshift.Serverless.removeSession' , terminal.name);
+                            void commands.executeCommand('openshift.Serverless.removeSession' , terminal.uuid, terminal.cwd, terminal.name);
                         }
                         terminal.dispose();
                         this.openShiftTerminals.delete(message?.data?.uuid);
@@ -656,6 +672,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                 void this.sendMessage({ kind: 'switchToTerminal', data: { uuid: newTermUUID } }),
             kill: () => this.openShiftTerminals.get(newTermUUID).write('\u0003'),
             forceKill: () => this.openShiftTerminals.get(newTermUUID).forceKill(),
+            id: newTermUUID
         };
     }
 

@@ -34,7 +34,7 @@ export interface FunctionObject {
     hasImage?: boolean;
     hadBuilt?: boolean;
     isRunning?: boolean;
-    session?: FunctionSession;
+    sessions?: FunctionSession[];
 }
 
 export interface FunctionSession {
