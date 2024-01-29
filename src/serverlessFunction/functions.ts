@@ -9,15 +9,13 @@ import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { isTektonAware } from '../tekton/tekton';
-import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
 import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
-import { FunctionContent, FunctionObject, FunctionSession, InvokeFunction } from './types';
-import { ServerlessFunctionView } from './view';
+import { FunctionContent, FunctionObject, FunctionSession } from './types';
 
 export class Functions {
 
@@ -129,7 +127,7 @@ export class Functions {
             teminal: terminal
         };
         this.addSession(context, session);
-        ServerlessFunctionView.getInstance().refresh(context);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
     }
 
     private addSession(context: FunctionObject, session: FunctionSession) {
@@ -192,7 +190,7 @@ export class Functions {
             teminal: terminal
         }
         this.addSession(context, session);
-        ServerlessFunctionView.getInstance().refresh(context);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
         this.buildTerminalMap.set(terminalKey, terminal);
     }
 
@@ -218,7 +216,7 @@ export class Functions {
             teminal: terminal
         }
         this.addSession(context, session);
-        ServerlessFunctionView.getInstance().refresh(context);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
         this.runTerminalMap.set(`run-${context.folderURI.fsPath}`, terminal);
     }
 
@@ -238,14 +236,6 @@ export class Functions {
                 void commands.executeCommand('openshift.Serverless.refresh');
             }
         });
-    }
-
-    public async getTemplates(): Promise<any[]> {
-        const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
-        if (result.error) {
-            void window.showErrorMessage(result.error.message);
-        }
-        return JSON.parse(result.stdout) as any[];
     }
 
     public async deploy(context: FunctionObject) {
@@ -309,17 +299,7 @@ export class Functions {
             teminal: terminal
         };
         this.addSession(context, session);
-        ServerlessFunctionView.getInstance().refresh(context);
-    }
-
-    public async invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
-       await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.invokeFunction(invokeFunData),
-            `Invoke: ${functionName}`,
-            undefined, undefined, {
-                onExit: undefined
-            }, true
-        );
+        void commands.executeCommand('openshift.Serverless.refresh', context);
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
@@ -375,16 +355,6 @@ export class Functions {
             },
             password: passwordType,
         });
-    }
-
-    public getDefaultImages(name: string): string[] {
-        const imageList: string[] = [];
-        const defaultUsername = Platform.getEnv();
-        const defaultQuayImage = `quay.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
-        const defaultDockerImage = `docker.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
-        imageList.push(defaultQuayImage);
-        imageList.push(defaultDockerImage);
-        return imageList;
     }
 
     public async getImage(folderURI: Uri): Promise<string> {

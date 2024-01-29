@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { Odo } from '../../odo/odoWrapper';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
-import { Functions } from '../../serverlessFunction/functions';
+
 import { InvokeFunction } from '../../serverlessFunction/types';
 import { CliExitData } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
@@ -18,11 +18,41 @@ import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { VsCommandError } from '../../vscommand';
 import { loadWebviewHtml, validateName } from '../common-ext/utils';
+import { Platform } from '../../util/platform';
+import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
     bindingName: string;
 }
+
+function getDefaultImages(name: string): string[] {
+    const imageList: string[] = [];
+    const defaultUsername = Platform.getEnv();
+    const defaultQuayImage = `quay.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
+    const defaultDockerImage = `docker.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
+    imageList.push(defaultQuayImage);
+    imageList.push(defaultDockerImage);
+    return imageList;
+}
+
+async function getTemplates(): Promise<any[]> {
+    const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+    if (result.error) {
+        void vscode.window.showErrorMessage(result.error.message);
+    }
+    return JSON.parse(result.stdout) as any[];
+}
+
+async function invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
+    await OpenShiftTerminalManager.getInstance().createTerminal(
+         ServerlessCommand.invokeFunction(invokeFunData),
+         `Invoke: ${functionName}`,
+         undefined, undefined, {
+             onExit: undefined
+         }, true
+     );
+ }
 
 async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
     let response: CliExitData;
@@ -33,7 +63,7 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
         case 'validateName': {
             const flag = validateName(functionName);
             const defaultImages = !flag
-                ? Functions.getInstance().getDefaultImages(functionName)
+                ? getDefaultImages(functionName)
                 : [];
             void panel?.webview.postMessage({
                 action: eventName,
@@ -117,7 +147,7 @@ async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<
                 enableURL: event.enableURL,
                 invokeURL: event.invokeURL,
             };
-            await Functions.getInstance().invoke(functionName, invokeFunData);
+            await invoke(functionName, invokeFunData);
             panel.dispose();
             break;
         }
@@ -155,7 +185,7 @@ export default class ServerlessFunctionViewLoader {
             panel.reveal(vscode.ViewColumn.One);
             return null;
         }
-        const templates = await Functions.getInstance().getTemplates();
+        const templates = await getTemplates();
         if (invoke) {
             const panel = await this.createView(title);
             const getEnvFuncId = crypto.randomUUID();
