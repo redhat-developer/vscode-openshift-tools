@@ -17,6 +17,7 @@ import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitSta
 import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, InvokeFunction } from './types';
+import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 
 export class Functions {
 
@@ -125,6 +126,10 @@ export class Functions {
     }
 
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
+        const isDockerRunning = await this.checkDocker();
+        if(!isDockerRunning) {
+            return;
+        }
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
 
         if (existingTerminal) {
@@ -171,6 +176,10 @@ export class Functions {
     }
 
     public async run(context: FunctionObject, runBuild = false) {
+        const isDockerRunning = await this.checkDocker();
+        if(!isDockerRunning) {
+            return;
+        }
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
             ServerlessCommand.runFunction(context.folderURI.fsPath, runBuild),
             `${runBuild ? 'Build and ' : ''}Run: ${context.name}`,
@@ -352,5 +361,20 @@ export class Functions {
             return yamlContent.image
         }
         return null;
+    }
+
+    private async checkDocker(): Promise<boolean> {
+        try {
+            const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute('docker info -f=json');
+            const resultObj: {ContainersRunning: number}= JSON.parse(resultRaw.stdout);
+            if (resultRaw.stderr.indexOf('docker daemon is not running') !== -1 && resultObj.ContainersRunning <= 0) {
+                void window.showErrorMessage('Docker is not running, Please start the docker process');
+                return false;
+            }
+        } catch(e) {
+            void window.showErrorMessage('Docker is not installed, Please install and start the docker process');
+            return false;
+        }
+        return true;
     }
 }
