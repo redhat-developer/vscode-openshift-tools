@@ -24,6 +24,7 @@ import { CliChannel } from '../../cli';
 import { ToolsConfig } from '../../tools';
 import { getVscodeModule } from '../../util/credentialManager';
 import { loadWebviewHtml } from '../common-ext/utils';
+import { Platform } from '../../util/platform';
 
 // HACK: we cannot include node-pty ourselves,
 // since the library can only be run under one version of node
@@ -485,7 +486,11 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     } else if (message.kind === 'resize') {
                         terminal.resize(message.data.cols, message.data.rows);
                     } else if (message.kind === 'closeTerminal') {
-                        if (terminal.file.endsWith('func.exe')) {
+                        let serverlessFuncTool = 'func';
+                        if (Platform.OS === 'win32') {
+                            serverlessFuncTool = serverlessFuncTool.concat('.exe');
+                        }
+                        if (terminal.file.endsWith(serverlessFuncTool)) {
                             void commands.executeCommand('openshift.Serverless.removeSession' , terminal.uuid, terminal.cwd, terminal.name);
                         }
                         terminal.dispose();
