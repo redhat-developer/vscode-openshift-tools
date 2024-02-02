@@ -3,16 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubeConfig, KubernetesObject } from '@kubernetes/client-node';
-import { pathExistsSync } from 'fs-extra';
-import * as path from 'path';
+import { KubernetesObject } from '@kubernetes/client-node';
 import { Uri, WorkspaceFolder, commands, workspace } from 'vscode';
 import { CommandOption, CommandText } from '../base/command';
 import * as cliInstance from '../cli';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { KubeConfigUtils } from '../util/kubeUtils';
-import { Platform } from '../util/platform';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
 import { AnalyzeResponse, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
@@ -77,34 +74,13 @@ export class Odo {
         void commands.executeCommand('setContext', 'isLoggedIn', false);
     }
 
-    public getKubeconfigEnv(): { KUBECONFIG?: string } {
-        const addEnv: { KUBECONFIG?: string } = {};
-        let kc: KubeConfig;
-        // TODO: Remove when odo works without kubeconfig present
-        try {
-            kc = new KubeConfigUtils();
-        } catch (err) {
-            // ignore error
-        }
-
-        const configPath = path.join(Platform.getUserHomePath(), '.kube', 'config');
-
-        if (kc && !pathExistsSync(configPath)) {
-            // config is loaded, yay! But there is still use case for missing config file
-            // use fake config to let odo get component types from registry
-            addEnv.KUBECONFIG = path.resolve(__dirname, '..', '..', 'config', 'kubeconfig');
-        }
-        return addEnv;
-    }
-
     public async getComponentTypes(): Promise<ComponentTypeAdapter[]> {
         // if kc is produced, KUBECONFIG env var is empty or pointing
 
         const result: CliExitData = await this.execute(
             new CommandText('odo', 'registry -o json'),
             undefined,
-            true,
-            this.getKubeconfigEnv(),
+            true
         );
         const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
         const devfileItems: ComponentTypeAdapter[] = [];
