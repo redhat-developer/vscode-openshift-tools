@@ -126,8 +126,8 @@ export class Functions {
     }
 
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
-        const isDockerRunning = await this.checkDocker();
-        if(!isDockerRunning) {
+        const isDockerRunning = await this.isDockerRunning();
+        if (!isDockerRunning) {
             return;
         }
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
@@ -157,7 +157,7 @@ export class Functions {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
-        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack',buildImage, isOpenShiftCluster, terminalKey);
+        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack', buildImage, isOpenShiftCluster, terminalKey);
     }
 
     private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string) {
@@ -176,8 +176,8 @@ export class Functions {
     }
 
     public async run(context: FunctionObject, runBuild = false) {
-        const isDockerRunning = await this.checkDocker();
-        if(!isDockerRunning) {
+        const isDockerRunning = await this.isDockerRunning();
+        if (!isDockerRunning) {
             return;
         }
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
@@ -363,7 +363,7 @@ export class Functions {
         return null;
     }
 
-    private async checkDocker(): Promise<boolean> {
+    private async isDockerRunning(): Promise<boolean> {
         try {
             const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute('docker info -f=json');
             const resultObj: {ContainersRunning: number}= JSON.parse(resultRaw.stdout);
@@ -371,10 +371,10 @@ export class Functions {
                 void window.showErrorMessage('Docker is not running, Please start the docker process');
                 return false;
             }
-        } catch(e) {
+            return true;
+        } catch (e) {
             void window.showErrorMessage('Docker is not installed, Please install and start the docker process');
             return false;
         }
-        return true;
     }
 }
