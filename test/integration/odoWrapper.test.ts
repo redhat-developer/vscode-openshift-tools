@@ -51,13 +51,6 @@ suite('./odo/odoWrapper.ts', function () {
         }
     });
 
-    suite('clusters', function () {
-        test('getActiveCluster()', async function () {
-            const activeCluster = await Odo.Instance.getActiveCluster();
-            expect(activeCluster).to.equal(clusterUrl);
-        });
-    });
-
     suite('components', function () {
         const project1 = 'my-test-project-1';
 

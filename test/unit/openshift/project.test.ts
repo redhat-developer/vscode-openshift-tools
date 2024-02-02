@@ -8,9 +8,9 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../../src/base/command';
-import { Odo } from '../../../src/odo/odoWrapper';
-import { Oc} from '../../../src/oc/ocWrapper';
+import { Oc } from '../../../src/oc/ocWrapper';
 import { Project as OdoProject } from '../../../src/oc/project';
+import { Odo } from '../../../src/odo/odoWrapper';
 import { Project } from '../../../src/openshift/project';
 
 const {expect} = chai;
@@ -28,7 +28,6 @@ suite('OpenShift/Project', () => {
     setup(() => {
         projectItem = { name: 'project', active: true };
         sandbox = sinon.createSandbox();
-        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({error: undefined, stdout: '', stderr: ''});
         createProjectStub = sandbox.stub(Oc.prototype, 'createProject').resolves();

@@ -5,7 +5,6 @@
 
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
-import { Odo } from '../../../src/odo/odoWrapper';
 import * as NameValidator from '../../../src/openshift/nameValidator';
 import { wait } from '../../../src/util/async';
 import sinon = require('sinon');
@@ -18,7 +17,6 @@ suite('nameValidator', function () {
 
     setup(function () {
         sandbox = sinon.createSandbox();
-        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
     });
 
     teardown(function () {

@@ -163,7 +163,6 @@ suite('./odo/odoWrapper.ts', () => {
 
         test('getProjects returns empty list if an error occurs', async () => {
             const errorStub = sandbox.stub(window, 'showErrorMessage');
-            sandbox.stub(odoCli, 'getActiveCluster').resolves('https://localhost:8080');
             execStub.rejects(errorMessage);
             const result = await Oc.Instance.getProjects();
 
@@ -244,25 +243,4 @@ suite('./odo/odoWrapper.ts', () => {
         });
     });
 
-    suite('odo and oc current cluster detection integration', () => {
-        const clusterUrl = 'https://localhost:8443';
-
-        const odoVersionOutLoggedIn = [
-            'odo v0.0.15 (2f7ed497)',
-            '',
-            `Server: ${clusterUrl}`,
-            'Kubernetes: v1.11.0+d4cacc0'
-        ];
-
-        test('extension uses odo version to get cluster url', async () => {
-            sandbox.stub(Odo.prototype, 'execute').resolves({
-                error: undefined,
-                stdout: odoVersionOutLoggedIn.join('\n'),
-                stderr: ''
-            });
-            const cluster: string = await odoCli.getActiveCluster();
-            expect(cluster).equals(clusterUrl);
-        });
-
-    });
 });
