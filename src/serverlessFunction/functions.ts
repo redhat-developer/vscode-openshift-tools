@@ -9,14 +9,13 @@ import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { isTektonAware } from '../tekton/tekton';
-import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';
 import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
-import { FunctionContent, FunctionObject, InvokeFunction } from './types';
+import { FunctionContent, FunctionObject, FunctionSession } from './types';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 
 export class Functions {
@@ -115,7 +114,7 @@ export class Functions {
 
     private async clustrBuildTerminal(context: FunctionObject, namespace: string, buildImage: string, gitModel: GitModel) {
         const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
-        await OpenShiftTerminalManager.getInstance().createTerminal(
+        const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
             ServerlessCommand.onClusterBuildFunction(context.folderURI.fsPath, namespace, buildImage, gitModel, isOpenShiftCluster),
             `On Cluster Build: ${context.name}`,
             context.folderURI.fsPath,
@@ -123,6 +122,24 @@ export class Functions {
                 onExit: undefined,
             } , true
         );
+        const session = {
+            sessionName: `On Cluster Build: ${context.name}`,
+            sessionPath: context.folderURI,
+            teminal: terminal
+        };
+        this.addSession(context, session);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
+    }
+
+    private addSession(context: FunctionObject, session: FunctionSession) {
+        if (context.sessions?.length > 0) {
+            const withoutExistingSameSession = context.sessions.filter((exSession) => exSession.sessionName !== session.sessionName);
+            context.sessions = withoutExistingSameSession;
+            context.sessions.push(session);
+        } else {
+            context.sessions = [];
+            context.sessions.push(session);
+        }
     }
 
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
@@ -131,7 +148,6 @@ export class Functions {
             return;
         }
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
-
         if (existingTerminal) {
             void window.showWarningMessage(`Do you want to restart ${context.name} build ?`, 'Yes', 'No').then(async (value: string) => {
                 if (value === 'Yes') {
@@ -169,9 +185,17 @@ export class Functions {
             {
                 onExit: () => {
                     this.buildTerminalMap.delete(terminalKey);
-                }
+                },
+
             }, true
         );
+        const session: FunctionSession = {
+            sessionName: `Build: ${context.name}`,
+            sessionPath: context.folderURI,
+            teminal: terminal
+        }
+        this.addSession(context, session);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
         this.buildTerminalMap.set(terminalKey, terminal);
     }
 
@@ -195,6 +219,13 @@ export class Functions {
                 }
             }, true
         );
+        const session: FunctionSession = {
+            sessionName: `${runBuild ? 'Build and ' : ''}Run: ${context.name}`,
+            sessionPath: context.folderURI,
+            teminal: terminal
+        }
+        this.addSession(context, session);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
         this.runTerminalMap.set(`run-${context.folderURI.fsPath}`, terminal);
     }
 
@@ -214,14 +245,6 @@ export class Functions {
                 void commands.executeCommand('openshift.Serverless.refresh');
             }
         });
-    }
-
-    public async getTemplates(): Promise<any[]> {
-        const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
-        if (result.error) {
-            void window.showErrorMessage(result.error.message);
-        }
-        return JSON.parse(result.stdout) as any[];
     }
 
     public async deploy(context: FunctionObject) {
@@ -278,16 +301,14 @@ export class Functions {
                 },
             }, true
         );
-    }
 
-    public async invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
-        await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.invokeFunction(invokeFunData),
-            `Invoke: ${functionName}`,
-            undefined, undefined, {
-                onExit: undefined
-            }, true
-        );
+        const session = {
+            sessionName: `Deploy: ${context.name}`,
+            sessionPath: context.folderURI,
+            teminal: terminal
+        };
+        this.addSession(context, session);
+        void commands.executeCommand('openshift.Serverless.refresh', context);
     }
 
     public async config(title: string, context: FunctionObject, mode: string, isAdd = true) {
@@ -343,16 +364,6 @@ export class Functions {
             },
             password: passwordType,
         });
-    }
-
-    public getDefaultImages(name: string): string[] {
-        const imageList: string[] = [];
-        const defaultUsername = Platform.getEnv();
-        const defaultQuayImage = `quay.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
-        const defaultDockerImage = `docker.io/${Platform.getOS() === 'win32' ? defaultUsername.USERNAME : defaultUsername.USER}/${name}:latest`;
-        imageList.push(defaultQuayImage);
-        imageList.push(defaultDockerImage);
-        return imageList;
     }
 
     public async getImage(folderURI: Uri): Promise<string> {

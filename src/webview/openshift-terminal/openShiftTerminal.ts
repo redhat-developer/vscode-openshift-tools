@@ -24,6 +24,7 @@ import { CliChannel } from '../../cli';
 import { ToolsConfig } from '../../tools';
 import { getVscodeModule } from '../../util/credentialManager';
 import { loadWebviewHtml } from '../common-ext/utils';
+import { Platform } from '../../util/platform';
 
 // HACK: we cannot include node-pty ourselves,
 // since the library can only be run under one version of node
@@ -65,6 +66,8 @@ export interface OpenShiftTerminalApi {
      * Close the terminal. If the extension is not running on Windows, the process will be terminated using SIGABRT.
      */
     forceKill: () => void;
+
+    id: string;
 }
 
 /**
@@ -203,6 +206,24 @@ class OpenShiftTerminal {
     }
 
     /**
+     * Returns the exe file of the execution.
+     *
+     * @returns the exe file of the execution.
+     */
+    public get file() {
+        return this._file;
+    }
+
+    /**
+     * Returns the current working directory of the execution.
+     *
+     * @returns the current working directory.
+     */
+    public get cwd(): string {
+        return this._options?.cwd;
+    }
+
+    /**
      * Returns the name of this terminal.
      *
      * @returns the name of this terminal
@@ -236,6 +257,10 @@ class OpenShiftTerminal {
      */
     public get isPtyLive() {
         return this._pty && !this._ptyExited;
+    }
+
+    public get isPtyExit() {
+        return this._ptyExited;
     }
 
     /**
@@ -461,6 +486,13 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                     } else if (message.kind === 'resize') {
                         terminal.resize(message.data.cols, message.data.rows);
                     } else if (message.kind === 'closeTerminal') {
+                        let serverlessFuncTool = 'func';
+                        if (Platform.OS === 'win32') {
+                            serverlessFuncTool = serverlessFuncTool.concat('.exe');
+                        }
+                        if (terminal.file.endsWith(serverlessFuncTool)) {
+                            void commands.executeCommand('openshift.Serverless.removeSession' , terminal.uuid, terminal.cwd, terminal.name);
+                        }
                         terminal.dispose();
                         this.openShiftTerminals.delete(message?.data?.uuid);
                     } else if (message.kind === 'openExternal') {
@@ -645,6 +677,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
                 void this.sendMessage({ kind: 'switchToTerminal', data: { uuid: newTermUUID } }),
             kill: () => this.openShiftTerminals.get(newTermUUID).write('\u0003'),
             forceKill: () => this.openShiftTerminals.get(newTermUUID).forceKill(),
+            id: newTermUUID
         };
     }
 

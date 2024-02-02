@@ -98,14 +98,14 @@
 	},
 	"devDependencies": {
 		"@devfile/api": "^2.2.2-1704827891",
-		"@mui/icons-material": "^5.15.6",
-		"@mui/lab": "^5.0.0-alpha.162",
-		"@mui/material": "^5.15.6",
-		"@mui/styles": "^5.15.6",
-		"@rjsf/core": "^5.15.1",
-		"@rjsf/mui": "^5.16.1",
+		"@mui/icons-material": "^5.15.7",
+		"@mui/lab": "^5.0.0-alpha.163",
+		"@mui/material": "^5.15.7",
+		"@mui/styles": "^5.15.7",
+		"@rjsf/core": "^5.17.0",
+		"@rjsf/mui": "^5.17.0",
 		"@rjsf/utils": "^5.15.1",
-		"@rjsf/validator-ajv8": "^5.16.1",
+		"@rjsf/validator-ajv8": "^5.17.0",
 		"@segment/analytics-next": "^1.63.0",
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^4.3.11",
@@ -170,7 +170,7 @@
 		"sinon": "^17.0.1",
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
-		"survey-react-ui": "^1.9.127",
+		"survey-react-ui": "^1.9.128",
 		"typescript": "^5.3.3",
 		"vscode-extension-tester": "^7.0",
 		"xterm-addon-fit": "^0.8.0",
@@ -930,6 +930,16 @@
 				"command": "openshift.Serverless.invoke",
 				"title": "Invoke",
 				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.showInTerminal",
+				"title": "Show in terminal",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.Serverless.removeSession",
+				"title": "Remove Serverless Session",
+				"category": "OpenShift"
 			}
 		],
 		"keybindings": [
@@ -1371,6 +1381,14 @@
 				},
 				{
 					"command": "openshift.Serverless.removeGit",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.showInTerminal",
+					"when": "false"
+				},
+				{
+					"command": "openshift.Serverless.removeSession",
 					"when": "false"
 				}
 			],
