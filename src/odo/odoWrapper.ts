@@ -4,12 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { Uri, WorkspaceFolder, commands, workspace } from 'vscode';
+import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { CommandOption, CommandText } from '../base/command';
 import * as cliInstance from '../cli';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
-import { KubeConfigUtils } from '../util/kubeUtils';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
 import { AnalyzeResponse, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
@@ -31,47 +30,6 @@ export class Odo {
 
     private constructor() {
         // no state
-    }
-
-    /**
-     * Returns the URL of the API of the current active cluster,
-     * or undefined if there are no active clusters.
-     *
-     * @return the URL of the API of the current active cluster,
-     * or undefined if there are no active clusters
-     */
-    public async getActiveCluster(): Promise<string> {
-        const result: CliExitData = await this.execute(
-            Command.printOdoVersion(),
-            process.cwd(),
-            false,
-        );
-
-        const odoCluster = result.stdout
-            .trim()
-            .split('\n')
-            .filter((value) => value.includes('Server:'))
-            .map((value) => {
-                return value.substring(value.indexOf(':') + 1).trim();
-            });
-        if (odoCluster.length !== 0) {
-            void commands.executeCommand('setContext', 'isLoggedIn', true);
-            return odoCluster[0];
-        }
-
-        // odo didn't report an active cluster, try reading it from KubeConfig
-        try {
-            const kubeConfigCurrentCluster = new KubeConfigUtils().getCurrentCluster().server;
-            if (kubeConfigCurrentCluster) {
-                void commands.executeCommand('setContext', 'isLoggedIn', true);
-                return kubeConfigCurrentCluster;
-            }
-        } catch (e) {
-            // ignored
-        }
-
-        // no active cluster
-        void commands.executeCommand('setContext', 'isLoggedIn', false);
     }
 
     public async getComponentTypes(): Promise<ComponentTypeAdapter[]> {
