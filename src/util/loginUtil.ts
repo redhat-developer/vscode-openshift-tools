@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandText } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { isOpenShift } from '../k8s/clusterExplorer';
 import { Oc } from '../oc/ocWrapper';
@@ -27,23 +27,25 @@ export class LoginUtil {
      * @returns true if the user needs to log in to access the cluster, and false otherwise
      */
     public async requireLogin(serverURI?: string): Promise<boolean> {
-        // Usually 'oc status' takes ~3 seconds to complete when logged in to an OS cluster,
-        // so we use 5 seconds timeout here in order to prevent false-positive 'not logged in`-like
-        // result
         return await CliChannel.getInstance().executeSyncTool(
-                new CommandText('oc', 'status'), { timeout: 5000 })
-            .then((server) => {
+                new CommandText('oc', 'whoami', [new CommandOption('--show-server')]), { timeout: 5000 })
+            .then(async (server) => {
+                // if the server is different - require to login
                 const serverCheck = server ? server.trim() : '';
-                return serverURI ? !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase())) : false;
+                if (serverURI && !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase()))) return true;
+
+                return await CliChannel.getInstance().executeSyncTool(
+                        new CommandText('oc', 'whoami'), { timeout: 5000 })
+                    .then((user) => false) // Active user is set - no need to login
+                    .catch((error) => {
+                        if (!error.stderr) return true; // Error with no reason - require to login
+
+                        // if reason is "forbidden" or not determined - require to login, otherwise - no need to login
+                        const matches = error.stderr.match(/Error\sfrom\sserver\s\(([a-zA-Z]*)\):*/);
+                        return matches && matches[1].toLocaleLowerCase() !== 'forbidden' ? false : true;
+                    });
             })
-            .catch((error) => {
-                // In case of Kind cluster we're don't need to provide any credentials,
-                // but Kind normally reports lack of project access rights error:
-                // "you do not have rights to view project..."
-                // Here we return 'false' in such case in order to prevent requesting for
-                // login credentials for Kind-like clusters.
-                return (error.stderr && error.stderr.toLowerCase().includes('you do not have rights to view project')) ? false : true;
-            });
+            .catch((error) => true); // Can't get server - require to login
     }
 
     /**
