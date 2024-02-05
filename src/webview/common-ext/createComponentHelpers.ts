@@ -185,7 +185,7 @@ export function validatePortNumber(portNumber: number): string {
  *
  * @returns a list of the devfile registries with their devfiles attached
  */
-export function getDevfileRegistries(): DevfileRegistry[] {
+export async function getDevfileRegistries(): Promise<DevfileRegistry[]> {
     const registries = ComponentTypesView.instance.getListOfRegistries();
     if (!registries || registries.length === 0) {
         throw new Error('No Devfile registries available. Default registry is missing');
@@ -198,7 +198,7 @@ export function getDevfileRegistries(): DevfileRegistry[] {
         } as DevfileRegistry;
     });
 
-    const components = ComponentTypesView.instance.getCompDescriptions();
+    const components = await ComponentTypesView.instance.getCompDescriptions();
     for (const component of components) {
         const devfileRegistry = devfileRegistries.find(
             (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
@@ -261,8 +261,8 @@ export function getDevfileCapabilities(): string[] {
  *
  * @returns a list of the devfile tags
  */
-export function getDevfileTags(url?: string): string[] {
-    const devfileRegistries = getDevfileRegistries();
+export async function getDevfileTags(url?: string): Promise<string[]> {
+    const devfileRegistries = await getDevfileRegistries();
 
     const devfileTags: string[] = [
         ...new Set(
