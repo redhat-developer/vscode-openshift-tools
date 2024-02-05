@@ -36,13 +36,13 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             })
             break;
         case 'getDevfileRegistries':
-            RegistryViewLoader.sendUpdatedRegistries();
+            await RegistryViewLoader.sendUpdatedRegistries();
             break;
         case 'getDevfileCapabilities':
             RegistryViewLoader.sendUpdatedCapabilities();
             break;
         case 'getDevfileTags':
-            RegistryViewLoader.sendUpdatedTags();
+            await RegistryViewLoader.sendUpdatedTags();
             break;
         case 'createComponent': {
             const { projectFolder, componentName } = event.data;
@@ -198,9 +198,9 @@ export default class RegistryViewLoader {
         return Promise.resolve();
     }
 
-    static sendUpdatedRegistries() {
+    static async sendUpdatedRegistries() {
         if (panel) {
-            let registries = getDevfileRegistries();
+            let registries = await getDevfileRegistries();
             if (RegistryViewLoader.url) {
                 registries = registries.filter((devfileRegistry) => devfileRegistry.url === RegistryViewLoader.url);
             }
@@ -220,18 +220,18 @@ export default class RegistryViewLoader {
         }
     }
 
-    static sendUpdatedTags() {
+    static async sendUpdatedTags() {
         if (panel) {
             void panel.webview.postMessage({
                 action: 'devfileTags',
-                data: getDevfileTags(RegistryViewLoader.url),
+                data: await getDevfileTags(RegistryViewLoader.url),
             });
         }
     }
 }
 
 ComponentTypesView.instance.subject.subscribe(() => {
-    RegistryViewLoader.sendUpdatedRegistries();
+    void RegistryViewLoader.sendUpdatedRegistries();
 });
 
 ComponentTypesView.instance.subject.subscribe(() => {
@@ -239,5 +239,5 @@ ComponentTypesView.instance.subject.subscribe(() => {
 });
 
 ComponentTypesView.instance.subject.subscribe(() => {
-    RegistryViewLoader.sendUpdatedTags();
+    void RegistryViewLoader.sendUpdatedTags();
 });
