@@ -28,7 +28,9 @@ import fetch = require('make-fetch-happen');
 
 export interface QuickPickItemExt extends QuickPickItem {
     name: string,
-    cluster: string
+    cluster: string,
+    user: string,
+    namespace: string
 }
 
 export class Cluster extends OpenShiftItem {
@@ -186,6 +188,8 @@ export class Cluster extends OpenShiftItem {
             .map((ctx) => ({
                 name: `${ctx.name}`,
                 cluster: `${ctx.cluster}`,
+                user: `${ctx.user}`,
+                namespace: `${ctx.namespace}`,
                 label: `${ctx.label}`,
                 description: `on ${ctx.cluster}`,
                 detail: `User: ${ctx.user}`,
@@ -223,8 +227,9 @@ export class Cluster extends OpenShiftItem {
                             if (await LoginUtil.Instance.requireLogin(clusterURL)) {
                                 const status = await Cluster.login(choice.name, true);
                                 if (status) {
+                                    const newKcu = new KubeConfigUtils(); // Can be updated after login
                                     if (Cluster.isSandboxCluster(clusterURL)
-                                            && !k8sConfig.equalsToCurrentContext(choice.name)) {
+                                            && !newKcu.equalsToCurrentContext(choice.name, choice.cluster, choice.namespace, choice.user)) {
                                         await window.showWarningMessage(
                                             'The cluster appears to be a OpenShift Dev Sandbox cluster, \
                                             but the required project doesn\'t appear to be existing. \

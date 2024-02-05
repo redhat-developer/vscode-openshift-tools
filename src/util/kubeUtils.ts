@@ -128,24 +128,15 @@ export class KubeConfigUtils extends KubeConfig {
         return undefined;
     }
 
-    public equalContexts(c1:string, c2:string): boolean {
-        if (c1 === c2) return true;
-        const context1 = this.findContext(c1);
-        const context2 = this.findContext(c2);
-        if (context1 === context2) return true; // Both are undefibed or reference the same object
-        if (context1 === undefined && context2 !== undefined) return false;
-        if (context1 === undefined && context2 !== undefined) return false;
-        if (context1.cluster !== context2.cluster) return false;
-        if (context1.namespace !== context2.namespace) return false;
-        if (context1.user !== context2.user) return false;
-        return true;
-    }
-
-    public equalsToCurrentContext(contextName:string): boolean {
+    public equalsToCurrentContext(contextName:string, cluster: string, namespace: string, user: string): boolean {
         const currentContext = this.findContext(this.currentContext);
         if (!currentContext) return false;
 
-        return this.equalContexts(currentContext.name, contextName);
+        if (currentContext.name !== contextName) return false;
+        if (currentContext.cluster !== cluster) return false;
+        if (currentContext.namespace !== namespace) return false;
+        if (currentContext.user !== user) return false;
+        return true;
     }
 }
 
