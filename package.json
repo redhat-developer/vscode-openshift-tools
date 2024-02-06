@@ -133,7 +133,7 @@
 		"@vscode/test-electron": "^2.3.9",
 		"bootstrap": "^5.3.2",
 		"chai": "^4.4.1",
-		"chokidar": "^3.5.3",
+		"chokidar": "^3.6.0",
 		"codecov": "^3.8.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.12",
