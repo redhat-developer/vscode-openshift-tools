@@ -25,7 +25,8 @@ import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
-import { setKubeConfig } from './util/kubeUtils';
+import { KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
+import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import { Platform } from './util/platform';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
@@ -34,6 +35,7 @@ import { WelcomePage } from './welcomePage';
 import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 
 import fsx = require('fs-extra');
+import { Oc } from './oc/ocWrapper';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -79,6 +81,13 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
     crcStatusItem.command = 'openshift.explorer.stopCluster';
+
+    const activeNamespaceStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, 1);
+    activeNamespaceStatusBarItem.command = 'openshift.project.set';
+
+    const activeContextStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, 2);
+    activeContextStatusBarItem.command = 'openshift.explorer.switchContext';
+
     const disposable = [
         ...(await registerCommands(
             './k8s/route',
@@ -99,6 +108,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             commands.executeCommand('extension.vsKubernetesUseNamespace', context),
         ),
         crcStatusItem,
+        activeNamespaceStatusBarItem,
+        activeContextStatusBarItem,
         OpenShiftExplorer.getInstance(),
         new DebugSessionsView().createTreeView('openshiftDebugView'),
         ...Component.init(),
@@ -182,7 +193,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     }
 
     function createStatusBarItem(context: ExtensionContext) {
-        const item = window.createStatusBarItem(StatusBarAlignment.Left, 1);
+        const item = window.createStatusBarItem(StatusBarAlignment.Left, 3);
         item.command = 'openshift.openStatusBar';
         context.subscriptions.push(item);
         context.subscriptions.push(statusBarFunctions());
@@ -200,6 +211,57 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         statusBarItem.text = `$(debug-stop) ${text}`;
         statusBarItem.show();
     }
+
+    // Disable the k8s extension displaying its context/namespace status bar items...
+    // ...and setup our own context and namespace status bar informer/picker items
+
+    // if true will disable displaying the namespace from the status bar
+    function isNamespaceInfoStatusBarDisabled(): boolean {
+        // If k8s extension's Namespace Picker is eenabled - do not show the OS Tools's one
+        if (workspace.getConfiguration('vs-kubernetes').get('vs-kubernetes.disable-namespace-info-status-bar') === false) {
+            return true;
+        }
+
+        return workspace.getConfiguration('openshiftToolkit').get['openshiftToolkit.disable-namespace-info-status-bar'];
+    }
+
+    // if true will disable displaying the context from the status bar
+    function isContextInfoStatusBarDisabled(): boolean {
+        // If k8s extension's Namespace Picker is eenabled - do not show the OS Tools's one
+        if (workspace.getConfiguration('vs-kubernetes').get('vs-kubernetes.disable-context-info-status-bar') === false) {
+            return true;
+        }
+
+        return workspace.getConfiguration('openshiftToolkit').get['openshiftToolkit.disable-context-info-status-bar'];
+    }
+
+    function updateContextStatusBarItem(statusBarItem: StatusBarItem, iconId: string, text: string, tooltip: string, show: boolean): void {
+        statusBarItem.text = `$(${iconId}) ${text}`;
+        statusBarItem.tooltip = tooltip;
+        if (show && text) {
+            statusBarItem.show();
+        } else {
+            statusBarItem.hide();
+        }
+    }
+
+    OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event((context) => {
+        void Oc.Instance.getActiveProject().then((namespace) =>
+            updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', namespace, `Current namespace: ${namespace}`,
+                !isNamespaceInfoStatusBarDisabled()));
+
+        const kcu: KubeConfigUtils = new KubeConfigUtils();
+        const currentContext: KcuContext = kcu.findContext(context);
+        updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
+            !isContextInfoStatusBarDisabled());
+    });
+
+    const kcu: KubeConfigUtils = new KubeConfigUtils();
+    const currentContext: KcuContext = kcu.findContext(kcu.currentContext);
+    updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', null, 'Current namespace',
+        !isNamespaceInfoStatusBarDisabled());
+    updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
+        !isContextInfoStatusBarDisabled());
 
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
     void extendClusterExplorer();

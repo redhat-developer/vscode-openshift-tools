@@ -78,6 +78,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
+    public onDidChangeContextEmitter = new EventEmitter<string>();
+
     private constructor() {
         try {
             this.kubeConfig = new KubeConfigUtils();
@@ -100,6 +102,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         || this.kubeContext.user !== newCtx.user
                         || this.kubeContext.namespace !== newCtx.namespace)) {
                     this.refresh();
+                    this.onDidChangeContextEmitter.fire(newCtx.name);
                 }
                 this.kubeContext = newCtx;
                 this.kubeConfig = ku2;
@@ -234,6 +237,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
             }
+            OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(new KubeConfigUtils().currentContext);
         } else if ('name' in element) { // we are dealing with context here
             // user is logged into cluster from current context
             // and project should be show as child node of current context
