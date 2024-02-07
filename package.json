@@ -99,7 +99,7 @@
 	"devDependencies": {
 		"@devfile/api": "^2.2.2-1704827891",
 		"@mui/icons-material": "^5.15.8",
-		"@mui/lab": "^5.0.0-alpha.163",
+		"@mui/lab": "^5.0.0-alpha.164",
 		"@mui/material": "^5.15.7",
 		"@mui/styles": "^5.15.8",
 		"@rjsf/core": "^5.17.0",
