@@ -3,14 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { KubernetesObject } from '@kubernetes/client-node';
 import * as path from 'path';
 import validator from 'validator';
 import { Disposable, QuickInputButtons, ThemeIcon, TreeItem, window } from 'vscode';
+import { CommandText } from './base/command';
 import { OpenShiftExplorer } from './explorer';
 import { Oc } from './oc/ocWrapper';
 import { validateRFC1123DNSLabel } from './openshift/nameValidator';
 import { quickBtn } from './util/inputValue';
 import { vsCommand } from './vscommand';
+import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
 export class Deployment {
 
@@ -76,6 +79,12 @@ export class Deployment {
 
         }
 
+    }
+
+    @vsCommand('openshift.deployment.shell')
+    static shellIntoDeployment(component: KubernetesObject): Promise<void> {
+        void OpenShiftTerminalManager.getInstance().createTerminal(new CommandText('oc', `exec -it ${component.kind}/${component.metadata.name} -- /bin/sh`), `Shell to '${component.metadata.name}'`);
+        return Promise.resolve();
     }
 
     /**
