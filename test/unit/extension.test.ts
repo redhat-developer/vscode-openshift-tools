@@ -15,8 +15,8 @@ import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
-import { Odo } from '../../src/odo/odoWrapper';
 import { Project } from '../../src/oc/project';
+import { Odo } from '../../src/odo/odoWrapper';
 import { Progress } from '../../src/util/progress';
 import path = require('path');
 
@@ -90,7 +90,6 @@ suite('openshift toolkit Extension', () => {
             return { error: undefined, stdout: '', stderr: ''};
         });
         sandbox.stub(Oc.prototype, 'getAllKubernetesObjects').resolves([]);
-        sandbox.stub(Odo.prototype, 'getActiveCluster').resolves('cluster');
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
     });
 

@@ -18,6 +18,7 @@ import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
+import { DevfileV1 } from '../../util/devfileV1Type';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
     getDevfileCapabilities,
@@ -29,7 +30,6 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
-import { DevfileV1 } from '../../util/devfileV1Type';
 
 interface CloneProcess {
     status: boolean;
@@ -78,7 +78,7 @@ export default class CreateComponentLoader {
         });
 
         const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            sendUpdatedRegistries();
+            void sendUpdatedRegistries();
         });
 
         const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
@@ -86,7 +86,7 @@ export default class CreateComponentLoader {
         });
 
         const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            sendUpdatedTags();
+            void sendUpdatedTags();
         });
 
         panel.onDidDispose(() => {
@@ -138,7 +138,7 @@ export default class CreateComponentLoader {
             case 'getDevfileRegistries': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileRegistries',
-                    data: getDevfileRegistries(),
+                    data: await getDevfileRegistries(),
                 });
                 break;
             }
@@ -158,7 +158,7 @@ export default class CreateComponentLoader {
             case 'getDevfileTags': {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'devfileTags',
-                    data: getDevfileTags(),
+                    data: await getDevfileTags(),
                 });
                 break;
             }
@@ -360,7 +360,7 @@ export default class CreateComponentLoader {
                             await fs.mkdir(componentFolder, {recursive: true});
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
-                        const devfileType = getDevfileType(message.data.devfileDisplayName);
+                        const devfileType = await getDevfileType(message.data.devfileDisplayName);
                         const componentFolderUri = Uri.file(componentFolder);
                         if (!await isDevfileExists(componentFolderUri)) {
                             await Odo.Instance.createComponentFromLocation(
@@ -521,7 +521,7 @@ export default class CreateComponentLoader {
                 action: 'getRecommendedDevfileStart'
             });
             analyzeRes = await Odo.Instance.analyze(uri.fsPath);
-            compDescriptions = getCompDescription(analyzeRes);
+            compDescriptions = await getCompDescription(analyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
                 const actions: Array<string> = ['Yes', 'Cancel'];
@@ -536,7 +536,7 @@ export default class CreateComponentLoader {
                         const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await Odo.Instance.analyze(uri.fsPath);
-                        compDescriptions = getCompDescription(analyzeRes);
+                        compDescriptions = await getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
                         const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(
                             devfileV1,
@@ -562,7 +562,7 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfile'
             });
-            const devfileRegistry: DevfileRegistry[] = getDevfileRegistries();
+            const devfileRegistry: DevfileRegistry[] = await getDevfileRegistries();
             const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
             const devfile: Devfile | undefined =
                 compDescriptions.length !== 0
@@ -583,8 +583,8 @@ export default class CreateComponentLoader {
     }
 }
 
-function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescription[] {
-    const compDescriptions = ComponentTypesView.instance.getCompDescriptions();
+async function getCompDescription(devfiles: AnalyzeResponse[]): Promise<ComponentTypeDescription[]> {
+    const compDescriptions = await ComponentTypesView.instance.getCompDescriptions();
     if (devfiles.length === 0) {
         return Array.from(compDescriptions);
     }
@@ -598,9 +598,9 @@ function getCompDescription(devfiles: AnalyzeResponse[]): ComponentTypeDescripti
     );
 }
 
-function getDevfileType(devfileDisplayName: string): string {
+async function getDevfileType(devfileDisplayName: string): Promise<string> {
     const compDescriptions: Set<ComponentTypeDescription> =
-        ComponentTypesView.instance.getCompDescriptions();
+        await ComponentTypesView.instance.getCompDescriptions();
     const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find(
         (description) => description.displayName === devfileDisplayName,
     );
@@ -661,11 +661,11 @@ async function validateFolderPath(path: string) {
     }
 }
 
-function sendUpdatedRegistries() {
+async function sendUpdatedRegistries() {
     if (CreateComponentLoader.panel) {
         void CreateComponentLoader.panel.webview.postMessage({
             action: 'devfileRegistries',
-            data: getDevfileRegistries(),
+            data: await getDevfileRegistries(),
         });
     }
 }
@@ -679,11 +679,11 @@ function sendUpdatedCapabilities() {
     }
 }
 
-function sendUpdatedTags() {
+async function sendUpdatedTags() {
     if (CreateComponentLoader.panel) {
         void CreateComponentLoader.panel.webview.postMessage({
             action: 'devfileTags',
-            data: getDevfileTags(),
+            data: await getDevfileTags(),
         });
     }
 }

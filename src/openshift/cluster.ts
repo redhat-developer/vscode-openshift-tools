@@ -4,6 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
+import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
+import * as fs from 'fs/promises';
+import * as YAML from 'js-yaml';
 import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
@@ -14,7 +17,7 @@ import * as NameValidator from '../openshift/nameValidator';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { inputValue, quickBtn } from '../util/inputValue';
-import { KubeConfigUtils } from '../util/kubeUtils';
+import { KubeConfigUtils, getKubeConfigFiles } from '../util/kubeUtils';
 import { LoginUtil } from '../util/loginUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
@@ -22,7 +25,6 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
 import fetch = require('make-fetch-happen');
-import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 
 export interface QuickPickItemExt extends QuickPickItem {
     name: string,
@@ -838,20 +840,26 @@ export class Cluster extends OpenShiftItem {
         } else {
             ocToken = userToken;
         }
-        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`, () =>
-            Oc.Instance.loginWithToken(clusterURL, ocToken)
-                .then(() => Cluster.loginMessage(clusterURL))
-                .catch((error) =>
-                    Promise.reject(
-                        new VsCommandError(
-                            `Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(
-                                error.message,
-                            )}'!`,
-                            'Failed to login to cluster',
-                        ),
-                    ),
-                ),
-        );
+        return Progress.execFunctionWithProgress(`Login to the cluster: ${clusterURL}`, async () => {
+            try {
+                await Oc.Instance.loginWithToken(clusterURL, ocToken);
+                if (Cluster.isOpenShiftSandbox(clusterURL)) {
+                    const YES = 'Yes';
+                    const result = await window.showInformationMessage('OpenShift Sandbox logs you out after 15 minutes. Would you like to switch to a service account to prevent this?', YES, 'No');
+                    if (result === YES) {
+                        await Cluster.installPipelineUserContext();
+                    }
+                }
+                return Cluster.loginMessage(clusterURL);
+            } catch (error) {
+                throw new VsCommandError(
+                    `Failed to login to cluster '${clusterURL}' with '${Filters.filterToken(
+                        error.message,
+                    )}'!`,
+                    'Failed to login to cluster',
+                );
+            }
+        });
     }
 
     static validateLoginToken(token: string): boolean {
@@ -878,6 +886,39 @@ export class Cluster extends OpenShiftItem {
         return Cluster.tokenLogin(apiEndpointUrl, true, clipboard);
     }
 
+    static async installPipelineUserContext(): Promise<void> {
+        const kcu = new KubeConfigUtils();
+        const kcFiles = getKubeConfigFiles();
+        if (kcFiles.length === 0) {
+            throw new Error('Could not locate Kube Config when trying to replace OpenShift Sandbox token with a longer-lived token');
+        }
+        const kcPath = kcFiles[0];
+        const kcActual = YAML.load((await fs.readFile(kcPath)).toString('utf-8')) as {
+            users: { name: string; user: { token: string } }[];
+            contexts: {
+                context: { cluster: string; user: string; namespace: string };
+                name: string;
+            }[];
+            'current-context': string;
+            clusters: object[];
+        };
+
+        const currentCtx = kcu.getCurrentContext();
+        const currentCtxObj = kcActual.contexts.find(ctx => ctx.name === currentCtx);
+        const sandboxUser = currentCtxObj.context.user;
+        const sandboxUserObj = kcActual.users.find(user => user.name === sandboxUser);
+
+        const secrets = await Oc.Instance.getKubernetesObjects('Secret');
+        const pipelineTokenSecret = secrets.find((secret) => secret.metadata.name.startsWith('pipeline-token')) as any;
+        const pipelineToken = Buffer.from(pipelineTokenSecret.data.token, 'base64').toString();
+
+        sandboxUserObj.user = {
+            token: pipelineToken
+        }
+
+        await fs.writeFile(kcPath, YAML.dump(kcActual, { lineWidth: Number.POSITIVE_INFINITY }));
+    }
+
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
         const clipboard = await Cluster.readFromClipboard();
         if (!NameValidator.ocLoginCommandMatches(clipboard)) {
@@ -898,5 +939,10 @@ export class Cluster extends OpenShiftItem {
         Cluster.serverlessView.refresh();
         await commands.executeCommand('setContext', 'isLoggedIn', true);
         return `Successfully logged in to '${clusterURL}'`;
+    }
+
+    static isOpenShiftSandbox(url :string): boolean {
+        const asUrl = new URL(url);
+        return asUrl.hostname.endsWith('openshiftapps.com');
     }
 }

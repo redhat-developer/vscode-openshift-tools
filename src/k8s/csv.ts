@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { TreeItem, WebviewPanel, window } from 'vscode';
+import { TreeItem } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { Oc } from '../oc/ocWrapper';
-import { Odo } from '../odo/odoWrapper';
 import OpenShiftItem from '../openshift/openshiftItem';
 import { CRDDescription, ClusterServiceVersionKind } from './olm/types';
 
@@ -51,42 +50,6 @@ export class ClusterServiceVersion extends OpenShiftItem {
                 return csv.spec.customresourcedefinitions.owned.map((crd) => new CsvNode(crd, csv));
             },
         };
-    }
-
-    static createFormMessageListener(panel: WebviewPanel) {
-        return async (event: any) => {
-            if (event.command === 'cancel') {
-                if (event.changed === true) {
-                    const choice = await window.showWarningMessage('Discard all the changes in the form?', 'Yes', 'No');
-                    if (choice === 'No') {
-                        return;
-                    }
-                }
-                panel.dispose();
-            }
-            if (event.command === 'create') {
-                // add waiting for Deployment to be created using wait --for=condition
-                // no need to wait until it is available
-                if (!await Odo.Instance.getActiveCluster()) {
-                    // could be expired session
-                    return;
-                }
-
-                try {
-                    // make the service part of the app
-                    event.formData.metadata.labels = {
-                        app: 'app',
-                        'app.kubernetes.io/part-of': 'app'
-                    };
-                    await Oc.Instance.createKubernetesObjectFromSpec(event.formData);
-                    void window.showInformationMessage(`Service ${event.formData.metadata.name} successfully created.`);
-                    panel.dispose();
-                } catch (err) {
-                    void window.showErrorMessage(err);
-                    await panel.webview.postMessage({action: 'error'});
-                }
-            }
-        }
     }
 
 }
