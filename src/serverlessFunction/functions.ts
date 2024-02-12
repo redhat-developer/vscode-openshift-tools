@@ -16,7 +16,7 @@ import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitSta
 import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, FunctionSession } from './types';
-import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
+import Dockerode = require('dockerode');
 
 export class Functions {
 
@@ -119,8 +119,8 @@ export class Functions {
             `On Cluster Build: ${context.name}`,
             context.folderURI.fsPath,
             process.env, {
-                onExit: undefined,
-            } , true
+            onExit: undefined,
+        }, true
         );
         const session = {
             sessionName: `On Cluster Build: ${context.name}`,
@@ -375,17 +375,20 @@ export class Functions {
     }
 
     private async isDockerRunning(): Promise<boolean> {
-        try {
-            const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute('docker info -f=json');
-            const resultObj: {ContainersRunning: number}= JSON.parse(resultRaw.stdout);
-            if (resultRaw.stderr.indexOf('docker daemon is not running') !== -1 && resultObj.ContainersRunning <= 0) {
-                void window.showErrorMessage('Docker is not running, Please start the docker process');
-                return false;
+        return new Promise<boolean>((resolve) => {
+            try {
+                const docker = new Dockerode();
+                docker.ping((err) => {
+                    if (err) {
+                        void window.showErrorMessage('Docker is not running, Please start the docker process');
+                        resolve(false);
+                    }
+                    resolve(true);
+                });
+            } catch (e) {
+                void window.showErrorMessage('Docker is not installed, Please install and start the docker process');
+                resolve(false);
             }
-            return true;
-        } catch (e) {
-            void window.showErrorMessage('Docker is not installed, Please install and start the docker process');
-            return false;
-        }
+        });
     }
 }
