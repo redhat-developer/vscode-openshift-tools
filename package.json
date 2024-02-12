@@ -101,7 +101,7 @@
 		"@mui/icons-material": "^5.15.9",
 		"@mui/lab": "^5.0.0-alpha.165",
 		"@mui/material": "^5.15.9",
-		"@mui/styles": "^5.15.9",
+		"@mui/styles": "^5.15.10",
 		"@rjsf/core": "^5.17.0",
 		"@rjsf/mui": "^5.17.0",
 		"@rjsf/utils": "^5.15.1",
