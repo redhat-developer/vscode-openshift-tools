@@ -17,6 +17,12 @@ import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, FunctionSession } from './types';
 import Dockerode = require('dockerode');
+import { CliExitData, ChildProcessUtil } from '../util/childProcessUtil';
+
+interface DockerStatus {
+    error: boolean;
+    message: string;
+}
 
 export class Functions {
 
@@ -142,9 +148,20 @@ export class Functions {
         }
     }
 
+    private async checkDocker(): Promise<boolean> {
+        let dockerStatus: DockerStatus = await this.isDockerRunning();
+        if (dockerStatus.error) {
+            dockerStatus = await this.isDockerOnPodman();
+            if (dockerStatus.error) {
+                void window.showErrorMessage(dockerStatus.message)
+                return false;
+            }
+        }
+        return true;
+    }
+
     public async build(context: FunctionObject, s2iBuild: boolean): Promise<void> {
-        const isDockerRunning = await this.isDockerRunning();
-        if (!isDockerRunning) {
+        if (! await this.checkDocker()) {
             return;
         }
         const existingTerminal: OpenShiftTerminalApi = this.buildTerminalMap.get(`build-${context.folderURI.fsPath}`);
@@ -200,8 +217,7 @@ export class Functions {
     }
 
     public async run(context: FunctionObject, runBuild = false) {
-        const isDockerRunning = await this.isDockerRunning();
-        if (!isDockerRunning) {
+        if (! await this.checkDocker()) {
             return;
         }
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
@@ -374,21 +390,56 @@ export class Functions {
         return null;
     }
 
-    private async isDockerRunning(): Promise<boolean> {
-        return new Promise<boolean>((resolve) => {
+    private async isDockerRunning(): Promise<DockerStatus> {
+        return new Promise<DockerStatus>((resolve) => {
             try {
                 const docker = new Dockerode();
                 docker.ping((err) => {
                     if (err) {
-                        void window.showErrorMessage('Docker is not running, Please start the docker process');
-                        resolve(false);
+                        resolve({
+                            error: true,
+                            message: 'Docker is not running, Please start the docker process'
+                        });
                     }
-                    resolve(true);
+                    resolve({
+                        error: false,
+                        message: ''
+                    });
                 });
             } catch (e) {
-                void window.showErrorMessage('Docker is not installed, Please install and start the docker process');
-                resolve(false);
+                resolve({
+                    error: true,
+                    message: 'Docker not installed, Please install and start the docker process'
+                });
             }
         });
+    }
+
+    private async isDockerOnPodman(): Promise<DockerStatus> {
+        try {
+            const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute('podman info -f=json');
+            if (resultRaw.stderr.toLowerCase().indexOf('cannot connect') !== -1) {
+                return ({
+                    error: true,
+                    message: 'Docker is not running, Please start the docker process'
+                });
+            }
+            const resultObj: { registries: { search: string[] } } = JSON.parse(resultRaw.stdout);
+            if (resultObj.registries && !resultObj.registries.search?.includes('docker.io')) {
+                return ({
+                    error: true,
+                    message: 'Docker is not running, Please start the docker process'
+                });
+            }
+            return ({
+                error: false,
+                message: ''
+            })
+        } catch (e) {
+            return ({
+                error: true,
+                message: 'Docker not installed, Please install and start the docker process'
+            });
+        }
     }
 }
