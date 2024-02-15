@@ -849,11 +849,7 @@ export class Cluster extends OpenShiftItem {
             try {
                 await Oc.Instance.loginWithToken(clusterURL, ocToken);
                 if (Cluster.isOpenShiftSandbox(clusterURL)) {
-                    const YES = 'Yes';
-                    const result = await window.showInformationMessage('OpenShift Sandbox logs you out after 15 minutes. Would you like to switch to a service account to prevent this?', YES, 'No');
-                    if (result === YES) {
-                        await Cluster.installPipelineUserContext();
-                    }
+                    await Cluster.installPipelineUserContext();
                 }
                 return Cluster.loginMessage(clusterURL);
             } catch (error) {
@@ -913,6 +909,11 @@ export class Cluster extends OpenShiftItem {
         const sandboxUser = currentCtxObj.context.user;
         const sandboxUserObj = kcActual.users.find(user => user.name === sandboxUser);
 
+        const serviceAccounts = await Oc.Instance.getKubernetesObjects('ServiceAccount');
+        const pipelineServiceAccount = serviceAccounts.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
+        if (!pipelineServiceAccount) {
+            return;
+        }
         const secrets = await Oc.Instance.getKubernetesObjects('Secret');
         const pipelineTokenSecret = secrets.find((secret) => secret.metadata.name.startsWith('pipeline-token')) as any;
         const pipelineToken = Buffer.from(pipelineTokenSecret.data.token, 'base64').toString();
