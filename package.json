@@ -768,6 +768,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.deployment.scale",
+				"title": "Scale",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.resource.load",
 				"title": "Load",
 				"category": "OpenShift"
@@ -1284,6 +1289,10 @@
 				},
 				{
 					"command": "openshift.deployment.shell",
+					"when": "false"
+				},
+				{
+					"command": "openshift.deployment.scale",
 					"when": "false"
 				},
 				{
@@ -1819,6 +1828,10 @@
 				},
 				{
 					"command": "openshift.deployment.shell",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
+				},
+				{
+					"command": "openshift.deployment.scale",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
 				},
 				{

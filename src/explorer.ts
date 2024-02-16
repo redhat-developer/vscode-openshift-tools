@@ -45,6 +45,15 @@ export type OpenShiftObject = {
     },
 }
 
+export interface DeploymentPodObject extends KubernetesObject {
+    spec?: {
+        [key: string]: string
+    },
+    status?: {
+        [key: string]: string
+    },
+}
+
 type PackageJSON = {
     version: string;
     bugs: string;
@@ -196,14 +205,28 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     description: 'Repositories',
                     iconPath: path.resolve(__dirname, '../../images/context/helm.png')
                 }
+            } else if (element.kind === 'Pod') {
+                const contextElement: DeploymentPodObject = element;
+                return {
+                    contextValue: 'openshift.k8sobject.Deployment.pod',
+                    label: contextElement.metadata.name,
+                    description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
+                    collapsibleState: TreeItemCollapsibleState.None,
+                    iconPath: new ThemeIcon('layers-active'),
+                    tooltip: `${contextElement.status.phase} (1/1)\n${contextElement.status.podIP}`,
+                    command: {
+                        title: 'Load',
+                        command: 'openshift.resource.load',
+                        arguments: [contextElement]
+                    }
+                }
             }
-
             const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
             return {
                 contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
                 label: element.metadata.name,
                 description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
-                collapsibleState: TreeItemCollapsibleState.None,
+                collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
                 iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
                 command: {
                     title: 'Load',
@@ -300,6 +323,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     result = [...helmRepos.sort(Helm.ascRepoName)];
                 }
             }
+        } else if ('kind' in element && element.kind === 'Deployment') {
+            const pods = await Oc.Instance.getKubernetesObjects('pods');
+            const filteredPods: DeploymentPodObject[] = pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1 && pod);
+            return filteredPods.filter((pod) => pod.status.phase === 'Running');
         } else {
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {

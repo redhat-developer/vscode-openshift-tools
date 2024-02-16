@@ -11,7 +11,7 @@ import { CommandText } from './base/command';
 import { OpenShiftExplorer } from './explorer';
 import { Oc } from './oc/ocWrapper';
 import { validateRFC1123DNSLabel } from './openshift/nameValidator';
-import { quickBtn } from './util/inputValue';
+import { inputValue, quickBtn } from './util/inputValue';
 import { vsCommand } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
@@ -85,6 +85,32 @@ export class Deployment {
     static shellIntoDeployment(component: KubernetesObject): Promise<void> {
         void OpenShiftTerminalManager.getInstance().createTerminal(new CommandText('oc', `exec -it ${component.kind}/${component.metadata.name} -- /bin/sh`), `Shell to '${component.metadata.name}'`);
         return Promise.resolve();
+    }
+
+    @vsCommand('openshift.deployment.scale')
+    static async scalingPod(component: KubernetesObject): Promise<void> {
+        if (!component) {
+            return;
+        }
+        let count = '1';
+        count = await inputValue(`How many replicas would you like to scale ${component.kind}/${component.metadata.name}?`,
+            count,
+            false,
+            (value: string) => {
+                const trimmedValue = value.trim();
+                if (trimmedValue.length === 0) {
+                    return 'Scale value cannot be empty';
+                }
+                if (parseInt(trimmedValue, 10) < 0) {
+                    return 'Scale value should greater than zero';
+                }
+            },
+            'Scale Count'
+        );
+        const response = await Oc.Instance.scalePod(component.metadata.name, count);
+        if (response.indexOf('scaled') !== -1) {
+            OpenShiftExplorer.getInstance().refresh(component);
+        }
     }
 
     /**
