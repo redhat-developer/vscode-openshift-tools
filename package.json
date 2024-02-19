@@ -103,7 +103,7 @@
 		"@mui/material": "^5.15.10",
 		"@mui/styles": "^5.15.10",
 		"@rjsf/core": "^5.17.0",
-		"@rjsf/mui": "^5.17.0",
+		"@rjsf/mui": "^5.17.1",
 		"@rjsf/utils": "^5.15.1",
 		"@rjsf/validator-ajv8": "^5.17.0",
 		"@segment/analytics-next": "^1.64.0",
