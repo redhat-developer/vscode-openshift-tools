@@ -65,7 +65,7 @@
             },
             "darwin-arm64": {
                 "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-mac-arm64-4.14.12.tar.gz",
-                "sha256sum": "f2bfd599623a7630b0580427e5eb9cb519fd8f1fe072b27ea96a46cb56a4ff98",
+                "sha256sum": "a1409db3d8c26d44ee3c240f7b2305506383be3cb7f08e5ba1ca21ec0546c1ed",
                 "dlFileName": "openshift-client-mac-arm64-4.14.12.tar.gz",
                 "cmdFileName": "oc"
             },
