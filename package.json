@@ -74,6 +74,7 @@
 		"@kubernetes/client-node": "^0.20.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.1",
 		"clsx": "^2.1.0",
+		"dockerode": "^4.0.2",
 		"fs-extra": "^11.2.0",
 		"git-up": "^7.0.0",
 		"got": "^11.8.6",
@@ -136,7 +137,6 @@
 		"chai": "^4.4.1",
 		"chokidar": "^3.6.0",
 		"codecov": "^3.8.2",
-		"dockerode": "^4.0.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.12",
 		"esbuild-plugin-svgr": "^2.1.0",
@@ -260,11 +260,11 @@
 		"icons": {
 			"current-context": {
 				"description": "context",
-				"default":"selection"
+				"default": "selection"
 			},
 			"project-node": {
 				"description": "project node",
-				"default":"project"
+				"default": "project"
 			}
 		},
 		"commands": [
