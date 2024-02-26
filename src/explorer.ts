@@ -212,12 +212,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     label: contextElement.metadata.name,
                     description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
                     collapsibleState: TreeItemCollapsibleState.None,
-                    iconPath: new ThemeIcon('layers-active'),
-                    tooltip: `${contextElement.status.phase} (1/1)\n${contextElement.status.podIP}`,
+                    iconPath: contextElement.status.phase === 'Running' ? new ThemeIcon('layers-active') : new ThemeIcon('layers-dot'),
+                    tooltip: `${contextElement.status.phase}\n${contextElement.status.podIP ? contextElement.status.podIP: ''}`,
                     command: {
                         title: 'Load',
                         command: 'openshift.resource.load',
-                        arguments: [contextElement]
+                        arguments: contextElement.status.phase === 'Running' ? [contextElement] : undefined
                     }
                 }
             }
@@ -324,9 +324,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else if ('kind' in element && element.kind === 'Deployment') {
-            const pods = await Oc.Instance.getKubernetesObjects('pods');
-            const filteredPods: DeploymentPodObject[] = pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1 && pod);
-            return filteredPods.filter((pod) => pod.status.phase === 'Running');
+            return await this.getPods(element);
         } else {
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {
@@ -369,6 +367,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return result;
     }
 
+    public async getPods(element: KubernetesObject | OpenShiftObject) {
+        const pods = await Oc.Instance.getKubernetesObjects('pods');
+        return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+    }
+
     refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
     }
@@ -382,7 +385,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
-        void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
+        if (component) {
+            void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
+        }
     }
 
     @vsCommand('openshift.resource.delete')
