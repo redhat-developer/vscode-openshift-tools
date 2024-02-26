@@ -9,20 +9,11 @@ import { Build } from './build';
 import { DeploymentConfig } from './deploymentConfig';
 import path = require('path');
 import { ClusterServiceVersion } from './csv';
+import { isOpenShift } from '../util/kubeUtils';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
 let lastNamespace = '';
-
-export async function isOpenShift(): Promise<boolean> {
-  const kubectl = await k8s.extension.kubectl.v1;
-  let isOS = false;
-  if (kubectl.available) {
-      const sr = await kubectl.api.invokeCommand('api-versions');
-      isOS = sr && sr.code === 0 && sr.stdout.includes('apps.openshift.io/v1');
-  }
-  return isOS;
-}
 
 async function initNamespaceName(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
   const kubectl = await k8s.extension.kubectl.v1;

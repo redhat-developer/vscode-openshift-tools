@@ -5,8 +5,8 @@
 
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { isOpenShift } from '../k8s/clusterExplorer';
 import { Oc } from '../oc/ocWrapper';
+import { isOpenShift } from './kubeUtils';
 
 export class LoginUtil {
 

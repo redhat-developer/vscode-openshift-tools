@@ -28,7 +28,7 @@ import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs } from './openshift/serviceHelpers';
-import { KubeConfigUtils, getKubeConfigFiles } from './util/kubeUtils';
+import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind } from './util/kubeUtils';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
@@ -60,14 +60,15 @@ type PackageJSON = {
     bugs: string;
 };
 
-function createOrSetProjectItem(projectName: string): ExplorerItem {
+async function createOrSetProjectItem(projectName: string): Promise<ExplorerItem> {
+    const kind = await getNamespaceKind();
     return {
         label: `${projectName}`,
-        description: 'Missing project. Create new or set active Project',
-        tooltip: `${projectName} - Missing project. Create new or set active Project`,
+        description: `Missing ${kind}. Create new or set active ${kind}`,
+        tooltip: `${projectName} - Missing ${kind}. Create new or set active ${kind}`,
         iconPath: new ThemeIcon('warning'),
         command: {
-            title: 'Create new or set active Project',
+            title: `Create new or set active ${kind}`,
             command: 'openshift.project.set'
         }
     };
@@ -287,9 +288,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         metadata: {
                             name: this.kubeContext.namespace,
                         },
-                    } as KubernetesObject]
+                    } as KubernetesObject];
                 } else {
-                    result = [createOrSetProjectItem(this.kubeContext.namespace)];
+                    result = [await createOrSetProjectItem(this.kubeContext.namespace)];
                 }
             } else {
                 // get list of projects or namespaces
@@ -303,7 +304,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     } as KubernetesObject]
                 } else {
                     const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
-                    result = [createOrSetProjectItem(projectName)];
+                    result = [await createOrSetProjectItem(projectName)];
                 }
             }
 
