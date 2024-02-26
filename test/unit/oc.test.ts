@@ -12,6 +12,7 @@ import { Project } from '../../src/oc/project';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
 import { YamlFileCommands } from '../../src/yamlFileCommands';
+import { getNamespaceKind } from '../../src/util/kubeUtils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -125,12 +126,13 @@ suite('Oc', function() {
         expect(savedErr === 'error');
     });
 
-    test('shows warning message when there is no active project', async function() {
+    test('shows warning message when there is no active project/namespace', async function() {
         getActiveProjectStub.resetBehavior();
         getActiveProjectStub.resolves(undefined);
         sandbox.stub(window, 'activeTextEditor').value(TextEditorMock);
         expect(await YamlFileCommands.create());
-        expect(warnStub).to.be.calledOnceWithExactly('The current project doesn\'t exist. Please select an existing project to work with or create a new project', 'Select or Create Project', 'Cancel');
+        const kind = await getNamespaceKind();
+        expect(warnStub).to.be.calledOnceWithExactly(`The current ${kind} doesn't exist. Please select an existing ${kind} to work with or create a new ${kind}`, `Select or Create ${kind}`, 'Cancel');
     });
 
 });

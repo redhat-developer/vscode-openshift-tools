@@ -9,6 +9,7 @@ import { Project } from '../oc/project';
 import { ServerlessFunctionView } from '../serverlessFunction/view';
 import { inputValue } from '../util/inputValue';
 import * as NameValidator from './nameValidator';
+import { getNamespaceKind } from '../util/kubeUtils';
 
 export class QuickPickCommand implements QuickPickItem {
     constructor (public label: string,
@@ -109,8 +110,9 @@ export function projectRequired() {
                 if (activeProjectExists) {
                     return fn.apply(this, args);
                 }
-                const SELECT_PROJECT = 'Select or Create Project';
-                const result = await window.showWarningMessage('The current project doesn\'t exist. Please select an existing project to work with or create a new project', SELECT_PROJECT, 'Cancel');
+                const kind = await getNamespaceKind();
+                const SELECT_PROJECT = `Select or Create ${kind}`;
+                const result = await window.showWarningMessage(`The current ${kind} doesn't exist. Please select an existing ${kind} to work with or create a new ${kind}`, SELECT_PROJECT, 'Cancel');
                 if (result === SELECT_PROJECT) {
                     await commands.executeCommand('openshift.project.set');
                     projects = await Oc.Instance.getProjects();

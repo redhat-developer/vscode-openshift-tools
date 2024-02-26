@@ -18,6 +18,7 @@ import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, FunctionSession } from './types';
 import Dockerode = require('dockerode');
 import { CliExitData, ChildProcessUtil } from '../util/childProcessUtil';
+import { getNamespaceKind } from '../util/kubeUtils';
 
 interface DockerStatus {
     error: boolean;
@@ -107,8 +108,9 @@ export class Functions {
         }
 
         const deployedNamespace = yamlContent.deploy?.namespace || undefined;
+        const kind = await getNamespaceKind();
         if (deployedNamespace && deployedNamespace !== currentNamespace) {
-            const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to current namespace ${currentNamespace}?`,
+            const response = await window.showInformationMessage(`Function ${kind} (declared in func.yaml) is different from the current active ${kind}. Deploy function ${context.name} to current ${kind} ${currentNamespace}?`,
                 'Ok',
                 'Cancel');
             if (response !== 'Ok') {
@@ -271,7 +273,8 @@ export class Functions {
             if (!deployedNamespace || (deployedNamespace === currentNamespace)) {
                 await this.deployProcess(context, deployedNamespace, yamlContent);
             } else if (deployedNamespace !== currentNamespace) {
-                const response = await window.showInformationMessage(`Function namespace (declared in func.yaml) is different from the current active namespace. Deploy function ${context.name} to current namespace ${currentNamespace}?`,
+                const kind = await getNamespaceKind();
+                const response = await window.showInformationMessage(`Function ${kind} (declared in func.yaml) is different from the current active ${kind}. Deploy function ${context.name} to current ${kind} ${currentNamespace}?`,
                     'Ok',
                     'Cancel');
                 if (response === 'Ok') {

@@ -25,7 +25,7 @@ import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
-import { KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
+import { getNamespaceKind, KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
 import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import { Platform } from './util/platform';
 import { setupWorkspaceDevfileContext } from './util/workspace';
@@ -245,9 +245,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         }
     }
 
-    OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event((context) => {
+    OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event(async (context) => {
+        const kind = await getNamespaceKind();
         void Oc.Instance.getActiveProject().then((namespace) =>
-            updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', namespace, `Current namespace: ${namespace}`,
+            updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', namespace, `Current ${kind}: ${namespace}`,
                 !isNamespaceInfoStatusBarDisabled()));
 
         const kcu: KubeConfigUtils = new KubeConfigUtils();
@@ -257,8 +258,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     });
 
     const kcu: KubeConfigUtils = new KubeConfigUtils();
+    const kind = await getNamespaceKind();
     const currentContext: KcuContext = kcu.findContext(kcu.currentContext);
-    updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', null, 'Current namespace',
+    updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', null, `Current ${kind}`,
         !isNamespaceInfoStatusBarDisabled());
     updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
         !isContextInfoStatusBarDisabled());

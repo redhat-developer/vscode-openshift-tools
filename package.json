@@ -207,6 +207,10 @@
 		"onCommand:openshift.project.set",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
+		"onCommand:openshift.namespace.create",
+		"onCommand:openshift.namespace.set",
+		"onCommand:openshift.namespace.delete",
+		"onCommand:openshift.namespace.delete.palette",
 		"onCommand:openshift.component.openCreateComponent",
 		"onCommand:openshift.component.createFromRootWorkspaceFolder",
 		"onCommand:openshift.component.describe",
@@ -383,6 +387,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.namespace.create",
+				"title": "New Namespace",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.helm.openView",
 				"title": "Browse and Install Helm Charts",
 				"category": "OpenShift"
@@ -424,12 +433,22 @@
 			},
 			{
 				"command": "openshift.project.delete",
-				"title": "Delete",
+				"title": "Delete Project",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.namespace.delete",
+				"title": "Delete Namespace",
 				"category": "OpenShift"
 			},
 			{
 				"command": "openshift.project.delete.palette",
 				"title": "Delete Project",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.namespace.delete.palette",
+				"title": "Delete Namespace",
 				"category": "OpenShift"
 			},
 			{
@@ -448,8 +467,22 @@
 				}
 			},
 			{
+				"command": "openshift.namespace.set",
+				"title": "Change Active Namespace",
+				"category": "OpenShift",
+				"icon": {
+					"dark": "images/title/dark/set-project.svg",
+					"light": "images/title/light/set-project.svg"
+				}
+			},
+			{
 				"command": "openshift.project.set.palette",
 				"title": "Set Active Project",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.namespace.set.palette",
+				"title": "Set Active Namespace",
 				"category": "OpenShift"
 			},
 			{
@@ -1075,7 +1108,11 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer"
+					"when": "view == openshiftProjectExplorer && isOpenshiftCluster"
+				},
+				{
+					"command": "openshift.namespace.set",
+					"when": "view == openshiftProjectExplorer && !isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.open.configFile",
@@ -1428,6 +1465,14 @@
 				{
 					"command": "openshift.Serverless.removeSession",
 					"when": "false"
+				},
+				{
+					"command": "openshift.project.delete",
+					"when": "false"
+				},
+				{
+					"command": "openshift.namespace.delete",
+					"when": "false"
 				}
 			],
 			"view/title": [
@@ -1658,12 +1703,22 @@
 				},
 				{
 					"command": "openshift.project.create",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && isOpenshiftCluster",
+					"group": "c1@1"
+				},
+				{
+					"command": "openshift.namespace.create",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && !isOpenshiftCluster",
 					"group": "c1@1"
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && isOpenshiftCluster",
+					"group": "c1@2"
+				},
+				{
+					"command": "openshift.namespace.set",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && !isOpenshiftCluster",
 					"group": "c1@2"
 				},
 				{
@@ -1688,17 +1743,32 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && isOpenshiftCluster",
+					"group": "p3@1"
+				},
+				{
+					"command": "openshift.namespace.set",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && !isOpenshiftCluster",
 					"group": "p3@1"
 				},
 				{
 					"command": "openshift.project.delete",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*.can-delete/i",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*.can-delete/i && isOpenshiftCluster",
+					"group": "p3@2"
+				},
+				{
+					"command": "openshift.namespace.delete",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*.can-delete/i && !isOpenshiftCluster",
 					"group": "p3@2"
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && isOpenshiftCluster",
+					"group": "inline"
+				},
+				{
+					"command": "openshift.namespace.set",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && !isOpenshiftCluster",
 					"group": "inline"
 				},
 				{

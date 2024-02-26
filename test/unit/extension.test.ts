@@ -21,6 +21,7 @@ import { Progress } from '../../src/util/progress';
 import path = require('path');
 
 import packagejson = require('../../package.json');
+import { getNamespaceKind } from '../../src/util/kubeUtils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -115,7 +116,8 @@ suite('openshift toolkit Extension', () => {
         sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
         const p1 = {kind: 'project', metadata: { name: 'p1'}};
         await vscode.commands.executeCommand('openshift.project.delete', p1);
-        expect(simStub).calledWith(`Project '${p1.metadata.name}' successfully deleted`);
+        const kind = await getNamespaceKind();
+        expect(simStub).calledWith(`${kind} '${p1.metadata.name}' successfully deleted`);
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
@@ -126,6 +128,7 @@ suite('openshift toolkit Extension', () => {
         sandbox.stub(Progress, 'execFunctionWithProgress').rejects(error);
         const p1 = {kind: 'project', metadata: { name: 'p1'}};
         await vscode.commands.executeCommand('openshift.project.delete', p1);
-        expect(semStub).calledWith(`Failed to delete Project with error '${error}'`);
+        const kind = await getNamespaceKind();
+        expect(semStub).calledWith(`Failed to delete ${kind} with error '${error}'`);
     });
 });
