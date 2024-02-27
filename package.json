@@ -254,7 +254,8 @@
 		"configurationDefaults": {
 			"vs-kubernetes": {
 				"vs-kubernetes.disable-context-info-status-bar": true,
-				"vs-kubernetes.disable-namespace-info-status-bar": true
+				"vs-kubernetes.disable-namespace-info-status-bar": true,
+				"vs-kubernetes.outputFormat": "yaml"
 			}
 		},
 		"icons": {
