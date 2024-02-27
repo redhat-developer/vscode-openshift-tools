@@ -74,6 +74,7 @@
 		"@kubernetes/client-node": "^0.20.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.1",
 		"clsx": "^2.1.0",
+		"dockerode": "^4.0.2",
 		"fs-extra": "^11.2.0",
 		"git-up": "^7.0.0",
 		"got": "^11.8.6",
@@ -98,10 +99,10 @@
 	},
 	"devDependencies": {
 		"@devfile/api": "^2.2.2-1704827891",
-		"@mui/icons-material": "^5.15.10",
-		"@mui/lab": "^5.0.0-alpha.165",
-		"@mui/material": "^5.15.10",
-		"@mui/styles": "^5.15.10",
+		"@mui/icons-material": "^5.15.11",
+		"@mui/lab": "^5.0.0-alpha.166",
+		"@mui/material": "^5.15.11",
+		"@mui/styles": "^5.15.11",
 		"@rjsf/core": "^5.17.1",
 		"@rjsf/mui": "^5.17.1",
 		"@rjsf/utils": "^5.17.1",
@@ -109,7 +110,7 @@
 		"@segment/analytics-next": "^1.64.0",
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^4.3.11",
-		"@types/dockerode": "^3.3.23",
+		"@types/dockerode": "^3.3.24",
 		"@types/express": "^4.17.21",
 		"@types/fs-extra": "^11.0.4",
 		"@types/lodash": "^4.14.202",
@@ -129,19 +130,18 @@
 		"@types/unzip-stream": "^0.3.4",
 		"@types/validator": "^13.11.9",
 		"@types/vscode": "1.64.0",
-		"@typescript-eslint/eslint-plugin": "^7.0.2",
-		"@typescript-eslint/parser": "^7.0.2",
+		"@typescript-eslint/eslint-plugin": "^7.1.0",
+		"@typescript-eslint/parser": "^7.1.0",
 		"@vscode/test-electron": "^2.3.9",
 		"bootstrap": "^5.3.3",
 		"chai": "^4.4.1",
 		"chokidar": "^3.6.0",
 		"codecov": "^3.8.2",
-		"dockerode": "^4.0.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.12",
 		"esbuild-plugin-svgr": "^2.1.0",
 		"esbuild-sass-plugin": "^2.16.1",
-		"eslint": "^8.56.0",
+		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
 		"eslint-plugin-header": "^3.1.1",
@@ -254,17 +254,18 @@
 		"configurationDefaults": {
 			"vs-kubernetes": {
 				"vs-kubernetes.disable-context-info-status-bar": true,
-				"vs-kubernetes.disable-namespace-info-status-bar": true
+				"vs-kubernetes.disable-namespace-info-status-bar": true,
+				"vs-kubernetes.outputFormat": "yaml"
 			}
 		},
 		"icons": {
 			"current-context": {
 				"description": "context",
-				"default":"selection"
+				"default": "selection"
 			},
 			"project-node": {
 				"description": "project node",
-				"default":"project"
+				"default": "project"
 			}
 		},
 		"commands": [
@@ -785,6 +786,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.deployment.scale",
+				"title": "Scale",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.resource.load",
 				"title": "Load",
 				"category": "OpenShift"
@@ -1301,6 +1307,10 @@
 				},
 				{
 					"command": "openshift.deployment.shell",
+					"when": "false"
+				},
+				{
+					"command": "openshift.deployment.scale",
 					"when": "false"
 				},
 				{
@@ -1846,6 +1856,10 @@
 				},
 				{
 					"command": "openshift.deployment.shell",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
+				},
+				{
+					"command": "openshift.deployment.scale",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
 				},
 				{

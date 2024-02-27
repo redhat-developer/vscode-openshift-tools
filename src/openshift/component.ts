@@ -362,9 +362,9 @@ export class Component extends OpenShiftItem {
                         Component.stateChanged.fire(component.contextPath);
                     },
                     onText(text: string) {
-                        if (cs.devStatus === ComponentContextState.DEV_STARTING && text.includes('[p]')) {
+                        if (cs.devStatus === ComponentContextState.DEV_STARTING  && text.includes('[p]')) {
+                            Component.stateChanged.fire(component.contextPath)
                             cs.devStatus = ComponentContextState.DEV_RUNNING;
-                            Component.stateChanged.fire(component.contextPath);
                         }
                         if (text.includes('^C')) {
                             cs.devStatus = ComponentContextState.DEV_STOPPING;
