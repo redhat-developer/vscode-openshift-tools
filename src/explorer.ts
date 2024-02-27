@@ -19,7 +19,8 @@ import {
     commands,
     extensions,
     version,
-    window
+    window,
+    workspace
 } from 'vscode';
 import { CommandText } from './base/command';
 import * as Helm from './helm/helm';
@@ -179,7 +180,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // otherwise it is a KubernetesObject instance
         if ('kind' in element) {
             if (element.kind === 'project') {
-                return  OpenShiftExplorer.generateOpenshiftProjectContextValue(element.metadata.name)
+                return OpenShiftExplorer.generateOpenshiftProjectContextValue(element.metadata.name)
                     .then(namespace => {
                         return {
                             contextValue: namespace,
@@ -355,7 +356,36 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
-        void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
+        void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind}/${component.metadata.name}`);
+    }
+
+    loadKubernetesCore(namespace: string | null, value: string) {
+        const outputFormat = this.getOutputFormat();
+        const uri = this.kubefsUri(namespace, value, outputFormat);
+        workspace.openTextDocument(uri).then((doc) => {
+            if (doc) {
+                void window.showTextDocument(doc);
+            }
+        },
+            (err) => window.showErrorMessage(`Error loading document: ${err}`));
+    }
+
+    getOutputFormat(): string {
+        return void workspace.getConfiguration('vs-kubernetes')['vs-kubernetes.outputFormat'];
+    }
+
+    kubefsUri(namespace: string | null | undefined /* TODO: rationalise null and undefined */, value: string, outputFormat: string, action?: string): Uri {
+        const K8S_RESOURCE_SCHEME = 'k8smsx';
+        const K8S_RESOURCE_SCHEME_READONLY = 'k8smsxro';
+        const KUBECTL_RESOURCE_AUTHORITY = 'loadkubernetescore';
+        const KUBECTL_DESCRIBE_AUTHORITY = 'kubernetesdescribe';
+        const docname = `${value.replace('/', '-')}${outputFormat !== '' ? `.${outputFormat}` : ''}`;
+        const nonce = new Date().getTime();
+        const nsquery = namespace ? `ns=${namespace}&` : '';
+        const scheme = action === 'describe' ? K8S_RESOURCE_SCHEME_READONLY : K8S_RESOURCE_SCHEME;
+        const authority = action === 'describe' ? KUBECTL_DESCRIBE_AUTHORITY : KUBECTL_RESOURCE_AUTHORITY;
+        const uri = `${scheme}://${authority}/${docname}?${nsquery}value=${value}&_=${nonce}`;
+        return Uri.parse(uri);
     }
 
     @vsCommand('openshift.resource.delete')
@@ -367,8 +397,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.watchLogs')
     public static async watchLogs(component: KubernetesObject) {
-         // wait until logs are available before starting to stream them
-         await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
+        // wait until logs are available before starting to stream them
+        await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
             return new Promise<void>(resolve => {
 
                 let intervalId: NodeJS.Timer = undefined;
@@ -377,7 +407,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     void Oc.Instance.getLogs('Deployment', component.metadata.name).then((logs) => {
                         clearInterval(intervalId);
                         resolve();
-                    }).catch(_e => {});
+                    }).catch(_e => { });
                 }
 
                 intervalId = setInterval(checkForPod, 200);
