@@ -425,6 +425,20 @@ export class Oc {
     }
 
     /**
+     * Scale replicas count
+     *
+     * @param name of the deployment
+     * @param count
+     * @returns the logs for the given resource
+     */
+    public async scalePod(name: string, count: string): Promise<string> {
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `scale deployment ${name}`, [new CommandOption('--replicas', count)])
+        );
+        return result.stdout;
+    }
+
+    /**
      * Returns the logs for the given resource.
      *
      * @param resourceType the type of resource to get the logs for
