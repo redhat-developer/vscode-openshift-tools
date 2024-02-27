@@ -74,6 +74,7 @@
 		"@kubernetes/client-node": "^0.20.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.7.1",
 		"clsx": "^2.1.0",
+		"dockerode": "^4.0.2",
 		"fs-extra": "^11.2.0",
 		"git-up": "^7.0.0",
 		"got": "^11.8.6",
@@ -102,14 +103,14 @@
 		"@mui/lab": "^5.0.0-alpha.165",
 		"@mui/material": "^5.15.10",
 		"@mui/styles": "^5.15.10",
-		"@rjsf/core": "^5.17.0",
-		"@rjsf/mui": "^5.17.0",
-		"@rjsf/utils": "^5.15.1",
-		"@rjsf/validator-ajv8": "^5.17.0",
+		"@rjsf/core": "^5.17.1",
+		"@rjsf/mui": "^5.17.1",
+		"@rjsf/utils": "^5.17.1",
+		"@rjsf/validator-ajv8": "^5.17.1",
 		"@segment/analytics-next": "^1.64.0",
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^4.3.11",
-		"@types/dockerode": "^3.3.23",
+		"@types/dockerode": "^3.3.24",
 		"@types/express": "^4.17.21",
 		"@types/fs-extra": "^11.0.4",
 		"@types/lodash": "^4.14.202",
@@ -129,19 +130,18 @@
 		"@types/unzip-stream": "^0.3.4",
 		"@types/validator": "^13.11.9",
 		"@types/vscode": "1.64.0",
-		"@typescript-eslint/eslint-plugin": "^7.0.1",
-		"@typescript-eslint/parser": "^7.0.1",
+		"@typescript-eslint/eslint-plugin": "^7.0.2",
+		"@typescript-eslint/parser": "^7.0.2",
 		"@vscode/test-electron": "^2.3.9",
-		"bootstrap": "^5.3.2",
+		"bootstrap": "^5.3.3",
 		"chai": "^4.4.1",
 		"chokidar": "^3.6.0",
 		"codecov": "^3.8.2",
-		"dockerode": "^4.0.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.12",
 		"esbuild-plugin-svgr": "^2.1.0",
 		"esbuild-sass-plugin": "^2.16.1",
-		"eslint": "^8.56.0",
+		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-import-resolver-typescript": "^3.6.1",
 		"eslint-plugin-header": "^3.1.1",
@@ -172,7 +172,7 @@
 		"sinon": "^17.0.1",
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
-		"survey-react-ui": "^1.9.129",
+		"survey-react-ui": "^1.9.131",
 		"typescript": "^5.3.3",
 		"vscode-extension-tester": "^7.1",
 		"xterm-addon-fit": "^0.8.0",
@@ -204,6 +204,7 @@
 		"onCommand:openshift.explorer.refresh",
 		"onCommand:openshift.componentTypesView.refresh",
 		"onCommand:openshift.project.create",
+		"onCommand:openshift.project.set",
 		"onCommand:openshift.project.delete",
 		"onCommand:openshift.project.delete.palette",
 		"onCommand:openshift.component.openCreateComponent",
@@ -250,6 +251,22 @@
 		"onWalkthrough:serverlessFunctionWalkthrough"
 	],
 	"contributes": {
+		"configurationDefaults": {
+			"vs-kubernetes": {
+				"vs-kubernetes.disable-context-info-status-bar": true,
+				"vs-kubernetes.disable-namespace-info-status-bar": true
+			}
+		},
+		"icons": {
+			"current-context": {
+				"description": "context",
+				"default": "selection"
+			},
+			"project-node": {
+				"description": "project node",
+				"default": "project"
+			}
+		},
 		"commands": [
 			{
 				"command": "openshift.about",
@@ -765,6 +782,11 @@
 			{
 				"command": "openshift.deployment.shell",
 				"title": "Open Shell to Container",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.deployment.scale",
+				"title": "Scale",
 				"category": "OpenShift"
 			},
 			{
@@ -1287,6 +1309,10 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.deployment.scale",
+					"when": "false"
+				},
+				{
 					"command": "openshift.resource.unInstall",
 					"when": "false"
 				},
@@ -1632,7 +1658,12 @@
 				{
 					"command": "openshift.project.create",
 					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace",
-					"group": "c1"
+					"group": "c1@1"
+				},
+				{
+					"command": "openshift.project.set",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace",
+					"group": "c1@2"
 				},
 				{
 					"command": "openshift.explorer.logout",
@@ -1655,9 +1686,19 @@
 					"group": "p2"
 				},
 				{
+					"command": "openshift.project.set",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace",
+					"group": "p3@1"
+				},
+				{
 					"command": "openshift.project.delete",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*.can-delete/i",
-					"group": "p3"
+					"group": "p3@2"
+				},
+				{
+					"command": "openshift.project.set",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace",
+					"group": "inline"
 				},
 				{
 					"command": "openshift.component.describe",
@@ -1776,11 +1817,6 @@
 					"group": "inline"
 				},
 				{
-					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && (viewItem == openshift.k8sContext || viewItem =~ /openshift.project.*/i) && canCreateNamespace",
-					"group": "inline"
-				},
-				{
 					"command": "openshift.component.revealInExplorer",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*/",
 					"group": "c40@1"
@@ -1819,6 +1855,10 @@
 				},
 				{
 					"command": "openshift.deployment.shell",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
+				},
+				{
+					"command": "openshift.deployment.scale",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
 				},
 				{
@@ -2087,6 +2127,21 @@
 				"order": 1,
 				"title": "OpenShift Toolkit",
 				"properties": {
+					"openshiftToolkit": {
+						"type": "object",
+						"title": "Additional settings",
+						"description": "OpenShift Toolkit configuration",
+						"properties": {
+							"openshiftToolkit.disable-context-info-status-bar": {
+								"type": "boolean",
+								"description": "Disable displaying the current Kubernetes context in VS Code's status bar."
+							},
+							"openshiftToolkit.disable-namespace-info-status-bar": {
+								"type": "boolean",
+								"description": "Disable displaying the active namespace in VS Code's status bar."
+							}
+						}
+					},
 					"openshiftToolkit.showWelcomePage": {
 						"type": "boolean",
 						"default": true,

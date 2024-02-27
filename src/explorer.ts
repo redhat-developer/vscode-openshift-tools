@@ -46,6 +46,15 @@ export type OpenShiftObject = {
     },
 }
 
+export interface DeploymentPodObject extends KubernetesObject {
+    spec?: {
+        [key: string]: string
+    },
+    status?: {
+        [key: string]: string
+    },
+}
+
 type PackageJSON = {
     version: string;
     bugs: string;
@@ -79,6 +88,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     readonly onDidChangeTreeData: Event<ExplorerItem | undefined> = this
         .eventEmitter.event;
 
+    public onDidChangeContextEmitter = new EventEmitter<string>();
+
     private constructor() {
         try {
             this.kubeConfig = new KubeConfigUtils();
@@ -101,6 +112,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         || this.kubeContext.user !== newCtx.user
                         || this.kubeContext.namespace !== newCtx.namespace)) {
                     this.refresh();
+                    this.onDidChangeContextEmitter.fire(newCtx.name);
                 }
                 this.kubeContext = newCtx;
                 this.kubeConfig = ku2;
@@ -197,14 +209,28 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     description: 'Repositories',
                     iconPath: path.resolve(__dirname, '../../images/context/helm.png')
                 }
+            } else if (element.kind === 'Pod') {
+                const contextElement: DeploymentPodObject = element;
+                return {
+                    contextValue: 'openshift.k8sobject.Deployment.pod',
+                    label: contextElement.metadata.name,
+                    description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
+                    collapsibleState: TreeItemCollapsibleState.None,
+                    iconPath: contextElement.status.phase === 'Running' ? new ThemeIcon('layers-active') : new ThemeIcon('layers-dot'),
+                    tooltip: `${contextElement.status.phase}\n${contextElement.status.podIP ? contextElement.status.podIP : ''}`,
+                    command: {
+                        title: 'Load',
+                        command: 'openshift.resource.load',
+                        arguments: contextElement.status.phase === 'Running' ? [contextElement] : undefined
+                    }
+                }
             }
-
             const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
             return {
                 contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
                 label: element.metadata.name,
                 description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
-                collapsibleState: TreeItemCollapsibleState.None,
+                collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
                 iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
                 command: {
                     title: 'Load',
@@ -235,6 +261,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             } catch (err) {
                 // ignore because ether server is not accessible or user is logged out
             }
+            OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(new KubeConfigUtils().currentContext);
         } else if ('name' in element) { // we are dealing with context here
             // user is logged into cluster from current context
             // and project should be show as child node of current context
@@ -301,6 +328,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     result = [...helmRepos.sort(Helm.ascRepoName)];
                 }
             }
+        } else if ('kind' in element && element.kind === 'Deployment') {
+            return await this.getPods(element);
         } else {
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {
@@ -343,6 +372,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return result;
     }
 
+    public async getPods(element: KubernetesObject | OpenShiftObject) {
+        const pods = await Oc.Instance.getKubernetesObjects('pods');
+        return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+    }
+
     refresh(target?: ExplorerItem): void {
         this.eventEmitter.fire(target);
     }
@@ -355,8 +389,21 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     @vsCommand('openshift.resource.load')
-    public static loadResource(component: KubernetesObject) {
-        void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind.toLowerCase()}/${component.metadata.name}`);
+    public static async loadResource(component: KubernetesObject) {
+        if (component) {
+            if (component.kind === 'Pod') {
+                const contextElement: DeploymentPodObject = component;
+                const pods = await OpenShiftExplorer.getInstance().getPods(contextElement);
+                if (pods.length === 0) {
+                    contextElement.status.phase = 'Terminated'
+                    void OpenShiftExplorer.getInstance().refresh(contextElement);
+                    void window.showInformationMessage(`Pod ${contextElement.metadata.name} ${contextElement.status.phase.toLowerCase()}`);
+                    void OpenShiftExplorer.getInstance().refresh();
+                    return;
+                }
+            }
+            void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind.toLowerCase()}/${component.metadata.name}`);
+        }
     }
 
     /**

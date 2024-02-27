@@ -8,10 +8,10 @@ import * as path from 'path';
 import validator from 'validator';
 import { Disposable, QuickInputButtons, ThemeIcon, TreeItem, window } from 'vscode';
 import { CommandText } from './base/command';
-import { OpenShiftExplorer } from './explorer';
+import { DeploymentPodObject, OpenShiftExplorer } from './explorer';
 import { Oc } from './oc/ocWrapper';
 import { validateRFC1123DNSLabel } from './openshift/nameValidator';
-import { quickBtn } from './util/inputValue';
+import { inputValue, quickBtn } from './util/inputValue';
 import { vsCommand } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
@@ -85,6 +85,46 @@ export class Deployment {
     static shellIntoDeployment(component: KubernetesObject): Promise<void> {
         void OpenShiftTerminalManager.getInstance().createTerminal(new CommandText('oc', `exec -it ${component.kind}/${component.metadata.name} -- /bin/sh`), `Shell to '${component.metadata.name}'`);
         return Promise.resolve();
+    }
+
+    @vsCommand('openshift.deployment.scale')
+    static async scalingPod(component: KubernetesObject): Promise<void> {
+        if (!component) {
+            return;
+        }
+        const pods: DeploymentPodObject[] = await OpenShiftExplorer.getInstance().getPods(component);
+        const runnngPodsLength = pods.filter((pod) => pod.status.phase === 'Running').length;
+        let count = runnngPodsLength.toString();
+        count = await inputValue(`How many replicas would you like to scale ${component.kind}/${component.metadata.name}?`,
+            count,
+            false,
+            (value: string) => {
+                const trimmedValue = value.trim();
+                const number = Number(trimmedValue);
+                if (trimmedValue.length === 0) {
+                    return 'Scale value cannot be empty';
+                }
+                if (isNaN(number)) {
+                    return 'Scale value should be a number';
+                } else  if (parseInt(trimmedValue, 10) < 0) {
+                    return 'Scale value should be equal or greater than zero';
+                } else if (Deployment.checkFloat(trimmedValue) || trimmedValue.indexOf('.') !== -1) {
+                    return 'Scale value should be integer';
+                }
+            },
+            'Scale Count'
+        );
+        if (count) {
+            const response = await Oc.Instance.scalePod(component.metadata.name, count);
+            if (response.indexOf('scaled') !== -1) {
+                OpenShiftExplorer.getInstance().refresh(component);
+            }
+        }
+    }
+
+    static checkFloat(trimmedValue: string): boolean {
+        const parsed = Number.parseFloat(trimmedValue);
+        return (!Number.isNaN(parsed)) && (!Number.isInteger(parsed))
     }
 
     /**
