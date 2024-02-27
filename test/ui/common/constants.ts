@@ -34,7 +34,7 @@ export const INPUTS = {
 
 export const MENUS = {
     newProject: 'New Project',
-    deleteComponentSourceCode: 'Delete',
+    delete: 'Delete',
     bindService: 'Bind Service',
     startDev: 'Start Dev',
 };
