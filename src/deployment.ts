@@ -108,7 +108,7 @@ export class Deployment {
                     return 'Scale value should be a number';
                 } else  if (parseInt(trimmedValue, 10) < 0) {
                     return 'Scale value should be equal or greater than zero';
-                } else if (Deployment.checkFloat(trimmedValue)) {
+                } else if (Deployment.checkFloat(trimmedValue) || trimmedValue.indexOf('.') !== -1) {
                     return 'Scale value should be integer';
                 }
             },

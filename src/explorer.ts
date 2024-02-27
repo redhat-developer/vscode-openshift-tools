@@ -384,8 +384,19 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     @vsCommand('openshift.resource.load')
-    public static loadResource(component: KubernetesObject) {
+    public static async loadResource(component: KubernetesObject | DeploymentPodObject) {
         if (component) {
+            if (component.kind === 'Pod') {
+                const contextElement: DeploymentPodObject = component;
+                const pods = await OpenShiftExplorer.getInstance().getPods(contextElement);
+                if (pods.length === 0) {
+                    contextElement.status.phase = 'Terminated'
+                    void OpenShiftExplorer.getInstance().refresh(contextElement);
+                    void window.showInformationMessage(`Pod ${contextElement.metadata.name} ${contextElement.status.phase.toLowerCase()}`);
+                    void OpenShiftExplorer.getInstance().refresh();
+                    return;
+                }
+            }
             void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
         }
     }
