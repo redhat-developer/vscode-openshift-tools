@@ -17,7 +17,6 @@ export function createComponentTest(contextFolder: string) {
         let view: SideBarView;
         let explorer: ViewSection;
         let components: ViewSection;
-        let editorView: EditorView;
 
         const projectName = `project${Math.floor(Math.random() * 100)}`
         const compName = `comp${Math.floor(Math.random() * 100)}`;
@@ -26,7 +25,6 @@ export function createComponentTest(contextFolder: string) {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
             components = await view.getContent().getSection(VIEWS.components);
-            editorView = new EditorView();
         });
 
         beforeEach(async function() {
