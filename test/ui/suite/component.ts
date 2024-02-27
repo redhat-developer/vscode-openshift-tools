@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
 import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
@@ -17,6 +17,7 @@ export function createComponentTest(contextFolder: string) {
         let view: SideBarView;
         let explorer: ViewSection;
         let components: ViewSection;
+        let editorView: EditorView;
 
         const projectName = `project${Math.floor(Math.random() * 100)}`
         const compName = `comp${Math.floor(Math.random() * 100)}`;
@@ -25,20 +26,21 @@ export function createComponentTest(contextFolder: string) {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
             components = await view.getContent().getSection(VIEWS.components);
+            editorView = new EditorView();
         });
 
         beforeEach(async function() {
-            const center = await new Workbench().openNotificationsCenter();
-            await center.clearAllNotifications();
-        });
-
-        afterEach(async function() {
             const notificationCenter = await new Workbench().openNotificationsCenter();
             const notifications = await notificationCenter.getNotifications(NotificationType.Any);
             if(notifications.length > 0) {
                 await notificationCenter.close();
             }
             await new EditorView().closeAllEditors();
+        });
+
+        afterEach(async function() {
+            editorView = new EditorView();
+            await editorView.closeAllEditors();
         });
 
         after(async function() {
