@@ -402,7 +402,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     return;
                 }
             }
-            void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind.toLowerCase()}/${component.metadata.name}`);
+            void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind}/${component.metadata.name}`);
         }
     }
 
@@ -422,8 +422,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             (err) => window.showErrorMessage(`Error loading document: ${err}`));
     }
 
+    /**
+     * get output format from vs-kubernetes.outputFormat
+     * default yaml
+     *
+     * @returns output format
+     */
     getOutputFormat(): string {
-        return void workspace.getConfiguration('vs-kubernetes')['vs-kubernetes.outputFormat'];
+        if (workspace.getConfiguration('vs-kubernetes').has('vs-kubernetes.outputFormat')) {
+            return workspace.getConfiguration('vs-kubernetes').get['vs-kubernetes.outputFormat'] as string;
+        }
+        return 'yaml'
     }
 
     kubefsUri(namespace: string | null | undefined, value: string, outputFormat: string, action?: string): Uri {
