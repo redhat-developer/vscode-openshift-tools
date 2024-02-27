@@ -356,9 +356,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.load')
     public static loadResource(component: KubernetesObject) {
-        void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind}/${component.metadata.name}`);
+        void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind.toLowerCase()}/${component.metadata.name}`);
     }
 
+    /**
+     * loadind deployment config
+     * @param namespace namespace
+     * @param value deployment name
+     */
     loadKubernetesCore(namespace: string | null, value: string) {
         const outputFormat = this.getOutputFormat();
         const uri = this.kubefsUri(namespace, value, outputFormat);
@@ -374,12 +379,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return void workspace.getConfiguration('vs-kubernetes')['vs-kubernetes.outputFormat'];
     }
 
-    kubefsUri(namespace: string | null | undefined /* TODO: rationalise null and undefined */, value: string, outputFormat: string, action?: string): Uri {
+    kubefsUri(namespace: string | null | undefined, value: string, outputFormat: string, action?: string): Uri {
         const K8S_RESOURCE_SCHEME = 'k8smsx';
         const K8S_RESOURCE_SCHEME_READONLY = 'k8smsxro';
         const KUBECTL_RESOURCE_AUTHORITY = 'loadkubernetescore';
         const KUBECTL_DESCRIBE_AUTHORITY = 'kubernetesdescribe';
-        const docname = `${value.replace('/', '-')}${outputFormat !== '' ? `.${outputFormat}` : ''}`;
+        const docname = `${value.replace('/', '-')}${outputFormat && outputFormat !== '' ? `.${outputFormat}` : ''}`;
         const nonce = new Date().getTime();
         const nsquery = namespace ? `ns=${namespace}&` : '';
         const scheme = action === 'describe' ? K8S_RESOURCE_SCHEME_READONLY : K8S_RESOURCE_SCHEME;
