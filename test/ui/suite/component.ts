@@ -48,7 +48,7 @@ export function createComponentTest(contextFolder: string) {
             const projectItem = await explorer.findItem(projectName);
             if (projectItem) {
                 const menu = await projectItem.openContextMenu();
-                await menu.select(MENUS.deleteComponentSourceCode);
+                await menu.select(MENUS.delete);
                 const notif = await notificationExists(NOTIFICATIONS.deleteProjectWarning(projectName), VSBrowser.instance.driver);
                 await notif.takeAction(INPUTS.yes);
                 await notificationExists(NOTIFICATIONS.projectDeleteSuccess(projectName), VSBrowser.instance.driver, 40000);
