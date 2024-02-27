@@ -31,17 +31,29 @@ export class ServerlessFunctionModel implements Disposable {
         });
     }
 
+    /**
+     * recursivly get the function folders
+     * @param filePath directory
+     * @param folders list of function folders
+     */
+    getFunctionsFromDir(filePath: string, folders: Uri[]) {
+        const fileContents = fs.readdirSync(filePath, { withFileTypes: true });
+        for (const fileContent of fileContents) {
+            if (fileContent.isDirectory()) {
+                if (fs.existsSync(path.join(filePath, fileContent.name, 'func.yaml'))) {
+                    folders.push(Uri.file(path.join(filePath, fileContent.name)));
+                }
+                this.getFunctionsFromDir(path.join(filePath, fileContent.name), folders);
+            }
+        }
+    }
+
     public async getLocalFunctions(): Promise<FunctionObject[]> {
         const functionList: FunctionObject[] = [];
         const folders: Uri[] = [];
         if (workspace.workspaceFolders) {
             for (const wf of workspace.workspaceFolders) {
-                const entries = await fs.readdir(wf.uri.fsPath, { withFileTypes: true });
-                for (const file of entries) {
-                    if (file.isDirectory() && fs.existsSync(path.join(wf.uri.fsPath, file.name, 'func.yaml'))) {
-                        folders.push(Uri.file(path.join(wf.uri.fsPath, file.name)));
-                    }
-                }
+                this.getFunctionsFromDir(wf.uri.fsPath, folders);
                 if (fs.existsSync(path.join(wf.uri.fsPath, 'func.yaml'))) {
                     folders.push(wf.uri);
                 }
