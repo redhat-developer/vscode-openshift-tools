@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
 import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
@@ -35,8 +35,12 @@ export function createComponentTest(contextFolder: string) {
         });
 
         afterEach(async function() {
-            editorView = new EditorView();
-            await editorView.closeAllEditors();
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if(notifications.length > 0) {
+                await notificationCenter.close();
+            }
+            await new EditorView().closeAllEditors();
         });
 
         after(async function() {
@@ -44,7 +48,7 @@ export function createComponentTest(contextFolder: string) {
             const projectItem = await explorer.findItem(projectName);
             if (projectItem) {
                 const menu = await projectItem.openContextMenu();
-                await menu.select(MENUS.delete);
+                await menu.select(MENUS.deleteComponentSourceCode);
                 const notif = await notificationExists(NOTIFICATIONS.deleteProjectWarning(projectName), VSBrowser.instance.driver);
                 await notif.takeAction(INPUTS.yes);
                 await notificationExists(NOTIFICATIONS.projectDeleteSuccess(projectName), VSBrowser.instance.driver, 40000);
