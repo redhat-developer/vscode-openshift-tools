@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
 import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
