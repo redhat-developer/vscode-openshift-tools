@@ -1,5 +1,27 @@
 # Change Log
 
+## 1.12.0 (February 28, 2024)
+ * [#3880](https://github.com/redhat-developer/vscode-openshift-tools/pull/3880) Do not call getAllComponents() in activate.
+ * [#3112](https://github.com/redhat-developer/vscode-openshift-tools/issues/3112) Extension takes several minutes to start if the current `~/.kube/config` context is an inaccessible cluster.
+ * [#3931](https://github.com/redhat-developer/vscode-openshift-tools/issues/3931) New Serverless Function is not shown after creation.
+ * [#3928](https://github.com/redhat-developer/vscode-openshift-tools/issues/3928) Can't load Helm chart.
+ * [#3879](https://github.com/redhat-developer/vscode-openshift-tools/pull/3879) When turned to use a service account for a Sandbox a wrong warning message appears.
+ * [#3848](https://github.com/redhat-developer/vscode-openshift-tools/pull/3848) Stop trying to connect to a cluster when it doesn't appear to be available.
+ * [#3841](https://github.com/redhat-developer/vscode-openshift-tools/pull/3841) Update func CLI to 1.13.0.
+ * [#3838](https://github.com/redhat-developer/vscode-openshift-tools/issues/3838) New and Improved sign-in for Developer Sandbox Login experience.
+ * [#3822](https://github.com/redhat-developer/vscode-openshift-tools/issues/3822) Add Context menu item to scale OpenShift Deployments.
+ * [#3814](https://github.com/redhat-developer/vscode-openshift-tools/issues/3814) "Open in Console" context menu item appears for non-OpenShift clusters.
+ * [#3813](https://github.com/redhat-developer/vscode-openshift-tools/pull/3813) Force refresh App explorer on create project when new project name is the same as the one set in the current-context.
+ * [#3812](https://github.com/redhat-developer/vscode-openshift-tools/issues/3812) As a user I initially couldn't find "Change Active Project".
+ * [#3804](https://github.com/redhat-developer/vscode-openshift-tools/pull/3804) Improve switch context workflow.
+ * [#3665](https://github.com/redhat-developer/vscode-openshift-tools/issues/3665) Enhance dev on podman experience.
+ * [#3640](https://github.com/redhat-developer/vscode-openshift-tools/issues/3640) Show context menu to Open in Terminal for the function created.
+ * [#3638](https://github.com/redhat-developer/vscode-openshift-tools/issues/3638) Show vscode notification message if docker is not started for Fn commands.
+ * [#3512](https://github.com/redhat-developer/vscode-openshift-tools/issues/3512) Add paste to the OpenShift terminal.
+ * [#3405](https://github.com/redhat-developer/vscode-openshift-tools/issues/3405) Fix podman detection prompt.
+ * [#2581](https://github.com/redhat-developer/vscode-openshift-tools/issues/2581) Cannot Start Dev action on quarkus component until an OpenShift Project is created.
+ * [#2418](https://github.com/redhat-developer/vscode-openshift-tools/issues/2418) Allow to deploy docker images to connected OpenShift cluster.
+
 ## 1.11.0 (December 13, 2023)
  * [#3609](https://github.com/redhat-developer/vscode-openshift-tools/issues/3609) Manage helm repositories
  * [#3113](https://github.com/redhat-developer/vscode-openshift-tools/issues/3113) Show Helm charts from all Helm repos in the Helm chart explorer

@@ -46,39 +46,39 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.14.12",
-        "versionRange": "^4.14.12",
-        "versionRangeLabel": "version >= 4.14.12 and < 5.0.0",
+        "version": "4.15.0",
+        "versionRange": "^4.15.0",
+        "versionRangeLabel": "version >= 4.15.0 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-windows-4.14.12.zip",
-                "sha256sum": "3eba0b1a27215c3675ae87b236b161a76c55298d543dfeb11fbdf0f516733cd2",
-                "dlFileName": "openshift-client-windows-4.14.12.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.0/openshift-client-windows-4.15.0.zip",
+                "sha256sum": "6305ceaef098862ea1324e20b86ccc87355cc45d2659120050f088649e50dc1e",
+                "dlFileName": "openshift-client-windows-4.15.0.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-mac-4.14.12.tar.gz",
-                "sha256sum": "2a80fff65b04de4b8997dea4dc16150237892044905b6cd13b54634cfb2a490f",
-                "dlFileName": "openshift-client-mac-4.14.12.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.0/openshift-client-mac-4.15.0.tar.gz",
+                "sha256sum": "f5f29c0e242f0326439dbe147aada6f005928507caaabdcef7ef0163ec88316d",
+                "dlFileName": "openshift-client-mac-4.15.0.tar.gz",
                 "cmdFileName": "oc"
             },
             "darwin-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-mac-arm64-4.14.12.tar.gz",
-                "sha256sum": "a1409db3d8c26d44ee3c240f7b2305506383be3cb7f08e5ba1ca21ec0546c1ed",
-                "dlFileName": "openshift-client-mac-arm64-4.14.12.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.0/openshift-client-mac-arm64-4.15.0.tar.gz",
+                "sha256sum": "daa5cae35ae6d969915dfb65701cac0f57a7a71cbcfbef56cd115e17bf0532f6",
+                "dlFileName": "openshift-client-mac-arm64-4.15.0.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-linux-4.14.12.tar.gz",
-                "sha256sum": "e212f3a17267908a3bc984709d6a75e71e61be2573f0935f3bdd9dd3c2aff3d2",
-                "dlFileName": "openshift-client-linux-4.14.12.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.0/openshift-client-linux-4.15.0.tar.gz",
+                "sha256sum": "b79bf8ed03138ab84fdc5b8c8366eb3e923303e9aa0553efb7e4ad6d13cafa56",
+                "dlFileName": "openshift-client-linux-4.15.0.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.12/openshift-client-linux-arm64-4.14.12.tar.gz",
-                "sha256sum": "d7c96a67e77f6e716a66fd7407ce04b2f9b37ef7902b85de68c2f846f57c04e0",
-                "dlFileName": "openshift-client-linux-arm64-4.14.12.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.0/openshift-client-linux-arm64-4.15.0.tar.gz",
+                "sha256sum": "b1cd4302a4608fdc1f9bb7236421d2f0520638b88e9a5a0d4c1647e494b486c5",
+                "dlFileName": "openshift-client-linux-arm64-4.15.0.tar.gz",
                 "cmdFileName": "oc"
             }
         }
@@ -172,7 +172,7 @@
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
         "name": "crc",
-        "crcVersion": "2.32.0",
-        "openshiftVersion": "4.14.8"
+        "crcVersion": "2.33.0",
+        "openshiftVersion": "4.14.12"
     }
 }
