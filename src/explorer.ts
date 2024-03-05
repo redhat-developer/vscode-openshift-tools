@@ -415,11 +415,24 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     loadKubernetesCore(namespace: string | null, value: string) {
         const outputFormat = this.getOutputFormat();
         const uri = this.kubefsUri(namespace, value, outputFormat);
-        workspace.openTextDocument(uri).then((doc) => {
-            if (doc) {
-                void window.showTextDocument(doc);
-            }
-        },
+
+        const query = this.getComparableQuery(uri);
+        const openUri = workspace.textDocuments.map((doc) => doc.uri)
+            .find((docUri) => {
+                return (docUri.scheme === uri.scheme &&
+                    docUri.authority === uri.authority &&
+                    docUri.fragment === uri.fragment &&
+                    docUri.path === uri.path &&
+                    this.getComparableQuery(docUri) === query);
+            });
+
+        // If open document is found for the URI provided, we use its URI to bring its editor to the front
+        // instead of openning a new editor
+        workspace.openTextDocument(openUri ? openUri : uri).then((doc) => {
+                if (doc) {
+                    void window.showTextDocument(doc);
+                }
+            },
             (err) => window.showErrorMessage(`Error loading document: ${err}`));
     }
 
@@ -448,6 +461,19 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         const authority = action === 'describe' ? KUBECTL_DESCRIBE_AUTHORITY : KUBECTL_RESOURCE_AUTHORITY;
         const uri = `${scheme}://${authority}/${docname}?${nsquery}value=${value}&_=${nonce}`;
         return Uri.parse(uri);
+    }
+
+    /*
+     * Returns the query string of the specified Uri without "nonce" param,
+     * so the query strings can be compared.
+     * The "nonce" param is generated as current time value for every KubefsUri created,
+     * f.i., "_=1709642987392", and are always added to the end of the query string (so
+     * they always have the preceeding query parameters sepacator character ("&") added),
+     * so the query strings, if they aren't cleared from "nonce" param, can be compared for
+     * Uri objects even when they point to the same document.
+     */
+    getComparableQuery(uri: Uri): string {
+        return uri.query.replace(/&_=[0-9]+/g, '');
     }
 
     @vsCommand('openshift.resource.delete')
