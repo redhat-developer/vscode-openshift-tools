@@ -113,7 +113,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         || this.kubeContext.user !== newCtx.user
                         || this.kubeContext.namespace !== newCtx.namespace)) {
                     this.refresh();
-                    this.onDidChangeContextEmitter.fire(newCtx.name);
+                    this.onDidChangeContextEmitter.fire(newCtx?.name); // newCtx can be 'null'
                 }
                 this.kubeContext = newCtx;
                 this.kubeConfig = ku2;
