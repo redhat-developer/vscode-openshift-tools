@@ -30,11 +30,13 @@ export const INPUTS = {
     newFolderQuickPick: 'Select workspace for component',
     yes: 'Yes',
     no: 'No',
+    logout: 'Logout',
 };
 
 export const MENUS = {
     newProject: 'New Project',
     delete: 'Delete',
+    deleteProject: 'Delete Project',
     bindService: 'Bind Service',
     startDev: 'Start Dev',
 };
@@ -51,4 +53,6 @@ export const NOTIFICATIONS = {
     projectDeleteSuccess: (projectName: string) => `Project '${projectName}' successfully deleted`,
     savePasswordPrompt: 'Do you want to save username and password?',
     loginSuccess: (cluster: string) => `Successfully logged in to '${cluster}'`,
+    doYouWantLogOut: 'Do you want to logout of cluster?',
+    logoutSuccess: 'Successfully logged out. Do you want to login to a new cluster'
 };

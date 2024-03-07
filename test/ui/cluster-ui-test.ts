@@ -8,6 +8,7 @@ import * as path from 'path';
 import { createComponentTest } from './suite/component';
 import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
+import { loginTest } from './suite/login';
 
 describe('Extension cluster-dependant UI tests', function () {
     const kubeConfig = path.join(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.kube', 'config');
@@ -31,5 +32,6 @@ describe('Extension cluster-dependant UI tests', function () {
 
     checkExtension();
     checkOpenshiftView();
+    loginTest();
     createComponentTest(contextFolder);
 });

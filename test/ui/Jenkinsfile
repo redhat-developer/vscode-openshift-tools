@@ -21,11 +21,20 @@ node('rhel8') {
                 }
             }
         }
-        stage('cluster-dependent UI tests') {
-            wrap([$class: 'Xvnc']) {
-                sh "npm run cluster-ui-test"
-                junit 'report.xml'
+        withEnv(['PATH+EXTRA=' + pwd()]){
+            stage('cluster-dependent UI tests') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    wrap([$class: 'Xvnc']) {
+                        sh 'curl -L -o $(pwd)/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
+                        sh 'chmod +x kubectl'
+                        sh "npm run cluster-ui-test"
+                        junit 'report.xml'
+                    }
+                }
             }
+        }
+        stage('Archive Artifacts'){
+            archiveArtifacts artifacts: '/tmp/test-resources/screenshots/*', allowEmptyArchive: true
         }
     }
 }
