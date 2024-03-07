@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
 import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
 import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
@@ -30,8 +30,12 @@ export function createComponentTest(contextFolder: string) {
         });
 
         beforeEach(async function() {
-            const center = await new Workbench().openNotificationsCenter();
-            await center.clearAllNotifications();
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if(notifications.length > 0) {
+                await notificationCenter.close();
+            }
+            await new EditorView().closeAllEditors();
         });
 
         afterEach(async function() {
