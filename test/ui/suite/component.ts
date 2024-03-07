@@ -4,16 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, ViewSection, VSBrowser, WelcomeContentButton, Workbench } from 'vscode-extension-tester';
-import { itemExists, notificationExists, terminalHasText, waitForInputUpdate } from '../common/conditions';
-import { BUTTONS, COMPONENTS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
+import { ActivityBar, EditorView, InputBox, NotificationType, SideBarView, TerminalView, TreeItem, VSBrowser, ViewSection, Workbench } from 'vscode-extension-tester';
+import { notificationExists, itemExists, terminalHasText } from '../common/conditions';
+import { VIEWS, MENUS, NOTIFICATIONS, INPUTS, COMPONENTS } from '../common/constants';
+
+
 
 export function createComponentTest(contextFolder: string) {
-    describe('Component creation', function() {
+    describe('Component creation', function () {
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
         const clusterName = cluster;
-        const user = process.env.CLUSTER_USER || 'developer';
-        const password = process.env.CLUSTER_PASSWORD || 'developer';
+
         let view: SideBarView;
         let explorer: ViewSection;
         let components: ViewSection;
@@ -29,94 +30,38 @@ export function createComponentTest(contextFolder: string) {
             editorView = new EditorView();
         });
 
-        beforeEach(async function() {
+        beforeEach(async function () {
             const notificationCenter = await new Workbench().openNotificationsCenter();
             const notifications = await notificationCenter.getNotifications(NotificationType.Any);
-            if(notifications.length > 0) {
+            if (notifications.length > 0) {
                 await notificationCenter.close();
             }
             await new EditorView().closeAllEditors();
         });
 
-        afterEach(async function() {
+        afterEach(async function () {
             editorView = new EditorView();
             await editorView.closeAllEditors();
         });
 
-        after(async function() {
+        after(async function () {
             this.timeout(60000);
             const projectItem = await explorer.findItem(projectName);
             if (projectItem) {
                 const menu = await projectItem.openContextMenu();
-                await menu.select(MENUS.delete);
+                await menu.select(MENUS.deleteProject);
                 const notif = await notificationExists(NOTIFICATIONS.deleteProjectWarning(projectName), VSBrowser.instance.driver);
                 await notif.takeAction(INPUTS.yes);
                 await notificationExists(NOTIFICATIONS.projectDeleteSuccess(projectName), VSBrowser.instance.driver, 40000);
             }
         });
 
-        it('Login with credentials', async function() {
-            this.timeout(30_000);
-            await explorer.expand();
-            const content = await explorer.findWelcomeContent();
-            // eslint-disable-next-line no-console, @typescript-eslint/restrict-template-expressions
-            console.log(`content: ${await Promise.all((await content.getButtons()).map(async item => await item.getTitle()))}`);
-            const btns = await content.getButtons();
-            let loginBtn: WelcomeContentButton;
-
-            for(const btn of btns) {
-                if (await btn.getTitle() === BUTTONS.login) {
-                    loginBtn = btn;
-                    break;
-                }
-            }
-            if (!loginBtn) {
-                expect.fail('No login button available');
-            }
-            await loginBtn.click();
-            // select new URL
-            const inputBox = await InputBox.create();
-            await inputBox.selectQuickPick(INPUTS.newUrlQuickPick);
-
-            // provide the cluster URL
-            const clusterMessage = await waitForInputUpdate(inputBox, '');
-            await inputBox.setText(cluster);
-            await inputBox.confirm();
-
-            // select credentials login
-            const typeMessage = await waitForInputUpdate(inputBox, clusterMessage);
-            await inputBox.selectQuickPick(INPUTS.credentialsQuickPick);
-
-            // create new credentials
-            const userMessage = await waitForInputUpdate(inputBox, typeMessage);
-            await inputBox.selectQuickPick(INPUTS.newUserQuickPick);
-
-            // provide user name
-            const nameMessage = await waitForInputUpdate(inputBox, userMessage);
-            await inputBox.setText(user);
-            await inputBox.confirm();
-
-            // provide password
-            await waitForInputUpdate(inputBox, nameMessage);
-            await inputBox.setText(password);
-            await inputBox.confirm();
-
-            // don't save the credentials when asked
-            const notification = await notificationExists(NOTIFICATIONS.savePasswordPrompt, VSBrowser.instance.driver);
-            await notification.takeAction(INPUTS.no);
-
-            // wait for confirmation that the login was successful
-            await notificationExists(NOTIFICATIONS.loginSuccess(cluster), VSBrowser.instance.driver, 15000);
-
-            // make sure the cluster shows up in the tree view
-            const clusterItem = await itemExists(clusterName, explorer);
-            expect(clusterItem).not.undefined;
-        });
-
-        it('Create a new project', async function() {
+        it('Create a new project', async function () {
             this.timeout(30000);
             await explorer.expand();
             const clusterItem = await explorer.findItem(clusterName) as TreeItem;
+            await clusterItem.expand();
+            await new Promise((res) => { setTimeout(res, 2_500); });
             const menu = await clusterItem.openContextMenu();
             await menu.select(MENUS.newProject);
 
@@ -124,11 +69,10 @@ export function createComponentTest(contextFolder: string) {
             await input.setText(projectName);
             await input.confirm();
 
-            await clusterItem.expand();
             await itemExists(projectName, explorer);
         });
 
-        it.skip('Create a new component from scratch', async function() {
+        it.skip('Create a new component from scratch', async function () {
             this.timeout(120_000);
             const newComponent = (await (await components.findWelcomeContent()).getButtons())[1];
             await newComponent.click();
@@ -165,7 +109,7 @@ export function createComponentTest(contextFolder: string) {
         });
 
         // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
-        it.skip('Start the component in dev mode', async function() {
+        it.skip('Start the component in dev mode', async function () {
             this.timeout(180000);
             const component = await itemExists(compName, components, 30_000);
 
@@ -186,7 +130,7 @@ export function createComponentTest(contextFolder: string) {
             await itemExists(compName, components, 60_000);
         });
 
-        it.skip('Check for \'Bind Service\' button (don\'t click it)', async function() {
+        it.skip('Check for \'Bind Service\' button (don\'t click it)', async function () {
             this.timeout(60000);
             const component = await itemExists(compName, components);
             const menu = await component.openContextMenu();
