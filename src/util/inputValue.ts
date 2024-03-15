@@ -13,9 +13,16 @@ export class quickBtn implements QuickInputButton {
     * - username string, or
     * - `null` in case of user cancelled (pressed `ESC`), or
     * - `undefined` if user pressed `Back` button
+    * @param prompt A prompt text to be shown
+    * @param initialValue an initial value
+    * @param password a boolean indicating if the chars are to be hidden (i.e. a password is to be typed in)
+    * @param validate a callback function to be invoked to validate value
+    * @param placeHolder (optional) A place holder text to be shown
+    * @param abortController if provided, allows cancelling the operation
     * @returns string contaning user name or null if cancelled or undefined if Back is pressed
     */
-export function inputValue(prompt: string, initialValue: string, password: boolean, validate, placeHolder?: string): Promise<string | null | undefined> {
+export function inputValue(prompt: string, initialValue: string, password: boolean, validate, placeHolder?: string,
+        abortController?: AbortController): Promise<string | null | undefined> {
     return new Promise<string | null | undefined>((resolve, reject) => {
         const input: InputBox = window.createInputBox();
         input.value = initialValue;
@@ -56,12 +63,16 @@ export function inputValue(prompt: string, initialValue: string, password: boole
         });
         input.onDidHide(() => {
             input.dispose();
+            resolve(null);
         })
         input.onDidTriggerButton(async (event) => {
             if (event === QuickInputButtons.Back) resolveAndClose(undefined);
             else if (event === cancelBtn) resolveAndClose(null);
             else if (event === enterBtn) await acceptInput();
         });
+        if (abortController) {
+            abortController.signal.addEventListener('abort', (ev) => resolveAndClose(null));
+        }
         input.show();
     });
 }

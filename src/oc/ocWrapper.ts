@@ -291,18 +291,22 @@ export class Oc {
      * @param clusterURL the URL of the cluster to log in to
      * @param username the username to use when logging in
      * @param password the password to use when logging in
+     * @param abortController if provided, allows cancelling the operation
      */
     public async loginWithUsernamePassword(
         clusterURL: string,
         username: string,
         password: string,
+        abortController?: AbortController
     ): Promise<void> {
+        const options = abortController ? { signal: abortController.signal } : undefined;
         const result = await CliChannel.getInstance().executeTool(
             new CommandText('oc', `login ${clusterURL}`, [
                 new CommandOption('-u', username, true, true),
                 new CommandOption('-p', password, true, true),
                 new CommandOption('--insecure-skip-tls-verify'),
             ]),
+            options
         );
         if (result.stderr) {
             throw new Error(result.stderr);
@@ -314,13 +318,17 @@ export class Oc {
      *
      * @param clusterURL the URL of the cluster to log in to
      * @param token the token to use to log in to the cluster
+     * @param abortController if provided, allows cancelling the operation
      */
-    public async loginWithToken(clusterURL: string, token: string): Promise<void> {
+    public async loginWithToken(clusterURL: string, token: string,
+            abortController?: AbortController): Promise<void> {
+        const options = abortController ? { signal: abortController.signal } : undefined;
         const result = await CliChannel.getInstance().executeTool(
             new CommandText('oc', `login ${clusterURL}`, [
                 new CommandOption('--token', token.trim()),
                 new CommandOption('--insecure-skip-tls-verify'),
             ]),
+            options
         );
         if (result.stderr) {
             throw new Error(result.stderr);
