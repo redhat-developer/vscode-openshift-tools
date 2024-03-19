@@ -14,3 +14,6 @@ updates:
     typescript-eslint:
       patterns:
       - "@typescript-eslint/*"
+    material-ui:
+      patterns:
+      - "@mui/*"
