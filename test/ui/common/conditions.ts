@@ -46,6 +46,22 @@ export async function itemExists(title: string, view: ViewSection, timeout = 100
     }, timeout);
 }
 
+export async function itemHasText(title: string, text: string, view: ViewSection, timeout = 10_000 ): Promise<ViewItem> {
+    return view.getDriver().wait(async () => {
+        try {
+            const item = await view.findItem(title);
+            if (item) {
+                const itemText = await item.getText();
+                if (itemText.includes(text)) {
+                    return item;
+                }
+            }
+        } catch (err) {
+            return null;
+        }
+    }, timeout)
+}
+
 export async function waitForInputProgress(input: InputBox, shouldExist: boolean, timeout = 5000) {
     return input.getDriver().wait(async () => {
         const hasProgress = await input.hasProgress();
