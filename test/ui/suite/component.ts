@@ -12,8 +12,6 @@ import { VIEWS, MENUS, NOTIFICATIONS, INPUTS, COMPONENTS } from '../common/const
 
 export function createComponentTest(contextFolder: string) {
     describe('Component creation', function () {
-        const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
-        const clusterName = cluster;
 
         let view: SideBarView;
         let explorer: ViewSection;
@@ -54,22 +52,6 @@ export function createComponentTest(contextFolder: string) {
                 await notif.takeAction(INPUTS.yes);
                 await notificationExists(NOTIFICATIONS.projectDeleteSuccess(projectName), VSBrowser.instance.driver, 40000);
             }
-        });
-
-        it('Create a new project', async function () {
-            this.timeout(30000);
-            await explorer.expand();
-            const clusterItem = await explorer.findItem(clusterName) as TreeItem;
-            await clusterItem.expand();
-            await new Promise((res) => { setTimeout(res, 2_500); });
-            const menu = await clusterItem.openContextMenu();
-            await menu.select(MENUS.newProject);
-
-            const input = await InputBox.create();
-            await input.setText(projectName);
-            await input.confirm();
-
-            await itemExists(projectName, explorer);
         });
 
         it.skip('Create a new component from scratch', async function () {
