@@ -265,6 +265,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     // eslint-disable-next-line class-methods-use-this
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
+        // don't show Open In Developer Dashboard if not openshift cluster
+        const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
         if (!element) {
             try {
                 if (!await LoginUtil.Instance.requireLogin()) {
@@ -354,12 +356,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'deployments'
                 },
             } as OpenShiftObject;
-            const deploymentConfigs = {
-                kind: 'deploymentconfigs',
-                metadata: {
-                    name: 'deployment configs'
-                },
-            } as OpenShiftObject;
             const helmReleases = {
                 kind: 'helmreleases',
                 metadata: {
@@ -396,6 +392,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'cron jobs'
                 },
             } as OpenShiftObject;
+            const deploymentConfigs = {
+                kind: 'deploymentconfigs',
+                metadata: {
+                    name: 'deployment configs'
+                },
+            } as OpenShiftObject;
             const imageStreams = {
                 kind: 'imagestreams',
                 metadata: {
@@ -408,8 +410,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'build configs'
                 },
             } as OpenShiftObject;
-            result.push(deployments, deploymentConfigs, helmReleases, pods,
-                statefulSets, daemonSets, jobs, cronJobs, imageStreams, buildConfigs);
+            result.push(deployments, helmReleases, pods,
+                statefulSets, daemonSets, jobs, cronJobs);
+            if (isOpenshiftCluster) {
+                result.push(deploymentConfigs, imageStreams, buildConfigs);
+            }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
             let collections: KubernetesObject[] | Helm.HelmRelease[];
@@ -431,8 +436,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         if (!element) {
             await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
         } else {
-            // don't show Open In Developer Dashboard if not openshift cluster
-            const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
             void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
         }
         return result;
