@@ -24,7 +24,7 @@ import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
-import fetch = require('make-fetch-happen');
+// import fetch = require('make-fetch-happen');
 
 export interface QuickPickItemExt extends QuickPickItem {
     name: string,
@@ -33,44 +33,78 @@ export interface QuickPickItemExt extends QuickPickItem {
     namespace: string
 }
 
+class CancelChecker {
+    cancelled: boolean;
+    controller: AbortController;
+
+    constructor() {
+        this.cancelled = false;
+        this.controller = new AbortController();
+    }
+
+    isCancelled(): boolean {
+        return this.cancelled;
+    }
+
+    cancel() {
+        this.cancelled = true;
+        this.controller.abort();
+    }
+}
+
 export class Cluster extends OpenShiftItem {
 
     public static extensionContext: ExtensionContext;
 
     @vsCommand('openshift.explorer.logout')
     static async logout(): Promise<string> {
+        const thenable = new Promise<string>((resolve, reject) => {
+            Cluster.logoutInternal()
+                .then((result) => resolve(result))
+                .catch((error) => reject(error));
+        });
+
+        window.setStatusBarMessage('$(sync) Logging out of cluster...', thenable);
+        return thenable;
+    }
+
+    static async logoutInternal(): Promise<string> {
         const value = await window.showWarningMessage(
             'Do you want to logout of cluster?',
             'Logout',
             'Cancel',
         );
         if (value === 'Logout') {
-            return LoginUtil.Instance.logout()
+            void LoginUtil.Instance.logout()
                 .catch(async (error) =>
                     Promise.reject(
                         new VsCommandError(
-                         `Failed to logout of the current cluster with '${error}'!`,
+                            `Failed to logout of the current cluster with '${error}'!`,
                             'Failed to logout of the current cluster',
                         ),
                     ),
                 )
-                .then(async () => {
+                .then(() => {
                     OpenShiftExplorer.getInstance().refresh();
                     Cluster.serverlessView.refresh();
                     void commands.executeCommand('setContext', 'isLoggedIn', false);
-                    const logoutInfo = await window.showInformationMessage(
-                        'Successfully logged out. Do you want to login to a new cluster',
-                        'Yes',
-                        'No',
-                    );
-                    if (logoutInfo === 'Yes') {
-                        return Cluster.login(undefined, true);
-                    }
+                    void window.showInformationMessage(
+                            'Successfully logged out. Do you want to login to a new cluster',
+                            'Yes',
+                            'No',
+                        ).then((logoutInfo) => {
+                            if (logoutInfo === 'Yes') {
+                                return Cluster.login(undefined, true);
+                            }
+                            return null;
+                        });
                     return null;
                 });
         }
         return null;
     }
+
+
 
     @vsCommand('openshift.explorer.refresh')
     static refresh(): void {
@@ -171,6 +205,33 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.explorer.switchContext')
     static async switchContext(): Promise<string> {
+        const cancelChecker = new CancelChecker();
+        if (!(await Cluster.checkOngoingOperation(cancelChecker))) {
+            return null;
+        }
+
+        Cluster.ongoingOperationCanceller = cancelChecker;
+        const thenable = new Promise<string>((resolve, reject) => {
+            Cluster.switchContextInternal(cancelChecker)
+            .then((result) => {
+                if (Cluster.ongoingOperationCanceller === cancelChecker) {
+                    Cluster.ongoingOperationCanceller = undefined;
+                }
+                resolve(result);
+            })
+            .catch((error) => {
+                if (Cluster.ongoingOperationCanceller === cancelChecker) {
+                    Cluster.ongoingOperationCanceller = undefined;
+                }
+                reject(error)
+            });
+        });
+
+        window.setStatusBarMessage('$(sync) Switching context...', thenable);
+        return thenable;
+   }
+
+    static async switchContextInternal(cancelChecker?: CancelChecker): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const k8sConfig = new KubeConfigUtils();
             const contexts = k8sConfig.contexts.filter(
@@ -207,7 +268,7 @@ export class Cluster extends OpenShiftItem {
                     )
                     .then((command: string) => {
                         if (command === 'Login') {
-                            resolve(Cluster.login(undefined, true));
+                            resolve(Cluster.login(undefined, true, cancelChecker));
                         }
                         resolve(null);
                     });
@@ -225,7 +286,7 @@ export class Cluster extends OpenShiftItem {
                         .then(async () => {
                             const clusterURL = k8sConfig.findClusterURL(choice.cluster);
                             if (await LoginUtil.Instance.requireLogin(clusterURL)) {
-                                const status = await Cluster.login(choice.name, true);
+                                const status = await Cluster.login(choice.name, true, cancelChecker);
                                 if (status) {
                                     const newKcu = new KubeConfigUtils(); // Can be updated after login
                                     if (Cluster.isSandboxCluster(clusterURL)
@@ -300,7 +361,7 @@ export class Cluster extends OpenShiftItem {
                     const prompt = 'Provide new Cluster URL to connect';
                     const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
                     const newURL = await inputValue(prompt, '', false, validateInput);
-                    if (newURL === null) return null; // Cancel
+                    if (newURL === null) reject(null); // Cancel
                     else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl)); // Back
                     else resolve(newURL);
                 } else {
@@ -478,6 +539,62 @@ export class Cluster extends OpenShiftItem {
         }
     }
 
+    private static ongoingOperationCanceller: CancelChecker;
+
+    /**
+     * Checks if a new operation can be started.
+     * If an ongoing operation is already started, asks if user really wants to cancel it and start a new one,
+     * If user agrees - the ongoing operation gets canceled.
+     *
+     * @returns true if we can start a new operation, false - otherwise
+     */
+    private static async checkOngoingOperation(cancelChecker: CancelChecker): Promise<boolean> {
+        // const canceller = new CancelChecker();
+        if (Cluster.ongoingOperationCanceller && Cluster.ongoingOperationCanceller !== cancelChecker) {
+            let response = 'Yes';
+            const cluster = new KubeConfigUtils().getCurrentCluster();
+            response = await window.showInformationMessage(
+                `You are already trying tp login to ${cluster ? cluster.server : ''} cluster. Do you want to login to cancel and try again?`,
+                'Yes',
+                'No',
+            );
+            if (response !== 'Yes') {
+                return false;
+            }
+
+            // Do cancell here.
+            Cluster.ongoingOperationCanceller && Cluster.ongoingOperationCanceller.cancel();
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks the availability of a given cluster
+     *
+     * @param url Cluster URL to check
+     * @param cancelChecker if provided, allows cancelling the check operation
+     * @returns true if cluster is available, false if cluster is not available or the operation is cancelled
+     */
+    static async pingCluster(url: string, cancelChecker: CancelChecker ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            const https = require('https');
+            const signal = cancelChecker ? cancelChecker.controller.signal : undefined;
+            const options = { rejectUnauthorized: false, signal};
+            https.get(`${url}/api`, options, (response) => {
+                if (response.statusCode < 500) {
+                    resolve(true);
+                } else {
+                    reject(`Connect error: ${response.statusCode}`);
+                }
+            }).on('error', (e) => {
+                reject(`Connect error: ${e}`);
+            }).on('success', (s) => {
+                resolve(true);
+            });
+        });
+    }
+
     /**
      * Login to a cluster
      *
@@ -486,7 +603,42 @@ export class Cluster extends OpenShiftItem {
      * @returns Successful login message, otherwise - 'null'
      */
     @vsCommand('openshift.explorer.login')
-    static async login(context?: string, skipConfirmation = false): Promise<string> {
+    static async login(context?: string, skipConfirmation = false, cancelChecker?: CancelChecker): Promise<string> {
+        let clusterURL: string = undefined;
+        if (context) {
+            // If context is specified, we'll initialize clusterURL from it
+            const kcu = new KubeConfigUtils();
+            const ctx = kcu.findContext(context);
+            clusterURL = ctx && kcu.findClusterURL(ctx.cluster);
+        }
+
+        const localCancelChecker = cancelChecker ? cancelChecker : new CancelChecker();
+        if (!(await Cluster.checkOngoingOperation(localCancelChecker))) {
+            return null;
+        }
+
+        Cluster.ongoingOperationCanceller = cancelChecker;
+        const thenable = new Promise<string>((resolve, reject) => {
+            Cluster.loginInternal(context, skipConfirmation, cancelChecker)
+                .then((result) => {
+                    if (Cluster.ongoingOperationCanceller === cancelChecker) {
+                        Cluster.ongoingOperationCanceller = undefined;
+                    }
+                    resolve(result);
+                })
+                .catch((error) => {
+                    if (Cluster.ongoingOperationCanceller === cancelChecker) {
+                        Cluster.ongoingOperationCanceller = undefined;
+                    }
+                    reject(error)
+                });
+        });
+
+        window.setStatusBarMessage(`$(sync) Logging in${clusterURL ? ` to ${clusterURL}` : ''}...`, thenable);
+        return thenable;
+    }
+
+    static async loginInternal(context?: string, skipConfirmation = false, cancelChecker?: CancelChecker): Promise<string> {
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
@@ -518,18 +670,13 @@ export class Cluster extends OpenShiftItem {
                         if (!clusterURL) return null;
 
                         try {
-                            await fetch(`${clusterURL}/api`, {
-                                // disable cert checking. crc uses a self-signed cert,
-                                // which means this request will always fail on crc unless cert checking is disabled
-                                strictSSL: false
-                            });
-
-                            // since the fetch didn't throw an exception,
-                            // a route to the cluster is available,
-                            // so it's running
-                            clusterIsUp = true;
+                            clusterIsUp  = await Cluster.pingCluster(clusterURL, cancelChecker);
                         } catch (e) {
-                            if (Cluster.isOpenshiftLocalCluster(clusterURL)) {                                const startCrc = 'Start OpenShift Local';
+                            if (cancelChecker.isCancelled()) {
+                                return null; // Silently exit
+                            }
+                            if (Cluster.isOpenshiftLocalCluster(clusterURL)) {
+                                const startCrc = 'Start OpenShift Local';
                                 const promptResponse = await window.showWarningMessage(
                                     'The cluster appears to be a OpenShift Local cluster, but it isn\'t running',
                                     'Use a different cluster',
