@@ -6,8 +6,12 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { FeedbackComponent } from './feedback';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 import './index.css';
 
-ReactDOM.render(<FeedbackComponent />,
+ReactDOM.render(
+    <WebviewErrorBoundary webviewName="feedback">
+        <FeedbackComponent />
+    </WebviewErrorBoundary>,
     document.getElementById('root'),
 );
