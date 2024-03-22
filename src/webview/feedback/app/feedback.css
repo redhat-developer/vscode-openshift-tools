@@ -68,3 +68,7 @@
 .footerText:hover {
     border-bottom: 3px solid #EE0000 !important;
 }
+
+.sd-rating__item-text {
+    color: var(--vscode-foreground) !important;
+}
