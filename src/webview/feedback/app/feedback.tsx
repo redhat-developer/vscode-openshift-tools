@@ -13,7 +13,6 @@ import MicrosoftIcon from '../../../../images/welcome/microsoft.svg';
 import { DefaultProps } from '../../common/propertyTypes';
 import { json } from '../json';
 import './feedback.css';
-import { VSCodeMessage } from './vsCodeMessage';
 
 export const FeedbackComponent: React.FC<DefaultProps> = () => {
 
@@ -21,7 +20,7 @@ export const FeedbackComponent: React.FC<DefaultProps> = () => {
 
     feedbackModal.onComplete.add((sender, options) => {
         options.showSaveInProgress();
-        VSCodeMessage.postMessage({
+        window.vscodeApi.postMessage({
             action: 'postFeedback',
             data: sender.data
         });

@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import React from 'react';
+import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorPage } from './errorPage';
 
@@ -23,7 +23,7 @@ export function WebviewErrorBoundary(props: { webviewName: string; children }) {
                     data: {
                         actionName: 'webviewRenderError',
                         properties: {
-                            webviewName: this.props.webviewName,
+                            webviewName: props.webviewName,
                             error: JSON.stringify(error),
                             stackTrace: JSON.stringify(info.componentStack),
                         },

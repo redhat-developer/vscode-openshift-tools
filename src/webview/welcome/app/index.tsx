@@ -6,6 +6,7 @@ import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { Welcome } from './welcomePage';
 import { VSCodeMessage } from './vsCodeMessage';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 VSCodeMessage.postMessage({
     'action': 'getOpenShiftVersion'
@@ -16,6 +17,8 @@ VSCodeMessage.postMessage({
 });
 
 ReactDOM.render(
-    <Welcome />,
+    <WebviewErrorBoundary webviewName='welcome'>
+        <Welcome />
+    </WebviewErrorBoundary>,
     document.getElementById('root'),
 );
