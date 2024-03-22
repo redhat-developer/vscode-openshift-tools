@@ -5,8 +5,11 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { ManageRepository } from './home';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 ReactDOM.render(
-    <ManageRepository />,
+    <WebviewErrorBoundary webviewName='helmManageRepository'>
+        <ManageRepository />
+    </WebviewErrorBoundary>,
     document.getElementById('root'),
 );

@@ -6,8 +6,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Home } from './home';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 ReactDOM.render(
-    <Home />,
+    <WebviewErrorBoundary webviewName='helmChart'>
+        <Home />
+    </WebviewErrorBoundary>,
     document.getElementById('root'),
 );

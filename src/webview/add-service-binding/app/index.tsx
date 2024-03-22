@@ -6,8 +6,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { AddServiceBindingForm } from './addServiceBindingForm';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 ReactDOM.render(
-    <AddServiceBindingForm />,
-    document.getElementById('root'),
+  <WebviewErrorBoundary webviewName='addServiceBinding'>
+    <AddServiceBindingForm />
+  </WebviewErrorBoundary>,
+  document.getElementById('root'),
 );

@@ -6,7 +6,10 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { CreateService } from './createForm';
+import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
 ReactDOM.render((
-  <CreateService />
+  <WebviewErrorBoundary webviewName='createService'>
+    <CreateService />
+  </WebviewErrorBoundary>
 ), document.getElementById('root'));
