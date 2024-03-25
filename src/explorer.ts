@@ -215,7 +215,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             } else if (element.kind === 'Pod') {
                 const contextElement: DeploymentPodObject = element;
                 return {
-                    contextValue: 'openshift.k8sobject.Deployment.pod',
+                    contextValue: 'openshift.k8sObject.pod',
                     label: contextElement.metadata.name,
                     description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
                     collapsibleState: TreeItemCollapsibleState.None,
@@ -565,7 +565,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.delete')
     public static async deleteResource(component: KubernetesObject) {
-        await Oc.Instance.deleteKubernetesObject(component.kind, component.metadata.name);
+        await Progress.execFunctionWithProgress(`Deleting '${component.kind}/${component.metadata.name}'`, async (_) => {
+            await Oc.Instance.deleteKubernetesObject(component.kind, component.metadata.name);
+        });
         void window.showInformationMessage(`Deleted the '${component.kind}' named '${component.metadata.name}'`);
         OpenShiftExplorer.instance.refresh();
     }
