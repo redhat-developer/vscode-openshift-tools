@@ -185,8 +185,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 contextValue: 'openshift.k8sObject.helm',
                 label: element.name,
                 collapsibleState: TreeItemCollapsibleState.None,
-                description: 'Helm Release',
-                iconPath: path.resolve(__dirname, '../../images/context/helm.png'),
+                description: element.status,
+                iconPath: element.status === 'failed' ? path.resolve(__dirname, '../../images/context/helmFailed.svg') :
+                    path.resolve(__dirname, '../../images/context/helmDeployed.svg'),
+                tooltip: `Chart version: ${element.chart}\nApp version: ${element.app_version}\n`,
             };
         }
 
@@ -217,7 +219,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     label: contextElement.metadata.name,
                     description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
                     collapsibleState: TreeItemCollapsibleState.None,
-                    iconPath: contextElement.status.phase === 'Running' ? new ThemeIcon('layers-active') : new ThemeIcon('layers-dot'),
+                    iconPath: contextElement.status.phase === 'Running' ? path.resolve(__dirname, '../../images/context/runningPod.svg') :
+                        path.resolve(__dirname, '../../images/context/notReadyPod.svg'),
                     tooltip: `${contextElement.status.phase}\n${contextElement.status.podIP ? contextElement.status.podIP : ''}`,
                     command: {
                         title: 'Load',
@@ -226,29 +229,44 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     }
                 }
             }
+            const contextElement: DeploymentPodObject = element;
+            if (!contextElement.spec) {
+                const elementValue = this.makeCaps(element.metadata.name);
+                return {
+                    contextValue: `openshift.k8sobject.${element.kind}`,
+                    label: elementValue,
+                    collapsibleState: TreeItemCollapsibleState.Collapsed
+                }
+            }
             const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
             return {
                 contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
                 label: element.metadata.name,
                 description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
                 collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
-                iconPath: path.resolve(__dirname, '../../images/context/component-node.png'),
+                iconPath: element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ? path.resolve(__dirname, '../../images/context/component-node.png') : undefined,
                 command: {
                     title: 'Load',
                     command: 'openshift.resource.load',
                     arguments: [element]
                 }
             };
-        }
 
+        }
         return {
             label: 'Unknown element'
         }
     }
 
+    private makeCaps(kind: string): string {
+        return kind.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+    }
+
     // eslint-disable-next-line class-methods-use-this
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
+        // don't show Open In Developer Dashboard if not openshift cluster
+        const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
         if (!element) {
             try {
                 if (!await LoginUtil.Instance.requireLogin()) {
@@ -331,46 +349,115 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             }
         } else if ('kind' in element && element.kind === 'Deployment') {
             return await this.getPods(element);
-        } else {
-            let serviceKinds: CustomResourceDefinitionStub[] = [];
-            try {
-                if (await Oc.Instance.canGetKubernetesObjects('csv')) {
-                    serviceKinds = await getServiceKindStubs();
-                }
-            } catch (_) {
-                // operator framework is not installed on cluster; do nothing
+        } else if ('kind' in element && element.kind === 'project') {
+            const deployments = {
+                kind: 'deployments',
+                metadata: {
+                    name: 'deployments'
+                },
+            } as OpenShiftObject;
+            const helmReleases = {
+                kind: 'helmreleases',
+                metadata: {
+                    name: 'helm Releases'
+                },
+            } as OpenShiftObject;
+            const pods = {
+                kind: 'pods',
+                metadata: {
+                    name: 'pods'
+                },
+            } as OpenShiftObject;
+            const statefulSets = {
+                kind: 'statefulsets',
+                metadata: {
+                    name: 'stateful sets'
+                },
+            } as OpenShiftObject;
+            const daemonSets = {
+                kind: 'daemonSets',
+                metadata: {
+                    name: 'daemon sets'
+                },
+            } as OpenShiftObject;
+            const jobs = {
+                kind: 'jobs',
+                metadata: {
+                    name: 'jobs'
+                },
+            } as OpenShiftObject;
+            const cronJobs = {
+                kind: 'cronjobs',
+                metadata: {
+                    name: 'cron jobs'
+                },
+            } as OpenShiftObject;
+            const deploymentConfigs = {
+                kind: 'deploymentconfigs',
+                metadata: {
+                    name: 'deployment configs'
+                },
+            } as OpenShiftObject;
+            const imageStreams = {
+                kind: 'imagestreams',
+                metadata: {
+                    name: 'image streams'
+                },
+            } as OpenShiftObject;
+            const buildConfigs = {
+                kind: 'buildConfigs',
+                metadata: {
+                    name: 'build configs'
+                },
+            } as OpenShiftObject;
+            result.push(deployments, helmReleases, pods,
+                statefulSets, daemonSets, jobs, cronJobs);
+            if (isOpenshiftCluster) {
+                result.push(deploymentConfigs, imageStreams, buildConfigs);
             }
-
-            const collectableServices: CustomResourceDefinitionStub[] = [];
-            await Promise.all(serviceKinds.map(async serviceKind => {
-                if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name)) {
-                    collectableServices.push(serviceKind);
-                }
-            }));
-
+        } else if ('kind' in element) {
+            const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
+            let collections: KubernetesObject[] | Helm.HelmRelease[];
+            switch (element.kind) {
+                case 'helmreleases':
+                    collections = await Helm.getHelmReleases();
+                    break;
+                default:
+                    collections = await Oc.Instance.getKubernetesObjects(element.kind);
+                    break;
+            }
             const toCollect = [
-                Oc.Instance.getKubernetesObjects('Deployment'),
-                Helm.getHelmReleases(),
+                collections,
                 ...collectableServices
                     .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
             ];
-            if (await Oc.Instance.isOpenShiftCluster()) {
-                toCollect.push(
-                    Oc.Instance.getKubernetesObjects('DeploymentConfig'),
-                )
-            }
-
             result = await Promise.all(toCollect).then(listOfLists => listOfLists.flatMap(a => a as ExplorerItem[]));
         }
-
         if (!element) {
             await commands.executeCommand('setContext', 'openshift.app.explorer.init', result.length === 0);
         } else {
-            // don't show Open In Developer Dashboard if not openshift cluster
-            const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
             void commands.executeCommand('setContext', 'isOpenshiftCluster', isOpenshiftCluster);
         }
         return result;
+    }
+
+    private async getServiceKinds() {
+        let serviceKinds: CustomResourceDefinitionStub[] = [];
+        try {
+            if (await Oc.Instance.canGetKubernetesObjects('csv')) {
+                serviceKinds = await getServiceKindStubs();
+            }
+        } catch (_) {
+            // operator framework is not installed on cluster; do nothing
+        }
+
+        const collectableServices: CustomResourceDefinitionStub[] = [];
+        await Promise.all(serviceKinds.map(async (serviceKind) => {
+            if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name)) {
+                collectableServices.push(serviceKind);
+            }
+        }));
+        return collectableServices;
     }
 
     public async getPods(element: KubernetesObject | OpenShiftObject) {
@@ -429,10 +516,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // If open document is found for the URI provided, we use its URI to bring its editor to the front
         // instead of openning a new editor
         workspace.openTextDocument(openUri ? openUri : uri).then((doc) => {
-                if (doc) {
-                    void window.showTextDocument(doc);
-                }
-            },
+            if (doc) {
+                void window.showTextDocument(doc);
+            }
+        },
             (err) => window.showErrorMessage(`Error loading document: ${err}`));
     }
 
