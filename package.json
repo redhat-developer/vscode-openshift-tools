@@ -1923,7 +1923,7 @@
 				},
 				{
 					"command": "openshift.resource.watchLogs",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.!(helm&&pod)/"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm|pod)/"
 				},
 				{
 					"command": "openshift.deployment.shell",
@@ -1939,7 +1939,7 @@
 				},
 				{
 					"command": "openshift.resource.openInDeveloperConsole",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.!(helm&&pod)/ && isOpenshiftCluster"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm|pod)/ && isOpenshiftCluster"
 				},
 				{
 					"command": "openshift.resource.openInBrowser",
