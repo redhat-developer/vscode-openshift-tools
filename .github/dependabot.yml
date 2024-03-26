@@ -17,3 +17,6 @@ updates:
     material-ui:
       patterns:
       - "@mui/*"
+    rjsf:
+      patterns:
+      - "@rjsf/*"
