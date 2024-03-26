@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { BottomBarPanel, InputBox, Notification, NotificationType, ViewItem, ViewSection, WebDriver, Workbench } from 'vscode-extension-tester';
+import type { WebDriver } from 'selenium-webdriver';
+import { BottomBarPanel, InputBox, Notification, NotificationType, ViewItem, ViewSection, Workbench } from 'vscode-extension-tester';
 
 export async function waitForInputUpdate(input: InputBox, originalText: string, timeout = 5000): Promise<string> {
     return input.getDriver().wait(async () => {
