@@ -66,7 +66,8 @@ export function checkOpenshiftView() {
             });
         });
 
-        describe('Components', function() {
+        //Unstable and replaced by createComponent tests
+        describe.skip('Components', function() {
             let section: ViewSection;
             let welcome: WelcomeContentSection;
 
