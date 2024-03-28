@@ -18,8 +18,8 @@ suite('helm integration', function () {
 
     const RELEASE_NAME = 'my-helm-release';
     const REPO_NAME = 'openshift';
-    const CHART_NAME = 'redhat-dotnet';
-    const CHART_VERSION = '0.0.2';
+    const CHART_NAME = 'redhat-jenkins';
+    const CHART_VERSION = '0.0.3';
     const HELM_NAMESPACE = 'my-helm-charts';
 
     suiteSetup(async function () {
