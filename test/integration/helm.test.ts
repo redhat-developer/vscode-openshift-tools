@@ -18,8 +18,8 @@ suite('helm integration', function () {
 
     const RELEASE_NAME = 'my-helm-release';
     const REPO_NAME = 'openshift';
-    const CHART_NAME = 'fredco-samplechart';
-    const CHART_VERSION = '0.1.3';
+    const CHART_NAME = 'redhat-dotnet';
+    const CHART_VERSION = '0.0.2';
     const HELM_NAMESPACE = 'my-helm-charts';
 
     suiteSetup(async function () {
