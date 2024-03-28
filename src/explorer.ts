@@ -181,6 +181,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         // It's a Helm installation
         if ('chart' in element) {
+
+            if (element.chart === 'noChart') {
+                return {
+                    label: 'No charts were installed'
+                };
+            }
             return {
                 contextValue: 'openshift.k8sObject.helm',
                 label: element.name,
@@ -204,13 +210,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                             iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
                         }
                     });
-            } else if (element.kind === 'helm') {
+            } else if (element.kind === 'helmContexts') {
+                return {
+                    label: 'Helm',
+                    collapsibleState: TreeItemCollapsibleState.Collapsed
+                }
+            } else if (element.kind === 'helmRepos') {
                 return {
                     contextValue: 'openshift.helm.repos',
                     label: element.metadata.name,
-                    collapsibleState: TreeItemCollapsibleState.Collapsed,
-                    description: 'Repositories',
-                    iconPath: path.resolve(__dirname, '../../images/context/helm.png')
+                    collapsibleState: TreeItemCollapsibleState.Collapsed
                 }
             } else if (element.kind === 'Pod') {
                 const contextElement: DeploymentPodObject = element;
@@ -293,12 +302,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
             const namespaces = await Oc.Instance.getProjects();
-            const helmContext = {
-                kind: 'helm',
-                metadata: {
-                    name: 'Helm'
-                },
-            } as OpenShiftObject
             if (this.kubeContext.namespace) {
                 if (namespaces.find(item => item.name === this.kubeContext.namespace)) {
                     result = [{
@@ -336,10 +339,21 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 // operator framework is not installed on cluster; do nothing
             }
             void commands.executeCommand('setContext', 'showCreateService', serviceKinds.length > 0);
-
-            // Add Helm Context
-            result.push(helmContext);
-        } else if ('kind' in element && element.kind === 'helm') {
+        } else if ('kind' in element && element.kind === 'helmContexts') {
+            const helmRepos = {
+                kind: 'helmRepos',
+                metadata: {
+                    name: 'Repositories'
+                },
+            } as OpenShiftObject
+            const helmReleases = {
+                kind: 'helmReleases',
+                metadata: {
+                    name: 'Releases'
+                },
+            } as OpenShiftObject
+            result.push(helmRepos, helmReleases);
+        } else if ('kind' in element && element.kind === 'helmRepos') {
             const cliData = await Helm.getHelmRepos();
             if (!cliData.error && !cliData.stderr) {
                 const helmRepos = JSON.parse(cliData.stdout) as HelmRepo[];
@@ -356,12 +370,20 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'deployments'
                 },
             } as OpenShiftObject;
-            const helmReleases = {
-                kind: 'helmreleases',
+            const helmContexts = {
+                kind: 'helmContexts',
                 metadata: {
-                    name: 'helm Releases'
+                    name: 'helmContexts'
                 },
-            } as OpenShiftObject;
+            } as OpenShiftObject
+            const workLoads = {
+                kind: 'workloads',
+                metadata: {
+                    name: 'workloads'
+                },
+            } as OpenShiftObject
+            result.push(deployments, helmContexts, workLoads);
+        } else if ('kind' in element && element.kind === 'workloads') {
             const pods = {
                 kind: 'pods',
                 metadata: {
@@ -410,7 +432,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'build configs'
                 },
             } as OpenShiftObject;
-            result.push(deployments, helmReleases, pods,
+            result.push(pods,
                 statefulSets, daemonSets, jobs, cronJobs);
             if (isOpenshiftCluster) {
                 result.push(deploymentConfigs, imageStreams, buildConfigs);
@@ -419,8 +441,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
             let collections: KubernetesObject[] | Helm.HelmRelease[];
             switch (element.kind) {
-                case 'helmreleases':
+                case 'helmReleases':
                     collections = await Helm.getHelmReleases();
+                    if (collections.length === 0) {
+                        collections = [{
+                            chart: 'noChart'
+                        }]
+                    }
                     break;
                 default:
                     collections = await Oc.Instance.getKubernetesObjects(element.kind);

@@ -8,13 +8,13 @@ import { HelmRepo } from './helmChartType';
 import * as HelmCommands from './helmCommands';
 
 export type HelmRelease = {
-    name: string;
-    namespace: string;
-    revision: string;
-    updated: string;
-    status: string;
+    name?: string;
+    namespace?: string;
+    revision?: string;
+    updated?: string;
+    status?: string;
     chart: string;
-    app_version: string;
+    app_version?: string;
 };
 
 /**
