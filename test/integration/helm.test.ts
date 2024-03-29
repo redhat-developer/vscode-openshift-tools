@@ -17,9 +17,9 @@ suite('helm integration', function () {
     const oc = Oc.Instance;
 
     const RELEASE_NAME = 'my-helm-release';
-    const REPO_NAME = 'openshift';
-    const CHART_NAME = 'fredco-samplechart';
-    const CHART_VERSION = '0.1.3';
+    const REPO_NAME = 'bitnami';
+    const CHART_NAME = 'discourse';
+    const CHART_VERSION = '12.8.0';
     const HELM_NAMESPACE = 'my-helm-charts';
 
     suiteSetup(async function () {
@@ -48,10 +48,10 @@ suite('helm integration', function () {
     });
 
     test('installs OpenShift repo', async function () {
-        await Helm.addHelmRepo('openshift','https://charts.openshift.io/');
+        await Helm.addHelmRepo('bitnami','https://charts.bitnami.com/bitnami');
         const repoListOutput = (await Helm.getHelmRepos()).stdout;
-        expect(repoListOutput).to.contain('openshift');
-        expect(repoListOutput).to.contain('https://charts.openshift.io/');
+        expect(repoListOutput).to.contain('bitnami');
+        expect(repoListOutput).to.contain('https://charts.bitnami.com/bitnami');
     });
 
     test('installs a chart as a release', async function () {
