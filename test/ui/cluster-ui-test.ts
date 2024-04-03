@@ -5,7 +5,6 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-//import { createComponentTest } from './suite/component';
 import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
 import { loginTest } from './suite/login';
@@ -35,5 +34,4 @@ describe('Extension cluster-dependant UI tests', function () {
     checkOpenshiftView();
     loginTest();
     projectTest();
-    //createComponentTest(contextFolder);
 });
