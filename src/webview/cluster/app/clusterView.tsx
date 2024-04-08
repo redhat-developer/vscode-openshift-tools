@@ -35,7 +35,7 @@ const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
 const crcDefaults = {
 	DefaultCPUs: 4,
-	DefaultMemory: 9216,
+	DefaultMemory: 10752,
 	DefaultWebConsoleURL: 'https://console-openshift-console.apps-crc.testing',
 	DefaultAPIURL: 'https://api.crc.testing:6443',
 	CrcLandingPageURL: 'https://console.redhat.com/openshift/create/local',

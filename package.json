@@ -2263,7 +2263,7 @@
 					},
 					"openshiftToolkit.crcMemoryAllocated": {
 						"type": "number",
-						"default": 9216,
+						"default": 10752,
 						"description": "MiB of memory to allocate to the OpenShift cluster as selected during the first run"
 					},
 					"openshiftToolkit.crcNameserver": {
