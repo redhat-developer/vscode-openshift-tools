@@ -9,7 +9,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
 import { Platform } from './platform';
-import * as k8s from 'vscode-kubernetes-tools-api';
+import { CommandText } from '../base/command';
+import { CliChannel } from '../cli';
 
 function fileExists(file: string): boolean {
     try {
@@ -184,14 +185,13 @@ export async function setKubeConfig(): Promise<void> {
 }
 
 export async function isOpenShift(): Promise<boolean> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    let isOS = false;
-    if (kubectl.available) {
-        const sr = await kubectl.api.invokeCommand('api-versions');
-        isOS = sr && sr.code === 0 && sr.stdout.includes('apps.openshift.io/v1');
+    try {
+        const stdout = await CliChannel.getInstance().executeSyncTool(new CommandText('kubectl', 'api-versions'), { timeout: 5000 });
+        return stdout.includes('apps.openshift.io/v1');
+    } catch(error) {
+        return false;
     }
-    return isOS;
-  }
+}
 
   export async function getNamespaceKind(): Promise<string> {
       return (await isOpenShift()) ? 'Project' : 'Namespace';

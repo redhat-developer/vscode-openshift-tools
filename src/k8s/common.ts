@@ -32,13 +32,13 @@ export async function selectResourceByName(config: Promise<QuickPickItem[]> | Qu
 }
 
 export async function getChildrenNode(command: CommandText, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const result = await kubectl.api.invokeCommand(`${command}`);
+    try {
+        const result = await CliChannel.getInstance().executeTool(new CommandText('kubectl', `${command}`));
         const builds = result.stdout.split('\n')
             .filter((value) => value !== '')
             .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2], 10), kind, abbreviation));
         return builds;
+    } catch (error) {
+        return [];
     }
-    return [];
 }

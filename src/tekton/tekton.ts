@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as k8s from 'vscode-kubernetes-tools-api';
+import { CommandText } from '../base/command';
+import { CliChannel } from '../cli';
 
 /**
  * Returns true if the cluster has the Tekton CRDs, and false otherwise.
@@ -11,11 +12,10 @@ import * as k8s from 'vscode-kubernetes-tools-api';
  * @returns true if the cluster has the Tekton CRDs, and false otherwise
  */
 export async function isTektonAware(): Promise<boolean> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    let isTekton = false;
-    if (kubectl.available) {
-        const sr = await kubectl.api.invokeCommand('api-versions');
-        isTekton = sr && sr.code === 0 && sr.stdout.includes('tekton.dev/v1beta1');
+    try {
+        const stdout = await CliChannel.getInstance().executeSyncTool(new CommandText('kubectl', 'api-versions'), { timeout: 5000 });
+        return stdout.includes('tekton.dev/v1beta1');
+    } catch(error) {
+        return false;
     }
-    return isTekton;
 }
