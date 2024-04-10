@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.13.0 (April 10, 2024)
+
+ * [#4045](https://github.com/redhat-developer/vscode-openshift-tools/issues/4045) Bump minimum memory for CRC to 10752 MB
+ * [#4013](https://github.com/redhat-developer/vscode-openshift-tools/issues/4013) Support deletion of Pod resources from extension UI
+ * [#4004](https://github.com/redhat-developer/vscode-openshift-tools/issues/4004) Fix Extension Survey form
+ * [#3991](https://github.com/redhat-developer/vscode-openshift-tools/issues/3991) Showcase all Workload resources in Application Explorer Tree view
+ * [#3981](https://github.com/redhat-developer/vscode-openshift-tools/issues/3981) Migrate Functionality from Kubernetes VSCode Extension to OpenShift Toolkit
+ * [#3947](https://github.com/redhat-developer/vscode-openshift-tools/issues/3947) Properly refresh the app explorer tree after logging into a Kind cluster
+ * [#3919](https://github.com/redhat-developer/vscode-openshift-tools/issues/3919) Improve "Open Kuberbetes YAML file" to avoid accidental opens and duplicate files
+ * [#3918](https://github.com/redhat-developer/vscode-openshift-tools/issues/3918) Use "namespaces" wording on kubernetes clusters and "projects" wording on OpenShift clusters
+
 ## 1.12.0 (February 28, 2024)
  * [#3880](https://github.com/redhat-developer/vscode-openshift-tools/pull/3880) Do not call getAllComponents() in activate.
  * [#3112](https://github.com/redhat-developer/vscode-openshift-tools/issues/3112) Extension takes several minutes to start if the current `~/.kube/config` context is an inaccessible cluster.
