@@ -14,8 +14,8 @@
 	"bugs": "https://github.com/redhat-developer/vscode-openshift-tools/issues",
 	"engines": {
 		"vscode": "^1.64.2",
-		"npm": ">=8.0.0 <10.0.0",
-		"node": ">=16.0.0 <v20.11.1"
+		"npm": ">=8.0.0",
+		"node": ">=16.0.0"
 	},
 	"badges": [
 		{
