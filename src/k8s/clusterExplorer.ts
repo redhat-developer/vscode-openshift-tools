@@ -10,22 +10,21 @@ import { DeploymentConfig } from './deploymentConfig';
 import path = require('path');
 import { ClusterServiceVersion } from './csv';
 import { isOpenShift } from '../util/kubeUtils';
+import { CommandText } from '../base/command';
+import { CliChannel } from '../cli';
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
 let lastNamespace = '';
 
 async function initNamespaceName(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode): Promise<string | undefined> {
-  const kubectl = await k8s.extension.kubectl.v1;
-  if (kubectl.available) {
-      const result = await kubectl.api.invokeCommand('config view -o json');
-      const config = JSON.parse(result.stdout);
-      const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
-      if (!currentContext) {
-          return '';
-      }
-      return currentContext.context.namespace || 'default';
-  }
+    const result = await CliChannel.getInstance().executeTool(new CommandText('oc', 'config view -o json'));
+    const config = JSON.parse(result.stdout);
+    const currentContext = (config.contexts || []).find((ctx) => ctx.name === node.name);
+    if (!currentContext) {
+        return '';
+    }
+    return currentContext.context.namespace || 'default';
 }
 
 async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {

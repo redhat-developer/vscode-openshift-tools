@@ -11,6 +11,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import { Build } from '../../../src/k8s/build';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
+import { CliChannel } from '../../../src/cli';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -20,6 +21,7 @@ suite('K8s/build', () => {
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub;
     let execStub: sinon.SinonStub;
+    let execToolStub: sinon.SinonStub;
     const errorMessage = 'FATAL ERROR';
     const context = {
         id: 'dummy',
@@ -64,6 +66,7 @@ suite('K8s/build', () => {
         sandbox = sinon.createSandbox();
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
+        execToolStub = sandbox.stub(CliChannel.prototype, 'executeTool');
         // sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
@@ -88,14 +91,7 @@ suite('K8s/build', () => {
         } as k8s.ClusterExplorerV1.ClusterExplorerNode;
 
         setup(() => {
-            const api: k8s.API<k8s.KubectlV1> = {
-                available: true,
-                api: {
-                    invokeCommand: sandbox.stub().resolves({ stdout: 'namespace, name, 1', stderr: '', code: 0}),
-                    portForward: sandbox.stub()
-                }
-            };
-            sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
+            execToolStub.resolves({ stdout: 'namespace, name, 1', stderr: '', error: undefined});
         });
 
         test('should able to get the children node of build Config', async () => {
@@ -155,23 +151,23 @@ suite('K8s/build', () => {
         }
     }`;
         setup(() => {
-            execStub.resolves({ stdout: mockData, stderr: undefined, error: undefined });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
+            execToolStub.resolves({ stdout: mockData, stderr: '', error: undefined });
         });
 
         test('works from context menu', async () => {
             const result = await Build.startBuild(startBuildCtx);
 
             expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name).toString());
+            expect(execToolStub).calledWith(Build.command.startBuild(startBuildCtx.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.startBuild(null);
 
             expect(result).equals(`Build '${startBuildCtx.name}' successfully started`);
-            expect(execStub).calledWith(Build.command.startBuild(startBuildCtx.name).toString());
+            expect(execToolStub).calledWith(Build.command.startBuild(startBuildCtx.name));
         });
 
         test('returns null when no BuildConfig selected', async () => {
@@ -181,7 +177,7 @@ suite('K8s/build', () => {
         });
 
         test('wraps errors in additional info', async () => {
-            execStub.rejects(errorMessage);
+            execToolStub.rejects(errorMessage);
 
             try {
                 await Build.startBuild(startBuildCtx);
@@ -192,7 +188,7 @@ suite('K8s/build', () => {
 
         test('throws error if there is no BuildConfigs to select', async () => {
             quickPickStub.restore();
-            execStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
+            execToolStub.resolves({ error: undefined, stdout: noBcData, stderr: '' });
             let checkError: Error;
             try {
                 await Build.startBuild(null);
@@ -290,7 +286,7 @@ suite('K8s/build', () => {
 
     suite('Delete', ()=> {
         setup(() => {
-            execStub.resolves({ error: null, stdout: buildData, stderr: '' });
+            execToolStub.resolves({ error: null, stdout: buildData, stderr: '' });
             sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
@@ -300,14 +296,14 @@ suite('K8s/build', () => {
             const result = await Build.delete(context);
 
             expect(result).equals(`Build '${context.impl.name}' successfully deleted`);
-            expect(execStub).calledWith(Build.command.delete(context.impl.name).toString());
+            expect(execToolStub).calledWith(Build.command.delete(context.impl.name));
         });
 
         test('works with no context', async () => {
             const result = await Build.delete(null);
 
             expect(result).equals('Build \'nodejs-copm-nodejs-comp-8\' successfully deleted');
-            expect(execStub).calledWith(Build.command.delete('nodejs-copm-nodejs-comp-8').toString());
+            expect(execToolStub).calledWith(Build.command.delete('nodejs-copm-nodejs-comp-8'));
         });
 
         test('returns null when no build selected to delete', async () => {
@@ -317,7 +313,7 @@ suite('K8s/build', () => {
         });
 
         test('wraps errors in additional info', async () => {
-            execStub.rejects(errorMessage);
+            execToolStub.rejects(errorMessage);
 
             try {
                 await Build.delete(context);

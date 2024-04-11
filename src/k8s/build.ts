@@ -118,8 +118,8 @@ export class Build {
         }
         if (buildName) {
             result = Progress.execFunctionWithProgress('Starting build', () =>
-                Build.cli.executeTool(Build.command.startBuild(buildName)),
-            )
+                    Build.cli.executeTool(Build.command.startBuild(buildName)),
+                )
                 .then(() => `Build '${buildName}' successfully started`)
                 .catch((err) =>
                     Promise.reject(
@@ -186,8 +186,8 @@ export class Build {
         const build = await Build.selectBuild(context, 'Select a build to delete');
         if (build) {
             result = Progress.execFunctionWithProgress('Deleting build', () =>
-                Build.cli.executeTool(Build.command.delete(build)),
-            )
+                    Build.cli.executeTool(Build.command.delete(build))
+                )
                 .then(() => `Build '${build}' successfully deleted`)
                 .catch((err) =>
                     Promise.reject(
