@@ -19,8 +19,8 @@ function convertItemToQuickPick(item: any): QuickPickItem {
 
 export async function getQuickPicks(cmd: CommandText, errorMessage: string, converter: (item: any) => QuickPickItem = convertItemToQuickPick): Promise<QuickPickItem[]> {
     const result = await CliChannel.getInstance().executeTool(cmd);
-    const json = JSON.parse(result.stdout);
-    if (json.items.length === 0) {
+    const json = result ? JSON.parse(result.stdout) : undefined;
+    if (!json || json.items.length === 0) {
         throw new VsCommandError(errorMessage);
     }
     return json.items.map(converter);
@@ -32,13 +32,13 @@ export async function selectResourceByName(config: Promise<QuickPickItem[]> | Qu
 }
 
 export async function getChildrenNode(command: CommandText, kind: string, abbreviation: string): Promise<k8s.ClusterExplorerV1.Node[]> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (kubectl.available) {
-        const result = await kubectl.api.invokeCommand(`${command}`);
+    try {
+        const result = await CliChannel.getInstance().executeTool(command);
         const builds = result.stdout.split('\n')
             .filter((value) => value !== '')
             .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2], 10), kind, abbreviation));
         return builds;
+    } catch (error) {
+        return [];
     }
-    return [];
 }

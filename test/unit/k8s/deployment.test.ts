@@ -13,6 +13,7 @@ import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { Progress } from '../../../src/util/progress';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
+import { VsCommandError } from '../../../src/vscommand';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -91,7 +92,7 @@ suite('K8s/deployment', () => {
     setup(() => {
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
-        execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
+        execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined});
         sandbox.stub(Progress, 'execFunctionWithProgress').yields();
     });
 
@@ -101,7 +102,6 @@ suite('K8s/deployment', () => {
 
     suite('DeploymentConfigNodeContributor', () => {
         let dcnc;
-        let kubectlV1Stub: sinon.SinonStub<any[], any>;
         const parent = {
             metadata: undefined,
             name: 'comp1-app',
@@ -119,26 +119,20 @@ suite('K8s/deployment', () => {
 
         setup(() => {
             dcnc = DeploymentConfig.getNodeContributor();
-            const api: k8s.API<k8s.KubectlV1> = {
-                available: true,
-                api: {
-                    invokeCommand: sandbox.stub().resolves({ stdout: 'namespace, name, 1', stderr: '', code: 0}),
-                    portForward: sandbox.stub()
-                }
-            };
-            kubectlV1Stub = sandbox.stub(k8s.extension.kubectl, 'v1').value(api);
         });
 
         test('should able to get the children node of deployment Config', async () => {
+            // Set 'executeTool` stub to return a normal response
+            execStub.resolves({ stdout: 'namespace, name, 1', stderr: '', error: undefined});
+
             const result = await dcnc.getChildren(parent);
             expect(result.length).equals(1);
         });
 
         test('returns empty children node of deployment Config', async () => {
-            const api = {
-                available: false
-            };
-            kubectlV1Stub.onFirstCall().value(api);
+            // Set 'executeTool` stub to return a random error
+            execStub.resolves({ stdout: '', stderr: 'Not available', error: new VsCommandError('Not available')});
+
             const result = await dcnc.getChildren(parent);
             expect(result.length).equals(0);
         });
@@ -155,7 +149,6 @@ suite('K8s/deployment', () => {
         };
 
         setup(() => {
-            // execStub = sandbox.stub(CliChannel.prototype, 'execute').resolves({ stdout: mockData, stderr: undefined, error: undefined });
             execStub.resolves({ error: undefined, stdout: mockData, stderr: '' });
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-comp-nodejs-app'});
