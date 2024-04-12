@@ -2238,6 +2238,11 @@
 						"type": "number",
 						"default": 90000,
 						"description": "Controls stopping development mode timeout (in milliseconds)."
+					},
+					"openshiftToolkit.execMaxBufferLength": {
+						"type": "number",
+						"default": 4,
+						"description": "MiB of memory to allocate for stdout buffer when executing a binary"
 					}
 				}
 			},

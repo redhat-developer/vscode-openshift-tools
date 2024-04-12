@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as vscode from 'vscode';
 import * as chai from 'chai';
 import * as childProcess from 'child_process';
 import * as sinon from 'sinon';
@@ -43,6 +44,9 @@ suite('ChildProcessUtil', function() {
     });
 
     test('execute uses a 2MB buffer by default', async function() {
+        // Change Exec Max Buffer Length to 2Mb (while the default value is 4Gb)
+        await vscode.workspace.getConfiguration('openshiftToolkit').update('execMaxBufferLength', 2);
+
         execStub.yields(null, stdout, '');
         await childProcessUtil.execute(command);
 
