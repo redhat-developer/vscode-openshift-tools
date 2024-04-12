@@ -78,10 +78,17 @@ export class ChildProcessUtil {
         this.odoChannel = odoChannel;
     }
 
+    public static getExecMaxBufferLength(): number {
+        const execMaxBufferLengthFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit')
+            .get('execMaxBufferLength');
+        const length = parseInt(execMaxBufferLengthFromSetting, 10);
+        return (!isNaN(length) && length > 0 ? length : 4) * 1024 * 1024;
+    }
+
     public execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
             if (opts.maxBuffer === undefined) {
-                opts.maxBuffer = 2 * 1024 * 1024;
+                opts.maxBuffer = ChildProcessUtil.getExecMaxBufferLength();
             }
             cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
                 // filter out info about update
