@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
+import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
@@ -59,6 +60,14 @@ export class CliChannel {
         const optsCopy = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv())
         const result: CliExitData = await ChildProcessUtil.Instance.execute(toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, optsCopy);
         if (result.error && fail) {
+            if (result.error.code && result.error.code.toString() === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+                void vscode.window.showErrorMessage('Do you want to change the maximum \'stdout\' buffer size by modifying the \'openshiftToolkit.execMaxBufferLength\' preference value?', 'Yes', 'Cancel')
+                    .then((answer)=> {
+                        if (answer === 'Yes') {
+                            void vscode.commands.executeCommand('workbench.action.openSettings', 'openshiftToolkit.execMaxBufferLength');
+                        }
+                    });
+            }
             throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
         };
         return result;
