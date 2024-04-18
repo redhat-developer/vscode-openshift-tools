@@ -62,57 +62,35 @@ export function kubernetesContextTest() {
             }
             const quickPickText = allQuickPicksTexts[0];
             const projectName = quickPickText.split('on')[0];
-            console.log(projectName)
 
-            console.log('A')
             await inputBox.selectQuickPick(projectName);
 
-            console.log('B')
             inputBox = await InputBox.create();
-            console.log('C')
             await inputBox.selectQuickPick(INPUTS.credentialsQuickPick);
-            console.log('D')
             await inputBox.selectQuickPick('developer');
-            console.log('E')
             await inputBox.confirm();
-            console.log('F')
 
-
-            console.log('hereeee')
             const clusterNode = await itemExists(clusterName, explorer) as TreeItem;
-            console.log('1')
             await clusterNode.expand();
-            console.log('2')
             await itemExists(projectName, explorer);
-            console.log('3')
         });
 
         it('Switch context', async function() {
             this.timeout(20_000);
 
-            console.log('1')
             const quickPickText = allQuickPicksTexts[1];
-            //console.log(quickPickText)
             const projectName = quickPickText.split('on')[0];
 
-            console.log('2')
             await collapse(explorer);
-            console.log('3')
             await explorer.expand();
-            console.log('4')
 
             const action = await explorer.getAction(ACTIONS.switchContexts);
-            console.log('5')
             await action.click();
-            console.log('6')
 
             const inputBox = await InputBox.create();
-            console.log('7')
             await inputBox.selectQuickPick(projectName);
-            console.log('8')
 
             await itemExists(projectName, explorer);
-            console.log('9')
         });
     });
 
