@@ -23,6 +23,10 @@ export const BUTTONS = {
     newComponent: 'Create Component',
 };
 
+export const ACTIONS = {
+    switchContexts: 'Switch Contexts',
+}
+
 export const INPUTS = {
     newUrlQuickPick: 'Provide new URL...',
     credentialsQuickPick: 'Credentials',
