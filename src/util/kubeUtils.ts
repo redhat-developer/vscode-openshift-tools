@@ -4,13 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
-import { Cluster, User, Context } from '@kubernetes/client-node/dist/config_types';
+import { Cluster, Context, User } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
 import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
-import { Platform } from './platform';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import { Platform } from './platform';
 
 function fileExists(file: string): boolean {
     try {
@@ -148,6 +148,8 @@ export class KubeConfigUtils extends KubeConfig {
  * - If KUBECONFIG is set, follows the semantics for specifying multiple config files described here:
  *   https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#append-home-kube-config-to-your-kubeconfig-environment-variable
  *   BUT: it shows an error if multiple configs are specified, since the Kubernetes client we are using doesn't support this use case.
+ *
+ * @returns the list of kube config files
  */
 export function getKubeConfigFiles(): string[] {
     if (process.env.KUBECONFIG) {

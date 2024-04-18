@@ -490,7 +490,7 @@ export class Component extends OpenShiftItem {
      * @param context
      * @param componentTypeName
      * @param componentKind
-     * @return A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
+     * @returns A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
      * @throws VsCommandError or Error in case of error in cli or code
      */
 

@@ -52,7 +52,7 @@ export async function getHelmRepos(): Promise<CliExitData> {
 /**
  * sync the repository to get latest
  *
- * @param repo name
+ * @param repoName the name of the repo to synchronize
  *
  * @returns the CLI output data from running the necessary command
  */
@@ -64,6 +64,7 @@ export async function syncHelmRepo(repoName: string): Promise<CliExitData> {
  * Install a chart from the OpenShift Helm Repo
  *
  * @param name the name of the release
+ * @param repoName the name of the helm repo
  * @param chartName the name of the chart to install
  * @param version the version of the chart to use for the release
  * @returns the CLI output data from running the necessary command
@@ -91,10 +92,11 @@ export async function unInstallHelmChart(name: string): Promise<CliExitData> {
 }
 
 /**
- * sort the repo list.
+ * Compare the repos based on the name, placing the openshift repo at the beginning.
  *
- * @param helm repo
- * @returns the CLI output data from running the necessary command
+ * @param oldRepo the first repo to compare
+ * @param newRepo the second repo to compare
+ * @returns a negative number if the first entry should go first, or a positive number if the second entry should go first
  */
 export function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
     const oldURLCheck = oldRepo.url.toLowerCase().includes('charts.openshift.io');

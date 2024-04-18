@@ -21,13 +21,9 @@ export default class ManageRepositoryViewLoader {
     }
 
     /**
-     * Returns a webview panel with the "Add Service Binding" UI,
-     * or if there is an existing view for the given contextPath, focuses that view and returns null.
+     * Returns the webview panel as a promise.
      *
-     * @param contextPath the path to the component that's being binded to a service
-     * @param availableServices the list of all bindable services on the cluster
-     * @param listenerFactory the listener function to receive and process messages from the webview
-     * @return the webview as a promise
+     * @returns the webview panel as a promise
      */
     static async loadView(
         title: string

@@ -151,6 +151,8 @@ async function updateDevfileContext(_: unknown) {
  * Sets up the context `ext.folderContainsDevfile` for use in package.json.
  *
  * Updates the context when folders are added to the workspace or devfiles are created/deleted.
+ *
+ * @returns a disposable to dispose of the watcher
  */
 export function setupWorkspaceDevfileContext(): Disposable {
     void updateDevfileContext(undefined);

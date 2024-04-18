@@ -178,8 +178,9 @@ function RegistriesPicker(props: {
 /**
  * sort the tags based on selection and alphabet order.
  *
- * @param tag
- * @returns number
+ * @param oldTag the first tag to compare
+ * @param newTag the second tag to compare
+ * @returns a negative number if the first tag should go first, and a positive number if the second tag should go first
  */
 function ascTag(oldTag: { name: string; enabled: boolean }, newTag: { name: string; enabled: boolean }) {
 
@@ -486,9 +487,7 @@ export type DevfileSearchProps = {
  * - it contains any of selected tags
  * - always if there is no any selected tags
  *
- * @param tags1
- * @param tags2
- * @returns
+ * @returns true if the specified Devfile should be included in the search results, and false otherwise
  */
 function isToBeIncluded(devfile: Devfile, tagFilter: string[], debugSupportFilter: boolean, deploySupportFilter: boolean): boolean {
     const includesDebugSupport = debugSupportFilter === false || debugSupportFilter === devfile.supportsDebug;

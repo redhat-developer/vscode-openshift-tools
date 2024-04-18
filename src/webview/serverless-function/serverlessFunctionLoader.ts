@@ -14,11 +14,11 @@ import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import { InvokeFunction } from '../../serverlessFunction/types';
 import { CliExitData } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
+import { Platform } from '../../util/platform';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { VsCommandError } from '../../vscommand';
 import { loadWebviewHtml, validateName } from '../common-ext/utils';
-import { Platform } from '../../util/platform';
 import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
 
 export interface ServiceBindingFormResponse {
@@ -165,13 +165,9 @@ export default class ServerlessFunctionViewLoader {
     }
 
     /**
-     * Returns a webview panel with the "Add Service Binding" UI,
-     * or if there is an existing view for the given contextPath, focuses that view and returns null.
+     * Returns the webview as a promise.
      *
-     * @param contextPath the path to the component that's being binded to a service
-     * @param availableServices the list of all bindable services on the cluster
-     * @param listenerFactory the listener function to receive and process messages from the webview
-     * @return the webview as a promise
+     * @returns the webview as a promise
      */
     static async loadView(
         title: string,

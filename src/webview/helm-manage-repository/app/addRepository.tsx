@@ -91,7 +91,6 @@ export class AddRepository extends React.Component<DefaultProps, {
         })
     }
 
-
     render(): React.ReactNode {
         const { input, repo } = this.state;
         return (

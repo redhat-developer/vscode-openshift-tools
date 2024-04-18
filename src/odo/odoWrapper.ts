@@ -299,8 +299,8 @@ export class Odo {
      * Resolves when the binding it created.
      *
      * @param contextPath the path to the component
-     * @param serviceName the name of the service to bind to
      * @param serviceNamespace the namespace the the service is in
+     * @param serviceName the name of the service to bind to
      * @param bindingName the name of the service binding
      */
     public async addBinding(

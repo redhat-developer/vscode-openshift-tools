@@ -55,7 +55,7 @@ export class CreateComponentWebView extends WebViewForm {
 /**
  * Class represents page that shows up after selecting a devfile
  * @author Lukas Grossmann <lgrossma@redhat.com>
-*/
+ */
 export class SetNameAndFolderPage extends WebViewForm {
 
     public constructor(name: string) {
