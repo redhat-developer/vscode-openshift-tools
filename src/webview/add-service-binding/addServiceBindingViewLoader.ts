@@ -28,7 +28,7 @@ export default class AddServiceBindingViewLoader {
      * @param contextPath the path to the component that's being binded to a service
      * @param availableServices the list of all bindable services on the cluster
      * @param listenerFactory the listener function to receive and process messages from the webview
-     * @return the webview as a promise
+     * @returns the webview as a promise
      */
     static async loadView(
         contextPath: string,

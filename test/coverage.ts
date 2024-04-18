@@ -32,10 +32,6 @@ export class CoverageRunner {
     /**
      * Writes a coverage report.
      * Note that as this is called in the process exit callback, all calls must be synchronous.
-     *
-     * @returns {void}
-     *
-     * @memberOf CoverageRunner
      */
     public async reportCoverage(): Promise<void> {
         // istanbul.hook.unhookRequire();

@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import sendTelemetry from '../telemetry';
-import * as Helm from '../../src/helm/helm';
-import { HelmRepo } from './helmChartType';
-import { OpenShiftExplorer } from '../explorer';
-import { vsCommand } from '../vscommand';
-import { ascRepoName } from '../../src/helm/helm';
-import ManageRepositoryViewLoader from '../webview/helm-manage-repository/manageRepositoryLoader';
-import HelmChartLoader from '../webview/helm-chart/helmChartLoader';
-import { inputValue } from '../util/inputValue';
 import validator from 'validator';
+import * as vscode from 'vscode';
+import * as Helm from '../../src/helm/helm';
+import { ascRepoName } from '../../src/helm/helm';
+import { OpenShiftExplorer } from '../explorer';
+import sendTelemetry from '../telemetry';
+import { inputValue } from '../util/inputValue';
 import { Progress } from '../util/progress';
+import { vsCommand } from '../vscommand';
+import HelmChartLoader from '../webview/helm-chart/helmChartLoader';
+import ManageRepositoryViewLoader from '../webview/helm-manage-repository/manageRepositoryLoader';
+import { HelmRepo } from './helmChartType';
 
 export class ManageRepository {
 
@@ -28,10 +28,10 @@ export class ManageRepository {
     }
 
     /**
-    * sync the repository
-    *
-    * @param repository
-    */
+     * sync the repository
+     *
+     * @param repo
+     */
     @vsCommand('openshift.helm.sync')
     public async sync(repo: HelmRepo): Promise<void> {
         await Progress.execFunctionWithProgress(`pulling ${repo.name} repository with latest`, async () => {
@@ -42,23 +42,16 @@ export class ManageRepository {
         });
     }
 
-    /**
-    * edit the repository
-    *
-    * @param repository
-    * @returns true if repo edited successfully
-    */
     @vsCommand('openshift.helm.add')
     public async add(_repo = undefined, newName: string, newURL: string, isWebview = false): Promise<boolean> {
         return await vscode.commands.executeCommand('openshift.helm.edit', undefined, newName, newURL, true, isWebview);
     }
 
     /**
-    * edit the repository
-    *
-    * @param repository
-    * @returns true if repo edited successfully
-    */
+     * edit the repository
+     *
+     * @returns true if repo edited successfully
+     */
     @vsCommand('openshift.helm.edit')
     public async edit(repo: HelmRepo, newName: string, newURL: string, isAdd = false, isWebview = false): Promise<boolean> {
         enum listOfStep {
@@ -149,11 +142,11 @@ export class ManageRepository {
     }
 
     /**
-    * delete the repository
-    *
-    * @param repository
-    * @returns true if repo deleted successfully
-    */
+     * delete the repository
+     *
+     * @param repo the helm repo to delete
+     * @returns if the repository was deleted successfully
+     */
     @vsCommand('openshift.helm.delete')
     public async delete(repo: HelmRepo, isWebview = false): Promise<void> {
         const yesNo = isWebview ? 'Yes' : await vscode.window.showInformationMessage(

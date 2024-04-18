@@ -156,7 +156,7 @@ export function validateName(name: string, isComponentBasedValidation = true): s
 /**
  * Returns the validation message if the component name is invalid, and undefined otherwise.
  *
- * @param name the port number to validate
+ * @param portNumber the port number to validate
  * @returns the validation message if the component name is invalid, and undefined otherwise
  */
 export function validatePortNumber(portNumber: number): string {

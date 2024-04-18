@@ -9,13 +9,16 @@ import type * as pty from 'node-pty';
 import { platform } from 'os';
 import {
     CancellationToken,
-    ColorTheme, commands, Disposable,
+    ColorTheme,
+    Disposable,
     Webview,
     WebviewView,
     WebviewViewProvider,
-    WebviewViewResolveContext, window,
-    workspace,
-    env
+    WebviewViewResolveContext,
+    commands,
+    env,
+    window,
+    workspace
 } from 'vscode';
 import { SerializeAddon } from 'xterm-addon-serialize';
 import { Terminal } from 'xterm-headless';
@@ -23,8 +26,8 @@ import { CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
 import { ToolsConfig } from '../../tools';
 import { getVscodeModule } from '../../util/credentialManager';
-import { loadWebviewHtml } from '../common-ext/utils';
 import { Platform } from '../../util/platform';
+import { loadWebviewHtml } from '../common-ext/utils';
 
 // HACK: we cannot include node-pty ourselves,
 // since the library can only be run under one version of node
@@ -107,7 +110,7 @@ class OpenShiftTerminal {
      * @param file the path to the program to execute
      * @param args the arguments to pass to the program
      * @param options the options for spawning the pty (name, current working directory, environment)
-     * @param closeOnExit true if the terminal should close when the program exits, or false if it should stay open until the user presses an additional key
+     * @param isKnative if the terminal is being used to run a knative-related task
      * @param callbacks functions to execute in response to events in the terminal:
      * - onSpawn(): called when the pty is created
      * - onExit(): called when the pty exits (whether normally or though SIGABRT)
@@ -253,7 +256,7 @@ class OpenShiftTerminal {
     /**
      * Returns true if the pty that's running the program associated with this terminal has been started and has not exited, and false otherwise.
      *
-     * @return true if the pty that's running the program associated with this terminal has been started and has not exited, and false otherwise
+     * @returns true if the pty that's running the program associated with this terminal has been started and has not exited, and false otherwise
      */
     public get isPtyLive() {
         return this._pty && !this._ptyExited;
@@ -415,7 +418,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
      * To be called by VS Code only
      *
      * @param webviewView the webview view containing the webview to resolve the content for
-     * @param context     ignored
+     * @param _context    ignored
      * @param token       the cancellation token
      */
     async resolveWebviewView(
@@ -590,11 +593,11 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
      * @param name the display name of the terminal session
      * @param cwd the current working directory to use when running the command
      * @param env the environment to use when running the command
-     * @param exitOnClose true if the terminal should close when the program exits, or false if it should stay open until the user presses an additional key
      * @param callbacks functions to execute in response to events in the terminal:
      * - onSpawn(): called when the pty is created
      * - onExit(): called when the pty exits (whether normally or though SIGABRT)
      * - onText(): called when text is printed to the terminal, whether by the program or by user input
+     * @param isKnative if the terminal is being used to run knative-related tasks
      * @returns an api to interact with the running command
      */
     public async createTerminal(

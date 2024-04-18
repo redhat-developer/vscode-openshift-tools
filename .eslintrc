@@ -10,7 +10,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "prettier"
+    "prettier",
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -26,7 +26,9 @@
     "@typescript-eslint",
     "prettier",
     "header",
-    "import"],
+    "import",
+    "jsdoc"
+  ],
   "settings": {
     "import/core-modules": [ "vscode" ],
     "import/parsers": {
@@ -107,7 +109,15 @@
     "@typescript-eslint/prefer-regexp-exec": 0,
     "quotes": [ "error", "single"],
     "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none" }],
-    "@typescript-eslint/no-explicit-any": 1
+    "@typescript-eslint/no-explicit-any": 1,
+    "jsdoc/check-tag-names": "error",
+    "jsdoc/check-param-names": ["error", { "checkDestructured": false }],
+    "jsdoc/check-alignment": "error",
+    "jsdoc/no-multi-asterisks": "error",
+    "jsdoc/no-types": "error",
+    "jsdoc/require-param-name": "error",
+    "jsdoc/require-returns-check": "error",
+    "jsdoc/require-returns-description": "error",
   },
   "overrides": [
     {

@@ -8,10 +8,10 @@ import * as fs from 'fs/promises';
 import * as tmp from 'tmp';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { Platform } from '../util/platform';
-import { ClusterType, KubernetesConsole } from './types';
-import { Project } from './project';
 import { KubeConfigUtils } from '../util/kubeUtils';
+import { Platform } from '../util/platform';
+import { Project } from './project';
+import { ClusterType, KubernetesConsole } from './types';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -64,7 +64,7 @@ export class Oc {
      * If no namespace is supplied, the current namespace is used.
      *
      * @param resourceType the type of resource to get
-     * @param resourceType the name of the resource to get
+     * @param resourceName the name of the resource to get
      * @param namespace the namespace to list the resources of (defaults to the current namespace if none is provided)
      * @returns the Kubernetes resource with the given name and type in the given namespace
      */
@@ -479,7 +479,7 @@ export class Oc {
      *
      * On non-OpenShift, namespaces are used instead of projects
      *
-     * @param newProject the new project to use
+     * @param projectName the new project to use
      */
     public async setProject(projectName: string): Promise<void> {
         if(await this.isOpenShiftCluster()) {
