@@ -80,7 +80,6 @@ When installing the extension directly from the VSCode marketplace all the depen
 
 * [Red Hat Authentication](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-redhat-account)
 * [YAML Extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
-* [Kubernetes Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools)
 
 ### CLI Tools
 

@@ -37,7 +37,7 @@ export class Node implements ClusterExplorerV1.Node, ClusterExplorerV1.ClusterEx
         item.contextValue = `openShift.resource.${this.node}`;
         item.command = {
             arguments: [this],
-            command: 'extension.vsKubernetesLoad',
+            command: 'openshift.resource.load',
             title: 'Load'
         };
         return item;

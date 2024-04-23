@@ -342,7 +342,7 @@ suite('./oc/ocWrapper.ts', function () {
         });
 
         test('getLogs()', async function() {
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 80; i++) {
                 try {
                     const logs = await Oc.Instance.getLogs('Deployment', DEPLOYMENT_NAME);
                     expect(logs.length).to.be.greaterThan(0);
