@@ -9,6 +9,7 @@ import { checkExtension } from './suite/extension';
 import { checkOpenshiftView } from './suite/openshift';
 import { loginTest } from './suite/login';
 import { projectTest } from './suite/project';
+import { kubernetesContextTest } from './suite/kubernetesContext';
 
 describe('Extension cluster-dependant UI tests', function () {
     const kubeConfig = path.join(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.kube', 'config');
@@ -34,4 +35,5 @@ describe('Extension cluster-dependant UI tests', function () {
     checkOpenshiftView();
     loginTest();
     projectTest();
+    kubernetesContextTest();
 });
