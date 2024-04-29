@@ -23,33 +23,25 @@ const webviews = [
     'openshift-terminal',
 ];
 
-function kebabToCamel(text) {
-    return text.replace(/-./g, searchResult => searchResult.substring(1).toUpperCase());
-}
-
 await Promise.all([
+    esbuild.build({
+        entryPoints: webviews.map(webview => `./src/webview/${webview}/app/index.tsx`),
+        bundle: true,
+        outdir: 'out',
+        platform: 'browser',
+        target: 'chrome108',
+        sourcemap: true,
+        loader: {
+            '.png': 'file',
+        },
+        plugins: [
+            sassPlugin(),
+            svgr({
+                plugins: ['@svgr/plugin-jsx']
+            }),
+        ]
+    }),
     ...webviews.map(webview =>
-        esbuild.build({
-            entryPoints: [
-                `./src/webview/${webview}/app/index.tsx`,
-            ],
-            bundle: true,
-            outfile: `./out/${kebabToCamel(webview)}Viewer/index.js`,
-            platform: 'browser',
-            target: 'chrome108',
-            sourcemap: true,
-            loader: {
-                '.png': 'file',
-            },
-            plugins: [
-                sassPlugin(),
-                svgr({
-                    plugins: ['@svgr/plugin-jsx']
-                }),
-            ]
-        })
-    ),
-    ...webviews.map(webview =>
-        fs.cp(`./src/webview/${webview}/app/index.html`, `./out/${kebabToCamel(webview)}Viewer/index.html`)
+        fs.cp(`./src/webview/${webview}/app/index.html`, `./out/${webview}/app/index.html`)
     ),
 ]);

@@ -26,7 +26,7 @@ export default class FeedbackLoader {
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || '', 'out', 'feedbackViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || ''));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -38,7 +38,7 @@ export default class FeedbackLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(FeedbackLoader.extensionPath || '', 'images/openshift_extension.png'));
-            panel.webview.html = await loadWebviewHtml('feedbackViewer', panel);
+            panel.webview.html = await loadWebviewHtml('feedback', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });

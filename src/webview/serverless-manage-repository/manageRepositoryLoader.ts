@@ -33,7 +33,7 @@ export default class ManageRepositoryViewLoader {
             return;
         }
         const localResourceRoot = vscode.Uri.file(
-            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'serverlessManageRepositoryViewer'),
+            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'serverless-manage-repository', 'app'),
         );
 
         const panel = vscode.window.createWebviewPanel('manageRepositoryView', title, vscode.ViewColumn.One, {
@@ -55,7 +55,7 @@ export default class ManageRepositoryViewLoader {
             path.join(ManageRepositoryViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
 
-        panel.webview.html = await loadWebviewHtml('serverlessManageRepositoryViewer', panel);
+        panel.webview.html = await loadWebviewHtml('serverless-manage-repository', panel);
         ManageRepositoryViewLoader.panel = panel;
 
         return panel;

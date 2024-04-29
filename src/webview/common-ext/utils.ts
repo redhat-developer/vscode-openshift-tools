@@ -5,12 +5,12 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import validator from 'validator';
 import { extensions, Uri, WebviewPanel, WebviewView } from 'vscode';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateURLProps } from '../common/propertyTypes';
-import validator from 'validator';
 export type Message = {
     action: string;
     data: any;
@@ -20,7 +20,7 @@ export async function loadWebviewHtml(webviewName: string, webviewPanel: Webview
 
     const extensionPath = extensions.getExtension(ExtensionID).extensionPath;
 
-    const reactAppRootOnDisk = path.join(extensionPath, 'out', webviewName);
+    const reactAppRootOnDisk = path.join(extensionPath, 'out', webviewName, 'app');
     const reactJavascriptUri = webviewPanel.webview.asWebviewUri(
         Uri.file(path.join(reactAppRootOnDisk, 'index.js'))
     );

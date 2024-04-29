@@ -53,7 +53,7 @@ export default class AddServiceBindingViewLoader {
         listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>,
     ): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(
-            path.join(AddServiceBindingViewLoader.extensionPath, 'out', 'addServiceBindingViewer'),
+            path.join(AddServiceBindingViewLoader.extensionPath, 'out', 'add-service-binding', 'app'),
         );
 
         let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
@@ -71,7 +71,7 @@ export default class AddServiceBindingViewLoader {
             path.join(AddServiceBindingViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
         panel.webview.html = await loadWebviewHtml(
-            'addServiceBindingViewer',
+            'add-service-binding',
             panel,
         );
         panel.webview.onDidReceiveMessage(listenerFactory(panel));

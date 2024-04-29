@@ -435,7 +435,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
             enableScripts: true,
         };
 
-        const newHtml: string = await loadWebviewHtml('openshiftTerminalViewer', this.webviewView);
+        const newHtml: string = await loadWebviewHtml('openshift-terminal', this.webviewView);
         if (!token.isCancellationRequested) {
             this.webview.html = newHtml;
         }

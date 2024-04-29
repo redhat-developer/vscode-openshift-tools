@@ -359,7 +359,7 @@ export default class ClusterViewLoader {
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'clusterViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'cluster', 'app'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -370,7 +370,7 @@ export default class ClusterViewLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
-            panel.webview.html = await loadWebviewHtml('clusterViewer', panel);
+            panel.webview.html = await loadWebviewHtml('cluster', panel);
             const messageListenerDisposable = panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
             panel.onDidDispose(()=> {
                 messageListenerDisposable.dispose();
