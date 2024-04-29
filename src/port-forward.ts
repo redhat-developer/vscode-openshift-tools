@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { V1Pod, V1Container } from '@kubernetes/client-node';
+import { V1Pod, V1Container, V1Service, V1Deployment } from '@kubernetes/client-node';
 import * as portFinder from 'portfinder';
 import { QuickPickOptions, window } from 'vscode';
 import { CommandText } from './base/command';
@@ -29,6 +29,48 @@ enum PortSpecifier {
     AllowEmpty,
 }
 
+declare global {
+    interface Array<T> {
+        choose<U>(fn: (t: T) => U | undefined): U[];
+    }
+}
+
+function choose<T, U>(this: T[], fn: (t: T) => U | undefined): U[] {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    return this.map(fn).filter((u) => u !== undefined).map((u) => u!);
+}
+
+if (!Array.prototype.choose) {
+    Object.defineProperty(Array.prototype, 'choose', {
+        enumerable: false,
+        value: choose
+    });
+}
+
+/**
+    * Builds a 'usable' port pair, containing a local port and a target port
+    * Selects a local port if only the target port is provided
+    * @param portPair PortMapping object
+    * @returns PortMapping object containing all requisite ports
+    */
+export async function buildUsablePortPair(portPair: PortMapping): Promise<PortMapping> {
+    const localPort = portPair.localPort;
+    const targetPort = portPair.targetPort;
+    let usedPort = localPort;
+
+    if (!localPort) {
+        // the port key/value is the `minimum` port to assign.
+        usedPort = await portFinder.getPortPromise({
+            port: 10000
+        } as portFinder.PortFinderOptions);
+    }
+
+    return {
+        targetPort,
+        localPort: usedPort
+    };
+}
+
 export class PortForward {
 
     private static instance: PortForward;
@@ -39,7 +81,6 @@ export class PortForward {
         }
         return PortForward.instance;
     }
-
 
     /**
      * Prompts the user on what port to port-forward to, and sets up the forwarding
@@ -52,51 +93,8 @@ export class PortForward {
         }
     }
 
-    /**
-    * Builds a 'usable' port pair, containing a local port and a target port
-    * Selects a local port if only the target port is provided
-    * @param portPair PortMapping object
-    * @returns PortMapping object containing all requisite ports
-    */
-    async buildUsablePortPair(portPair: PortMapping): Promise<PortMapping> {
-        const localPort = portPair.localPort;
-        const targetPort = portPair.targetPort;
-        let usedPort = localPort;
-
-        if (!localPort) {
-            // the port key/value is the `minimum` port to assign.
-            usedPort = await portFinder.getPortPromise({
-                port: 10000
-            } as portFinder.PortFinderOptions);
-        }
-
-        return {
-            targetPort,
-            localPort: usedPort
-        };
-    }
-
-    /**
-    * Invokes kubectl port-forward
-    * @param podName The pod name
-    * @param portMapping The PortMapping objects. Each object contains the a requested local port and an optional target port.
-    * @param namespace  The namespace to use to find the pod in
-    * @returns The locally bound ports that were bound
-    */
-    async portForwardToPod(podName: string, portMapping: PortMapping[], namespace?: string): Promise<number[]> {
-        return this.portForwardToResource('pods', podName, portMapping, namespace);
-    }
-
-    async portForwardToService(serviceName: string, portMapping: PortMapping[], namespace?: string): Promise<number[]> {
-        return this.portForwardToResource('services', serviceName, portMapping, namespace);
-    }
-
-    async portForwardToDeployment(name: string, portMapping: PortMapping[], namespace?: string): Promise<number[]> {
-        return this.portForwardToResource('deployments', name, portMapping, namespace);
-    }
-
     async portForwardToResource(kind: string, name: string, portMapping: PortMapping[], namespace?: string): Promise<number[]> {
-        const usedPortMappings: PortMapping[] = await Promise.all(portMapping.map(this.buildUsablePortPair()));
+        const usedPortMappings: PortMapping[] = await Promise.all(portMapping.map(buildUsablePortPair));
 
         usedPortMappings.forEach((usedPortPair) => {
             void window.showInformationMessage(`Forwarding from 127.0.0.1:${usedPortPair.localPort} -> ${kind}/${name}:${usedPortPair.targetPort}`);
@@ -121,13 +119,13 @@ export class PortForward {
         const ns = namespace || 'default';
         try {
             const result = await Oc.Instance.getKubernetesObject(kind, resourceName, ns);
-            if (kind === 'Pod') {
+            if (kind.toLowerCase() === 'pod') {
                 extractedPorts = this.extractPodPorts(result);
-            }/* else if (kind === kuberesources.allKinds.service.apiName) {
-            extractedPorts = extractServicePorts(result.stdout);
-        } else if (kind === kuberesources.allKinds.deployment.apiName) {
-            extractedPorts = extractDeploymentPorts(result.stdout);
-        }*/
+            } else if (kind.toLowerCase() === 'service') {
+                extractedPorts = this.extractServicePorts(result);
+            } else if (kind.toLowerCase() === 'deployment') {
+                extractedPorts = this.extractDeploymentPorts(result);
+            }
         } catch (err) {
             // eslint-disable-next-line no-console
             console.log(err);
@@ -222,14 +220,14 @@ export class PortForward {
     * Validates if the port is a named port or withing the valid range
     * @param validPorts List of valid named ports
     * @param port The port to validate
-    * @param portSpecifier Can the port be empty or zero
+    * @param portSpec Can the port be empty or zero
     * @returns Boolean identifying if the port is valid
     */
-    isPortValid(validPorts: ExtractedPort[], port: string, portSpecifier: PortSpecifier): boolean {
+    isPortValid(validPorts: ExtractedPort[], port: string, portSpec: PortSpecifier): boolean {
         if (validPorts.map(({ name }) => name).includes(port)) {
             return true;
         }
-        if (portSpecifier === PortSpecifier.AllowEmpty && ['', '0'].includes(port)) {
+        if (portSpec === PortSpecifier.AllowEmpty && ['', '0'].includes(port)) {
             return true;
         }
         return 0 < Number(port) && Number(port) <= 65535;
@@ -305,6 +303,28 @@ export class PortForward {
     */
     extractPodPorts(podJson: V1Pod): ExtractedPort[] {
         const containers = podJson.spec ? podJson.spec.containers : [];
+        return this.extractContainerPorts(containers);
+    }
+
+    /**
+    *  Given a JSON representation of a Service, extract the ports to suggest to the user
+    * for port forwarding.
+    */
+    extractServicePorts(serviceJson: V1Service): ExtractedPort[] {
+        const k8sPorts = serviceJson.spec ? (serviceJson.spec.ports || []) : [];
+        return k8sPorts.map((k8sport) => ({
+            name: k8sport.name || `port-${k8sport.port}`,
+            port: k8sport.port,
+        }));
+    }
+
+    /**
+    * Given a JSON representation of a Deployment, extract the ports to suggest to the user
+    * for port forwarding.
+    */
+    extractDeploymentPorts(deployment: V1Deployment): ExtractedPort[] {
+        const spec = deployment.spec ? deployment.spec.template.spec : undefined;
+        const containers = spec ? spec.containers : [];
         return this.extractContainerPorts(containers);
     }
 
