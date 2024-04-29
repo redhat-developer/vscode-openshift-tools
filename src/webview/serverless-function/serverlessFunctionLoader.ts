@@ -221,7 +221,7 @@ export default class ServerlessFunctionViewLoader {
     ): Promise<vscode.WebviewPanel> {
 
         const localResourceRoot = vscode.Uri.file(
-            path.join(ServerlessFunctionViewLoader.extensionPath, 'out', 'serverlessFunctionViewer'),
+            path.join(ServerlessFunctionViewLoader.extensionPath, 'out', 'serverless-function', 'app'),
         );
 
         let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
@@ -239,7 +239,7 @@ export default class ServerlessFunctionViewLoader {
             path.join(ServerlessFunctionViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
         panel.webview.html = await loadWebviewHtml(
-            'serverlessFunctionViewer',
+            'serverless-function',
             panel,
         );
         panel.webview.onDidReceiveMessage((e) => messageListener(panel, e));

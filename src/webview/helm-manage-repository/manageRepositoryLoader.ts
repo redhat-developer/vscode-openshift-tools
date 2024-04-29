@@ -34,7 +34,7 @@ export default class ManageRepositoryViewLoader {
             return;
         }
         const localResourceRoot = vscode.Uri.file(
-            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'helmManageRepositoryViewer'),
+            path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'helm-manage-repository', 'app'),
         );
 
         const panel = vscode.window.createWebviewPanel('helmRepositoryView', title, vscode.ViewColumn.One, {
@@ -56,7 +56,7 @@ export default class ManageRepositoryViewLoader {
             path.join(ManageRepositoryViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
 
-        panel.webview.html = await loadWebviewHtml('helmManageRepositoryViewer', panel);
+        panel.webview.html = await loadWebviewHtml('helm-manage-repository', panel);
         ManageRepositoryViewLoader.panel = panel;
 
         return panel;

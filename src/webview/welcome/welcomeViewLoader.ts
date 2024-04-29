@@ -76,7 +76,7 @@ export default class WelcomeViewLoader {
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'out', 'welcomeViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'out'));
         const images = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images'));
         if (panel) {
             // If we already have a panel, show it in the target column
@@ -88,7 +88,7 @@ export default class WelcomeViewLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(WelcomeViewLoader.extensionPath, 'images/openshift_extension.png'));
-            panel.webview.html = await loadWebviewHtml('welcomeViewer', panel);
+            panel.webview.html = await loadWebviewHtml('welcome', panel);
             panel.onDidDispose(() => {
                 panel = undefined;
             });

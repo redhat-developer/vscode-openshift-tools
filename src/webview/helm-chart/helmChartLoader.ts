@@ -2,19 +2,19 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as JSYAML from 'js-yaml';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
+import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
 import sendTelemetry, { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
+import { Progress } from '../../util/progress';
 import { vsCommand } from '../../vscommand';
+import { validateName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import fetch = require('make-fetch-happen');
-import { validateName } from '../common-ext/createComponentHelpers';
-import { Progress } from '../../util/progress';
-import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];
@@ -140,7 +140,7 @@ export default class HelmChartLoader {
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'out', 'helmChartViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'out', 'helm-chart', 'app'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
@@ -152,7 +152,7 @@ export default class HelmChartLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
-            panel.webview.html = await loadWebviewHtml('helmChartViewer', panel);
+            panel.webview.html = await loadWebviewHtml('helm-chart', panel);
             const messageDisposable = panel.webview.onDidReceiveMessage(helmChartMessageListener);
             panel.onDidDispose(() => {
                 messageDisposable.dispose();

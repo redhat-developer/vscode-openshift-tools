@@ -58,7 +58,7 @@ export default class CreateComponentLoader {
             return;
         }
         const localResourceRoot = Uri.file(
-            path.join(CreateComponentLoader.extensionPath, 'out', 'createComponentViewer'),
+            path.join(CreateComponentLoader.extensionPath, 'out', 'create-component'),
         );
 
         const panel = window.createWebviewPanel('createComponentView', title, ViewColumn.One, {
@@ -105,7 +105,7 @@ export default class CreateComponentLoader {
         panel.iconPath = Uri.file(
             path.join(CreateComponentLoader.extensionPath, 'images/context/cluster-node.png'),
         );
-        panel.webview.html = await loadWebviewHtml('createComponentViewer', panel);
+        panel.webview.html = await loadWebviewHtml('create-component', panel);
         CreateComponentLoader.panel = panel;
 
         CreateComponentLoader.initFromRootFolderPath = folderPath;

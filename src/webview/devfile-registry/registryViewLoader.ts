@@ -155,7 +155,7 @@ export default class RegistryViewLoader {
     }
 
     static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfileRegistryViewer'));
+        const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfile-registry', 'app'));
         if (panel) {
             if (RegistryViewLoader.url !== url) {
                 RegistryViewLoader.url = url;
@@ -171,7 +171,7 @@ export default class RegistryViewLoader {
                 retainContextWhenHidden: true
             });
             panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
-            panel.webview.html = await loadWebviewHtml('devfileRegistryViewer', panel);
+            panel.webview.html = await loadWebviewHtml('devfile-registry', panel);
             const messageDisposable = panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
             panel.onDidDispose(() => {
                 messageDisposable.dispose();

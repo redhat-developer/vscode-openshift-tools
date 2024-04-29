@@ -28,35 +28,25 @@ const webviews = (await fs.readdir('./src/webview', { withFileTypes: true }))
     .filter((dirent) => dirent.isDirectory() && !['@types', 'common', 'common-ext'].includes(dirent.name))
     .map((dirent) => dirent.name);
 
-function kebabToCamel(text) {
-    return text.replace(/-./g, (searchResult) => searchResult.substring(1).toUpperCase());
-}
-
 // build the esbuild contexts
-const contexts = [];
-await Promise.all(
-    webviews.map(async (webview) => {
-        const ctx = await esbuild.context({
-            entryPoints: [`./src/webview/${webview}/app/index.tsx`],
-            bundle: true,
-            outfile: `./out/${kebabToCamel(webview)}Viewer/index.js`,
-            platform: 'browser',
-            target: 'chrome108',
-            sourcemap: true,
-            loader: {
-                '.png': 'file',
-                '.svg': 'file',
-            },
-            plugins: [
-                sassPlugin(),
-                svgr({
-                    plugins: ['@svgr/plugin-jsx']
-                }),
-            ],
-        });
-        contexts.push(ctx);
-    }),
-);
+const esbuildContext = await esbuild.context({
+    entryPoints: webviews.map(webview => `./src/webview/${webview}/app/index.tsx`),
+    bundle: true,
+    outdir: 'out',
+    platform: 'browser',
+    target: 'chrome108',
+    sourcemap: true,
+    loader: {
+        '.png': 'file',
+        '.svg': 'file',
+    },
+    plugins: [
+        sassPlugin(),
+        svgr({
+            plugins: ['@svgr/plugin-jsx'],
+        }),
+    ],
+});
 
 /**
  * Returns a timestamp that imitates the one used by tsc watch
@@ -91,10 +81,10 @@ async function runBuildProcess() {
         await Promise.all([
             promiseExec('npx tsc -p ./'),
             promiseExec('npx tsc -p ./src/webview -noEmit'),
-            ...contexts.map((context) => context.rebuild()),
+            esbuildContext.rebuild(),
             ...webviews.map((webview) => fs.cp(
                 `./src/webview/${webview}/app/index.html`,
-                `./out/${kebabToCamel(webview)}Viewer/index.html`)),
+                `./out/${webview}/app/index.html`)),
         ]);
     } catch (error) {
         success = false;
@@ -120,7 +110,7 @@ const watcher = watch('./src').on('all', (event, path) => {
 process.on('SIGINT', () => {
     console.log('Stopping watch mode...')
     watcher.close();
-    contexts.forEach((ctx) => void ctx.dispose());
+    esbuildContext.dispose();
 });
 
 process.on('exit', () => {

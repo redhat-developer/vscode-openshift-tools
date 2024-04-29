@@ -28,7 +28,7 @@ export default class CreateServiceViewLoader {
 
     static async loadView(): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(
-            path.join(CreateServiceViewLoader.extensionPath, 'out', 'createServiceViewer'),
+            path.join(CreateServiceViewLoader.extensionPath, 'out', 'create-service', 'app'),
         );
 
         if (CreateServiceViewLoader.panel) {
@@ -51,7 +51,7 @@ export default class CreateServiceViewLoader {
             path.join(CreateServiceViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
         CreateServiceViewLoader.panel.webview.html = await loadWebviewHtml(
-            'createServiceViewer',
+            'create-service',
             CreateServiceViewLoader.panel,
         );
 
