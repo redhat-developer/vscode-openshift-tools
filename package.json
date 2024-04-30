@@ -82,7 +82,7 @@
 		"js-yaml": "^4.1.0",
 		"json-schema": "^0.4.0",
 		"lodash": "^4.17.21",
-		"make-fetch-happen": "^12.0.0",
+		"make-fetch-happen": "^13.0.1",
 		"mkdirp": "^3.0.1",
 		"rxjs": "^7.8.1",
 		"semver": "^7.6.0",
