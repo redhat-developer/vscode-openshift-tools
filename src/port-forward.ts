@@ -248,7 +248,7 @@ export class PortForward {
     /**
      * Builds a single PortMapping object from the captured user input
      * @param validPorts List of valid named ports
-     * @param portString The port string provided by the user
+     * @param portPair The port string provided by the user
      * @returns PortMapping object
      */
     buildPortPair(validPorts: ExtractedPort[], portPair: string): PortMapping {
@@ -274,8 +274,8 @@ export class PortForward {
     /**
      * Builds a single numberic port for a PortMapping object from the captured user input allowing empty or zero value
      * @param validPorts List of valid named ports
-     * @param portString The port provided by the user
-     * @returns numberic port number
+     * @param port The port provided by the user
+     * @returns The port provided by the user
      */
     buildNullablePort(validPorts: ExtractedPort[], port: string): number | undefined {
         if (['', '0'].includes(port)) {
@@ -287,7 +287,7 @@ export class PortForward {
     /**
      * Builds a single numberic port for a PortMapping object from the captured user input
      * @param validPorts List of valid named ports
-     * @param portString The port provided by the user
+     * @param port The port provided by the user
      * @returns numberic port number
      */
     buildPort(validPorts: ExtractedPort[], port: string): number {
