@@ -48,11 +48,11 @@ if (!Array.prototype.choose) {
 }
 
 /**
-    * Builds a 'usable' port pair, containing a local port and a target port
-    * Selects a local port if only the target port is provided
-    * @param portPair PortMapping object
-    * @returns PortMapping object containing all requisite ports
-    */
+ * Builds a 'usable' port pair, containing a local port and a target port
+ * Selects a local port if only the target port is provided
+ * @param portPair PortMapping object
+ * @returns PortMapping object containing all requisite ports
+ */
 export async function buildUsablePortPair(portPair: PortMapping): Promise<PortMapping> {
     const localPort = portPair.localPort;
     const targetPort = portPair.targetPort;
@@ -110,9 +110,9 @@ export class PortForward {
     }
 
     /**
-    * Prompts the user on what port to port-forward to, and validates numeric input.
-    * @returns An array of PortMapping objects.
-    */
+     * Prompts the user on what port to port-forward to, and validates numeric input.
+     * @returns An array of PortMapping objects.
+     */
     async promptForPort(kind: string, resourceName: string, namespace?: string): Promise<PortMapping[]> {
         let portString: string | undefined;
         let extractedPorts = Array.of<ExtractedPort>();
@@ -163,23 +163,24 @@ export class PortForward {
     }
 
     /**
-    * Validates the user supplied port mapping(s)
-    * @param portMapping The portMapping string captured from an input field
-    * @param validPorts List of valid named ports
-    * @returns A ValidationResult object describing the first error found.
-    */
+     * Validates the user supplied port mapping(s)
+     * @param portMapping The portMapping string captured from an input field
+     * @param validPorts List of valid named ports
+     * @returns A ValidationResult object describing the first error found.
+     */
     validatePortMapping(portMapping: string, validPorts: ExtractedPort[] = []): ValidationResult | undefined {
         const portPairs = portMapping.split(' ');
         const validationResults = portPairs.map((pair) => this.validatePortPair(validPorts, pair));
 
         return validationResults.find((result) => !result.valid);
     }
+
     /**
-    * Validates a single port mapping
-    * @param validPorts List of valid named ports
-    * @param portPair The port pair to validate
-    * @returns An error to be displayed, or undefined
-    */
+     * Validates a single port mapping
+     * @param validPorts List of valid named ports
+     * @param portPair The port pair to validate
+     * @returns An error to be displayed, or undefined
+     */
     validatePortPair(validPorts: ExtractedPort[], portPair: string): ValidationResult {
         const splitMapping = portPair.split(':');
 
@@ -217,12 +218,12 @@ export class PortForward {
     }
 
     /**
-    * Validates if the port is a named port or withing the valid range
-    * @param validPorts List of valid named ports
-    * @param port The port to validate
-    * @param portSpec Can the port be empty or zero
-    * @returns Boolean identifying if the port is valid
-    */
+     * Validates if the port is a named port or withing the valid range
+     * @param validPorts List of valid named ports
+     * @param port The port to validate
+     * @param portSpec Can the port be empty or zero
+     * @returns Boolean identifying if the port is valid
+     */
     isPortValid(validPorts: ExtractedPort[], port: string, portSpec: PortSpecifier): boolean {
         if (validPorts.map(({ name }) => name).includes(port)) {
             return true;
@@ -234,22 +235,22 @@ export class PortForward {
     }
 
     /**
-    * Builds and returns multiple PortMapping objects
-    * @param portString A validated, user provided string containing the port mappings
-    * @param namedPorts List of valid named ports
-    * @returns An array containing the requested PortMappings
-    */
+     * Builds and returns multiple PortMapping objects
+     * @param portString A validated, user provided string containing the port mappings
+     * @param namedPorts List of valid named ports
+     * @returns An array containing the requested PortMappings
+     */
     buildPortMapping(portString: string, namedPorts: ExtractedPort[] = []): PortMapping[] {
         const portPairs = portString.split(' ');
         return portPairs.map((pair) => this.buildPortPair(namedPorts, pair));
     }
 
     /**
-    * Builds a single PortMapping object from the captured user input
-    * @param validPorts List of valid named ports
-    * @param portString The port string provided by the user
-    * @returns PortMapping object
-    */
+     * Builds a single PortMapping object from the captured user input
+     * @param validPorts List of valid named ports
+     * @param portString The port string provided by the user
+     * @returns PortMapping object
+     */
     buildPortPair(validPorts: ExtractedPort[], portPair: string): PortMapping {
         // Only target port supplied.
         if (!portPair.includes(':')) {
@@ -271,11 +272,11 @@ export class PortForward {
     }
 
     /**
-    * Builds a single numberic port for a PortMapping object from the captured user input allowing empty or zero value
-    * @param validPorts List of valid named ports
-    * @param portString The port provided by the user
-    * @returns numberic port number
-    */
+     * Builds a single numberic port for a PortMapping object from the captured user input allowing empty or zero value
+     * @param validPorts List of valid named ports
+     * @param portString The port provided by the user
+     * @returns numberic port number
+     */
     buildNullablePort(validPorts: ExtractedPort[], port: string): number | undefined {
         if (['', '0'].includes(port)) {
             return undefined;
@@ -284,11 +285,11 @@ export class PortForward {
     }
 
     /**
-    * Builds a single numberic port for a PortMapping object from the captured user input
-    * @param validPorts List of valid named ports
-    * @param portString The port provided by the user
-    * @returns numberic port number
-    */
+     * Builds a single numberic port for a PortMapping object from the captured user input
+     * @param validPorts List of valid named ports
+     * @param portString The port provided by the user
+     * @returns numberic port number
+     */
     buildPort(validPorts: ExtractedPort[], port: string): number {
         const validPort = validPorts.find(({ name }) => name === port);
         if (validPort) {
@@ -298,18 +299,18 @@ export class PortForward {
     }
 
     /**
-    * Given a JSON representation of a Pod, extract the ports to suggest to the user
-    * for port forwarding.
-    */
+     * Given a JSON representation of a Pod, extract the ports to suggest to the user
+     * for port forwarding.
+     */
     extractPodPorts(podJson: V1Pod): ExtractedPort[] {
         const containers = podJson.spec ? podJson.spec.containers : [];
         return this.extractContainerPorts(containers);
     }
 
     /**
-    *  Given a JSON representation of a Service, extract the ports to suggest to the user
-    * for port forwarding.
-    */
+     *  Given a JSON representation of a Service, extract the ports to suggest to the user
+     * for port forwarding.
+     */
     extractServicePorts(serviceJson: V1Service): ExtractedPort[] {
         const k8sPorts = serviceJson.spec ? (serviceJson.spec.ports || []) : [];
         return k8sPorts.map((k8sport) => ({
@@ -319,9 +320,9 @@ export class PortForward {
     }
 
     /**
-    * Given a JSON representation of a Deployment, extract the ports to suggest to the user
-    * for port forwarding.
-    */
+     * Given a JSON representation of a Deployment, extract the ports to suggest to the user
+     * for port forwarding.
+     */
     extractDeploymentPorts(deployment: V1Deployment): ExtractedPort[] {
         const spec = deployment.spec ? deployment.spec.template.spec : undefined;
         const containers = spec ? spec.containers : [];
@@ -329,9 +330,9 @@ export class PortForward {
     }
 
     /**
-    * Given a array of containers, extract the ports to suggest to the user
-    * for port forwarding.
-    */
+     * Given a array of containers, extract the ports to suggest to the user
+     * for port forwarding.
+     */
     extractContainerPorts(containers: V1Container[]): ExtractedPort[] {
         const ports = Array.of<ExtractedPort>();
         containers.forEach((container) => {
