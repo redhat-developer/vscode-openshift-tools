@@ -36,6 +36,7 @@ import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { LoginUtil } from './util/loginUtil';
+import { PortForward } from './port-forward';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -597,6 +598,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         });
         void window.showInformationMessage(`Deleted the '${component.kind}' named '${component.metadata.name}'`);
         OpenShiftExplorer.instance.refresh();
+    }
+
+    @vsCommand('openshift.resource.portForward')
+    public static async portForward(component: KubernetesObject) {
+        const kind = component.kind || 'pods';
+        const resourceName = component.metadata.name;
+        const namespace: string = await Oc.Instance.getActiveProject();
+        return await PortForward.getInstance().promptAndForwardPort(kind, resourceName, namespace);
     }
 
     @vsCommand('openshift.resource.watchLogs')
