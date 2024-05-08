@@ -5,8 +5,7 @@
 
 import { KubernetesObject } from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
-import * as fs from 'fs/promises';
-import * as YAML from 'js-yaml';
+import * as https from 'https';
 import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
@@ -17,14 +16,13 @@ import * as NameValidator from '../openshift/nameValidator';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { inputValue, quickBtn } from '../util/inputValue';
-import { KubeConfigUtils, getKubeConfigFiles } from '../util/kubeUtils';
+import { KubeConfigUtils } from '../util/kubeUtils';
 import { LoginUtil } from '../util/loginUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
-import * as https from 'https';
 
 export interface QuickPickItemExt extends QuickPickItem {
     name: string,
@@ -1006,9 +1004,6 @@ export class Cluster extends OpenShiftItem {
 
         try {
             await Oc.Instance.loginWithToken(clusterURL, ocToken, abortController);
-            if (Cluster.isOpenShiftSandbox(clusterURL)) {
-                await Cluster.installPipelineUserContext();
-            }
             return Cluster.loginMessage(clusterURL);
         } catch (error) {
             if (abortController?.signal.aborted) return null;
@@ -1041,7 +1036,8 @@ export class Cluster extends OpenShiftItem {
         apiEndpointUrl: string,
         oauthRequestTokenUrl: string,
     ): Promise<string | null> {
-        const clipboard = await Cluster.readFromClipboard();
+        // for whatever reason the token is padded with spaces at the beginning and end when copied from the website
+        const clipboard = (await Cluster.readFromClipboard()).trim();
         if (!clipboard) {
             const choice = await window.showErrorMessage(
                 'Cannot parse token in clipboard. Please click `Get token` button below, copy token into clipboard and press `Login to Sandbox` button again.',
@@ -1053,44 +1049,6 @@ export class Cluster extends OpenShiftItem {
             return;
         }
         return Cluster.tokenLogin(apiEndpointUrl, true, clipboard);
-    }
-
-    static async installPipelineUserContext(): Promise<void> {
-        const kcu = new KubeConfigUtils();
-        const kcFiles = getKubeConfigFiles();
-        if (kcFiles.length === 0) {
-            throw new Error('Could not locate Kube Config when trying to replace OpenShift Sandbox token with a longer-lived token');
-        }
-        const kcPath = kcFiles[0];
-        const kcActual = YAML.load((await fs.readFile(kcPath)).toString('utf-8')) as {
-            users: { name: string; user: { token: string } }[];
-            contexts: {
-                context: { cluster: string; user: string; namespace: string };
-                name: string;
-            }[];
-            'current-context': string;
-            clusters: object[];
-        };
-
-        const currentCtx = kcu.getCurrentContext();
-        const currentCtxObj = kcActual.contexts.find(ctx => ctx.name === currentCtx);
-        const sandboxUser = currentCtxObj.context.user;
-        const sandboxUserObj = kcActual.users.find(user => user.name === sandboxUser);
-
-        const serviceAccounts = await Oc.Instance.getKubernetesObjects('ServiceAccount');
-        const pipelineServiceAccount = serviceAccounts.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
-        if (!pipelineServiceAccount) {
-            return;
-        }
-        const secrets = await Oc.Instance.getKubernetesObjects('Secret');
-        const pipelineTokenSecret = secrets.find((secret) => secret.metadata.name.startsWith('pipeline-token')) as any;
-        const pipelineToken = Buffer.from(pipelineTokenSecret.data.token, 'base64').toString();
-
-        sandboxUserObj.user = {
-            token: pipelineToken
-        }
-
-        await fs.writeFile(kcPath, YAML.dump(kcActual, { lineWidth: Number.POSITIVE_INFINITY }));
     }
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {

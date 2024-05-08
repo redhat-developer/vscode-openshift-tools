@@ -28,15 +28,15 @@ import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs } from './openshift/serviceHelpers';
+import { PortForward } from './port-forward';
 import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind } from './util/kubeUtils';
+import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
-import { LoginUtil } from './util/loginUtil';
-import { PortForward } from './port-forward';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -164,7 +164,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             void commands.executeCommand('setContext', 'isLoggedIn', true);
             return {
                 contextValue: 'openshift.k8sContext',
-                label: this.kubeConfig.getCluster(element.cluster).server,
+                label: this.kubeConfig.getCluster(element.cluster)?.server,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
                 iconPath: path.resolve(__dirname, '../../images/context/cluster-node.png')
             };
