@@ -5,13 +5,16 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { clearInterval } from 'timers';
 import * as vscode from 'vscode';
 import { CommandText } from '../../base/command';
+import { Oc } from '../../oc/ocWrapper';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ChildProcessUtil } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
+import { KubeConfigUtils } from '../../util/kubeUtils';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
@@ -186,6 +189,22 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
                 if (result) void vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
+                const timeout = setInterval(() => {
+                    const currentUser = new KubeConfigUtils().getCurrentUser();
+                    if (currentUser) {
+                        clearInterval(timeout);
+                        const projectPrefix = currentUser.name.substring(
+                            0,
+                            currentUser.name.indexOf('/'),
+                        );
+                        void Oc.Instance.getProjects().then((projects) => {
+                            const userProject = projects.find((project) =>
+                                project.name.includes(projectPrefix),
+                            );
+                            void Oc.Instance.setProject(userProject.name);
+                        });
+                    }
+                }, 1000);
             } catch (err) {
                 void vscode.window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
@@ -201,9 +220,9 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
 async function pollClipboard(signupStatus) {
     const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
     while (panel) {
-        const previousContent = await vscode.env.clipboard.readText();
+        const previousContent = (await vscode.env.clipboard.readText()).trim();
         await new Promise(r => setTimeout(r, 500));
-        const currentContent = await vscode.env.clipboard.readText();
+        const currentContent = (await vscode.env.clipboard.readText()).trim();
         if (previousContent && previousContent !== currentContent) {
             let errCode = '';
             if (!Cluster.validateLoginToken(currentContent)){
@@ -359,7 +378,7 @@ export default class ClusterViewLoader {
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out', 'cluster', 'app'));
+        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out'));
         if (panel) {
             // If we already have a panel, show it in the target column
             panel.reveal(vscode.ViewColumn.One);
