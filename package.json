@@ -86,7 +86,7 @@
 		"mkdirp": "^3.0.1",
 		"portfinder": "^1.0.32",
 		"rxjs": "^7.8.1",
-		"semver": "^7.6.1",
+		"semver": "^7.6.2",
 		"shelljs": "^0.8.5",
 		"stacktrace-parser": "^0.1.10",
 		"targz": "^1.0.1",
