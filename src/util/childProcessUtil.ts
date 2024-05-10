@@ -14,6 +14,25 @@ export interface CliExitData {
     readonly cwd?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace CliExitData {
+    export function failed(result: CliExitData): boolean {
+        if (!result) {
+            return true; // Treat null result as error
+        }
+        if (result.error) {
+            return true;
+        }
+        return result.stderr && result.stderr.length > 0;
+    }
+    export function getErrorMessage(result: CliExitData): string {
+        if(CliExitData.failed(result)) {
+            return result.error ? result.error.message : result.stderr;
+        }
+        return '';
+    }
+}
+
 class OdoChannel {
 
     private static instance = new OdoChannel();

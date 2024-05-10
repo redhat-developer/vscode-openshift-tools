@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { CliExitData } from '../util/childProcessUtil';
 import { HelmRepo } from './helmChartType';
@@ -107,4 +108,36 @@ export function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
         return 1;
     }
     return oldRepo.name.localeCompare(newRepo.name);
+}
+
+// This file contains utilities for executing command line tools, notably Helm.
+
+export enum HelmSyntaxVersion {
+    Unknown = 1,
+    V2 = 2,
+    V3 = 3,
+}
+
+let cachedVersion: HelmSyntaxVersion | undefined = undefined;
+
+export async function helmSyntaxVersion(): Promise<HelmSyntaxVersion> {
+    if (cachedVersion === undefined) {
+        const srHelm2 = await CliChannel.getInstance().executeTool(new CommandText('helm version --short -c'));
+        if (CliExitData.failed(srHelm2)) {
+            // failed to run Helm; do not cache result
+            return HelmSyntaxVersion.Unknown;
+        }
+
+        if (srHelm2.stdout.indexOf('v2') >= 0) {
+            cachedVersion = HelmSyntaxVersion.V2;
+        } else {
+            const srHelm3 = await CliChannel.getInstance().executeTool(new CommandText('helm version --short'));
+            if (!CliExitData.failed(srHelm3) && srHelm3.stdout.indexOf('v3') >= 0) {
+                cachedVersion = HelmSyntaxVersion.V3;
+            } else {
+                return HelmSyntaxVersion.Unknown;
+            }
+        }
+    }
+    return cachedVersion;
 }

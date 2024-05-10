@@ -232,7 +232,6 @@
 		"onCommand:openshift.explorer.reportIssue",
 		"onCommand:openshift.explorer.switchContext",
 		"onCommand:clusters.openshift.project.openConsole",
-		"onCommand:clusters.openshift.useProject",
 		"onCommand:clusters.openshift.deploy",
 		"onCommand:clusters.openshift.build.start",
 		"onCommand:clusters.openshift.build.showLog",
@@ -255,7 +254,8 @@
 		"onCommand:openshift.component.deleteConfigurationFiles",
 		"onCommand:openshift.component.deleteSourceFolder",
 		"onWalkthrough:openshiftWalkthrough",
-		"onWalkthrough:serverlessFunctionWalkthrough"
+		"onWalkthrough:serverlessFunctionWalkthrough",
+		"onFileSystem:k8smsx"
 	],
 	"contributes": {
 		"configurationDefaults": {
@@ -605,11 +605,6 @@
 			{
 				"command": "openshift.component.debug.palette",
 				"title": "Debug Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "clusters.openshift.useProject",
-				"title": "Use Project",
 				"category": "OpenShift"
 			},
 			{
@@ -1873,10 +1868,6 @@
 					"group": "c3@4"
 				},
 				{
-					"command": "clusters.openshift.useProject",
-					"when": "viewItem =~ /\\.openshift\\.inactiveProject/i"
-				},
-				{
 					"command": "clusters.openshift.project.openConsole",
 					"when": "view == extension.vsKubernetesExplorer && viewItem =~ /vsKubernetes\\.resource\\.project*/i"
 				},
@@ -1946,6 +1937,10 @@
 				{
 					"command": "openshift.deployment.scale",
 					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.Deployment/"
+				},
+				{
+					"command": "openshift.resource.load",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sObject.helm"
 				},
 				{
 					"command": "openshift.resource.unInstall",
@@ -2243,6 +2238,15 @@
 						"default": 0,
 						"description": "Output verbosity level (value between 0 and 9) for OpenShift Create, and Dev commands in output channel and integrated terminal."
 					},
+					"openshiftToolkit.outputFormat": {
+						"enum": [
+							"json",
+							"yaml"
+						],
+						"type": "string",
+						"default": "yaml",
+						"description": "Output format for Kubernetes specs. One of 'json' or 'yaml' (default)."
+					},
 					"openshiftToolkit.searchForToolsInPath": {
 						"type": "boolean",
 						"default": false,
@@ -2311,8 +2315,7 @@
 		]
 	},
 	"extensionDependencies": [
-		"redhat.vscode-redhat-account",
-		"ms-kubernetes-tools.vscode-kubernetes-tools"
+		"redhat.vscode-redhat-account"
 	],
 	"__metadata": {
 		"id": "8fea1f1f-b45c-4eea-b479-3a92c6e697d3",

@@ -37,6 +37,7 @@ import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
+import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.virtualfs';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -196,6 +197,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 iconPath: element.status === 'failed' ? path.resolve(__dirname, '../../images/context/helmFailed.svg') :
                     path.resolve(__dirname, '../../images/context/helmDeployed.svg'),
                 tooltip: `Chart version: ${element.chart}\nApp version: ${element.app_version}\n`,
+                command: {
+                    title: 'Load',
+                    command: 'openshift.resource.load',
+                    arguments: element.status === 'deployed' ? [element] : undefined
+                }
             };
         }
 
@@ -507,30 +513,56 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     @vsCommand('openshift.resource.load')
     public static async loadResource(component: KubernetesObject) {
         if (component) {
-            if (component.kind === 'Pod') {
-                const contextElement: DeploymentPodObject = component;
-                const pods = await OpenShiftExplorer.getInstance().getPods(contextElement);
-                if (pods.length === 0) {
-                    contextElement.status.phase = 'Terminated'
-                    void OpenShiftExplorer.getInstance().refresh(contextElement);
-                    void window.showInformationMessage(`Pod ${contextElement.metadata.name} ${contextElement.status.phase.toLowerCase()}`);
-                    void OpenShiftExplorer.getInstance().refresh();
-                    return;
+            if ('chart' in component && 'name' in component && 'revision' in component
+                    && 'status' in component && component.chart !== 'noChart'
+                    && component.status === 'deployed') { // Deployed Helm Chart
+                const releaseName: string = typeof component.name === 'string' ? component.name : '';
+                const revisionString: string | undefined = typeof component.revision === 'string' ? component.revision : undefined;
+                const revision = revisionString ? parseInt(revisionString, 10) : undefined;
+                void OpenShiftExplorer.getInstance().loadKubernetesHelmChart(releaseName, revision);
+            } else {
+                if (component.kind === 'Pod') {
+                    const contextElement: DeploymentPodObject = component;
+                    const pods = await OpenShiftExplorer.getInstance().getPods(contextElement);
+                    if (pods.length === 0) {
+                        contextElement.status.phase = 'Terminated'
+                        void OpenShiftExplorer.getInstance().refresh(contextElement);
+                        void window.showInformationMessage(`Pod ${contextElement.metadata.name} ${contextElement.status.phase.toLowerCase()}`);
+                        void OpenShiftExplorer.getInstance().refresh();
+                        return;
+                    }
                 }
+                void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind}/${component.metadata.name}`);
             }
-            void OpenShiftExplorer.getInstance().loadKubernetesCore(component.metadata.namespace, `${component.kind}/${component.metadata.name}`);
         }
     }
 
     /**
-     * loadind deployment config
+     * Loading deployment config
      * @param namespace namespace
      * @param value deployment name
      */
     loadKubernetesCore(namespace: string | null, value: string) {
-        const outputFormat = this.getOutputFormat();
-        const uri = this.kubefsUri(namespace, value, outputFormat);
+        const outputFormat = getOutputFormat();
+        const uri = kubefsUri(namespace, value, outputFormat);
+        this.loadKubernetesDocument(uri);
+    }
 
+    /**
+     * Loading an installed Helm Chart config
+     * @param releaseName Installed Helm Chart release name
+     * @param revision Installed Helm Chart revision
+     */
+    loadKubernetesHelmChart(releaseName: string, revision: number | undefined) {
+        const uri = helmfsUri(releaseName, revision);
+        this.loadKubernetesDocument(uri);
+    }
+
+    /**
+     * Loading a Kubernates document by its Uri
+     * @param uri A Kubernetes document Uri
+     */
+    loadKubernetesDocument(uri: Uri) {
         const query = this.getComparableQuery(uri);
         const openUri = workspace.textDocuments.map((doc) => doc.uri)
             .find((docUri) => {
@@ -543,39 +575,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         // If open document is found for the URI provided, we use its URI to bring its editor to the front
         // instead of openning a new editor
-        workspace.openTextDocument(openUri ? openUri : uri).then((doc) => {
-            if (doc) {
-                void window.showTextDocument(doc);
-            }
-        },
+        workspace.openTextDocument(openUri ? openUri : uri).then(
+            (doc) => {
+                if (doc) {
+                    void window.showTextDocument(doc);
+                }
+            },
             (err) => window.showErrorMessage(`Error loading document: ${err}`));
-    }
-
-    /**
-     * get output format from vs-kubernetes.outputFormat
-     * default yaml
-     *
-     * @returns output format
-     */
-    getOutputFormat(): string {
-        if (workspace.getConfiguration('vs-kubernetes').has('vs-kubernetes.outputFormat')) {
-            return workspace.getConfiguration('vs-kubernetes').get['vs-kubernetes.outputFormat'] as string;
-        }
-        return 'yaml'
-    }
-
-    kubefsUri(namespace: string | null | undefined, value: string, outputFormat: string, action?: string): Uri {
-        const K8S_RESOURCE_SCHEME = 'k8smsx';
-        const K8S_RESOURCE_SCHEME_READONLY = 'k8smsxro';
-        const KUBECTL_RESOURCE_AUTHORITY = 'loadkubernetescore';
-        const KUBECTL_DESCRIBE_AUTHORITY = 'kubernetesdescribe';
-        const docname = `${value.replace('/', '-')}${outputFormat && outputFormat !== '' ? `.${outputFormat}` : ''}`;
-        const nonce = new Date().getTime();
-        const nsquery = namespace ? `ns=${namespace}&` : '';
-        const scheme = action === 'describe' ? K8S_RESOURCE_SCHEME_READONLY : K8S_RESOURCE_SCHEME;
-        const authority = action === 'describe' ? KUBECTL_DESCRIBE_AUTHORITY : KUBECTL_RESOURCE_AUTHORITY;
-        const uri = `${scheme}://${authority}/${docname}?${nsquery}value=${value}&_=${nonce}`;
-        return Uri.parse(uri);
     }
 
     /*
@@ -640,7 +646,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.openInConsole')
     public static openInConsole(component: KubernetesObject) {
-        void commands.executeCommand('extension.vsKubernetesLoad', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
+        void commands.executeCommand('openshift.resource.load', { namespace: component.metadata.namespace, kindName: `${component.kind}/${component.metadata.name}` });
     }
 
     @vsCommand('openshift.explorer.reportIssue')
