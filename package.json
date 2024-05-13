@@ -1720,12 +1720,12 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && isOpenshiftCluster",
 					"group": "c1@2"
 				},
 				{
 					"command": "openshift.namespace.set",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && canCreateNamespace && !isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext && !isOpenshiftCluster",
 					"group": "c1@2"
 				},
 				{
@@ -1750,12 +1750,12 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && isOpenshiftCluster",
 					"group": "p3@1"
 				},
 				{
 					"command": "openshift.namespace.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && !isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && !isOpenshiftCluster",
 					"group": "p3@1"
 				},
 				{
@@ -1770,12 +1770,12 @@
 				},
 				{
 					"command": "openshift.project.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && isOpenshiftCluster",
 					"group": "inline"
 				},
 				{
 					"command": "openshift.namespace.set",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && canCreateNamespace && !isOpenshiftCluster",
+					"when": "view == openshiftProjectExplorer && viewItem =~ /openshift.project.*/i && !isOpenshiftCluster",
 					"group": "inline"
 				},
 				{

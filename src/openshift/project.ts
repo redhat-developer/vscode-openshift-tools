@@ -19,25 +19,42 @@ export class Project extends OpenShiftItem {
     static async set(): Promise<string | null> {
         let message: string = null;
         const kind = await getNamespaceKind();
+        const canCreateProjects = await Oc.Instance.canCreateNamespace();
+        const canListProjects = await Oc.Instance.canListNamespaces();
+
         const createNewProject = {
             label: `Create new ${kind}`,
             description: `Create new ${kind} and make it active`
         };
+        const manuallySetProject = {
+            label: `Manually set active ${kind}`,
+            description: `Type in ${kind} name and make it active`
+        };
         const projectsAndCreateNew = Oc.Instance
             .getProjects() //
-            .then((projects) => [
-                createNewProject,
-                ...projects.map((project) => ({
-                    label: project.name,
-                    description: project.active ? 'Currently active': '',
-                })),
-            ]);
+            .then((projects) => {
+                const items = [];
+                if (canCreateProjects) {
+                    items.push(createNewProject);
+                }
+                items.push(manuallySetProject);
+                if (canListProjects) {
+                    items.push(...projects.map((project) => ({
+                        label: project.name,
+                        description: project.active ? 'Currently active': '',
+                    })));
+                }
+                return items;
+            });
         const selectedItem = await window.showQuickPick(projectsAndCreateNew, {placeHolder: `Select ${kind} to activate or create new one`});
         if (!selectedItem) return null;
         if (selectedItem === createNewProject) {
             await commands.executeCommand('openshift.project.create');
         } else {
-            const projectName = selectedItem.label;
+            const projectName = selectedItem === manuallySetProject ?
+                await Project.getProjectName(`${kind} name`, Promise.resolve([])) : selectedItem.label;
+            if (!projectName) return null;
+
             await Oc.Instance.setProject(projectName);
             OpenShiftExplorer.getInstance().refresh();
             Project.serverlessView.refresh();
@@ -50,7 +67,7 @@ export class Project extends OpenShiftItem {
     @vsCommand('openshift.namespace.create')
     static async create(): Promise<string> {
         const kind = await getNamespaceKind();
-        const projectList = Oc.Instance.getProjects();
+        const projectList = Oc.Instance.getProjects(true);
         let projectName = await Project.getProjectName(`${kind} name`, projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
@@ -76,7 +93,7 @@ export class Project extends OpenShiftItem {
     static async delFromPalette(): Promise<string | null> {
         const kind = await getNamespaceKind();
         const projects = Oc.Instance
-            .getProjects() //
+            .getProjects(true) // Get only projects existing on cluster
             .then((projects) => [
                 ...projects.map((project) => ({
                     label: project.name,

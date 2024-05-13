@@ -102,6 +102,15 @@ suite('./oc/ocWrapper.ts', function () {
             const project3 = 'my-test-project-3';
             await Oc.Instance.createProject(project3);
             await Oc.Instance.deleteProject(project3);
+
+            // Because 'my-test-project-3' namepace is still stays configured in Kube Config,
+            // it's been returned by `getProjects` in order to allow working with clusters that
+            // have a restriction on listing projects/namespaces.
+            // (see: https://github.com/redhat-developer/vscode-openshift-tools/issues/3999)
+            // So we need to set any other project as active before aqcuiring projects from the cluster,
+            // in order to make sure that required `my-test-projet-2` is deleted on the cluster:
+            await Oc.Instance.setProject('default');
+
             const projects = await Oc.Instance.getProjects();
             const projectNames = projects.map((project) => project.name);
             expect(projectNames).to.not.contain(project3);

@@ -76,6 +76,13 @@ async function createOrSetProjectItem(projectName: string): Promise<ExplorerItem
     };
 }
 
+function couldNotGetItem(item: string, clusterURL: string): ExplorerItem {
+    return {
+        label: `Couldn't get ${item} for server ${clusterURL}`,
+        iconPath: new ThemeIcon('error')
+    };
+}
+
 export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Disposable {
     private static instance: OpenShiftExplorer;
 
@@ -138,14 +145,23 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private static generateOpenshiftProjectContextValue(namespace: string): Thenable<string> {
         const contextValue = `openshift.project.${namespace}`;
-        return Oc.Instance.canDeleteNamespace(namespace)
-            .then(result => (result ? `${contextValue}.can-delete` : contextValue));
+        const allTrue = arr => arr.every(Boolean);
+
+        return Promise.all([
+                Oc.Instance.canDeleteNamespace(namespace),
+                Oc.Instance.getProjects(true)
+                    .then((clusterProjects) => {
+                        const existing = clusterProjects.find((project) => project.name === namespace);
+                        return existing !== undefined;
+                    })
+            ])
+            .then(result => (allTrue(result) ? `${contextValue}.can-delete` : contextValue));
     }
 
     // eslint-disable-next-line class-methods-use-this
     async getTreeItem(element: ExplorerItem): Promise<TreeItem> {
 
-        if ('command' in element) {
+        if ('command' in element || ('label' in element && 'iconPath' in element)) {
             return element;
         }
 
@@ -290,6 +306,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     if (this.kubeContext) {
                         const config = getKubeConfigFiles();
                         void commands.executeCommand('setContext', 'canCreateNamespace', await Oc.Instance.canCreateNamespace());
+                        void commands.executeCommand('setContext', 'canListNamespaces', await Oc.Instance.canListNamespaces());
                         result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
                     }
                 }
@@ -299,7 +316,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(new KubeConfigUtils().currentContext);
         } else if ('name' in element) { // we are dealing with context here
             // user is logged into cluster from current context
-            // and project should be show as child node of current context
+            // and project should be shown as child node of current context
             // there are several possible scenarios
             // (1) there is no namespace set in context and default namespace/project exists
             //   * example is kubernetes provisioned with docker-desktop
@@ -309,31 +326,23 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
             const namespaces = await Oc.Instance.getProjects();
-            if (this.kubeContext.namespace) {
-                if (namespaces.find(item => item.name === this.kubeContext.namespace)) {
-                    result = [{
-                        kind: 'project',
-                        metadata: {
-                            name: this.kubeContext.namespace,
-                        },
-                    } as KubernetesObject];
-                } else {
-                    result = [await createOrSetProjectItem(this.kubeContext.namespace)];
-                }
+            // Actually 'Oc.Instance.getProjects()' takes care of setting up at least one project as
+            // an active project, so here after it's enough just to search the array for it.
+            // The only case where there could be no active project set is empty projects array.
+            let active = namespaces.find((project) => project.active);
+            if (!active) active = namespaces.find(item => item?.name === 'default');
+
+            // find active or default namespace
+            if (active) {
+                result = [{
+                    kind: 'project',
+                    metadata: {
+                        name: active.name,
+                    },
+                } as KubernetesObject]
             } else {
-                // get list of projects or namespaces
-                // find default namespace
-                if (namespaces.find(item => item?.name === 'default')) {
-                    result = [{
-                        kind: 'project',
-                        metadata: {
-                            name: 'default',
-                        },
-                    } as KubernetesObject]
-                } else {
-                    const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
-                    result = [await createOrSetProjectItem(projectName)];
-                }
+                const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
+                result = [await createOrSetProjectItem(projectName)];
             }
 
             // The 'Create Service' menu visibility
@@ -369,7 +378,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 }
             }
         } else if ('kind' in element && element.kind === 'Deployment') {
-            return await this.getPods(element);
+            try {
+                const pods = await Oc.Instance.getKubernetesObjects('pods');
+                return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+            } catch {
+                return [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
+            }
         } else if ('kind' in element && element.kind === 'project') {
             const deployments = {
                 kind: 'deployments',
@@ -446,7 +460,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
-            let collections: KubernetesObject[] | Helm.HelmRelease[];
+            let collections: KubernetesObject[] | Helm.HelmRelease[] | ExplorerItem[];
             switch (element.kind) {
                 case 'helmReleases':
                     collections = await Helm.getHelmReleases();
@@ -457,7 +471,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     }
                     break;
                 default:
-                    collections = await Oc.Instance.getKubernetesObjects(element.kind);
+                    try {
+                        collections = await Oc.Instance.getKubernetesObjects(element.kind);
+                    } catch {
+                        collections = [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
+                    }
                     break;
             }
             const toCollect = [

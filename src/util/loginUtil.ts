@@ -35,15 +35,9 @@ export class LoginUtil {
                 if (serverURI && !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase()))) return true;
 
                 return await CliChannel.getInstance().executeSyncTool(
-                        new CommandText('oc', 'whoami'), { timeout: 5000 })
-                    .then((user) => false) // Active user is set - no need to login
-                    .catch((error) => {
-                        if (!error.stderr) return true; // Error with no reason - require to login
-
-                        // if reason is "forbidden" or not determined - require to login, otherwise - no need to login
-                        const matches = error.stderr.match(/Error\sfrom\sserver\s\(([a-zA-Z]*)\):*/);
-                        return matches && matches[1].toLocaleLowerCase() !== 'forbidden' ? false : true;
-                    });
+                        new CommandText('oc', 'api-versions'), { timeout: 5000 })
+                    .then((response) => !response || response.trim().length === 0) // Active user is set - no need to login
+                    .catch((error) => true);
             })
             .catch((error) => true); // Can't get server - require to login
     }
