@@ -133,7 +133,7 @@
 		"@types/vscode": "1.64.0",
 		"@typescript-eslint/eslint-plugin": "^7.9.0",
 		"@typescript-eslint/parser": "^7.9.0",
-		"@vscode/test-electron": "^2.3.9",
+		"@vscode/test-electron": "^2.3.10",
 		"bootstrap": "^5.3.3",
 		"chai": "^4.4.1",
 		"chokidar": "^3.6.0",
