@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { BottomBarPanel, InputBox, Notification, NotificationType, ViewItem, ViewSection, WebDriver, Workbench } from 'vscode-extension-tester';
+import { BottomBarPanel, EditorView, InputBox, Notification, NotificationType, ViewItem, ViewSection, WebDriver, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
 
 export async function waitForInputUpdate(input: InputBox, originalText: string, timeout = 5000): Promise<string> {
     return input.getDriver().wait(async () => {
@@ -80,4 +80,25 @@ export async function terminalHasText(text: string, timeout = 60000, period = 50
         }
         await new Promise(res => setTimeout(res, period));
     }, timeout);
+}
+
+export async function welcomeContentButtonsAreLoaded(welcomeContentSection: WelcomeContentSection, timeout = 60_000) {
+    return welcomeContentSection.getDriver().wait(async () => {
+        const buttons = await welcomeContentSection.getButtons();
+        if(buttons.length > 0) {
+            return buttons
+        }
+    }, timeout);
+}
+
+export async function webViewIsOpened(name: string, driver: WebDriver, timeout = 10_000) {
+    return driver.wait(async () => {
+        try {
+            const editor = new EditorView();
+            await editor.openEditor(name)
+            return true;
+        } catch(err) {
+            return null;
+        }
+    }, timeout)
 }
