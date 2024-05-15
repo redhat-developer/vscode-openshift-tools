@@ -42,7 +42,7 @@ export function checkAboutCommand() {
             console.log('c')
             const key = os === 'darwin' ? Key.COMMAND : Key.CONTROL;
             console.log('d')
-            console.log(key.toString())
+            console.log(key === Key.CONTROL)
 
             await terminalInstance.sendKeys(`${key}a`);
             console.log('e')
