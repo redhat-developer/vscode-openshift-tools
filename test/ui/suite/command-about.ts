@@ -35,7 +35,7 @@ export function checkAboutCommand() {
         it('Terminal shows according information', async function() {
             this.timeout(60_000);
             await terminalInstance.click();
-            
+
             const os = process.platform;
             const key = os === 'darwin' ? Key.COMMAND : Key.CONTROL;
 
