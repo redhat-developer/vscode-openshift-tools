@@ -34,17 +34,26 @@ export function checkAboutCommand() {
         // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
         it('Terminal shows according information', async function() {
             this.timeout(60_000);
+            console.log('a')
             await terminalInstance.click();
+            console.log('b')
 
             const os = process.platform;
+            console.log('c')
             const key = os === 'darwin' ? Key.COMMAND : Key.CONTROL;
+            console.log('d')
 
             await terminalInstance.sendKeys(`${key}a`);
+            console.log('e')
             await terminalInstance.sendKeys(`${key}c`);
+            console.log('f')
             await webviewView.switchBack();
+            console.log('g')
 
             const cb = await import('clipboardy');
+            console.log('h')
             const clipboard = await cb.read();
+            console.log('i')
             expect(clipboard).to.contain(odoVersion);
         });
     });
