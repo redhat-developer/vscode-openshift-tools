@@ -5,7 +5,6 @@
 
 import { By, EditorView, Key, WebElement, WebviewView, Workbench } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
-import { execSync } from 'child_process';
 import { expect } from 'chai';
 
 export function checkAboutCommand() {
@@ -36,20 +35,17 @@ export function checkAboutCommand() {
         it('Terminal shows according information', async function() {
             this.timeout(60_000);
             await terminalInstance.click();
-            await terminalInstance.sendKeys(`${Key.COMMAND}a`);
-            await terminalInstance.sendKeys(`${Key.COMMAND}c`);
-            await webviewView.switchBack();
+            
             const os = process.platform;
-            let clipboardUtil: string;
-            if (os === 'linux') {
-                clipboardUtil = 'xclip';
-            } else if (os === 'darwin') {
-                clipboardUtil = 'pbpaste';
-            } else {
-                clipboardUtil = 'clip';
-            }
-            const text = execSync(clipboardUtil, { encoding: 'utf-8' });
-            expect(text).to.contain(odoVersion);
+            const key = os === 'darwin' ? Key.COMMAND : Key.CONTROL;
+
+            await terminalInstance.sendKeys(`${key}a`);
+            await terminalInstance.sendKeys(`${key}c`);
+            await webviewView.switchBack();
+
+            const cb = await import('clipboardy');
+            const clipboard = await cb.read();
+            expect(clipboard).to.contain(odoVersion);
         });
     });
 }
