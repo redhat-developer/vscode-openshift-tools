@@ -10,7 +10,6 @@ import { expect } from 'chai';
 export function checkAboutCommand() {
     describe('About Command', () => {
         const command = '>OpenShift: About';
-        //const expectedTerminalName = 'OpenShift: Show odo Version';
         const odoVersion = 'odo v3';
 
         let webviewView: WebviewView;
@@ -21,7 +20,6 @@ export function checkAboutCommand() {
             await activateCommand(command);
         })
 
-        // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
         it('New terminal opens', async function() {
             this.timeout(60_000);
             await new Promise(res => setTimeout(res, 3_000));
@@ -31,7 +29,6 @@ export function checkAboutCommand() {
             terminalInstance = await webviewView.findWebElement(By.xpath('//textarea[@aria-label = "Terminal input"]'));
         });
 
-        // Pending on https://github.com/redhat-developer/vscode-extension-tester/pull/855
         it('Terminal shows according information', async function() {
             this.timeout(60_000);
             await terminalInstance.click();
