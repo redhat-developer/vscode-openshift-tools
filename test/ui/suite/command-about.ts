@@ -38,15 +38,13 @@ export function checkAboutCommand() {
             await terminalInstance.click();
             console.log('b')
 
-            const os = process.platform;
+            //const os = process.platform;
             console.log('c')
-            const key = os === 'darwin' ? Key.COMMAND : Key.CONTROL;
             console.log('d')
-            console.log(key === Key.CONTROL)
 
-            await terminalInstance.sendKeys(`${key}a`);
+            await terminalInstance.sendKeys(`${Key.CONTROL}${Key.SHIFT}a`);
             console.log('e')
-            await terminalInstance.sendKeys(`${key}c`);
+            await terminalInstance.sendKeys(`${Key.CONTROL}${Key.SHIFT}c`);
             console.log('f')
             await webviewView.switchBack();
             console.log('g')
