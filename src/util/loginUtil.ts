@@ -27,25 +27,28 @@ export class LoginUtil {
      * @returns true if the user needs to log in to access the cluster, and false otherwise
      */
     public async requireLogin(serverURI?: string): Promise<boolean> {
-        return await CliChannel.getInstance().executeSyncTool(
-                new CommandText('oc', 'whoami', [new CommandOption('--show-server')]), { timeout: 5000 })
-            .then(async (server) => {
-                // if the server is different - require to login
-                const serverCheck = server ? server.trim() : '';
-                if (serverURI && !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase()))) return true;
+        try {
+            const server = await CliChannel.getInstance().executeSyncTool(
+                new CommandText('oc', 'whoami', [new CommandOption('--show-server')]), { timeout: 5000 });
+            // if the server is different - require to login
+            const serverCheck = server ? server.trim() : '';
+            if (serverURI && !(`${serverCheck}`.toLowerCase().includes(serverURI.toLowerCase()))) return true;
 
-                return await CliChannel.getInstance().executeSyncTool(
-                        new CommandText('oc', 'whoami'), { timeout: 5000 })
-                    .then((user) => false) // Active user is set - no need to login
-                    .catch((error) => {
-                        if (!error.stderr) return true; // Error with no reason - require to login
-
-                        // if reason is "forbidden" or not determined - require to login, otherwise - no need to login
-                        const matches = error.stderr.match(/Error\sfrom\sserver\s\(([a-zA-Z]*)\):*/);
-                        return matches && matches[1].toLocaleLowerCase() !== 'forbidden' ? false : true;
-                    });
-            })
-            .catch((error) => true); // Can't get server - require to login
+            try {
+                const result = await CliChannel.getInstance().executeTool(new CommandText('oc api-resources'), { timeout: 2000 });
+                if (result.stdout.length === 0) {
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                if (!error || !error.stderr) return true; // Error with no reason - require to login
+                // if reason is "forbidden" or not determined - require to login, otherwise - no need to login
+                const matches = (error.stderr as string).match(/Error\sfrom\sserver\s\(([a-zA-Z]*)\):*/);
+                return matches && matches[1].toLocaleLowerCase() === 'forbidden';
+            }
+        } catch (_e) {
+            return true;
+        }
     }
 
     /**
