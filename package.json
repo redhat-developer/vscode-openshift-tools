@@ -171,7 +171,7 @@
 		"remap-istanbul": "^0.13.0",
 		"showdown": "^2.1.0",
 		"shx": "^0.3.3",
-		"sinon": "^17.0.2",
+		"sinon": "^18.0.0",
 		"sinon-chai": "^3.7.0",
 		"source-map-support": "^0.5.21",
 		"survey-core": "^1.10.3",
