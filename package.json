@@ -811,6 +811,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.route.create",
+				"title": "Create Route",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.deployment.create.fromImageUrl",
 				"title": "Create Deployment from Container Image URL",
 				"category": "OpenShift"
@@ -1619,6 +1624,11 @@
 				{
 					"command": "openshift.service.create",
 					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i && showCreateService",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.route.create",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i && showCreateRoute",
 					"group": "c2"
 				},
 				{

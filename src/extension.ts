@@ -94,6 +94,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             './openshift/project',
             './openshift/cluster',
             './openshift/service',
+            './openshift/route',
             './k8s/console',
             './yamlFileCommands',
             './registriesView',

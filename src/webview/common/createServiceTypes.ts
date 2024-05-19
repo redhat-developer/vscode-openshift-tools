@@ -64,3 +64,76 @@ export type SpecDescriptor = {
      */
     path: string;
 }
+
+export type OwnerReference = {
+    name: string;
+    kind: string;
+    uid: string;
+    apiVersion: string;
+    controller?: boolean;
+    blockOwnerDeletion?: boolean;
+};
+
+
+export type ObjectMetadata = {
+    annotations?: { [key: string]: string };
+    clusterName?: string;
+    creationTimestamp?: string;
+    deletionGracePeriodSeconds?: number;
+    deletionTimestamp?: string;
+    finalizers?: string[];
+    generateName?: string;
+    generation?: number;
+    labels?: { [key: string]: string };
+    managedFields?: any[];
+    name?: string;
+    namespace?: string;
+    ownerReferences?: OwnerReference[];
+    resourceVersion?: string;
+    uid?: string;
+};
+
+// Properties common to (almost) all Kubernetes resources.
+export type K8sResourceCommon = {
+    apiVersion?: string;
+    kind?: string;
+    metadata?: ObjectMetadata;
+};
+
+
+
+
+export type MatchExpression = {
+    key: string;
+    operator: 'Exists' | 'DoesNotExist' | 'In' | 'NotIn' | 'Equals' | 'NotEqual';
+    values?: string[];
+    value?: string;
+};
+
+export type MatchLabels = {
+    [key: string]: string;
+};
+
+export type Selector = {
+    matchLabels?: MatchLabels;
+    matchExpressions?: MatchExpression[];
+};
+
+export type Port = {
+    name: string;
+    port: number;
+    protocol: string;
+    targetPort: string;
+};
+
+// Generic, unknown kind. Avoid when possible since it allows any key in spec
+// or status, weakening type checking.
+export type K8sResourceKind = K8sResourceCommon & {
+    spec?: {
+        selector?: Selector | MatchLabels;
+        ports?: Port[];
+        [key: string]: any;
+    };
+    status?: { [key: string]: any };
+    data?: { [key: string]: any };
+};

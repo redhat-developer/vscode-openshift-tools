@@ -61,8 +61,8 @@ function isGitURL(host: string): boolean {
     ].includes(host);
 }
 
-export function validateURL(event: Message): validateURLProps {
-    if (typeof event.data === 'string' && (event.data).trim().length === 0) {
+export function validateURL(event: Message | { command: string; data: object }, isRequired = true): validateURLProps {
+    if (isRequired && typeof event.data === 'string' && (event.data).trim().length === 0) {
         return {
             url: event.data,
             error: true,
@@ -78,7 +78,7 @@ export function validateURL(event: Message): validateURLProps {
     return {
         url: event.data,
         error: false,
-        helpText: 'URL is valid'
+        helpText: !isRequired ? '' : 'URL is valid'
     } as validateURLProps
 }
 
