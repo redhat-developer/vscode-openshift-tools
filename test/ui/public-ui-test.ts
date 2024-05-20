@@ -16,10 +16,12 @@ import { backupKubeConfig, loadKubeConfigFromBackup } from './common/kubeConfigU
 
 require('source-map-support').install();
 
-describe('Extension public-facing UI tests', async function() {
+describe('Extension public-facing UI tests', function() {
     const contextFolder = path.join(__dirname, 'context');
 
-    await backupKubeConfig();
+    (async () => {
+        await backupKubeConfig();
+    });
     checkExtension();
     checkOpenshiftView();
     testAddCluster();
@@ -28,5 +30,7 @@ describe('Extension public-facing UI tests', async function() {
     checkFocusOnCommands();
     testCreateComponent(contextFolder);
     testCreateServerlessFunction(contextFolder);
-    await loadKubeConfigFromBackup();
+    (async () => {
+        await loadKubeConfigFromBackup();
+    })
 });
