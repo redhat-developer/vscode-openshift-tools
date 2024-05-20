@@ -37,6 +37,7 @@ describe('Extension public-facing UI tests with Kind cluster', function() {
     before(async function() {
         await loadKubeConfigFromBackup();
     });
+    checkFocusOnCommands();
 
     //tests requiring clusters incoming
 })
