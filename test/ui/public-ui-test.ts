@@ -12,12 +12,14 @@ import { checkFocusOnCommands } from './suite/focusOn';
 import { checkOpenshiftView } from './suite/openshift';
 import { testCreateServerlessFunction } from './suite/serverlessFunction';
 import { testAddCluster } from './suite/addCluster';
+import { backupKubeConfig, loadKubeConfigFromBackup } from './common/kubeConfigUtils';
 
 require('source-map-support').install();
 
-describe('Extension public-facing UI tests', function() {
+describe('Extension public-facing UI tests', async function() {
     const contextFolder = path.join(__dirname, 'context');
 
+    await backupKubeConfig();
     checkExtension();
     checkOpenshiftView();
     testAddCluster();
@@ -26,4 +28,5 @@ describe('Extension public-facing UI tests', function() {
     checkFocusOnCommands();
     testCreateComponent(contextFolder);
     testCreateServerlessFunction(contextFolder);
+    await loadKubeConfigFromBackup();
 });
