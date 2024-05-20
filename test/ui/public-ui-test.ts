@@ -19,9 +19,10 @@ require('source-map-support').install();
 describe('Extension public-facing UI tests', function() {
     const contextFolder = path.join(__dirname, 'context');
 
-    (async () => {
+    before(async function () {
         await backupKubeConfig();
     });
+
     checkExtension();
     checkOpenshiftView();
     testAddCluster();
@@ -30,7 +31,12 @@ describe('Extension public-facing UI tests', function() {
     checkFocusOnCommands();
     testCreateComponent(contextFolder);
     testCreateServerlessFunction(contextFolder);
-    (async () => {
-        await loadKubeConfigFromBackup();
-    })
 });
+
+describe('Extension public-facing UI tests with Kind cluster', function() {
+    before(async function() {
+        await loadKubeConfigFromBackup();
+    });
+
+    //tests requiring clusters incoming
+})
