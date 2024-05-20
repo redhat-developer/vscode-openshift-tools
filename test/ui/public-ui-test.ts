@@ -24,7 +24,7 @@ describe('Extension public-facing UI tests', function() {
         before(async function () {
             await backupKubeConfig();
         });
-    
+
         checkExtension();
         checkOpenshiftView();
         testAddCluster();
@@ -44,7 +44,7 @@ describe('Extension public-facing UI tests', function() {
         });
 
         checkFocusOnCommands();
-    
+
         //tests requiring clusters incoming
     });
 });
