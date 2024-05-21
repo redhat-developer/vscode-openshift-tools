@@ -22,7 +22,7 @@ import {
     window,
     workspace
 } from 'vscode';
-import { CommandText } from './base/command';
+import { CommandOption, CommandText } from './base/command';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
@@ -634,6 +634,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     @vsCommand('openshift.resource.watchLogs')
     public static async watchLogs(component: KubernetesObject) {
+        const namespace: string = await Oc.Instance.getActiveProject();
         // wait until logs are available before starting to stream them
         await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
             return new Promise<void>(resolve => {
@@ -641,7 +642,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 let intervalId: NodeJS.Timer = undefined;
 
                 function checkForPod() {
-                    void Oc.Instance.getLogs('Deployment', component.metadata.name).then((logs) => {
+                    void Oc.Instance.getLogs('Deployment', component.metadata.name, namespace).then((logs) => {
                         clearInterval(intervalId);
                         resolve();
                     }).catch(_e => { });
@@ -651,7 +652,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             });
         });
 
-        void OpenShiftTerminalManager.getInstance().createTerminal(new CommandText('oc', `logs -f ${component.kind}/${component.metadata.name}`), `Watching '${component.metadata.name}' logs`);
+        void OpenShiftTerminalManager.getInstance().createTerminal(
+            new CommandText('oc', `logs -f ${component.kind}/${component.metadata.name}`,
+                [new CommandOption('--namespace', namespace)]),
+            `Watching '${component.metadata.name}' logs`);
     }
 
     @vsCommand('openshift.resource.unInstall')
