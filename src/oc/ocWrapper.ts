@@ -470,12 +470,17 @@ export class Oc {
      *
      * @param resourceType the type of resource to get the logs for
      * @param name the name of the resource to get the logs for
+     * @param namespace (optional) namespace where the logs are to be acquired
      * @throws if the logs are not available
      * @returns the logs for the given resource
      */
-    public async getLogs(resourceType: string, name: string): Promise<string> {
+    public async getLogs(resourceType: string, name: string, namespace?: string): Promise<string> {
+        const args: CommandOption[] = [];
+        if (namespace) {
+            args.push(new CommandOption('--namespace', namespace));
+        }
         const result = await CliChannel.getInstance().executeTool(
-            new CommandText('oc', `logs ${resourceType}/${name}`)
+            new CommandText('oc', `logs ${resourceType}/${name}`, args)
         );
         return result.stdout;
     }
