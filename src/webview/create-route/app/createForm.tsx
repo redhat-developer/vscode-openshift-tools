@@ -24,6 +24,7 @@ import 'react-dom';
 import type { K8sResourceKind, Port } from '../../common/createServiceTypes';
 import type { RouteInputBoxText } from '../../common/route';
 import { LoadScreen } from '../../common/loading';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { createVSCodeTheme } from '../../common/vscode-theme';
 import { ErrorPage } from '../../common/errorPage';
 
@@ -158,7 +159,7 @@ function SelectService(props: {
                     >
                         {ports.map((portObj: Port) => (
                             <MenuItem key={portObj.port} value={portObj.port}>
-                                {portObj.port} ​&#8594; {portObj.targetPort} ({portObj.protocol})
+                                {portObj.port} <ArrowRightAltIcon /> {portObj.targetPort} ({portObj.protocol})
                             </MenuItem>
                         ))}
                     </Select>
@@ -259,24 +260,27 @@ export function CreateService() {
                     setPage((_) => 'PickServiceKind');
                     break;
                 case 'validateRouteName':
+                    const routeData = JSON.parse(message.data);
                     setRouteNameObj({
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText !== '' ? message.data.helpText : routeNameObj.helpText
+                        name: routeData.name,
+                        error: routeData.error,
+                        helpText: routeData.helpText !== '' ? routeData.helpText : routeNameObj.helpText
                     });
                     break;
                 case 'validateHost':
+                    const hostData = JSON.parse(message.data);
                     setHostNameObj({
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText !== '' ? message.data.helpText : hostNameObj.helpText
+                        name: hostData.name,
+                        error: hostData.error,
+                        helpText: hostData.helpText !== '' ? hostData.helpText : hostNameObj.helpText
                     });
                     break;
                 case 'validatePath':
+                    const PathData = JSON.parse(message.data);
                     setPathObj({
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText
+                        name: PathData.name,
+                        error: PathData.error,
+                        helpText: PathData.helpText
                     });
                     break;
                 case 'error':

@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as _ from 'lodash';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { OpenShiftExplorer } from '../../explorer';
@@ -96,7 +95,6 @@ export default class CreateRouteViewLoader {
             case 'getSpec': {
                 try {
                     const services = await getService();
-                    console.log(services);
                     void CreateRouteViewLoader.panel.webview.postMessage({
                         action: 'setSpec',
                         data: {
@@ -121,7 +119,7 @@ export default class CreateRouteViewLoader {
                         protocol: route.port.protocal
                     }
                     await Oc.Instance.createRoute(route.routeName, route.serviceName, route.hostname, route.path, port, route.isSecured);
-                    void vscode.window.showInformationMessage(`Route ${route.routeName}} successfully created.`);
+                    void vscode.window.showInformationMessage(`Route ${route.routeName} successfully created.`);
                     CreateRouteViewLoader.panel.dispose();
                     CreateRouteViewLoader.panel = undefined;
                     OpenShiftExplorer.getInstance().refresh();
@@ -138,11 +136,11 @@ export default class CreateRouteViewLoader {
                 const flag = validateName(message.data.toString());
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validateRouteName',
-                    data: {
+                    data: JSON.stringify({
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag,
                         name: message.data.toString()
-                    }
+                    })
                 });
                 break;
             }
@@ -150,22 +148,22 @@ export default class CreateRouteViewLoader {
                 if (message.data.toString().trim() === '') {
                     void CreateRouteViewLoader.panel.webview.postMessage({
                         action: 'validateHost',
-                        data: {
+                        data: JSON.stringify({
                             error: false,
                             helpText: '',
                             name: message.data.toString()
-                        }
+                        })
                     });
                     break;
                 }
                 const flag = validateURL(message, false);
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validateHost',
-                    data: {
+                    data: JSON.stringify({
                         error: !flag.error ? false : true,
                         helpText: flag.helpText,
                         name: message.data.toString()
-                    }
+                    })
                 });
                 break;
             }
@@ -173,22 +171,22 @@ export default class CreateRouteViewLoader {
                 if (message.data.toString().trim() === '') {
                     void CreateRouteViewLoader.panel.webview.postMessage({
                         action: 'validatePath',
-                        data: {
+                        data: JSON.stringify({
                             error: false,
                             helpText: '',
                             name: message.data.toString()
-                        }
+                        })
                     });
                     break;
                 }
                 const flag = validatePath(message.data.toString());
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validatePath',
-                    data: {
+                    data: JSON.stringify({
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag,
                         name: message.data.toString()
-                    }
+                    })
                 });
                 break;
             }
