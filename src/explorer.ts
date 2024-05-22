@@ -57,6 +57,11 @@ export interface DeploymentPodObject extends KubernetesObject {
     },
 }
 
+export interface DeploymentPodErrors {
+    inCrashLoopBackOff: boolean,
+    messages: string[]
+}
+
 type PackageJSON = {
     version: string;
     bugs: string;
@@ -270,24 +275,149 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     collapsibleState: TreeItemCollapsibleState.Collapsed
                 }
             }
-            const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
-            return {
+            return this.getDeploymentItem(element);
+        }
+        return {
+            label: 'Unknown element'
+        }
+    }
+
+    private getDeploymentIconSuffix(pods: DeploymentPodObject[]): string {
+        // Find all not 'Running' pods
+        const notRunning = pods.filter((pod) => pod.status && pod.status.phase !== 'Running');
+        if (notRunning.length === 0) {
+            return '-green'; // All running - return 'green'
+        }
+        // Find any 'Failed' or 'Unknown' pod - if any return error ('red')
+        const failed = notRunning.find((pod) => pod.status &&
+                (pod.status.phase === 'Failed' || pod.status.phase === 'Unknown'));
+        if (failed) {
+            return '-red'; // At least one failed or unknown - return 'red'
+        }
+        // Find any 'Pending' pod - if any return pending ('yellow')
+        const pending = notRunning.find((pod) => pod.status && pod.status.phase === 'Pending');
+        return pending ? '-yellow' : '';
+    }
+
+    /*
+     * Search for 'CrashLoopBackOff` in Pod's opbect:
+     * status:
+     *   containerStatuses:
+     *     state:
+     *       waiting:
+     *         message: |
+     *           container create failed: time="2024-05-28T10:30:28Z" level=error msg="runc create failed: unable to start container process: exec: \"asdf\": executable file not found in $PATH"
+     *         reason: CreateContainerError
+     */
+    private detectCrashLoopBackOff(pods): DeploymentPodErrors {
+        let inCrashLoopBackOff = false;
+        const messages: string[] = [];
+
+        // Search for Pod continers' errors
+        pods.forEach((pod) => {
+            pod.status?.containerStatuses &&
+            pod.status.containerStatuses.forEach((cs) => {
+                if (cs.state?.waiting) {
+                    const reason = cs.state.waiting.reason;
+                    const message = cs.state.waiting.message;
+
+                    inCrashLoopBackOff = inCrashLoopBackOff || reason === 'CrashLoopBackOff';
+
+                    const msg = `${reason}: ${message ? message.trim(): 'No valuable message'}`;
+                    // Skip duplicates and show not more than 10 errors
+                    if (messages.length <= 10 && !(messages.find((m) => m === msg))) {
+                        messages.push(msg);
+                    }
+                }
+            });
+        });
+
+        return {
+            inCrashLoopBackOff,
+            messages
+        }
+    }
+
+    private collectDeploymentErrors(deployment): string[] {
+        const messages: string[] = [];
+        deployment.status.conditions.filter((c) => c.status === 'False')
+            .forEach((c) => {
+                const message = `${c.reason}: ${c.message ? c.message.trim(): 'No valuable message'}`;
+
+                // Skip duplicates and show not more than 10 errors
+                if (messages.length <= 10 && !(messages.find((m) => m === message))) {
+                    messages.push(message);
+                }
+            });
+
+        return messages;
+    }
+
+    private async getDeploymentItem(element): Promise<TreeItem> {
+        const shouldHaveReplicas = element.spec.replicas > 0;
+        const desiredReplicas = element.spec.replicas ? element.spec.replicas : 0;
+        const actualReplicas = element.status.replicas ? element.status.replicas : 0;
+        const readyReplicas = element.status.readyReplicas ? element.status.readyReplicas : 0;
+        const availableReplicas = element.status.availableReplicas ? element.status.availableReplicas : 0;
+        const unavailableReplicas = element.status.unavailableReplicas ? element.status.unavailableReplicas : 0;
+
+        let pods: DeploymentPodObject[] = [];
+        if (shouldHaveReplicas) {
+            try {
+                pods = await this.getPods(element);
+            } catch {
+                // ignore
+            }
+        }
+
+        // Look into Pod containers' states for any 'CrashLoopBackOff` status
+        const podErrors = this.detectCrashLoopBackOff(pods);
+        let podsMessages = '';
+        podErrors.messages.forEach((m) => podsMessages = podsMessages.concat(`\n\t${m}`));
+
+        // We get Deployment's 'CrashLoopBackOff` status and error messages
+        const deploymentErrors = this.collectDeploymentErrors(element);
+
+        let errorMessages = '';
+        deploymentErrors.forEach((m) => errorMessages = errorMessages.concat(`\n\t${m}`));
+
+        // const inCrashLoopBackOff = element.status.conditions.find((condition) => condition.status === 'False' && condition.reason === 'CrashLoopBackOff');
+        let description = `${this.makeCaps(element.kind)}`;
+        let tooltip = description;
+        if (element.kind === 'Deployment') {
+            description = `${description} (${availableReplicas}/${desiredReplicas})`
+            tooltip = `${tooltip}: ${element.metadata.name}\n`.concat(
+                `Desired Replicas: ${desiredReplicas}\n`,
+                `Actual Replicas: ${actualReplicas}\n`,
+                'Of which:\n',
+                `\tReady Replicas: ${readyReplicas}\n`,
+                `\tAvailable Replicas: ${availableReplicas}\n`,
+                `\tUnavailable Replicas: ${unavailableReplicas}\n`,
+                `---\nCrashLoopBackOff detected: ${podErrors.inCrashLoopBackOff ? 'Yes' : 'No'}\n`,
+                podsMessages.length > 0 ? `---\nPod Container Failures:${podsMessages}\n` : '',
+                errorMessages.length > 0 ? `---\nDeployment Failures:${errorMessages}\n` : ''
+            );
+        }
+        const iconSuffix = !shouldHaveReplicas ? '' :
+                podErrors.inCrashLoopBackOff ? '-red' : this.getDeploymentIconSuffix(pods);
+        const iconPath = element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ?
+            path.resolve(__dirname, `../../images/context/component-node${iconSuffix}.png`)
+                : undefined;
+
+        const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
+        return {
                 contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
                 label: element.metadata.name,
-                description: `${element.kind.substring(0, 1).toLocaleUpperCase()}${element.kind.substring(1)}`,
+                description,
+                tooltip,
                 collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
-                iconPath: element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ? path.resolve(__dirname, '../../images/context/component-node.png') : undefined,
+                iconPath,
                 command: {
                     title: 'Load',
                     command: 'openshift.resource.load',
                     arguments: [element]
                 }
             };
-
-        }
-        return {
-            label: 'Unknown element'
-        }
     }
 
     private makeCaps(kind: string): string {
