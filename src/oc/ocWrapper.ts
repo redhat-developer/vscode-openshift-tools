@@ -502,7 +502,7 @@ export class Oc {
             });
     }
 
-    public async createRoute(routeName: string, serviceName: string, hostName: string, path: string, port: { number: string, name: string, protocol: string },
+    public async createRoute(routeName: string, serviceName: string, hostName: string, path: string, port: { number: string, name: string, protocol: string, targetPort: string },
         isSecured: boolean): Promise<string> {
         let cmdText: CommandText;
         if (isSecured) {
@@ -516,6 +516,7 @@ export class Oc {
             cmdText = new CommandText('oc', `expose service ${serviceName.trim()}`, [
                 new CommandOption('--name', routeName),
                 new CommandOption('--port', port.number),
+                new CommandOption('--target-port', port.targetPort),
                 new CommandOption('--protocol', port.protocol)
             ]);
         }

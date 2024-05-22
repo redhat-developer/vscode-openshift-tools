@@ -18,7 +18,8 @@ export type CreateRoute = {
     port: {
         number: string;
         name: string;
-        protocal: string
+        protocal: string;
+        targetPort: string;
     };
     isSecured: boolean;
 }

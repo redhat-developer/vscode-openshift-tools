@@ -126,7 +126,7 @@ export function validateName(value: string): string | null {
             JSON.parse(value) as unknown as string
         );
     }
-    if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
+    if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', JSON.parse(value) as unknown as string, 0); }
     return validationMessage;
 }
 

@@ -74,7 +74,6 @@ export type OwnerReference = {
     blockOwnerDeletion?: boolean;
 };
 
-
 export type ObjectMetadata = {
     annotations?: { [key: string]: string };
     clusterName?: string;
@@ -99,9 +98,6 @@ export type K8sResourceCommon = {
     kind?: string;
     metadata?: ObjectMetadata;
 };
-
-
-
 
 export type MatchExpression = {
     key: string;

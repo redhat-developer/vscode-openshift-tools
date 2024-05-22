@@ -116,7 +116,8 @@ export default class CreateRouteViewLoader {
                     const port = {
                         name: route.port.name,
                         number: route.port.number,
-                        protocol: route.port.protocal
+                        protocol: route.port.protocal,
+                        targetPort: route.port.targetPort
                     }
                     await Oc.Instance.createRoute(route.routeName, route.serviceName, route.hostname, route.path, port, route.isSecured);
                     void vscode.window.showInformationMessage(`Route ${route.routeName} successfully created.`);
@@ -130,6 +131,11 @@ export default class CreateRouteViewLoader {
                     });
                     void vscode.window.showErrorMessage(err);
                 }
+                break;
+            }
+            case 'close': {
+                CreateRouteViewLoader.panel.dispose();
+                CreateRouteViewLoader.panel = undefined;
                 break;
             }
             case 'validateRouteName': {

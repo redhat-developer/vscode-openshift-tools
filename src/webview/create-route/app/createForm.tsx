@@ -33,11 +33,16 @@ import { ErrorPage } from '../../common/errorPage';
  */
 function SelectService(props: {
     routeNameObj: RouteInputBoxText;
+    setRouteNameObj;
     hostNameObj: RouteInputBoxText;
+    setHostNameObj;
     pathObj: RouteInputBoxText;
+    setPathNameObj;
     serviceKinds: K8sResourceKind[];
     selectedServiceKind: K8sResourceKind;
     setSelectedServiceKind;
+    ports: Port[],
+    setPorts;
     selectedPort: Port;
     setSelectedPort;
 }) {
@@ -45,7 +50,6 @@ function SelectService(props: {
     const [isServiceKindTouched, setServiceKindTouched] = React.useState(false);
     const [isPortTouched, setPortTouched] = React.useState(false);
     const [isSecured, setSecured] = React.useState(false);
-    const [ports, setPorts] = React.useState<Port[]>([]);
 
     return (
         <form
@@ -71,7 +75,9 @@ function SelectService(props: {
                             command: 'validateRouteName',
                             data: e.target.value
                         });
-                    }} />
+                        props.setRouteNameObj((prevState: RouteInputBoxText) => ({ ...prevState, name: e.target.value }));
+                    }}
+                />
                 <TextField fullWidth
                     id='hostName'
                     variant='outlined'
@@ -85,6 +91,7 @@ function SelectService(props: {
                             command: 'validateHost',
                             data: e.target.value
                         });
+                        props.setHostNameObj((prevState: RouteInputBoxText) => ({ ...prevState, name: e.target.value }));
                     }} />
                 <TextField fullWidth
                     id='path'
@@ -99,6 +106,7 @@ function SelectService(props: {
                             command: 'validatePath',
                             data: e.target.value
                         });
+                        props.setPathNameObj((prevState: RouteInputBoxText) => ({ ...prevState, name: e.target.value }));
                     }} />
                 <FormControl required>
                     <InputLabel id='service-kind-label'>Service</InputLabel>
@@ -117,7 +125,8 @@ function SelectService(props: {
                                 (serviceKind: K8sResourceKind) => serviceKind.metadata.name === e.target.value,
                             );
                             props.setSelectedServiceKind((_) => newSelection);
-                            setPorts((_) => newSelection.spec.ports);
+                            props.setPorts((_) => newSelection.spec.ports);
+                            props.setSelectedPort((_) => undefined);
                         }}
                         variant='outlined'
                         placeholder='Select a service'
@@ -146,7 +155,7 @@ function SelectService(props: {
                             }
                         }}
                         onChange={(e) => {
-                            const newSelection = ports.find(
+                            const newSelection = props.ports.find(
                                 (port: Port) => port.port === e.target.value,
                             );
                             props.setSelectedPort((_) => newSelection);
@@ -156,7 +165,7 @@ function SelectService(props: {
                         error={isServiceKindTouched && props.selectedServiceKind === undefined}
                         required
                     >
-                        {ports.map((portObj: Port) => (
+                        {props.ports.map((portObj: Port) => (
                             <MenuItem key={portObj.port} value={portObj.port}>
                                 {portObj.port} <ArrowRightAltIcon /> {portObj.targetPort} ({portObj.protocol})
                             </MenuItem>
@@ -179,7 +188,7 @@ function SelectService(props: {
                 </FormControl>
                 <Stack direction='row' spacing={2} marginTop={3}>
                     <Button
-                        variant="contained"
+                        variant='contained'
                         onClick={() => {
                             window.vscodeApi.postMessage({
                                 command: 'create',
@@ -190,6 +199,7 @@ function SelectService(props: {
                                     serviceName: props.selectedServiceKind.metadata.name.trim(),
                                     port: {
                                         number: props.selectedPort.port,
+                                        targetPort: props.selectedPort.targetPort,
                                         name: props.selectedPort.name,
                                         protocal: props.selectedPort.protocol
                                     },
@@ -202,9 +212,11 @@ function SelectService(props: {
                         Create
                     </Button>
                     <Button
-                        variant="contained"
+                        variant='contained'
                         onClick={() => {
-
+                            window.vscodeApi.postMessage({
+                                command: 'close'
+                            });
                         }}>
                         Cancel
                     </Button>
@@ -244,6 +256,7 @@ export function CreateService() {
     const [serviceKinds, setServiceKinds] = React.useState<K8sResourceKind[]>(undefined);
     const [selectedServiceKind, setSelectedServiceKind] =
         React.useState<K8sResourceKind>(undefined);
+    const [ports, setPorts] = React.useState<Port[]>([]);
     const [selectedPort, setSelectedPort] =
         React.useState<Port>(undefined);
 
@@ -309,16 +322,22 @@ export function CreateService() {
         case 'Loading':
             return <LoadScreen title='Loading ...' />;
         case 'Error':
-            return <ErrorPage message={error} />;
+            pageElement = (<ErrorPage message={error} />);
+            break;
         case 'PickServiceKind':
             pageElement = (
                 <SelectService
                     routeNameObj={routeNameObj}
+                    setRouteNameObj={setRouteNameObj}
                     hostNameObj={hostNameObj}
+                    setHostNameObj={setHostNameObj}
                     pathObj={pathObj}
+                    setPathNameObj={setPathObj}
                     serviceKinds={serviceKinds}
                     selectedServiceKind={selectedServiceKind}
                     setSelectedServiceKind={setSelectedServiceKind}
+                    ports={ports}
+                    setPorts={setPorts}
                     selectedPort={selectedPort}
                     setSelectedPort={setSelectedPort} />
             );
@@ -329,7 +348,22 @@ export function CreateService() {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container maxWidth='lg'>{pageElement}</Container>
+            <Container maxWidth='lg'>
+                {pageElement}
+                {error?.trim().length > 0 &&
+                    <Stack direction='row' spacing={2} marginTop={3}>
+                        <Button
+                            variant='contained'
+                            onClick={() => {
+                                setError(() => undefined);
+                                setPage((_) => 'PickServiceKind');
+                            }}
+                        >
+                            Back
+                        </Button>
+                    </Stack>
+                }
+            </Container>
         </ThemeProvider>
     );
 }
