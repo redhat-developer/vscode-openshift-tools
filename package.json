@@ -176,6 +176,7 @@
 		"survey-core": "^1.10.2",
 		"survey-react-ui": "^1.10.2",
 		"typescript": "^5.4.5",
+		"valid-path": "^2.1.0",
 		"vscode-extension-tester": "^8.1",
 		"xterm-addon-fit": "^0.8.0",
 		"xterm-addon-web-links": "^0.9.0",

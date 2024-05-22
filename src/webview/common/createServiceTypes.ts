@@ -121,7 +121,7 @@ export type Selector = {
 
 export type Port = {
     name: string;
-    port: number;
+    port: string;
     protocol: string;
     targetPort: string;
 };

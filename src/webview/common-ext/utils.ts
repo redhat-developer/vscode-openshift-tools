@@ -129,3 +129,10 @@ export function validateName(value: string): string | null {
     if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
     return validationMessage;
 }
+
+export function validatePath(value: string): string | null {
+    return NameValidator.validatePath(
+        'Given path is not valid',
+        value,
+    );
+}

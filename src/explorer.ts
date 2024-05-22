@@ -400,6 +400,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'pods'
                 },
             } as OpenShiftObject;
+            const routes = {
+                kind: 'routes',
+                metadata: {
+                    name: 'routes'
+                },
+            } as OpenShiftObject;
             const statefulSets = {
                 kind: 'statefulsets',
                 metadata: {
@@ -442,7 +448,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'build configs'
                 },
             } as OpenShiftObject;
-            result.push(pods,
+            result.push(pods, routes,
                 statefulSets, daemonSets, jobs, cronJobs);
             if (isOpenshiftCluster) {
                 result.push(deploymentConfigs, imageStreams, buildConfigs);

@@ -8,8 +8,9 @@ import * as vscode from 'vscode';
 import { OpenShiftExplorer } from '../../explorer';
 import { Oc } from '../../oc/ocWrapper';
 import { ExtensionID } from '../../util/constants';
-import { loadWebviewHtml, validateName, validateURL } from '../common-ext/utils';
+import { loadWebviewHtml, validateName, validatePath, validateURL } from '../common-ext/utils';
 import { getServices as getService } from '../../openshift/serviceHelpers';
+import type { CreateRoute } from '../common/route';
 
 export default class CreateRouteViewLoader {
     private static panel: vscode.WebviewPanel;
@@ -113,8 +114,14 @@ export default class CreateRouteViewLoader {
             }
             case 'create': {
                 try {
-                    await Oc.Instance.createKubernetesObjectFromSpec(message.data);
-                    void vscode.window.showInformationMessage(`Service ${(message.data as unknown as any).metadata.name} successfully created.` );
+                    const route: CreateRoute = message.data as CreateRoute;
+                    const port = {
+                        name: route.port.name,
+                        number: route.port.number,
+                        protocol: route.port.protocal
+                    }
+                    await Oc.Instance.createRoute(route.routeName, route.serviceName, route.hostname, route.path, port, route.isSecured);
+                    void vscode.window.showInformationMessage(`Route ${route.routeName}} successfully created.`);
                     CreateRouteViewLoader.panel.dispose();
                     CreateRouteViewLoader.panel = undefined;
                     OpenShiftExplorer.getInstance().refresh();
@@ -139,13 +146,47 @@ export default class CreateRouteViewLoader {
                 });
                 break;
             }
-            case 'validateHostName': {
+            case 'validateHost': {
+                if (message.data.toString().trim() === '') {
+                    void CreateRouteViewLoader.panel.webview.postMessage({
+                        action: 'validateHost',
+                        data: {
+                            error: false,
+                            helpText: '',
+                            name: message.data.toString()
+                        }
+                    });
+                    break;
+                }
                 const flag = validateURL(message, false);
                 void CreateRouteViewLoader.panel.webview.postMessage({
-                    action: 'validateHostName',
+                    action: 'validateHost',
                     data: {
                         error: !flag.error ? false : true,
                         helpText: flag.helpText,
+                        name: message.data.toString()
+                    }
+                });
+                break;
+            }
+            case 'validatePath': {
+                if (message.data.toString().trim() === '') {
+                    void CreateRouteViewLoader.panel.webview.postMessage({
+                        action: 'validatePath',
+                        data: {
+                            error: false,
+                            helpText: '',
+                            name: message.data.toString()
+                        }
+                    });
+                    break;
+                }
+                const flag = validatePath(message.data.toString());
+                void CreateRouteViewLoader.panel.webview.postMessage({
+                    action: 'validatePath',
+                    data: {
+                        error: !flag ? false : true,
+                        helpText: !flag ? '' : flag,
                         name: message.data.toString()
                     }
                 });
