@@ -49,8 +49,6 @@ jobs:
           run: npm run test
       - name: Package
         run: |
-          jq --tab '.extensionDependencies += [ "ms-kubernetes-tools.vscode-kubernetes-tools" ]' package.json  > package.json.new
-          mv package.json.new package.json
           node ./out/build/update-readme.js
           declare -A targets
           targets["win32-x64"]=win32

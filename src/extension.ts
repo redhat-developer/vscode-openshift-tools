@@ -36,6 +36,7 @@ import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 
 import fsx = require('fs-extra');
 import { Oc } from './oc/ocWrapper';
+import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -76,6 +77,12 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
 
+    // Temporarily loaded resource providers
+    const resourceDocProvider = new KubernetesResourceVirtualFileSystemProvider();
+
+    // Link from resources to referenced resources
+    // const resourceLinkProvider = new KubernetesResourceLinkProvider();
+
     // pick kube config in case multiple are configured
     await setKubeConfig();
 
@@ -105,9 +112,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             './feedback',
             './deployment'
         )),
-        commands.registerCommand('clusters.openshift.useProject', (context) =>
-            commands.executeCommand('extension.vsKubernetesUseNamespace', context),
-        ),
         crcStatusItem,
         activeNamespaceStatusBarItem,
         activeContextStatusBarItem,
@@ -120,6 +124,13 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         setupWorkspaceDevfileContext(),
         window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
         ...registerYamlHandlers(),
+        // Temporarily loaded resource providers
+        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME, resourceDocProvider, { /* TODO: case sensitive? */ }),
+        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
+
+        // Link from resources to referenced resources
+        // languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
+
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));
 

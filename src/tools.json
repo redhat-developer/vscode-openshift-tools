@@ -46,39 +46,39 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.15.9",
-        "versionRange": "^4.15.9",
-        "versionRangeLabel": "version >= 4.15.9 and < 5.0.0",
+        "version": "4.15.12",
+        "versionRange": "^4.15.12",
+        "versionRangeLabel": "version >= 4.15.12 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.9/openshift-client-windows-4.15.9.zip",
-                "sha256sum": "276b3eb443a45ed1de69d607407426066f7076ae2ffe8ab365852ef963c89cc5",
-                "dlFileName": "openshift-client-windows-4.15.9.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.12/openshift-client-windows-4.15.12.zip",
+                "sha256sum": "a6fac03ada27188403285e4f24c5913e1476c12cfb7e873b9dbb70cc9316861e",
+                "dlFileName": "openshift-client-windows-4.15.12.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.9/openshift-client-mac-4.15.9.tar.gz",
-                "sha256sum": "1ffb0c629fc29ad053731e469fe4e61d6380307857c9f787170e3c5758bc0c94",
-                "dlFileName": "openshift-client-mac-4.15.9.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.12/openshift-client-mac-4.15.12.tar.gz",
+                "sha256sum": "47156497b4432b6f31db3d6a9df387652df18a2a558667077d4f0266fbeb9702",
+                "dlFileName": "openshift-client-mac-4.15.12.tar.gz",
                 "cmdFileName": "oc"
             },
             "darwin-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.9/openshift-client-mac-arm64-4.15.9.tar.gz",
-                "sha256sum": "9fa2fcf515cc72ff533597f458798407cbe2f288662ca6029bf5f014656e5239",
-                "dlFileName": "openshift-client-mac-arm64-4.15.9.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.12/openshift-client-mac-arm64-4.15.12.tar.gz",
+                "sha256sum": "123946d192b14bcbc5594e13703159c9de12336bff1a8a70e7b6a508d9febde0",
+                "dlFileName": "openshift-client-mac-arm64-4.15.12.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.9/openshift-client-linux-4.15.9.tar.gz",
-                "sha256sum": "5e8c0f976700deb7c328bdccedfd9333a74d293aafcebce1855ecced993685be",
-                "dlFileName": "openshift-client-linux-4.15.9.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.12/openshift-client-linux-4.15.12.tar.gz",
+                "sha256sum": "6922454b653876e02acb8c404904594ec6ef8a62706c03ba9b8f5ccc78a0fa35",
+                "dlFileName": "openshift-client-linux-4.15.12.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.9/openshift-client-linux-arm64-4.15.9.tar.gz",
-                "sha256sum": "991092f1fee841b2cb15e2121cfc1367451030b175fa14a2db7d2ab9549c1377",
-                "dlFileName": "openshift-client-linux-arm64-4.15.9.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.12/openshift-client-linux-arm64-4.15.12.tar.gz",
+                "sha256sum": "fc04b83ac87a2f0136b6759c321096f1401cfb7e9e99b912a08bb5ec5f1d45ce",
+                "dlFileName": "openshift-client-linux-arm64-4.15.12.tar.gz",
                 "cmdFileName": "oc"
             }
         }
@@ -87,40 +87,40 @@
         "description": "Function CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "func",
-        "version": "1.12.2",
-        "versionRange": "^1.12.2",
-        "versionRangeLabel": "version >= 1.12.2",
+        "version": "1.14.0",
+        "versionRange": "^1.14.0",
+        "versionRangeLabel": "version >= 1.14.0",
         "dlFileName": "func",
         "cmdFileName": "func",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.12.2/func_windows_amd64.exe",
-                "sha256sum": "db8532bc1d727a264b1ff213dee0189d4960ee5442a980f6b279c4e9e984d3da",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.14.0/func_windows_amd64.exe",
+                "sha256sum": "23031685a21bfaa08af476359335e60101b6aa3f2ce816920500223370c09d05",
                 "dlFileName": "func_windows_amd64.exe",
                 "cmdFileName": "func.exe"
             },
             "darwin": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.12.2/func_darwin_amd64",
-                "sha256sum": "391bb1a87d6494cb6b639e76e663b16aa918a58f55402b2b7299e278504b2c67",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.14.0/func_darwin_amd64",
+                "sha256sum": "bd68e6c409e1c1f7df36ecd34e5045fb7cfb952e32b7233bc19c7db640651aef",
                 "dlFileName": "func_darwin_amd64",
                 "cmdFileName": "func"
             },
             "darwin-arm64": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.12.2/func_darwin_arm64",
-                "sha256sum": "f29c2017a3fb739dd7f942d71458898b1a8c8946f57e03043ef4fc8f25f2be23",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.14.0/func_darwin_arm64",
+                "sha256sum": "5c6afbc75df69518b2a8fc438991c18fd4f0b0bc22e0d0da8fb26cb9495b8da5",
                 "dlFileName": "func_darwin_arm64",
                 "cmdFileName": "func"
             },
             "linux": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.12.2/func_linux_amd64",
-                "sha256sum": "2892d1f85030e6ed90333b7b8c8262bafa1d0c371d8cecae27dd503106356f28",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.14.0/func_linux_amd64",
+                "sha256sum": "286b7a22ffd196ef113dd08f29859d2b8e2ac1eed06115947824d5a6236b7674",
                 "dlFileName": "func_linux_amd64",
                 "cmdFileName": "func"
             },
             "linux-arm64": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.12.2/func_linux_arm64",
-                "sha256sum": "f555cdffcad59db0d5542b7f1fcc7ac3a3a3db4d0d402a83807ecf988261cd19",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.14.0/func_linux_arm64",
+                "sha256sum": "f3afd2875af9e61d161b3b12f58fb061508c6c3bd2abb6600855dabba28e6424",
                 "dlFileName": "func_linux_arm64",
                 "cmdFileName": "func"
             }
@@ -172,7 +172,7 @@
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
         "name": "crc",
-        "crcVersion": "2.34.1",
-        "openshiftVersion": "4.15.3"
+        "crcVersion": "2.36.0",
+        "openshiftVersion": "4.15.12"
     }
 }

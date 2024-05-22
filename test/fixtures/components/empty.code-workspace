@@ -1,3 +1,6 @@
 {
 	"folders": [],
+	"settings": {
+		"openshiftToolkit.execMaxBufferLength": 2
+	},
 }

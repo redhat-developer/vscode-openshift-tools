@@ -11,6 +11,7 @@ import { checkExtension } from './suite/extension';
 import { checkFocusOnCommands } from './suite/focusOn';
 import { checkOpenshiftView } from './suite/openshift';
 import { testCreateServerlessFunction } from './suite/serverlessFunction';
+import { testAddCluster } from './suite/addCluster';
 
 require('source-map-support').install();
 
@@ -19,6 +20,7 @@ describe('Extension public-facing UI tests', function() {
 
     checkExtension();
     checkOpenshiftView();
+    testAddCluster();
     checkAboutCommand();
     testDevfileRegistries();
     checkFocusOnCommands();

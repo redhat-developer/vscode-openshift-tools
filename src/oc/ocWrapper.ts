@@ -202,6 +202,25 @@ export class Oc {
     }
 
     /**
+     * Returns true if the current user is authorized to list namespaces on the cluster, and false otherwise.
+     *
+     * @returns true if the current user is authorized to list namespaces on the cluster, and false otherwise
+     */
+    public async canListNamespaces(): Promise<boolean> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'auth can-i list projects'),
+            );
+            if (result.stdout === 'yes') {
+                return true;
+            }
+        } catch {
+            //ignore
+        }
+        return false;
+    }
+
+    /**
      * Returns true if the current user is authorized to delete a namespace on the cluster, and false otherwise.
      *
      * @param namespace the namespace to be deleted (defaults to the current namespace if none is provided)
@@ -536,8 +555,9 @@ export class Oc {
         }
     }
 
-    public async getProjects(): Promise<Project[]> {
-        return this._listProjects();
+    public async getProjects(onlyFromCluster: boolean = false): Promise<Project[]> {
+        return this._listProjects()
+            .then((projects) => onlyFromCluster ? projects : this.fixActiveProject(projects));
     }
 
     /**
@@ -546,51 +566,103 @@ export class Oc {
      * @returns the active project or null if no project is active
      */
     public async getActiveProject(): Promise<string> {
-        const projects = await this._listProjects();
-        if (!projects.length) {
-            return null;
-        }
-        let activeProject = projects.find((project) => project.active);
-        if (activeProject) return activeProject.name;
+        return this._listProjects()
+            .then((projects) => {
+                const fixedProjects = this.fixActiveProject(projects);
+                const activeProject = fixedProjects.find((project) => project.active);
+                return activeProject ? activeProject.name : null;
+            });
+    }
 
-        // If not found - use Kube Config current context or 'default'
+    /**
+     * Fixes the projects array by marking up an active project (if not set)
+     * by the following rules:
+     * - If there is only one single project - mark it as active
+     * - If there is already at least one project marked as active - return the projects "as is"
+     * - If Kube Config's current context has a namespace set - find an according project
+     *   and mark it as active
+     * - [fixup for Sandbox cluster] Get Kube Configs's curernt username and try finding a project,
+     *   which name is partially created from that username - if found, treat it as an active project
+     * - Try a 'default' as a project name, if found - use it as an active project name
+     * - Use first project as active
+     *
+     * @returns The array of Projects with at least one project marked as an active
+     */
+    public fixActiveProject(projects: Project[]): Project[] {
         const kcu = new KubeConfigUtils();
         const currentContext = kcu.findContext(kcu.currentContext);
+
+        let fixedProjects = projects.length ? projects : [];
+        let activeProject = undefined;
+
         if (currentContext) {
-            const active = currentContext.namespace || 'default';
-            activeProject = projects.find((project) => project.name ===active);
+            // Try Kube Config current context to find existing active project
+            if (currentContext.namespace) {
+                activeProject = fixedProjects.find((project) => project.name === currentContext.namespace);
+                if (activeProject) {
+                    activeProject.active = true;
+                    return fixedProjects;
+                }
+            }
+
+            // [fixup for Sandbox cluster] Get Kube Configs's curernt username and try finding a project,
+            // which name is partially created from that username
+            const currentUser = kcu.getCurrentUser();
+            if (currentUser) {
+                const projectPrefix = currentUser.name.substring(0, currentUser.name.indexOf('/'));
+                if (projectPrefix.length > 0) {
+                    activeProject = fixedProjects.find((project) => project.name.includes(projectPrefix));
+                    if (activeProject) {
+                        activeProject.active = true;
+                        void Oc.Instance.setProject(activeProject.name);
+                        return fixedProjects;
+                    }
+                }
+            }
+
+            // Add Kube Config current context to the proect list for cases where
+            // projects/namespaces cannot be listed due to the cluster config restrictions
+            // (such a project/namespace can be set active manually)
+            if (currentContext.namespace) {
+                fixedProjects = [
+                    {
+                        name: currentContext.namespace,
+                        active: true
+                    },
+                    ...projects
+                ]
+                void Oc.Instance.setProject(currentContext.namespace);
+                return fixedProjects;
+            }
         }
-        return activeProject ? activeProject.name : null;
+
+        // Try a 'default' as a project name, if found - use it as an active project name
+        activeProject = fixedProjects.find((project) => project.name === 'default');
+        if (activeProject) {
+            activeProject.active = true;
+            return fixedProjects;
+        }
+
+        // Set the first available project as active
+        if (fixedProjects.length > 0) {
+            fixedProjects[0].active = true;
+            void Oc.Instance.setProject(fixedProjects[0].name);
+        }
+
+        return fixedProjects;
     }
 
     private async _listProjects(): Promise<Project[]> {
-        const onlyOneProject = 'you have one project on this server:';
         const namespaces: Project[] = [];
         return await CliChannel.getInstance().executeTool(
-                new CommandText('oc', 'projects')
+                new CommandText('oc', 'projects -q')
             )
             .then( (result) => {
                 const lines = result.stdout && result.stdout.split(/\r?\n/g);
                 for (let line of lines) {
                     line = line.trim();
                     if (line === '') continue;
-                    if (line.toLocaleLowerCase().startsWith(onlyOneProject)) {
-                        const matches = line.match(/You\shave\sone\sproject\son\sthis\sserver:\s"([a-zA-Z0-9]+[a-zA-Z0-9.-]*)"./);
-                        if (matches) {
-                            namespaces.push({name: matches[1], active: true});
-                            break; // No more projects are to be listed
-                        }
-                    } else {
-                        const words: string[] = line.split(' ');
-                        if (words.length > 0 && words.length <= 2) {
-                            // The list of projects may have eithe 1 (project name) or 2 words
-                            // (an asterisk char, indicating that the project is active, and project name).
-                            // Otherwise, it's either a header or a footer text
-                            const active = words.length === 2 && words[0].trim() === '*';
-                            const projectName = words[words.length - 1] // The last word of array
-                            namespaces.push( {name: projectName, active });
-                        }
-                    }
+                    namespaces.push( {name: line, active: false });
                 }
                 return namespaces;
             })
