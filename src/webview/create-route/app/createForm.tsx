@@ -28,7 +28,6 @@ import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { createVSCodeTheme } from '../../common/vscode-theme';
 import { ErrorPage } from '../../common/errorPage';
 
-
 /**
  * Component to select which type of service (which CRD) should be created.
  */
@@ -259,30 +258,34 @@ export function CreateService() {
                     setServiceKinds((_) => message.data);
                     setPage((_) => 'PickServiceKind');
                     break;
-                case 'validateRouteName':
-                    const routeData = JSON.parse(message.data);
+                case 'validateRouteName': {
+                    const routeData: RouteInputBoxText = JSON.parse(message.data) as unknown as RouteInputBoxText;
                     setRouteNameObj({
                         name: routeData.name,
                         error: routeData.error,
                         helpText: routeData.helpText !== '' ? routeData.helpText : routeNameObj.helpText
                     });
                     break;
-                case 'validateHost':
-                    const hostData = JSON.parse(message.data);
+
+                }
+                case 'validateHost': {
+                    const hostData: RouteInputBoxText = JSON.parse(message.data) as unknown as RouteInputBoxText;
                     setHostNameObj({
                         name: hostData.name,
                         error: hostData.error,
                         helpText: hostData.helpText !== '' ? hostData.helpText : hostNameObj.helpText
                     });
                     break;
-                case 'validatePath':
-                    const PathData = JSON.parse(message.data);
+                }
+                case 'validatePath': {
+                    const PathData: RouteInputBoxText = JSON.parse(message.data) as unknown as RouteInputBoxText;
                     setPathObj({
                         name: PathData.name,
                         error: PathData.error,
                         helpText: PathData.helpText
                     });
                     break;
+                }
                 case 'error':
                     setError(() => message.data)
                     setPage(() => 'Error');

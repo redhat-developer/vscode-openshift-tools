@@ -133,25 +133,25 @@ export default class CreateRouteViewLoader {
                 break;
             }
             case 'validateRouteName': {
-                const flag = validateName(message.data.toString());
+                const flag = validateName(JSON.stringify(message.data));
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validateRouteName',
                     data: JSON.stringify({
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag,
-                        name: message.data.toString()
+                        name: message.data
                     })
                 });
                 break;
             }
             case 'validateHost': {
-                if (message.data.toString().trim() === '') {
+                if (JSON.stringify(message.data).trim() === '') {
                     void CreateRouteViewLoader.panel.webview.postMessage({
                         action: 'validateHost',
                         data: JSON.stringify({
                             error: false,
                             helpText: '',
-                            name: message.data.toString()
+                            name: message.data
                         })
                     });
                     break;
@@ -162,30 +162,30 @@ export default class CreateRouteViewLoader {
                     data: JSON.stringify({
                         error: !flag.error ? false : true,
                         helpText: flag.helpText,
-                        name: message.data.toString()
+                        name: message.data
                     })
                 });
                 break;
             }
             case 'validatePath': {
-                if (message.data.toString().trim() === '') {
+                if (JSON.stringify(message.data).trim() === '') {
                     void CreateRouteViewLoader.panel.webview.postMessage({
                         action: 'validatePath',
                         data: JSON.stringify({
                             error: false,
                             helpText: '',
-                            name: message.data.toString()
+                            name: message.data
                         })
                     });
                     break;
                 }
-                const flag = validatePath(message.data.toString());
+                const flag = validatePath(JSON.stringify(message.data));
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validatePath',
                     data: JSON.stringify({
                         error: !flag ? false : true,
                         helpText: !flag ? '' : flag,
-                        name: message.data.toString()
+                        name: message.data
                     })
                 });
                 break;
@@ -195,9 +195,3 @@ export default class CreateRouteViewLoader {
         }
     }
 }
-
-
-
-
-
-

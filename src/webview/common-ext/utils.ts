@@ -119,11 +119,11 @@ export function validateGitURL(event: Message): validateURLProps {
 }
 
 export function validateName(value: string): string | null {
-    let validationMessage = NameValidator.emptyName('Required', value.trim());
+    let validationMessage = NameValidator.emptyName('Required', JSON.parse(value) as unknown as string);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
             'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets',
-            value,
+            JSON.parse(value) as unknown as string
         );
     }
     if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
@@ -133,6 +133,6 @@ export function validateName(value: string): string | null {
 export function validatePath(value: string): string | null {
     return NameValidator.validatePath(
         'Given path is not valid',
-        value,
+        JSON.parse(value) as unknown as string
     );
 }
