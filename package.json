@@ -72,7 +72,7 @@
 	},
 	"dependencies": {
 		"@kubernetes/client-node": "^0.21.0",
-		"@redhat-developer/vscode-redhat-telemetry": "^0.7.1",
+		"@redhat-developer/vscode-redhat-telemetry": "^0.8.0",
 		"clsx": "^2.1.1",
 		"dockerode": "^4.0.2",
 		"fs-extra": "^11.2.0",
