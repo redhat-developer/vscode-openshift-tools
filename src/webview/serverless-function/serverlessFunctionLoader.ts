@@ -3,23 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import * as cp from 'child_process';
-import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { Odo } from '../../odo/odoWrapper';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
-
-import { InvokeFunction } from '../../serverlessFunction/types';
+import sendTelemetry from '../../telemetry';
 import { CliExitData } from '../../util/childProcessUtil';
-import { ExtensionID } from '../../util/constants';
 import { Platform } from '../../util/platform';
 import { Progress } from '../../util/progress';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { VsCommandError } from '../../vscommand';
-import { loadWebviewHtml, validateName } from '../common-ext/utils';
-import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
+import { getExtensionPath, loadWebviewHtml, validateName } from '../common-ext/utils';
 
 export interface ServiceBindingFormResponse {
     selectedService: string;
@@ -44,187 +40,32 @@ async function getTemplates(): Promise<any[]> {
     return JSON.parse(result.stdout) as any[];
 }
 
-async function invoke(functionName: string, invokeFunData: InvokeFunction): Promise<void> {
-    await OpenShiftTerminalManager.getInstance().createTerminal(
-         ServerlessCommand.invokeFunction(invokeFunData),
-         `Invoke: ${functionName}`,
-         undefined, undefined, {
-             onExit: undefined
-         }, true
-     );
- }
-
-async function messageListener(panel: vscode.WebviewPanel, event: any): Promise<any> {
-    let response: CliExitData;
-    const eventName = event.action;
-    const functionName = event.name;
-    const functionPath: vscode.Uri = event.folderPath;
-    switch (eventName) {
-        case 'validateName': {
-            const flag = validateName(functionName);
-            const defaultImages = !flag
-                ? getDefaultImages(functionName)
-                : [];
-            void panel?.webview.postMessage({
-                action: eventName,
-                error: !flag ? false : true,
-                helpText: !flag ? '' : flag,
-                name: functionName,
-                images: defaultImages,
-            });
-            break;
-        }
-        case 'selectFile': {
-            const options: vscode.OpenDialogOptions = {
-                canSelectMany: false,
-                openLabel: 'Select',
-                canSelectFiles: true,
-                canSelectFolders: false,
-            };
-            const file = await vscode.window.showOpenDialog(options);
-            if (file && file[0]) {
-                void panel?.webview.postMessage({
-                    action: eventName,
-                    filePath: file[0].fsPath,
-                });
-            }
-            break;
-        }
-        case 'selectFolder': {
-            const workspaceFolderItems = event.noWSFolder
-                ? await selectWorkspaceFolder(true, 'Select Function Folder', functionName)
-                : selectWorkspaceFolders();
-            void panel?.webview.postMessage({
-                action: eventName,
-                wsFolderItems: event.noWSFolder ? [workspaceFolderItems] : workspaceFolderItems,
-            });
-            break;
-        }
-        case 'createFunction': {
-            const selctedFolder: vscode.Uri = vscode.Uri.file(
-                path.join(functionPath.fsPath, functionName),
-            );
-            await Progress.execFunctionWithProgress(
-                `Creating function '${functionName}'`,
-                async () => {
-                    response = await ServerlessFunctionViewLoader.createFunction(event.language, event.template, selctedFolder.fsPath, event.selectedImage);
-                });
-            if (response && response.error) {
-                void vscode.window.showErrorMessage(
-                    `Error while creating the function ${functionName}`,
-                );
-            } else {
-                const addedWSPath = vscode.Uri.from(selctedFolder);
-                const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
-                if (!wsFolder) {
-                    void vscode.window.showInformationMessage(
-                        'The Created function was added into workspace',
-                    );
-                    vscode.workspace.updateWorkspaceFolders(
-                        vscode.workspace.workspaceFolders
-                            ? vscode.workspace.workspaceFolders.length
-                            : 0,
-                        null,
-                        { uri: addedWSPath },
-                    );
-                }
-                panel.dispose();
-                await vscode.commands.executeCommand('openshift.Serverless.refresh');
-            }
-            break;
-        }
-        case 'invokeFunction': {
-            const invokeFunData: InvokeFunction = {
-                instance: event.instance,
-                id: event.id,
-                path: event.path,
-                contentType: event.contentType,
-                format: event.format,
-                source: event.source,
-                type: event.type,
-                data: event.data,
-                file: event.file,
-                enableURL: event.enableURL,
-                invokeURL: event.invokeURL,
-            };
-            await invoke(functionName, invokeFunData);
-            panel.dispose();
-            break;
-        }
-        default:
-            break;
-    }
-}
-
 export default class ServerlessFunctionViewLoader {
+    private static panel: vscode.WebviewPanel = undefined;
 
-    public static invokePanelMap: Map<string, vscode.WebviewPanel> = new Map<string, vscode.WebviewPanel>();
-
-    private static get extensionPath(): string {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath;
-    }
+    private static templates: any[] = undefined;
 
     /**
      * Returns the webview as a promise.
      *
      * @returns the webview as a promise
      */
-    static async loadView(
-        title: string,
-        invoke = false,
-        status?: string,
-        folderURI?: vscode.Uri,
-        url?: string
-    ): Promise<vscode.WebviewPanel | null> {
-        if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
-            const panel = ServerlessFunctionViewLoader.invokePanelMap.get(title);
-            panel.reveal(vscode.ViewColumn.One);
-            return null;
+    static async loadView(title: string): Promise<vscode.WebviewPanel> {
+        if (this.panel) {
+            this.panel.reveal(vscode.ViewColumn.One);
+            return this.panel;
         }
-        const templates = await getTemplates();
-        if (invoke) {
-            const panel = await this.createView(title);
-            const getEnvFuncId = crypto.randomUUID();
-            ServerlessFunctionViewLoader.invokePanelMap.set(title, panel);
-            const yamlContent = await Utils.getFuncYamlContent(folderURI.fsPath);
-            let template: string, runtime: string, basicTemplates: string[] = ['cloudevent', 'http'];
-            if (yamlContent) {
-                template = yamlContent.invoke;
-                runtime = yamlContent.runtime;
-                basicTemplates = template ? templates[runtime] : basicTemplates;
-            }
-            void panel.webview.postMessage({
-                action: 'invoke',
-                instance: status,
-                name: title.substring(0, title.indexOf('-')).trim(),
-                id: getEnvFuncId,
-                uri: folderURI,
-                runtime,
-                template,
-                basicTemplates,
-                url
-            });
-            return panel;
-        } else if (!invoke) {
-            const panel = await this.createView(title);
-            void panel.webview.postMessage({
-                action: 'create',
-                basicTemplates: templates
-            });
-            return panel;
-        }
-        return null;
+        ServerlessFunctionViewLoader.templates = await getTemplates();
+        this.panel = await this.createView(title);
+        return this.panel;
     }
 
-    private static async createView(
-        title: string
-    ): Promise<vscode.WebviewPanel> {
-
+    private static async createView(title: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(
-            path.join(ServerlessFunctionViewLoader.extensionPath, 'out', 'serverless-function', 'app'),
+            path.join(getExtensionPath(), 'out', 'serverless-function', 'app'),
         );
 
-        let panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
+        const panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
             'serverlessFunctionView',
             title,
             vscode.ViewColumn.One,
@@ -236,23 +77,119 @@ export default class ServerlessFunctionViewLoader {
         );
 
         panel.iconPath = vscode.Uri.file(
-            path.join(ServerlessFunctionViewLoader.extensionPath, 'images/context/cluster-node.png'),
+            path.join(getExtensionPath(), 'images/context/cluster-node.png'),
         );
-        panel.webview.html = await loadWebviewHtml(
-            'serverless-function',
-            panel,
+        panel.webview.html = await loadWebviewHtml('serverless-function', panel);
+        const messageDisposable = panel.webview.onDidReceiveMessage((e) =>
+            ServerlessFunctionViewLoader.messageListener(panel, e),
         );
-        panel.webview.onDidReceiveMessage((e) => messageListener(panel, e));
 
         panel.onDidDispose(() => {
-            if (ServerlessFunctionViewLoader.invokePanelMap.has(title)) {
-                ServerlessFunctionViewLoader.invokePanelMap.delete(title);
-            }
-            panel = undefined;
+            messageDisposable.dispose();
+            this.panel = undefined;
         });
 
         return Promise.resolve(panel);
     }
+
+    static messageListener = async (panel: vscode.WebviewPanel, event: any): Promise<any> => {
+        let response: CliExitData;
+        const eventName = event.action;
+        const functionName = event.name;
+        const functionPath: vscode.Uri = event.folderPath;
+        switch (eventName) {
+            case 'init': {
+                void panel.webview.postMessage({
+                    action: 'create',
+                    basicTemplates: ServerlessFunctionViewLoader.templates,
+                });
+                break;
+            }
+            case 'validateName': {
+                const flag = validateName(functionName);
+                const defaultImages = !flag ? getDefaultImages(functionName) : [];
+                void panel?.webview.postMessage({
+                    action: eventName,
+                    error: !flag ? false : true,
+                    helpText: !flag ? '' : flag,
+                    name: functionName,
+                    images: defaultImages,
+                });
+                break;
+            }
+            case 'selectFile': {
+                const options: vscode.OpenDialogOptions = {
+                    canSelectMany: false,
+                    openLabel: 'Select',
+                    canSelectFiles: true,
+                    canSelectFolders: false,
+                };
+                const file = await vscode.window.showOpenDialog(options);
+                if (file && file[0]) {
+                    void panel?.webview.postMessage({
+                        action: eventName,
+                        filePath: file[0].fsPath,
+                    });
+                }
+                break;
+            }
+            case 'selectFolder': {
+                const workspaceFolderItems = event.noWSFolder
+                    ? await selectWorkspaceFolder(true, 'Select Function Folder', functionName)
+                    : selectWorkspaceFolders();
+                void panel?.webview.postMessage({
+                    action: eventName,
+                    wsFolderItems: event.noWSFolder ? [workspaceFolderItems] : workspaceFolderItems,
+                });
+                break;
+            }
+            case 'createFunction': {
+                const selctedFolder: vscode.Uri = vscode.Uri.file(
+                    path.join(functionPath.fsPath, functionName),
+                );
+                await Progress.execFunctionWithProgress(
+                    `Creating function '${functionName}'`,
+                    async () => {
+                        response = await ServerlessFunctionViewLoader.createFunction(
+                            event.language,
+                            event.template,
+                            selctedFolder.fsPath,
+                            event.selectedImage,
+                        );
+                    },
+                );
+                if (response && response.error) {
+                    void vscode.window.showErrorMessage(
+                        `Error while creating the function ${functionName}`,
+                    );
+                } else {
+                    const addedWSPath = vscode.Uri.from(selctedFolder);
+                    const wsFolder = vscode.workspace.getWorkspaceFolder(addedWSPath);
+                    if (!wsFolder) {
+                        void vscode.window.showInformationMessage(
+                            'The Created function was added into workspace',
+                        );
+                        vscode.workspace.updateWorkspaceFolders(
+                            vscode.workspace.workspaceFolders
+                                ? vscode.workspace.workspaceFolders.length
+                                : 0,
+                            null,
+                            { uri: addedWSPath },
+                        );
+                    }
+                    panel.dispose();
+                    await vscode.commands.executeCommand('openshift.Serverless.refresh');
+                }
+                break;
+            }
+            case 'sendTelemetry': {
+                void sendTelemetry(event.data.actionName, event.data.properties);
+                break;
+            }
+            default:
+                break;
+        }
+    };
 
     static async createFunction(
         language: string,

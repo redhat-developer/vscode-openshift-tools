@@ -4,14 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as React from 'react';
 import { Uri } from 'vscode';
-import { VSCodeMessage } from './vsCodeMessage';
 import { DefaultProps } from '../../common/propertyTypes';
 import { CreateFunction } from './createFunction';
-import { InvokeFunction } from './invokeFunction';
 import './home.scss';
 
 export class ServerlessFunction extends React.Component<DefaultProps, {
-    invoke: boolean,
     name: string,
     id: any,
     folderURI: Uri,
@@ -25,7 +22,6 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     constructor(props: DefaultProps | Readonly<DefaultProps>) {
         super(props);
         this.state = {
-            invoke: false,
             name: '',
             id: undefined,
             folderURI: undefined,
@@ -38,30 +34,24 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
     }
 
     componentDidMount(): void {
-        VSCodeMessage.onMessage((message) => {
-            if (message.data.action === 'invoke') {
-                this.setState({
-                    invoke: true,
-                    name: message.data.name,
-                    id: message.data.id,
-                    folderURI: message.data.uri,
-                    instance: message.data.instance,
-                    invokeURL: message.data.url,
-                    runtime: message.data.runtime,
-                    template: message.data.template,
-                    basicTemplates: message.data.basicTemplates
-                })
-            } else if (message.data.action === 'create') {
-                this.setState({
-                    invoke: false,
-                    basicTemplates: message.data.basicTemplates
-                })
-            }
-        });
+        window.addEventListener('message', this.handleMessage);
+        window.vscodeApi.postMessage({ action: 'init' });
+    }
+
+    componentWillUnmount(): void {
+        window.removeEventListener('message', this.handleMessage);
+    }
+
+    handleMessage = (message) => {
+        if (message.data.action === 'create') {
+            this.setState({
+                basicTemplates: message.data.basicTemplates
+            })
+        }
     }
 
     handleCreateSubmit = (name: string, language: string, template: string, location: Uri, image: string): void => {
-        VSCodeMessage.postMessage({
+        window.vscodeApi.postMessage({
             action: 'createFunction',
             name,
             folderPath: location,
@@ -73,7 +63,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
 
     handleInvokeSubmit = (name: string, instance: string, id: string, path: string, contentType: string, format: string, source: string,
         type: string, data: string, file: string, enableUrl: boolean, invokeURL: string): void => {
-        VSCodeMessage.postMessage({
+            window.vscodeApi.postMessage({
             action: 'invokeFunction',
             name,
             instance,
@@ -92,12 +82,7 @@ export class ServerlessFunction extends React.Component<DefaultProps, {
 
     render(): React.ReactNode {
         return (
-            this.state.invoke ?
-                <InvokeFunction instance={this.state.instance} uri={this.state.folderURI} name={this.state.name}
-                    invokeURL={this.state.invokeURL} id={this.state.id}
-                    template={this.state.template} basicTemplates={this.state.basicTemplates} onInvokeSubmit={this.handleInvokeSubmit} />
-                :
-                <CreateFunction onCreateSubmit={this.handleCreateSubmit} basicTemplates={this.state.basicTemplates} />
+            <CreateFunction onCreateSubmit={this.handleCreateSubmit} basicTemplates={this.state.basicTemplates} />
         )
     }
 }
