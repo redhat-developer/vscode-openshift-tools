@@ -187,6 +187,8 @@ export default class HelmChartLoader {
                 url = url.concat('index.yaml');
                 void HelmChartLoader.fetchURL(helmRepo, url);
             });
+        } else {
+            void vscode.window.showErrorMessage(`Helm Charts Loading Error: ${cliData.error?.message ? cliData.error.message : ''} ${cliData.stderr ? cliData.stderr : ''}`)
         }
     }
 
