@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { OpenShiftExplorer } from '../../explorer';
 import { Oc } from '../../oc/ocWrapper';
 import { ExtensionID } from '../../util/constants';
-import { loadWebviewHtml, validateName, validatePath, validateURL } from '../common-ext/utils';
+import { loadWebviewHtml, validateJSONValue, validatePath, validateURL } from '../common-ext/utils';
 import { getServices as getService } from '../../openshift/serviceHelpers';
 import type { CreateRoute } from '../common/route';
 
@@ -139,7 +139,7 @@ export default class CreateRouteViewLoader {
                 break;
             }
             case 'validateRouteName': {
-                const flag = validateName(JSON.stringify(message.data));
+                const flag = validateJSONValue(JSON.stringify(message.data));
                 void CreateRouteViewLoader.panel.webview.postMessage({
                     action: 'validateRouteName',
                     data: JSON.stringify({

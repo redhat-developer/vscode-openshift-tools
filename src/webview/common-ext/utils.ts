@@ -119,6 +119,17 @@ export function validateGitURL(event: Message): validateURLProps {
 }
 
 export function validateName(value: string): string | null {
+    let validationMessage = NameValidator.emptyName('Required', value);
+    if (!validationMessage) {
+        validationMessage = NameValidator.validateMatches(
+            'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets', value
+        );
+    }
+    if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
+    return validationMessage;
+}
+
+export function validateJSONValue(value: string): string | null {
     let validationMessage = NameValidator.emptyName('Required', JSON.parse(value) as unknown as string);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
