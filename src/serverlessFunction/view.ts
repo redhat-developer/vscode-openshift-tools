@@ -21,6 +21,7 @@ import {
     workspace
 } from 'vscode';
 import { vsCommand } from '../vscommand';
+import { InvokeServerlessFunctionViewLoader } from '../webview/invoke-serverless-function/invokeServerlessFunctionLoader';
 import ServerlessFunctionViewLoader from '../webview/serverless-function/serverlessFunctionLoader';
 import ManageRepositoryViewLoader from '../webview/serverless-manage-repository/manageRepositoryLoader';
 import { ServerlessFunctionModel } from './functionModel';
@@ -222,7 +223,7 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
 
     @vsCommand('openshift.Serverless.invoke')
     static async invokeFunction(context: FunctionObject) {
-        await ServerlessFunctionViewLoader.loadView(`${context.name} - Invoke`, true, context.context, context.folderURI, context.url);
+        await InvokeServerlessFunctionViewLoader.loadView(`${context.name} - Invoke`, context.context, context.folderURI, context.url);
     }
 
     @vsCommand('openshift.Serverless.openFunction')

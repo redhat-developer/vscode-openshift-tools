@@ -16,7 +16,6 @@ import SpringBootIcon from '../../../../images/serverlessfunctions/spring boot.s
 import TypeScriptIcon from '../../../../images/serverlessfunctions/typescript.svg';
 import { CreateFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
-import { VSCodeMessage } from './vsCodeMessage';
 
 export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     functionData: {
@@ -59,51 +58,57 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
             wsFolderPath: undefined,
             showLoadScreen: false
         }
-        VSCodeMessage.postMessage({
+        void window.vscodeApi.postMessage({
             action: 'selectFolder'
         });
     }
 
     validateName = (value: string): void => {
-        VSCodeMessage.postMessage({
+        void window.vscodeApi.postMessage({
             action: 'validateName',
             name: value
         })
     }
 
     componentDidMount(): void {
-        VSCodeMessage.onMessage((message) => {
-            if (message.data.action === 'validateName') {
-                this.setState({
-                    functionData: {
-                        name: message.data.name,
-                        error: message.data.error,
-                        helpText: message.data.helpText,
-                    },
-                    imageData: {
-                        name: '',
-                        error: false,
-                        helpText: ''
-                    },
-                    images: message.data.images
-                });
-            } else if (message.data.action === 'selectFolder') {
-                if (message.data.wsFolderItems === null || message.data.wsFolderItems[0] === null) {
-                    VSCodeMessage.postMessage('close');
-                } else {
-                    if (message.data.wsFolderItems.length > 0) {
-                        this.setState({ wsFolderPath: message.data.wsFolderItems[0] });
-                    }
-                    this.setState({
-                        wsFolderItems: message.data.wsFolderItems
-                    });
+        window.addEventListener('message', this.messageHandler);
+    }
+
+    componentWillUnmount(): void {
+        window.removeEventListener('message', this.messageHandler);
+    }
+
+    messageHandler = (message): void => {
+        if (message.data.action === 'validateName') {
+            this.setState({
+                functionData: {
+                    name: message.data.name,
+                    error: message.data.error,
+                    helpText: message.data.helpText,
+                },
+                imageData: {
+                    name: '',
+                    error: false,
+                    helpText: ''
+                },
+                images: message.data.images
+            });
+        } else if (message.data.action === 'selectFolder') {
+            if (message.data.wsFolderItems === null || message.data.wsFolderItems[0] === null) {
+                void window.vscodeApi.postMessage({action: 'close'});
+            } else {
+                if (message.data.wsFolderItems.length > 0) {
+                    this.setState({ wsFolderPath: message.data.wsFolderItems[0] });
                 }
+                this.setState({
+                    wsFolderItems: message.data.wsFolderItems
+                });
             }
-        });
+        }
     }
 
     selectFolder = (): void => {
-        VSCodeMessage.postMessage({
+        void window.vscodeApi.postMessage({
             action: 'selectFolder',
             noWSFolder: true,
             name: this.state.functionData.name
@@ -112,7 +117,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
     handleWsFolderDropDownChange = (_e: any, value: Uri | string): void => {
         if (typeof value === 'string' && value === 'New Folder') {
-            VSCodeMessage.postMessage({
+            void window.vscodeApi.postMessage({
                 action: 'selectFolder',
                 noWSFolder: true
             });
@@ -130,7 +135,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
     handleDropDownChange = (_event: any, value: string, isLang = false): void => {
         if (isLang) {
             this.setState({
-                templates: this.props.basicTemplates[this.convert(value)]
+                templates: this.props.basicTemplates[this.convert(value)] || []
             });
             this.setState({
                 language: value,
@@ -338,7 +343,7 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     value={template}
                                     id='template-dropdown'
                                     options={templates}
-                                    disabled={language?.length === 0}
+                                    disabled={language?.length === 0 || (templates && templates.length === 0)}
                                     onChange={(e, v) => this.handleDropDownChange(e, v)}
                                     PaperComponent={({ children }) => (
                                         <Paper sx={{

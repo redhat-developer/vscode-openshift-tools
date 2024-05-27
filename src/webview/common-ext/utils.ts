@@ -147,3 +147,7 @@ export function validatePath(value: string): string | null {
         JSON.parse(value) as unknown as string
     );
 }
+
+export function getExtensionPath(): string {
+    return extensions.getExtension(ExtensionID).extensionPath;
+}
