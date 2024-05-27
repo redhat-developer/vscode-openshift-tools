@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
 import { ChartResponse, HelmRepo } from '../../../helm/helmChartType';
@@ -163,6 +163,7 @@ function SearchBar(props: {
 
 export function HelmSearch() {
     const ITEMS_PER_PAGE = 18;
+    const [isSomeHelmChartsRetrieved, setSomeHelmChartsRetrieved] = React.useState(false);
     const [helmRepos, setHelmRepos] = React.useState<HelmRepo[]>([]);
     const [helmCharts, sethelmCharts] = React.useState<ChartResponse[]>([]);
     const [helmChartEnabled, setHelmChartEnabled] = React.useState<
@@ -196,6 +197,7 @@ export function HelmSearch() {
             case 'getHelmCharts': {
                 sethelmCharts((_helmCharts) => message.data.helmCharts as ChartResponse[]);
                 VSCodeMessage.postMessage({ action: 'getProviderTypes' });
+                setSomeHelmChartsRetrieved(_unused => true);
                 break;
             }
             default:
@@ -277,7 +279,7 @@ export function HelmSearch() {
         <>
             <Stack direction='column' height='100%' spacing={0.5}>
                 {
-                    helmCharts.length === 0 ?
+                    !isSomeHelmChartsRetrieved ?
                         <LoadScreen title='Retrieving Helm Charts' /> :
                         <Stack direction="row" spacing={1} width={'100%'}>
                             {
@@ -328,8 +330,11 @@ export function HelmSearch() {
                                         (getFilteredCharts().length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)}
                                     perPageCount={ITEMS_PER_PAGE}
                                     chartsLength={getFilteredCharts().length} />
-                                {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
-                                {/* 5em is the padding at the top of the page */}
+                                {helmRepos.length === 0 ?
+                                    <Stack direction='row' justifyContent='center' alignItems='center' paddingTop='2rem'>
+                                        <Alert severity='info'>No Helm repos are configured. Please configure a Helm repo to view its charts.</Alert>
+                                    </Stack>
+                                    :
                                 <Stack
                                     id='devfileList'
                                     direction='column'
@@ -353,7 +358,7 @@ export function HelmSearch() {
                                                     }} />
                                             );
                                         })}
-                                </Stack>
+                                </Stack>}
                             </Stack>
                         </Stack>
                 }
