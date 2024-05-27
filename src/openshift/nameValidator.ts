@@ -22,6 +22,11 @@ export function validateMatches(message: string, value: string): string | null {
     return validator.matches(value, '^[a-z]([-a-z0-9]*[a-z0-9])*$') ? null : message;
 }
 
+export function validatePath(message: string, value: string): string | null {
+    const pathRegx = value.match(/^(\/{1}(?!\/))[A-Za-z0-9/\-_]*(([a-zA-Z]+))?$/);
+    return pathRegx ? null : message;
+}
+
 export function validateFilePath(message: string, value: string): string | null {
     const proposedPath = path.parse(value);
     return /^devfile\.ya?ml$/i.test(proposedPath.base) ? null : message;

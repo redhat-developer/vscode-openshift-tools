@@ -352,4 +352,9 @@ export type CapabilityProps<C extends SpecCapability | StatusCapability> = {
   value: any;
 };
 
+export type Service = {
+    apiVersion: string;
+    items: K8sResourceKind[];
+}
+
 export type Error = { message: string };

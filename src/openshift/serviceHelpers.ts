@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { K8sResourceKind } from '../k8s/olm/types';
 import { Oc } from '../oc/ocWrapper';
 import {
     ClusterServiceVersion,
@@ -20,4 +21,10 @@ export async function getServiceKindStubs(): Promise<CustomResourceDefinitionStu
         }
         return serviceKinds;
     });
+}
+
+export async function getServices(): Promise<K8sResourceKind[]> {
+    return (await Oc.Instance.getKubernetesObjects(
+        'service'
+    )) as unknown as K8sResourceKind[];
 }

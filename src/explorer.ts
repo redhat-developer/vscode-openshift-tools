@@ -27,7 +27,7 @@ import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
-import { getServiceKindStubs } from './openshift/serviceHelpers';
+import { getServiceKindStubs, getServices } from './openshift/serviceHelpers';
 import { PortForward } from './port-forward';
 import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind } from './util/kubeUtils';
 import { LoginUtil } from './util/loginUtil';
@@ -35,7 +35,7 @@ import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
-import { CustomResourceDefinitionStub } from './webview/common/createServiceTypes';
+import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.virtualfs';
 
@@ -355,6 +355,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 // operator framework is not installed on cluster; do nothing
             }
             void commands.executeCommand('setContext', 'showCreateService', serviceKinds.length > 0);
+
+            // The 'Create Route' menu visibility
+            let services: K8sResourceKind[] = [];
+            try {
+                services = await getServices();
+            }
+            catch (_) {
+                // operator framework is not installed on cluster; do nothing
+            }
+            void commands.executeCommand('setContext', 'showCreateRoute', services.length > 0);
         } else if ('kind' in element && element.kind === 'helmContexts') {
             const helmRepos = {
                 kind: 'helmRepos',
@@ -411,6 +421,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'pods'
                 },
             } as OpenShiftObject;
+            const routes = {
+                kind: 'routes',
+                metadata: {
+                    name: 'routes'
+                },
+            } as OpenShiftObject;
             const statefulSets = {
                 kind: 'statefulsets',
                 metadata: {
@@ -456,7 +472,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             result.push(pods,
                 statefulSets, daemonSets, jobs, cronJobs);
             if (isOpenshiftCluster) {
-                result.push(deploymentConfigs, imageStreams, buildConfigs);
+                result.push(deploymentConfigs, imageStreams, buildConfigs, routes);
             }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();

@@ -31,6 +31,7 @@
         "test-resources",
         "src/webview/cluster/app",
         "src/webview/create-service/app",
+        "src/webview/create-route/app",
         "src/webview/create-component/app",
         "src/webview/create-component/pages",
         "src/webview/devfile-registry/app",

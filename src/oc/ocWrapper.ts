@@ -12,6 +12,7 @@ import { KubeConfigUtils } from '../util/kubeUtils';
 import { Platform } from '../util/platform';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
+import validator from 'validator';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -504,6 +505,38 @@ export class Oc {
                 await this.setProject(projectName);
                 return result.stdout;
             });
+    }
+
+    public async createRoute(routeName: string, serviceName: string, hostName: string, path: string, port: { number: string, name: string, protocol: string, targetPort: string },
+        isSecured: boolean): Promise<string> {
+        let cmdText: CommandText;
+        if (isSecured) {
+
+            cmdText = new CommandText('oc', `create route edge ${routeName}`, [
+                new CommandOption('--service', serviceName),
+                new CommandOption('--port', port.number),
+            ]);
+
+        } else {
+            cmdText = new CommandText('oc', `expose service ${serviceName.trim()}`, [
+                new CommandOption('--name', routeName),
+                new CommandOption('--port', port.number),
+                new CommandOption('--target-port', port.targetPort),
+                new CommandOption('--protocol', port.protocol)
+            ]);
+        }
+
+        if (!validator.isEmpty(hostName)) {
+            cmdText.addOption(new CommandOption('--hostname', hostName));
+        }
+
+        if (!validator.isEmpty(path)) {
+            cmdText.addOption(new CommandOption('--path', path));
+        }
+        return await CliChannel.getInstance().executeTool(
+            cmdText
+        )
+            .then((result) => result.stdout);
     }
 
     /**

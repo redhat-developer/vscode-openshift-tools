@@ -61,8 +61,8 @@ function isGitURL(host: string): boolean {
     ].includes(host);
 }
 
-export function validateURL(event: Message): validateURLProps {
-    if (typeof event.data === 'string' && (event.data).trim().length === 0) {
+export function validateURL(event: Message | { command: string; data: object }, isRequired = true): validateURLProps {
+    if (isRequired && typeof event.data === 'string' && (event.data).trim().length === 0) {
         return {
             url: event.data,
             error: true,
@@ -78,7 +78,7 @@ export function validateURL(event: Message): validateURLProps {
     return {
         url: event.data,
         error: false,
-        helpText: 'URL is valid'
+        helpText: !isRequired ? '' : 'URL is valid'
     } as validateURLProps
 }
 
@@ -119,13 +119,31 @@ export function validateGitURL(event: Message): validateURLProps {
 }
 
 export function validateName(value: string): string | null {
-    let validationMessage = NameValidator.emptyName('Required', value.trim());
+    let validationMessage = NameValidator.emptyName('Required', value);
     if (!validationMessage) {
         validationMessage = NameValidator.validateMatches(
-            'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets',
-            value,
+            'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets', value
         );
     }
     if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', value, 0); }
     return validationMessage;
+}
+
+export function validateJSONValue(value: string): string | null {
+    let validationMessage = NameValidator.emptyName('Required', JSON.parse(value) as unknown as string);
+    if (!validationMessage) {
+        validationMessage = NameValidator.validateMatches(
+            'Only lower case alphabets and numeric characters or \'-\', start and ends with only alphabets',
+            JSON.parse(value) as unknown as string
+        );
+    }
+    if (!validationMessage) { validationMessage = NameValidator.lengthName('Should be between 2-63 characters', JSON.parse(value) as unknown as string, 0); }
+    return validationMessage;
+}
+
+export function validatePath(value: string): string | null {
+    return NameValidator.validatePath(
+        'Given path is not valid',
+        JSON.parse(value) as unknown as string
+    );
 }
