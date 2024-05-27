@@ -5,7 +5,6 @@
 
 import * as path from 'path';
 import validator from 'validator';
-import validPath = require('valid-path');
 
 export function emptyName(message: string, value: string): string | null {
     return validator.isEmpty(value) ? message : null;
@@ -24,7 +23,8 @@ export function validateMatches(message: string, value: string): string | null {
 }
 
 export function validatePath(message: string, value: string): string | null {
-    return validPath(value).valid ? null : message;
+    const pathRegx = value.match(/^(\/{1}(?!\/))[A-Za-z0-9/\-_]*(([a-zA-Z]+))?$/);
+    return pathRegx ? null : message;
 }
 
 export function validateFilePath(message: string, value: string): string | null {

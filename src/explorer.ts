@@ -469,10 +469,10 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'build configs'
                 },
             } as OpenShiftObject;
-            result.push(pods, routes,
+            result.push(pods,
                 statefulSets, daemonSets, jobs, cronJobs);
             if (isOpenshiftCluster) {
-                result.push(deploymentConfigs, imageStreams, buildConfigs);
+                result.push(deploymentConfigs, imageStreams, buildConfigs, routes);
             }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
