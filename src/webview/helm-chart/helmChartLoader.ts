@@ -77,7 +77,8 @@ function helmChartMessageListener(event: any): void {
             void panel.webview.postMessage({
                 action: 'setTheme',
                 themeValue: vscode.window.activeColorTheme.kind,
-            })
+            });
+            void HelmChartLoader.getHelmCharts();
             break;
         case 'install': {
             void vscode.commands.executeCommand('openshift.helm.install', event);
@@ -159,7 +160,6 @@ export default class HelmChartLoader {
                 panel = undefined;
             });
         }
-        await HelmChartLoader.getHelmCharts();
         return panel;
     }
 
@@ -181,33 +181,37 @@ export default class HelmChartLoader {
                     }
                 }
             );
-            helmRepos.forEach((helmRepo: HelmRepo) => {
+            await Promise.all(helmRepos.map((helmRepo: HelmRepo) => {
                 let url = helmRepo.url;
                 url = url.endsWith('/') ? url : url.concat('/');
                 url = url.concat('index.yaml');
-                void HelmChartLoader.fetchURL(helmRepo, url);
-            });
+                return HelmChartLoader.fetchURL(helmRepo, url);
+            }));
+            void panel?.webview.postMessage(
+                {
+                    action: 'getHelmCharts',
+                    data: {
+                        helmCharts
+                    }
+                }
+            );
         }
     }
 
     private static async fetchURL(repo: HelmRepo, url: string) {
-        const signupResponse = await fetch(url, {
-            method: 'GET'
-        });
-        const yamlResponse = JSYAML.load(await signupResponse.text()) as any;
+        const helmRepoContent = await fetch(url);
+        const yamlResponse = JSYAML.load(await helmRepoContent.text()) as {
+            entries: { [key: string]: Chart[] };
+        };
         const entries = yamlResponse.entries;
         Object.keys(entries).forEach((key) => {
             const res: ChartResponse = {
-                repoName: '',
-                repoURL: '',
-                chartName: '',
-                chartVersions: [],
+                repoName: repo.name,
+                repoURL: repo.url,
+                chartName: key,
+                chartVersions: entries[key].sort(HelmChartLoader.descOrder),
                 displayName: ''
             };
-            res.repoName = repo.name;
-            res.repoURL = repo.url;
-            res.chartName = key;
-            res.chartVersions = entries[key].sort(HelmChartLoader.descOrder);
             res.displayName = res.chartVersions[0].annotations ? res.chartVersions[0].annotations['charts.openshift.io/name'] : res.chartVersions[0].name;
             helmCharts.push(res);
         });
@@ -222,8 +226,8 @@ export default class HelmChartLoader {
     }
 
     private static descOrder(oldChart: Chart, newChart: Chart): number {
-    const oldVersion = parseInt(oldChart.version, 10);
-    const newVersion = parseInt(newChart.version, 10);
-    return newVersion - oldVersion;
-}
+        const oldVersion = parseInt(oldChart.version, 10);
+        const newVersion = parseInt(newChart.version, 10);
+        return newVersion - oldVersion;
+    }
 }
