@@ -1027,7 +1027,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static validateLoginToken(token: string): boolean {
-        const sha256Regex = new RegExp('^sha256~([A-Za-z0-9_]+)');
+        const sha256Regex = /^sha256~([A-Za-z0-9_-]+)$/;
         return sha256Regex.test(token);
     }
 
