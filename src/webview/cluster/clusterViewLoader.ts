@@ -117,7 +117,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     if (signupStatus.status.ready) {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
                         let errCode = '';
-                        if (!Cluster.validateLoginToken(await vscode.env.clipboard.readText())) {
+                        if (!Cluster.validateLoginToken((await vscode.env.clipboard.readText()).trim())) {
                             errCode = 'invalidToken';
                         }
                         await panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
