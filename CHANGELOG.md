@@ -1,5 +1,21 @@
 # Change Log
 
+## 1.14.0 (May 29, 2024)
+
+ * [#3906](https://github.com/redhat-developer/vscode-openshift-tools/issues/3906) Add a new UI for showing, adding, and removing port forwards.
+ * [#4086](https://github.com/redhat-developer/vscode-openshift-tools/issues/4086) Create a webview for creating routes from the extension.
+ * [#3849](https://github.com/redhat-developer/vscode-openshift-tools/issues/3849) Add progress indicator for Login, Switch context, and Change project actions.
+ * [#4109](https://github.com/redhat-developer/vscode-openshift-tools/pull/4109) Fix login to sandbox workflow.
+ * [#4101](https://github.com/redhat-developer/vscode-openshift-tools/issues/4101) Project not listed if it has a display name annotation.
+ * [#4092](https://github.com/redhat-developer/vscode-openshift-tools/issues/4092) Trying to create a serverless function using the Spring Boot template causes the webview to fail.
+ * [#4083](https://github.com/redhat-developer/vscode-openshift-tools/issues/4083) Helm charts may not load on Linux under certain conditions.
+ * [#3999](https://github.com/redhat-developer/vscode-openshift-tools/issues/3999) Support projects/namespaces on clusters where the listing of projects is restricted.
+ * [#3990](https://github.com/redhat-developer/vscode-openshift-tools/issues/3990) Remove dependence on VS Code Kubernetes extension and use 'oc' binary instead of relying on 'kubectl' binary provided by VS Code Kubernetes.
+ * [#3987](https://github.com/redhat-developer/vscode-openshift-tools/issues/3987) Prevent App. Explorer from hanging on extension loading if logged out from a cluster.
+ * [#3971](https://github.com/redhat-developer/vscode-openshift-tools/issues/3971) Fix bug where re-logging in does not ask for username and password under certain conditions.
+ * [#3925](https://github.com/redhat-developer/vscode-openshift-tools/issues/3925), [#4064](https://github.com/redhat-developer/vscode-openshift-tools/pull/4064)  Fixed 'stdout maxBuffer length exceeded' error, a proposal message is added to change the maximum buffer size of standard output in case of 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' error appearance.
+ * [#3845](https://github.com/redhat-developer/vscode-openshift-tools/issues/3845) Fix bug where opening deployment logs would fail if you switched projects while they loaded.
+
 ## 1.13.0 (April 10, 2024)
 
  * [#4045](https://github.com/redhat-developer/vscode-openshift-tools/issues/4045) Bump minimum memory for CRC to 10752 MB
