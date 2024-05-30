@@ -324,8 +324,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     inCrashLoopBackOff = inCrashLoopBackOff || reason === 'CrashLoopBackOff';
 
                     const msg = `${reason}: ${message ? message.trim(): 'No valuable message'}`;
-                    // Skip duplicates and show not more than 10 errors
-                    if (messages.length <= 10 && !(messages.find((m) => m === msg))) {
+                    // Skip duplicated messages
+                    if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${reason}:`)))) {
                         messages.push(msg);
                     }
                 }
@@ -344,8 +344,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             .forEach((c) => {
                 const message = `${c.reason}: ${c.message ? c.message.trim(): 'No valuable message'}`;
 
-                // Skip duplicates and show not more than 10 errors
-                if (messages.length <= 10 && !(messages.find((m) => m === message))) {
+                // Skip duplicated messages
+                if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${c.reason}:`)))) {
                     messages.push(message);
                 }
             });
