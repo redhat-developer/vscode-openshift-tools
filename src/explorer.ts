@@ -708,7 +708,9 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
      */
     loadKubernetesCore(namespace: string | null, value: string) {
         const outputFormat = getOutputFormat();
-        const uri = kubefsUri(namespace, value, outputFormat);
+        // Names are to be only lowercase,
+        // see: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+        const uri = kubefsUri(namespace, value.toLocaleLowerCase(), outputFormat, undefined, true);
         this.loadKubernetesDocument(uri);
     }
 
@@ -718,7 +720,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
      * @param revision Installed Helm Chart revision
      */
     loadKubernetesHelmChart(releaseName: string, revision: number | undefined) {
-        const uri = helmfsUri(releaseName, revision);
+        const uri = helmfsUri(releaseName, revision, true);
         this.loadKubernetesDocument(uri);
     }
 
@@ -727,38 +729,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
      * @param uri A Kubernetes document Uri
      */
     loadKubernetesDocument(uri: Uri) {
-        const query = this.getComparableQuery(uri);
-        const openUri = workspace.textDocuments.map((doc) => doc.uri)
-            .find((docUri) => {
-                return (docUri.scheme === uri.scheme &&
-                    docUri.authority === uri.authority &&
-                    docUri.fragment === uri.fragment &&
-                    docUri.path === uri.path &&
-                    this.getComparableQuery(docUri) === query);
-            });
-
-        // If open document is found for the URI provided, we use its URI to bring its editor to the front
-        // instead of openning a new editor
-        workspace.openTextDocument(openUri ? openUri : uri).then(
+        workspace.openTextDocument(uri).then(
             (doc) => {
                 if (doc) {
                     void window.showTextDocument(doc);
                 }
             },
             (err) => window.showErrorMessage(`Error loading document: ${err}`));
-    }
-
-    /*
-     * Returns the query string of the specified Uri without "nonce" param,
-     * so the query strings can be compared.
-     * The "nonce" param is generated as current time value for every KubefsUri created,
-     * f.i., "_=1709642987392", and are always added to the end of the query string (so
-     * they always have the preceeding query parameters sepacator character ("&") added),
-     * so the query strings, if they aren't cleared from "nonce" param, can be compared for
-     * Uri objects even when they point to the same document.
-     */
-    getComparableQuery(uri: Uri): string {
-        return uri.query.replace(/&_=[0-9]+/g, '');
     }
 
     @vsCommand('openshift.resource.delete')

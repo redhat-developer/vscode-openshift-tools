@@ -6,7 +6,7 @@
 import * as path from 'path';
 import {
     authentication,
-    commands, env, ExtensionContext, QuickPickItemKind,
+    commands, env, ExtensionContext, languages, QuickPickItemKind,
     StatusBarAlignment,
     StatusBarItem, window,
     workspace
@@ -37,6 +37,7 @@ import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 import fsx = require('fs-extra');
 import { Oc } from './oc/ocWrapper';
 import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
+import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -81,7 +82,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     const resourceDocProvider = new KubernetesResourceVirtualFileSystemProvider();
 
     // Link from resources to referenced resources
-    // const resourceLinkProvider = new KubernetesResourceLinkProvider();
+    const resourceLinkProvider = new KubernetesResourceLinkProvider();
 
     // pick kube config in case multiple are configured
     await setKubeConfig();
@@ -129,7 +130,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
 
         // Link from resources to referenced resources
-        // languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
+        languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
 
     ];
     disposable.forEach((value) => extensionContext.subscriptions.push(value));

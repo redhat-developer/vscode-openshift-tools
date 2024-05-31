@@ -26,24 +26,41 @@ export const HELM_RESOURCE_AUTHORITY = 'helmget';
 export const OUTPUT_FORMAT_YAML = 'yaml'    // Default
 export const OUTPUT_FORMAT_JSON = 'json'
 
-export function kubefsUri(namespace: string | null | undefined /* TODO: rationalise null and undefined */, value: string, outputFormat: string, action?: string): Uri {
+export function findOpenEditor(uri: Uri) {
+    const uriWithoutNonce = uri.toString(true).replace(/&_=[0-9]+/g, '');
+    return vscode.workspace.textDocuments.map((doc) => doc.uri)
+        .find((docUri) => docUri.toString(true).replace(/&_=[0-9]+/g, '') === uriWithoutNonce);
+}
+
+export function kubefsUri(namespace: string | null | undefined /* TODO: rationalise null and undefined */,
+        value: string, outputFormat: string, action?: string, dedupe?: boolean): Uri {
     const docname = `${value.replace('/', '-')}${outputFormat !== '' ? `.${outputFormat}` : ''}`;
     const nonce = new Date().getTime();
     const nsquery = namespace ? `ns=${namespace}&` : '';
     const scheme = action === 'describe' ? K8S_RESOURCE_SCHEME_READONLY : K8S_RESOURCE_SCHEME;
     const authority = action === 'describe' ? KUBECTL_DESCRIBE_AUTHORITY : KUBECTL_RESOURCE_AUTHORITY;
     const uri = `${scheme}://${authority}/${docname}?${nsquery}value=${value}&_=${nonce}`;
-    return Uri.parse(uri);
+    const newUri = Uri.parse(uri);
+    if (!dedupe) {
+        return newUri;
+    }
+    const editedUri = findOpenEditor(newUri);
+    return editedUri ? editedUri : newUri;
 }
 
-export function helmfsUri(releaseName: string, revision: number | undefined): vscode.Uri {
+export function helmfsUri(releaseName: string, revision: number | undefined, dedupe?: boolean): vscode.Uri {
     const revisionSuffix = revision ? `-${revision}` : '';
     const revisionQuery = revision ? `&revision=${revision}` : '';
 
     const docname = `helmrelease-${releaseName}${revisionSuffix}.txt`;
     const nonce = new Date().getTime();
     const uri = `${K8S_RESOURCE_SCHEME}://${HELM_RESOURCE_AUTHORITY}/${docname}?value=${releaseName}${revisionQuery}&_=${nonce}`;
-    return vscode.Uri.parse(uri);
+    const newUri = Uri.parse(uri);
+    if (!dedupe) {
+        return newUri;
+    }
+    const editedUri = findOpenEditor(newUri);
+    return editedUri ? editedUri : newUri;
 }
 
 /**
