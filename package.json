@@ -81,9 +81,11 @@
 		"hasha": "^5.2.2",
 		"js-yaml": "^4.1.0",
 		"json-schema": "^0.4.0",
+		"json-to-ast": "^2.1.0",
 		"lodash": "^4.17.21",
 		"make-fetch-happen": "^13.0.1",
 		"mkdirp": "^3.0.1",
+		"node-yaml-parser": "^0.0.9",
 		"portfinder": "^1.0.32",
 		"rxjs": "^7.8.1",
 		"semver": "^7.6.2",
@@ -137,6 +139,7 @@
 		"bootstrap": "^5.3.3",
 		"chai": "^4.4.1",
 		"chokidar": "^3.6.0",
+		"clipboardy": "^2.3.0",
 		"codecov": "^3.8.2",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.19.12",
@@ -180,8 +183,7 @@
 		"vscode-extension-tester": "^8.1",
 		"xterm-addon-fit": "^0.8.0",
 		"xterm-addon-web-links": "^0.9.0",
-		"xterm-addon-webgl": "^0.16.0",
-		"clipboardy": "^2.3.0"
+		"xterm-addon-webgl": "^0.16.0"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
