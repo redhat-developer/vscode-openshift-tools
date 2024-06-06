@@ -66,6 +66,9 @@ suite('./odo/odoWrapper.ts', function () {
                 'component1',
                 tmpFolder1,
                 'nodejs-starter',
+                false,
+                '',
+                '2.2.0' // A workaround for odo v.3.15.0 not supporting schema v.>2.2.0
             );
             await Odo.Instance.createComponentFromFolder(
                 'go',
@@ -258,6 +261,9 @@ suite('./odo/odoWrapper.ts', function () {
                 'component1',
                 Uri.parse(componentFolder),
                 'nodejs-starter',
+                false,
+                '',
+                '2.2.0' // A workaround for odo v.3.15.0 not supporting schema v.>2.2.0
             );
         });
 

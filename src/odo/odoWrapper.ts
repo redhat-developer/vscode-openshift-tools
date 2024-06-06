@@ -109,6 +109,7 @@ export class Odo {
         starter: string = undefined,
         useExistingDevfile = false,
         customDevfilePath = '',
+        devfileVersion?: string
     ): Promise<void> {
         await this.execute(
             Command.createLocalComponent(
@@ -119,6 +120,7 @@ export class Odo {
                 starter,
                 useExistingDevfile,
                 customDevfilePath,
+                devfileVersion
             ),
             location.fsPath,
         );
