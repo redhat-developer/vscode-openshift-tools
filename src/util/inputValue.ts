@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { InputBox, QuickInputButton, QuickInputButtons, ThemeIcon, window } from 'vscode';
+import { env, InputBox, QuickInputButton, QuickInputButtons, ThemeIcon, window } from 'vscode';
 
 export class quickBtn implements QuickInputButton {
     constructor(public iconPath: ThemeIcon, public tooltip: string) { }
@@ -31,11 +31,34 @@ export function inputValue(prompt: string, initialValue: string, password: boole
         if (placeHolder) input.placeholder = placeHolder;
         const enterBtn = new quickBtn(new ThemeIcon('check'), 'Enter');
         const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
-        input.buttons = [QuickInputButtons.Back, enterBtn, cancelBtn];
+        const pasteBtn = new quickBtn(new ThemeIcon('output'), 'Paste from Clipboard');
+        const hideBtn = new quickBtn(new ThemeIcon('eye'), 'Hide value');
+        const showBtn = new quickBtn(new ThemeIcon('eye-closed'), 'Show value');
+        let isHidden = password;
+        const updateButtons = (() => {
+            const buttons = [];
+            if (password) {
+                buttons.push(isHidden ? showBtn : hideBtn);
+            }
+            buttons.push(pasteBtn, QuickInputButtons.Back, enterBtn, cancelBtn);
+            input.buttons = buttons;
+        });
+        updateButtons();
         const validationMessage: string = validate(input.value? input.value : '');
         const resolveAndClose = ((result) => {
             input.dispose();
             resolve(result);
+        });
+        const pasteFromClipboard = (async () => {
+            try {
+                const clipboard = (await env.clipboard.readText()).trim();
+                if (clipboard.length > 0) {
+                    input.value = clipboard;
+                    input.validationMessage = validate(clipboard);
+                }
+            } catch (ignore) {
+                // Do nothing
+            }
         });
         input.ignoreFocusOut = true;
         if (validationMessage) {
@@ -67,6 +90,13 @@ export function inputValue(prompt: string, initialValue: string, password: boole
         })
         input.onDidTriggerButton(async (event) => {
             if (event === QuickInputButtons.Back) resolveAndClose(undefined);
+            else if (event === showBtn) {
+                input.password = isHidden = !isHidden;
+                updateButtons();
+            } else if (event === hideBtn) {
+                input.password = isHidden = !isHidden;
+                updateButtons();
+            } else if (event === pasteBtn) await pasteFromClipboard();
             else if (event === cancelBtn) resolveAndClose(null);
             else if (event === enterBtn) await acceptInput();
         });
