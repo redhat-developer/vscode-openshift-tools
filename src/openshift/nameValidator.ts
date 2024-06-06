@@ -36,6 +36,10 @@ export function validateRFC1123DNSLabel(message: string, value: string): string 
   return validator.matches(value, '^[a-z0-9]([-a-z0-9]*[a-z0-9])*$') ? null : message;
 }
 
+export function validateLoginToken(message: string, value: string): string | null {
+    return validator.matches(value, '^sha256~([A-Za-z0-9_-]+)$') ? null : message
+}
+
 export function clusterURL(value: string): string | null {
     const urlRegex = value.match(/--server=(https?:\/\/[^ ]*)/);
     return urlRegex ? urlRegex[1] : null;

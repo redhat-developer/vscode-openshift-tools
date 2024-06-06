@@ -935,13 +935,11 @@ export class Cluster extends OpenShiftItem {
     }
 
     static async readFromClipboard(): Promise<string> {
-        let r = '';
         try {
-            r = await env.clipboard.readText();
+            return await env.clipboard.readText();
         } catch (ignore) {
-            // ignore exceptions and return empty string
+            return '';
         }
-        return r;
     }
 
     static async getUrlFromClipboard(): Promise<string | null> {
@@ -952,6 +950,11 @@ export class Cluster extends OpenShiftItem {
         return null;
     }
 
+    static async getTokenFromClipboard(): Promise<string> {
+        const clipboard = (await Cluster.readFromClipboard()).trim();
+        return Cluster.validateLoginToken(clipboard) ? clipboard : '';
+    }
+
     @vsCommand('openshift.explorer.login.tokenLogin')
     static async tokenLogin(
         userClusterUrl: string,
@@ -959,34 +962,23 @@ export class Cluster extends OpenShiftItem {
         userToken?: string,
         abortController?: AbortController
     ): Promise<string | null> {
-        let token: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
         if (response !== 'Yes') return null;
 
         let clusterURL = userClusterUrl;
-        let clusterUrlFromClipboard: string;
-
-        if (!clusterURL) {
-            clusterUrlFromClipboard = await Cluster.getUrlFromClipboard();
-        }
-
-        if (
-            (!clusterURL && clusterUrlFromClipboard) ||
-            clusterURL?.trim() === clusterUrlFromClipboard
-        ) {
-            token = NameValidator.getToken(await Cluster.readFromClipboard());
-            clusterURL = clusterUrlFromClipboard;
-        }
 
         if (!clusterURL) {
             clusterURL = await Cluster.getUrl(abortController);
         }
 
+        if (!clusterURL) return null;
+
         let ocToken: string;
         if (!userToken) {
             const prompt = 'Provide Bearer token for authentication to the API server';
-            const validateInput = (value: string) => NameValidator.emptyName('Bearer token cannot be empty', value ? value : '');
+            const validateInput = (value: string) => NameValidator.validateLoginToken('Bearer token should be a valid "sha256" token', value ? value : '');
+            const token = await Cluster.getTokenFromClipboard();
             ocToken = await inputValue(prompt, token ? token : '', true, validateInput,
                 `Provide Bearer token for: ${clusterURL}`, abortController);
             if (ocToken === null) {
@@ -1027,8 +1019,7 @@ export class Cluster extends OpenShiftItem {
     }
 
     static validateLoginToken(token: string): boolean {
-        const sha256Regex = /^sha256~([A-Za-z0-9_-]+)$/;
-        return sha256Regex.test(token);
+        return NameValidator.validateLoginToken('Error', token) === null;
     }
 
     @vsCommand('openshift.explorer.login.clipboard')
