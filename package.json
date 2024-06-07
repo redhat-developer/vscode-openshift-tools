@@ -180,7 +180,7 @@
 		"survey-core": "^1.10.3",
 		"survey-react-ui": "^1.11.1",
 		"typescript": "^5.4.5",
-		"vscode-extension-tester": "^8.1",
+		"vscode-extension-tester": "^8.2",
 		"xterm-addon-fit": "^0.8.0",
 		"xterm-addon-web-links": "^0.9.0",
 		"xterm-addon-webgl": "^0.16.0"
