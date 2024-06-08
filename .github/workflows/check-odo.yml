@@ -4,42 +4,111 @@ on:
   schedule:
     - cron: "0 8 * * *"
   workflow_dispatch:
+env:
+  TOOL_REPO: redhat-developer/odo
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  check-odo-repo:
+  check-odo:
     runs-on: ubuntu-latest
-    env:
-        TOOL_REPO: redhat-developer/odo
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      last-commit-id: ${{ steps.repo-last-commit-info.outputs.repo-last-commit-id }}
+      last-release-tag: ${{ steps.repo-last-commit-info.outputs.repo-last-release-tag }}
+      last-release-version: ${{ steps.repo-last-commit-info.outputs.repo-last-release-version }}
+      nightly-build-version: ${{ steps.repo-last-commit-info.outputs.repo-nightly-build-version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: '${{ env.TOOL_REPO }}'
+          fetch-depth: 2
+          fetch-tags: false
+          path: redhat-developer-odo-repository
+      - name: Get Last Commit Info
+        id: repo-last-commit-info
+        run: |
+          pushd redhat-developer-odo-repository
+
+          # Last Commit ID (short or abbreviated to 9 characters version)
+          lastCommitId="$(git describe --no-match --always --abbrev=9 --dirty --broken 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)"
+          echo "repo-last-commit-id=$lastCommitId" >> $GITHUB_OUTPUT
+
+          # Last Release Tag and Version
+          lastReleaseTag=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName | jq -r .tagName)
+          lastReleaseVersion="$(echo $lastReleaseTag | sed 's|v||')"
+          echo "repo-last-release-tag=$lastReleaseTag" >> $GITHUB_OUTPUT
+          echo "repo-last-release-version=$lastReleaseVersion" >> $GITHUB_OUTPUT
+
+          # Nightly Build Version
+          echo "repo-nightly-build-version=$lastReleaseVersion (${lastCommitId}-nightly)" >> $GITHUB_OUTPUT
+
+          popd
+
+  check-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      pr-exists: ${{ steps.check-pr-exists.outputs.pr-exists }}
+    needs: check-odo
+    if: ${{ needs.check-odo.outputs.last-commit-id != '' }}
+    steps:
+      - name: Check if the update PR already exists
+        id: check-pr-exists
+        run: echo pr-exists=$(gh pr --repo ${{ github.repository }} list --state all --search "update odo cli to ${{ needs.check-odo.outputs.last-release-version }} (${{ needs.check-odo.outputs.last-commit-id }}-nightly) in:title" --json url | jq length) >> $GITHUB_OUTPUT
+
+  check-nightly-build:
+    runs-on: ubuntu-latest
+    outputs:
+      nightly-build-exists: ${{ steps.check-nightly-build-exists.outputs.nightly-build-exists }}
+    needs: [check-odo, check-pr]
+    if: ${{ needs.check-odo.outputs.last-commit-id != '' && needs.check-pr.outputs.pr-exists == 0 }}
+    steps:
+      - name: Check if a Nightly Build exists for the last commit id
+        id: check-nightly-build-exists
+        run: echo nightly-build-exists=`curl -s "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-${{ needs.check-odo.outputs.last-commit-id }}.tar.gz.sha256" | grep -E "^[A-Za-z0-9]+$" | wc -w` >> $GITHUB_OUTPUT
+
+  update-odo:
+    runs-on: ubuntu-latest
+    needs: [check-odo, check-pr, check-nightly-build]
+    if: ${{ needs.check-odo.outputs.last-commit-id != '' && needs.check-pr.outputs.pr-exists == 0 && needs.check-nightly-build.outputs.nightly-build-exists != 0 }}
     steps:
       - name: Check Out Code
         uses: actions/checkout@v4
-      - name: Get latest ODO version
-        run: |
-          echo "REPO_ODO_VERSION=$(cat src/tools.json | jq -r .odo.version)" >> $GITHUB_ENV
-          LATEST_TOOL_RELEASE_RESP=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName,url)
-          echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
-          echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
-      - name: Find existing PR for ODO version
-        run: |
-          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update odo ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
       - name: Update src/tools.json with latest odo version
-        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
-          jq --indent 4 '.odo.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.odo.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.odo.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }}"' > src/tools.json.new
+          jq --indent 4 '.odo.description = "ODO CLI tool"' src/tools.json \
+            | jq --indent 4 '.odo.vendor = "Red Hat Developer"' \
+            | jq --indent 4 '.odo.name = "odo"' \
+            | jq --indent 4 '.odo.version = "${{ needs.check-odo.outputs.last-release-version }}"' \
+            | jq --indent 4 '.odo.versionRange = "^${{ needs.check-odo.outputs.last-release-version }}"' \
+            | jq --indent 4 '.odo.versionRangeLabel = "version >= ${{ needs.check-odo.outputs.last-release-version }}"' > src/tools.json.new
           mv src/tools.json.new src/tools.json
           for platform in win32 darwin darwin-arm64 linux linux-arm64; do
-            old_url=`jq -r .odo.platform[\"${platform}\"].url src/tools.json`
-            new_url=`echo ${old_url} | sed "s|${{ env.REPO_ODO_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
+            pltfrm="$platform"
+            ext=".tar.gz"
+            exeExt=""
+            if [[ "$platform" == "win"* ]]; then
+              pltfrm="windows"
+              ext=".zip"
+              exeExt=".exe"
+            fi
+            arch="-amd64"
+            if [[ $platform == *"-a"* ]]; then
+              arch="" # already in platform string
+            fi
+            new_url="https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-${pltfrm}${arch}-${{ needs.check-odo.outputs.last-commit-id }}${ext}"
             checksum=`curl -s ${new_url}.sha256`
-            jq --indent 4 ".odo.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json | jq --indent 4 ".odo.platform[\"${platform}\"].sha256sum = \"${checksum}\"" > src/tools.json.new
+            dlFileName="odo-${pltfrm}${arch}${ext}"
+            cmdFileName="odo-${pltfrm}${arch}-${{ needs.check-odo.outputs.last-commit-id }}${exeExt}"
+            jq --indent 4 ".odo.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json \
+              | jq --indent 4 ".odo.platform[\"${platform}\"].sha256sum = \"${checksum}\"" \
+              | jq --indent 4 ".odo.platform[\"${platform}\"].dlFileName = \"${dlFileName}\"" \
+              | jq --indent 4 ".odo.platform[\"${platform}\"].cmdFileName = \"${cmdFileName}\"" > src/tools.json.new > src/tools.json.new
             mv src/tools.json.new src/tools.json
           done
       - name: Create pull request
-        if: ${{ (env.LATEST_TOOL_RELEASE != '') && (env.LATEST_TOOL_RELEASE != env.REPO_ODO_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
           git config --global user.name "openshifttools-bot"
-          git checkout -b "odo-${{ env.LATEST_TOOL_RELEASE }}"
-          git commit -am "Update odo to ${{ env.LATEST_TOOL_RELEASE }}"
-          git push origin "odo-${{ env.LATEST_TOOL_RELEASE }}"
-          gh pr create --title "Update odo to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
+          git checkout -b "bump-odo-${{ needs.check-odo.outputs.last-release-version }}-${{ needs.check-odo.outputs.last-commit-id }}"
+          git commit -am "Update ODO CLI to ${{ needs.check-odo.outputs.nightly-build-version }}"
+          git push -f origin "bump-odo-${{ needs.check-odo.outputs.last-release-version }}-${{ needs.check-odo.outputs.last-commit-id }}"
+          gh pr create --title "Update ODO CLI to ${{ needs.check-odo.outputs.nightly-build-version }}" \
+            --body "See the commit history between release ${{needs.check-odo.outputs.last-release-version}} and the latest nightly version ${{ needs.check-odo.outputs.nightly-build-version }} at: https://github.com/redhat-developer/odo/compare/${{needs.check-odo.outputs.last-release-tag}}...${{ needs.check-odo.outputs.last-commit-id }}"
