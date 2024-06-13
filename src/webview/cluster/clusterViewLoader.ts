@@ -219,11 +219,13 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
 
 async function pollClipboard(signupStatus) {
     const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+    let coldStart = true; // To enforce clipboard token propagation on start
     while (panel) {
         const previousContent = (await vscode.env.clipboard.readText()).trim();
         await new Promise(r => setTimeout(r, 500));
         const currentContent = (await vscode.env.clipboard.readText()).trim();
-        if (previousContent && previousContent !== currentContent) {
+        if (coldStart || (previousContent && previousContent !== currentContent)) {
+            coldStart = false;
             let errCode = '';
             if (!Cluster.validateLoginToken(currentContent)){
                 errCode = 'invalidToken';
