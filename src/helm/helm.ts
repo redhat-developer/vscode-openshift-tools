@@ -78,7 +78,7 @@ export async function installHelmChart(
 ): Promise<CliExitData> {
     await syncHelmRepo(repoName);
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.installHelmChart(name, repoName, chartName, version), undefined, false
+        HelmCommands.installHelmChart(name, repoName, chartName, version)
     );
 }
 
