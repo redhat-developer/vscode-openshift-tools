@@ -13,7 +13,7 @@ export class WatchUtil {
         filename: string,
     ): FileContentChangeNotifier {
         const emitter: EventEmitter = new EventEmitter();
-        let timer: NodeJS.Timer;
+        let timer: ReturnType<typeof setInterval> | undefined;
         fsxt.ensureDirSync(location);
         const watcher: fsxt.FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
             if (filename === changedFile) {

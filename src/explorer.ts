@@ -762,7 +762,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
             return new Promise<void>(resolve => {
 
-                let intervalId: NodeJS.Timer = undefined;
+                let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
                 function checkForPod() {
                     void Oc.Instance.getLogs('Deployment', component.metadata.name, namespace).then((logs) => {

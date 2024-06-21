@@ -354,9 +354,9 @@ function removeEmptyProperties(schema: JSONSchema7): void {
     }
 
     for (const key of Object.keys(schema.properties)) {
-        if (typeof schema.properties[key] !== 'boolean' && (schema.properties[key] as JSONSchema7).type === 'object') {
-            if ((schema.properties[key] as JSONSchema7).properties && Object.keys((schema.properties[key] as JSONSchema7).properties).length) {
-                removeEmptyProperties(schema.properties[key] as JSONSchema7);
+        if (typeof schema.properties[key] !== 'boolean' && schema.properties[key].type === 'object') {
+            if (schema.properties[key].properties && Object.keys(schema.properties[key].properties).length) {
+                removeEmptyProperties(schema.properties[key]);
             } else {
                 delete schema.properties[key];
             }
