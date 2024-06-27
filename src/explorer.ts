@@ -340,7 +340,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private collectDeploymentErrors(deployment): string[] {
         const messages: string[] = [];
-        deployment.status.conditions.filter((c) => c.status === 'False')
+        deployment.status.conditions?.filter((c) => c.status === 'False')
             .forEach((c) => {
                 const message = `${c.reason}: ${c.message ? c.message.trim(): 'No valuable message'}`;
 
