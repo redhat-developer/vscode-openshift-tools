@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubernetesObject } from '@kubernetes/client-node';
+import * as k8s from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import * as https from 'https';
 import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
@@ -131,7 +131,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.resource.openInDeveloperConsole')
     @clusterRequired()
-    static async openInDeveloperConsole(resource: KubernetesObject): Promise<void> {
+    static async openInDeveloperConsole(resource: k8s.KubernetesObject): Promise<void> {
         return Progress.execFunctionWithProgress('Opening Console Dashboard', async (progress) => {
             const consoleInfo = await Oc.Instance.getConsoleInfo();
             progress.report({ increment: 100, message: 'Starting default browser' });
@@ -147,7 +147,7 @@ export class Cluster extends OpenShiftItem {
 
     @vsCommand('openshift.resource.openInBrowser')
     @clusterRequired()
-    static openInBrowser(resource: KubernetesObject): Promise<void> {
+    static openInBrowser(resource: k8s.KubernetesObject): Promise<void> {
         return Progress.execFunctionWithProgress('Opening in browser', async (progress) => {
             const routeURL = await Oc.Instance.getRouteURL(resource.metadata.name);
             if (routeURL) {
@@ -1040,6 +1040,44 @@ export class Cluster extends OpenShiftItem {
             return;
         }
         return Cluster.tokenLogin(apiEndpointUrl, true, clipboard);
+    }
+
+    static async loginUsingPipelineServiceAccountToken(server: string, proxy: string, username: string, accessToken: string ): Promise<string> {
+        const kcu = new k8s.KubeConfig();
+        const clusterProxy = {
+            name: 'sandbox-proxy',
+            server: proxy,
+        };
+        const user = {
+            name: 'sso-user',
+            token: accessToken,
+        };
+        const context = {
+            cluster: clusterProxy.name,
+            name: 'sandbox-proxy-context',
+            user: user.name,
+            namespace: `${username}-dev`,
+        };
+        kcu.addCluster(clusterProxy);
+        kcu.addUser(user)
+        kcu.addContext(context);
+        kcu.setCurrentContext(context.name);
+
+        const k8sApi = kcu.makeApiClient(k8s.CoreV1Api);
+        // const auth = new k8s.HttpBearerAuth();
+        // auth.accessToken = accessToken;
+        // k8sApi.setDefaultAuthentication(auth);
+
+        const serviceAccounts = await k8sApi.listNamespacedServiceAccount(`${username}-dev`);
+        const pipelineServiceAccount = serviceAccounts.body.items.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
+        if (!pipelineServiceAccount) {
+            return;
+        }
+        const secrets = await k8sApi.listNamespacedSecret(`${username}-dev`);
+        const pipelineTokenSecret = secrets.body.items.find((secret) => secret.metadata.name.startsWith('pipeline-token'));
+        const pipelineToken = Buffer.from(pipelineTokenSecret.data.token, 'base64').toString();
+
+        return Cluster.tokenLogin(server, true, pipelineToken);
     }
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
