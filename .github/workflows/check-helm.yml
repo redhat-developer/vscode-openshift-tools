@@ -21,11 +21,16 @@ jobs:
           echo "LATEST_TOOL_VERSION=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
           echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
       - name: Find existing PR for HELM version
-        if: ${{ (env.LATEST_TOOL_VERSION != '') && (env.LATEST_TOOL_VERSION != env.REPO_HELM_VERSION) }}
+        if: ${{ env.LATEST_TOOL_VERSION != '' }}
         run: |
-          echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update helm cli to ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
+          if [[ "${{ env.LATEST_TOOL_VERSION != env.REPO_HELM_VERSION }}" == "true" ]]; then
+            prFound=$(gh pr --repo ${{ github.repository }} list --state all --search "update helm cli to ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length)
+            if [[ $prFound == 0 ]]; then
+              echo SHOULD_UPDATE=true >> $GITHUB_ENV
+            fi
+          fi
       - name: Update src/tools.json with latest helm version
-        if: ${{ env.PR_EXISTS == 0 }}
+        if: ${{ env.SHOULD_UPDATE == 'true' }}
         run: |
           jq --indent 4 '.helm.description = "Helm CLI tool"' src/tools.json \
             | jq --indent 4 '.helm.vendor = "The Helm Project"' \
@@ -61,7 +66,7 @@ jobs:
             mv src/tools.json.new src/tools.json
           done
       - name: Create pull request
-        if: ${{ env.PR_EXISTS == 0 }}
+        if: ${{ env.SHOULD_UPDATE == 'true' }}
         run: |
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
           git config --global user.name "openshifttools-bot"
