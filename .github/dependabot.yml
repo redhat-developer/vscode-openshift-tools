@@ -10,6 +10,9 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  ignore:
+    - dependency-name: "make-fetch-happen"
+      versions: ["^13.x"]
   groups:
     typescript-eslint:
       patterns:
