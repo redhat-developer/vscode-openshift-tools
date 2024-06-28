@@ -125,7 +125,8 @@ export function testDevfileRegistries() {
             // initialize web view editor
             const webView = new RegistryWebViewEditor('Devfile Registry - DefaultDevfileRegistry');
             await webView.initializeEditor();
-            expect(await webView.getRegistryStackNames()).to.include.members(['Quarkus Java', 'Django', 'Go Runtime', 'Vue']);
+            // Expect these components to be available on the first page
+            expect(await webView.getRegistryStackNames()).to.include.members(['Quarkus Java', 'Django', 'Go Runtime', 'Maven Java', 'Node.js Runtime', 'Open Liberty Gradle', 'Open Liberty Maven', 'Python', 'Vert.x Java']);
         });
 
         after(async function context() {
