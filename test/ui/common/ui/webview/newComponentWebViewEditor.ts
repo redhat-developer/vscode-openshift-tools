@@ -72,7 +72,7 @@ export class SetNameAndFolderPage extends WebViewForm {
     public async clearProjectFolderPath(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const pathField = await this.getProjectFolderPathField(webView);
-            const controlKey = process.platform === 'darwin' ? Key.COMMAND : Key.CONTROL
+            const controlKey = process.platform === 'darwin' ? Key.COMMAND : Key.CONTROL;
             await pathField.sendKeys(`${controlKey} ${'a'}`);
             await pathField.sendKeys(Key.DELETE);
         });
@@ -82,7 +82,7 @@ export class SetNameAndFolderPage extends WebViewForm {
         await this.enterWebView(async (webView) => {
             const button = await this.getSelectFolderButton(webView);
             await button.click();
-        })
+        });
     }
 
     public async clickCreateComponentButton(): Promise<void> {
@@ -106,15 +106,16 @@ export class SetNameAndFolderPage extends WebViewForm {
 }
 
 abstract class Page extends WebViewForm {
+
     public constructor() {
-        super('Create Component')
+        super('Create Component');
     }
 
     public async clickNextButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getNextButton(webView);
             await button.click();
-        })
+        });
     }
 
     /**
@@ -123,7 +124,7 @@ abstract class Page extends WebViewForm {
     public async clickSelectDifferentDevfileButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getSelectDifferentDevfileButton(webView);
-            await button.click()
+            await button.click();
         });
     }
 
@@ -149,7 +150,7 @@ export class GitProjectPage extends Page {
     public async insertGitLink(link: string): Promise<void> {
         await this.enterWebView(async (webView) => {
             const linkField = await this.getGitRepositoryLinkField(webView);
-            await linkField.sendKeys(link)
+            await linkField.sendKeys(link);
         });
     }
 
@@ -158,9 +159,22 @@ export class GitProjectPage extends Page {
      */
     public async clickContinueButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const button = await this.getContinueButton(webView);
-            await button.click()
+            const button = await this.continueButtonExists(webView);
+            await button.click();
         });
+    }
+
+    private async continueButtonExists(webView: WebView, timeout = 60_000): Promise<WebElement> {
+        return webView.getDriver().wait(async () => {
+            try {
+                const button = await this.getContinueButton(webView);
+                if (button) {
+                    return button;
+                }
+            } catch (err) {
+                return null;
+            }
+        }, timeout);
     }
 
     private async getContinueButton(webView: WebView): Promise<WebElement> {
@@ -173,6 +187,7 @@ export class GitProjectPage extends Page {
 }
 
 export class LocalCodeBasePage extends Page {
+
     public constructor() {
         super();
     }
@@ -180,21 +195,21 @@ export class LocalCodeBasePage extends Page {
     public async insertComponentName(name: string): Promise<void> {
         await this.enterWebView(async (webView) => {
             const nameField = await this.getComponentNameField(webView);
-            await nameField.sendKeys(name)
+            await nameField.sendKeys(name);
         });
     }
 
     public async clickSelectFolderButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getSelectFolderButton(webView);
-            await button.click()
+            await button.click();
         });
     }
 
     public async clickCreateComponent(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getCreateComponentButton(webView);
-            await button.click()
+            await button.click();
         });
     }
 
