@@ -6,6 +6,7 @@ import { expect } from 'chai';
 import { ActivityBar, CustomTreeSection, SideBarView, ViewSection, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
 import { BUTTONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
+import { welcomeContentButtonsAreLoaded, welcomeContentIsLoaded } from '../common/conditions';
 
 export function checkOpenshiftView() {
     describe('OpenShift View', function() {
@@ -36,7 +37,7 @@ export function checkOpenshiftView() {
             before(async function() {
                 explorer = await view.getContent().getSection(VIEWS.appExplorer);
                 await explorer.expand();
-                welcome = await explorer.findWelcomeContent();
+                welcome = await welcomeContentIsLoaded(explorer);
 
                 for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions]) {
                     await (await view.getContent().getSection(item)).collapse();
@@ -44,6 +45,7 @@ export function checkOpenshiftView() {
             });
 
             it('shows welcome content when not logged in', async function() {
+                await welcomeContentButtonsAreLoaded(welcome);
                 expect(welcome).not.undefined;
                 const description = (await welcome.getTextSections()).join('');
                 expect(description).not.empty;
