@@ -28,7 +28,7 @@ jobs:
           jq --indent 4 '.odo.version = "${{ env.LATEST_TOOL_RELEASE }}"' src/tools.json | jq --indent 4 '.odo.versionRange = "^${{ env.LATEST_TOOL_RELEASE }}"' | jq --indent 4 '.odo.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_RELEASE }}"' > src/tools.json.new
           mv src/tools.json.new src/tools.json
           for platform in win32 darwin darwin-arm64 linux linux-arm64; do
-            old_url=`jq -r .odo.platform.${platform}.url src/tools.json`
+            old_url=`jq -r .odo.platform[\"${platform}\"].url src/tools.json`
             new_url=`echo ${old_url} | sed "s|${{ env.REPO_ODO_VERSION }}|${{ env.LATEST_TOOL_RELEASE }}|"`
             checksum=`curl -s ${new_url}.sha256`
             jq --indent 4 ".odo.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json | jq --indent 4 ".odo.platform[\"${platform}\"].sha256sum = \"${checksum}\"" > src/tools.json.new
