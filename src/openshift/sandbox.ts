@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { workspace } from 'vscode';
-import fetch = require('make-fetch-happen');
 
 // eslint-disable-next-line no-shadow
 export enum SBAPIEndpoint {
@@ -78,7 +77,7 @@ export async function getSignUpStatus(token: string): Promise<SBSignupResponse |
                 Authorization: `Bearer ${token}`
             },
             cache: 'no-cache',
-            timeout: getSandboxAPITimeout()
+            signal: AbortSignal.timeout(getSandboxAPITimeout())
         });
     return signupResponse.ok ? signupResponse.json() as Promise<SBSignupResponse> : undefined;
 }
@@ -89,23 +88,23 @@ export async function signUp(token: string): Promise<boolean> {
             headers: {
                 Authorization: `Bearer ${token}`
             },
-            timeout: getSandboxAPITimeout()
+            signal: AbortSignal.timeout(getSandboxAPITimeout())
         });
     return signupResponse.ok;
 }
 
 export async function requestVerificationCode(token: string, countryCode: string, phoneNumber: string) : Promise<VerificationCodeResponse> {
     const verificationCodeRequestResponse = await fetch(`${getSandboxAPIUrl()}${SBAPIEndpoint.VERIFICATION}`, {
-        method: 'PUT',
-        headers: {
-            Authorization: `Bearer ${token}`
-        },
-        timeout: getSandboxAPITimeout(),
-        body: JSON.stringify({
-            'country_code': countryCode,
-            'phone_number': phoneNumber
-        })
-    });
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            signal: AbortSignal.timeout(getSandboxAPITimeout()),
+            body: JSON.stringify({
+                'country_code': countryCode,
+                'phone_number': phoneNumber
+            })
+        });
     const responseText = await verificationCodeRequestResponse.text();
     return {
         ok: verificationCodeRequestResponse.ok,
@@ -115,21 +114,20 @@ export async function requestVerificationCode(token: string, countryCode: string
 
 export async function validateVerificationCode(token: string, code: string): Promise<boolean> {
     const validationRequestResponse = await fetch(`${getSandboxAPIUrl()}${SBAPIEndpoint.VERIFICATION}/${code}`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`
-        },
-        timeout: getSandboxAPITimeout()
-    });
-
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            signal: AbortSignal.timeout(getSandboxAPITimeout())
+        });
     return validationRequestResponse.ok;
 }
 
 export async function getOauthServerInfo(apiEndpointUrl: string): Promise<OauthServerInfo> {
     const oauthServerInfoResponse = await fetch(`${apiEndpointUrl}/${OAUTH_SERVER_INFO_PATH}`, {
-        method: 'GET',
-        timeout: getSandboxAPITimeout()
-    });
+            method: 'GET',
+            signal: AbortSignal.timeout(getSandboxAPITimeout())
+        });
     const oauthInfoText = await oauthServerInfoResponse.text();
     return (oauthInfoText ? JSON.parse(oauthInfoText) : {}) as OauthServerInfo;
 }
