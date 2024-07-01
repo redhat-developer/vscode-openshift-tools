@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as fetch from 'make-fetch-happen';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import sendTelemetry, { WelcomePageProps } from '../../telemetry';
@@ -15,12 +14,11 @@ async function welcomeViewerMessageListener(event: any): Promise<void> {
     switch (event?.action) {
         case 'getOpenShiftVersion':
             try {
-                const response = await fetch('https://api.github.com/repos/redhat-developer/vscode-openshift-tools/releases/latest',
-                {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-                    }
-                });
+                const response = await fetch('https://api.github.com/repos/redhat-developer/vscode-openshift-tools/releases/latest', {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+                        }
+                    });
                 const data = await response.json();
                 void panel?.webview.postMessage({
                     'action': 'getOpenShiftVersion',
