@@ -80,7 +80,7 @@
     "max-classes-per-file": [0],
     "no-alert": 2,
     "no-caller": 2,
-    "no-console": 2,
+    //"no-console": 2,
     "no-constant-condition": 2,
     "no-debugger": 2,
     "no-else-return": ["error"],
