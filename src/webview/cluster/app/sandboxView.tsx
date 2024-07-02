@@ -58,6 +58,7 @@ export default function addSandboxView(): JSX.Element {
         statusInfo: '',
         consoleDashboard: '',
         apiEndpoint: '',
+        apiEndpointProxy: '',
         oauthTokenEndpoint: '',
         errorCode: undefined
     });
@@ -150,6 +151,7 @@ export default function addSandboxView(): JSX.Element {
                 consoleDashboard: currentState.consoleDashboard,
                 statusInfo: currentState.statusInfo,
                 apiEndpoint: '',
+                apiEndpointProxy: '',
                 oauthTokenEndpoint: '',
                 errorCode: undefined
             });
@@ -301,6 +303,7 @@ export default function addSandboxView(): JSX.Element {
                 statusInfo: '',
                 consoleDashboard: '',
                 apiEndpoint: '',
+                apiEndpointProxy: '',
                 oauthTokenEndpoint: '',
                 errorCode: undefined
             });
@@ -379,7 +382,12 @@ export default function addSandboxView(): JSX.Element {
     const Provisioned = () => {
 
         const handleLoginButton = () => {
-            postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`});
+            postMessage('sandboxLoginUsingDataInClipboard', {
+                apiEndpointUrl: currentState.apiEndpoint,
+                oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`,
+                username: currentState.statusInfo,
+                apiEndpointProxy: currentState.apiEndpointProxy,
+            });
         };
 
         const invalidToken = currentState.errorCode === 'invalidToken';
@@ -417,7 +425,9 @@ export default function addSandboxView(): JSX.Element {
                             <Button variant='contained' className='button' href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
                         </Tooltip>
                         <Tooltip title={loginSandboxTitle} placement='bottom'>
-                            <div style={{ display: 'inline-block', margin: '8px 0px 8px 0px' }}><Button variant='contained' className='buttonRed' disabled={invalidToken} onClick={handleLoginButton}>Login to DevSandbox</Button></div>
+                            <div style={{ display: 'inline-block', margin: '8px 0px 8px 0px' }}><Button variant='contained' className='buttonRed'
+                                onClick={handleLoginButton}>Login to DevSandbox</Button>
+                            </div>
                         </Tooltip>
                     </div>
                 )}
