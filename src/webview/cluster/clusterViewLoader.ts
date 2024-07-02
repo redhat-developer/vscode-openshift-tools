@@ -5,16 +5,14 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { clearInterval } from 'timers';
 import * as vscode from 'vscode';
 import { CommandText } from '../../base/command';
-import { Oc } from '../../oc/ocWrapper';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ChildProcessUtil } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
-import { KubeConfigUtils } from '../../util/kubeUtils';
+
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
@@ -23,6 +21,7 @@ let panel: vscode.WebviewPanel;
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel('OpenShift Local Logs');
 const sandboxAPI = createSandboxAPI();
+
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
 
@@ -120,7 +119,15 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                         if (!Cluster.validateLoginToken((await vscode.env.clipboard.readText()).trim())) {
                             errCode = 'invalidToken';
                         }
-                        await panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
+                        await panel.webview.postMessage({
+                            action: 'sandboxPageProvisioned',
+                            statusInfo: signupStatus.compliantUsername,
+                            consoleDashboard: signupStatus.consoleURL,
+                            apiEndpoint: signupStatus.apiEndpoint,
+                            apiEndpointProxy: signupStatus.proxyURL,
+                            oauthTokenEndpoint: oauthInfo.token_endpoint,
+                            errorCode: errCode
+                        });
                         await pollClipboard(signupStatus);
                     } else {
                         // cluster is not ready and the reason is
@@ -186,25 +193,31 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginUsingDataInClipboard': {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
-                const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
+                // const username = await whoami();
+                const result = await Cluster.loginUsingPipelineServiceAccountToken(
+                    event.payload.apiEndpointUrl,
+                    event.payload.apiEndpointProxy,
+                    event.payload.username,
+                    (sessionCheck as any).idToken
+                );
                 if (result) void vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
-                const timeout = setInterval(() => {
-                    const currentUser = new KubeConfigUtils().getCurrentUser();
-                    if (currentUser) {
-                        clearInterval(timeout);
-                        const projectPrefix = currentUser.name.substring(
-                            0,
-                            currentUser.name.indexOf('/'),
-                        );
-                        void Oc.Instance.getProjects().then((projects) => {
-                            const userProject = projects.find((project) =>
-                                project.name.includes(projectPrefix),
-                            );
-                            void Oc.Instance.setProject(userProject.name);
-                        });
-                    }
-                }, 1000);
+                // const timeout = setInterval(() => {
+                //     const currentUser = new KubeConfigUtils().getCurrentUser();
+                //     if (currentUser) {
+                //         clearInterval(timeout);
+                //         const projectPrefix = currentUser.name.substring(
+                //             0,
+                //             currentUser.name.indexOf('/'),
+                //         );
+                //         void Oc.Instance.getProjects().then((projects) => {
+                //             const userProject = projects.find((project) =>
+                //                 project.name.includes(projectPrefix),
+                //             );
+                //             void Oc.Instance.setProject(userProject.name);
+                //         });
+                //     }
+                // }, 1000);
             } catch (err) {
                 void vscode.window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
@@ -228,7 +241,14 @@ async function pollClipboard(signupStatus) {
             if (!Cluster.validateLoginToken(currentContent)){
                 errCode = 'invalidToken';
             }
-            void panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode});
+            void panel.webview.postMessage({
+                action: 'sandboxPageProvisioned',
+                statusInfo: signupStatus.username,
+                consoleDashboard: signupStatus.consoleURL,
+                apiEndpoint: signupStatus.apiEndpoint,
+                oauthTokenEndpoint: oauthInfo.token_endpoint,
+                errorCode: errCode
+            });
         }
     }
 }
