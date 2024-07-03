@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import {
     authentication,
     commands, env, ExtensionContext, languages, QuickPickItemKind,
@@ -11,7 +10,7 @@ import {
     StatusBarItem, window,
     workspace
 } from 'vscode';
-import * as k8s from 'vscode-kubernetes-tools-api';
+import { extension as k8sExtension } from 'vscode-kubernetes-tools-api';
 import { REDHAT_CLOUD_PROVIDER } from './cloudProvider/redhatCloudProvider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
@@ -27,14 +26,12 @@ import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
 import { getNamespaceKind, KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
 import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
-import { Platform } from './util/platform';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { WelcomePage } from './welcomePage';
 import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 
-import fsx = require('fs-extra');
 import { Oc } from './oc/ocWrapper';
 import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
 import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
@@ -43,16 +40,6 @@ import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprov
 // this method is called when your extension is deactivated
 export function deactivate(): void {
     // intentionally left blank
-}
-
-function migrateFromOdo018(): void {
-    const newCfgDir = path.join(Platform.getUserHomePath(), '.odo');
-    const newCfg = path.join(newCfgDir, 'odo-config.yaml');
-    const oldCfg = path.join(Platform.getUserHomePath(), '.kube', 'odo');
-    if (!fsx.existsSync(newCfg) && fsx.existsSync(oldCfg)) {
-        fsx.ensureDirSync(newCfgDir);
-        fsx.copyFileSync(oldCfg, newCfg);
-    }
 }
 
 async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: string, helmPath: string }> {
@@ -64,7 +51,7 @@ async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: strin
 }
 
 async function registerKubernetesCloudProvider(): Promise<void> {
-    const cloudProvider = await k8s.extension.cloudExplorer.v1;
+    const cloudProvider = await k8sExtension.cloudExplorer.v1;
     if (cloudProvider.available) {
         cloudProvider.api.registerCloudProvider(REDHAT_CLOUD_PROVIDER);
     }
@@ -72,9 +59,8 @@ async function registerKubernetesCloudProvider(): Promise<void> {
 
 export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
     void WelcomePage.createOrShow();
-    await commands.executeCommand('setContext', 'isVSCode', env.uiKind);
-    // UIKind.Desktop ==1 & UIKind.Web ==2. These conditions are checked for browser based & electron based IDE.
-    migrateFromOdo018();
+    void commands.executeCommand('setContext', 'isVSCode', env.uiKind);
+
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
 
@@ -85,7 +71,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     const resourceLinkProvider = new KubernetesResourceLinkProvider();
 
     // pick kube config in case multiple are configured
-    await setKubeConfig();
+    const setKubeConfigPromise = setKubeConfig();
 
     const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
     crcStatusItem.command = 'openshift.explorer.stopCluster';
@@ -96,49 +82,51 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     const activeContextStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, 2);
     activeContextStatusBarItem.command = 'openshift.explorer.switchContext';
 
-    const disposable = [
-        ...(await registerCommands(
-            './k8s/route',
-            './openshift/project',
-            './openshift/cluster',
-            './openshift/service',
-            './openshift/route',
-            './k8s/console',
-            './yamlFileCommands',
-            './registriesView',
-            './componentsView',
-            './webview/devfile-registry/registryViewLoader',
-            './webview/helm-chart/helmChartLoader',
-            './webview/helm-manage-repository/manageRepositoryLoader',
-            './feedback',
-            './deployment'
-        )),
-        crcStatusItem,
-        activeNamespaceStatusBarItem,
-        activeContextStatusBarItem,
-        OpenShiftExplorer.getInstance(),
-        new DebugSessionsView().createTreeView('openshiftDebugView'),
-        ...Component.init(),
-        ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
-        ServerlessFunctionView.getInstance(),
-        ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
-        setupWorkspaceDevfileContext(),
-        window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
-        ...registerYamlHandlers(),
-        // Temporarily loaded resource providers
-        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME, resourceDocProvider, { /* TODO: case sensitive? */ }),
-        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
+    const pushSubscriptions = async function(): Promise<void> {
+        const disposable = [
+            ...(await registerCommands(
+                './k8s/route',
+                './openshift/project',
+                './openshift/cluster',
+                './openshift/service',
+                './openshift/route',
+                './k8s/console',
+                './yamlFileCommands',
+                './registriesView',
+                './componentsView',
+                './webview/devfile-registry/registryViewLoader',
+                './webview/helm-chart/helmChartLoader',
+                './webview/helm-manage-repository/manageRepositoryLoader',
+                './feedback',
+                './deployment'
+            )),
+            crcStatusItem,
+            activeNamespaceStatusBarItem,
+            activeContextStatusBarItem,
+            OpenShiftExplorer.getInstance(),
+            new DebugSessionsView().createTreeView('openshiftDebugView'),
+            ...Component.init(),
+            ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
+            ServerlessFunctionView.getInstance(),
+            ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
+            setupWorkspaceDevfileContext(),
+            window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
+            ...registerYamlHandlers(),
+            // Temporarily loaded resource providers
+            workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME, resourceDocProvider, { /* TODO: case sensitive? */ }),
+            workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
 
-        // Link from resources to referenced resources
-        languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
-
-    ];
-    disposable.forEach((value) => extensionContext.subscriptions.push(value));
+            // Link from resources to referenced resources
+            languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
+        ];
+        disposable.forEach((value) => extensionContext.subscriptions.push(value));
+    }
+    void pushSubscriptions();
 
     // activate "Sign in with Red Hat ..."
     void authentication.getSession('redhat-account-auth', ['openid'], { silent: false });
 
-    function statusBarFunctions() {
+    const statusBarFunctions = function() {
         return commands.registerCommand('openshift.openStatusBar', async () => {
             const selection = await window.showQuickPick(
                 [
@@ -201,11 +189,10 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                 default:
                     break;
             }
-
         });
     }
 
-    function createStatusBarItem(context: ExtensionContext) {
+    const createOpenShiftStatusBarItem = function(context: ExtensionContext) {
         const item = window.createStatusBarItem(StatusBarAlignment.Left, 3);
         item.command = 'openshift.openStatusBar';
         context.subscriptions.push(item);
@@ -214,9 +201,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         item.show();
     }
 
-    createStatusBarItem(extensionContext);
+    createOpenShiftStatusBarItem(extensionContext);
 
-    function updateStatusBarItem(statusBarItem: StatusBarItem, text: string): void {
+    const updateStatusBarItem = function(statusBarItem: StatusBarItem, text: string): void {
         if (!workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation')) {
             statusBarItem.hide();
             return;
@@ -229,26 +216,24 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     // ...and setup our own context and namespace status bar informer/picker items
 
     // if true will disable displaying the namespace from the status bar
-    function isNamespaceInfoStatusBarDisabled(): boolean {
+    const isNamespaceInfoStatusBarDisabled = function(): boolean {
         // If k8s extension's Namespace Picker is eenabled - do not show the OS Tools's one
         if (workspace.getConfiguration('vs-kubernetes').get('vs-kubernetes.disable-namespace-info-status-bar') === false) {
             return true;
         }
-
         return workspace.getConfiguration('openshiftToolkit').get['openshiftToolkit.disable-namespace-info-status-bar'];
     }
 
     // if true will disable displaying the context from the status bar
-    function isContextInfoStatusBarDisabled(): boolean {
+    const isContextInfoStatusBarDisabled = function(): boolean {
         // If k8s extension's Namespace Picker is eenabled - do not show the OS Tools's one
         if (workspace.getConfiguration('vs-kubernetes').get('vs-kubernetes.disable-context-info-status-bar') === false) {
             return true;
         }
-
         return workspace.getConfiguration('openshiftToolkit').get['openshiftToolkit.disable-context-info-status-bar'];
     }
 
-    function updateContextStatusBarItem(statusBarItem: StatusBarItem, iconId: string, text: string, tooltip: string, show: boolean): void {
+    const updateContextStatusBarItem = function(statusBarItem: StatusBarItem, iconId: string, text: string, tooltip: string, show: boolean): void {
         statusBarItem.text = `$(${iconId}) ${text}`;
         statusBarItem.tooltip = tooltip;
         if (show && text) {
@@ -258,34 +243,40 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
         }
     }
 
-    OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event(async (context) => {
+    const updateContextAndProjectStatusBarItems = async function(context?: string): Promise<void> {
         const kind = await getNamespaceKind();
-        void Oc.Instance.getActiveProject().then((namespace) =>
+        const namespace = await Oc.Instance.getActiveProject();
+        if (namespace) {
             updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', namespace, `Current ${kind}: ${namespace}`,
-                !isNamespaceInfoStatusBarDisabled()));
+                !isNamespaceInfoStatusBarDisabled());
+        } else {
+            updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', '', '', false);
+        }
 
         const kcu: KubeConfigUtils = new KubeConfigUtils();
-        const currentContext: KcuContext = kcu.findContext(context);
+        const currentContext: KcuContext = kcu.findContext(context ? context : kcu.currentContext);
         updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
             !isContextInfoStatusBarDisabled());
+    }
+
+    OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event((context) => {
+        void updateContextAndProjectStatusBarItems(context);
     });
 
-    const kcu: KubeConfigUtils = new KubeConfigUtils();
-    const kind = await getNamespaceKind();
-    const currentContext: KcuContext = kcu.findContext(kcu.currentContext);
-    updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', null, `Current ${kind}`,
-        !isNamespaceInfoStatusBarDisabled());
-    updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
-        !isContextInfoStatusBarDisabled());
+    void updateContextAndProjectStatusBarItems();
 
     updateStatusBarItem(crcStatusItem, 'Stop CRC');
+
     void extendClusterExplorer();
 
     await registerKubernetesCloudProvider();
     void startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
 
+    // Wait for finishing Kube Config setup
+    await setKubeConfigPromise;
+
     return {
-        verifyBundledBinaries,
+        verifyBundledBinaries
     };
 }
