@@ -294,7 +294,7 @@ A [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
 object is a way of exposing a `Deployment` to the Kubernetes internal network.
 A [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 manages running an application and can horizontally scale the application.
-Please refer to the linked documentation for more acurate technical descriptions of these concepts.
+Please refer to the linked documentation for more accurate technical descriptions of these concepts.
 In our case, the name of the `Service` object is the same as the name of the `Deployment`,
 and we can find the name of the `Deployment` in the "Application Explorer" section in the OpenShift sidebar.
 

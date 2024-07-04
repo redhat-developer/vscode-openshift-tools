@@ -121,7 +121,7 @@ Note: MacOS users upgrading from an earlier release should perform a crc delete 
   ]
 }
 ```
-# Run debugger from command pallet
+# Run debugger from command palette
 
 ## How to update dependencies
 
