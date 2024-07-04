@@ -33,7 +33,7 @@ Actions available in Components View
    * `Import from Git` - Deploy a git repository directly on OpenShift using a guided workflow
    * `New Component` - Create a component from the available registries.
 
-Commands available in context for the compenent
+Commands available in context for the component
 
    * `Start Dev` - The application has been built and deployed to the OpenShift/Kubernetes cluster and the application is port-forwarded for local accessibility. The extension will watch for changes in the current directory and rebuild the application when changes are detected.
    * `Start Dev on Podman` - Run the above start dev workflow for applications deployed on Podman.
