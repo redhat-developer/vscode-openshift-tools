@@ -136,33 +136,47 @@ export function testCreateComponent(path: string) {
 
         it('Create component from template project', async function test() {
             this.timeout(25_000);
+            console.log('a')
 
             //Click on create component
             await clickCreateComponent();
+            console.log('b')
 
             //Initialize create component editor and select create from template
             const createCompView = await initializeEditor();
+            console.log('c')
             await createCompView.createComponentFromTemplate();
+            console.log('d')
 
             //Initialize devfile editor and select stack
             const devfileView = new RegistryWebViewEditor(createCompView.editorName);
+            console.log('e')
             await devfileView.initializeEditor();
+            console.log('f')
             await devfileView.selectRegistryStack('Node.js Runtime');
+            console.log('g')
             await new Promise((res) => {
                 setTimeout(res, 500);
             });
 
+            console.log('h')
             //Initialize stack window and click Use Devfile
             const devFileWindow = new RegistryWebViewDevfileWindow(createCompView.editorName);
+            console.log('i')
             await devFileWindow.initializeEditor();
+            console.log('j')
             await devFileWindow.useDevfile();
+            console.log('k')
 
             //Initialize next page, fill out path and select create component
             await createComponent(createCompView);
+            console.log('l')
 
             //check if component is in component view
             componentName = 'nodejs-starter';
+            console.log('m')
             expect(await section.findItem(componentName)).to.be.not.undefined;
+            console.log('n')
         });
 
         //Delete the component using file system
