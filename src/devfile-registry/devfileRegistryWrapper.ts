@@ -6,7 +6,7 @@ import * as https from 'https';
 import * as YAML from 'js-yaml';
 import { ExecutionContext } from '../cli';
 import { Registry } from '../odo/componentType';
-import { Odo } from '../odo/odoWrapper';
+import { OdoPreference } from '../odo/odoPreference';
 import { DevfileData, DevfileInfo } from './devfileInfo';
 
 export const DEVFILE_VERSION_LATEST: string = 'latest';
@@ -86,7 +86,7 @@ export class DevfileRegistry {
         let registries: Registry[] = [];
         const key = ExecutionContext.key('getRegistries');
         if (this.executionContext && !this.executionContext.has(key)) {
-            registries = await Odo.Instance.getRegistries();
+            registries = await OdoPreference.Instance.getRegistries();
             this.executionContext.set(key, registries);
         } else {
             registries = this.executionContext.get(key);

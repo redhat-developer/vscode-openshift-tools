@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { OdoPreference } from '../../../src/odo/odoPreference';
+
 export const VIEWS = {
     extensions: 'Extensions',
     installed: 'Installed',
@@ -12,7 +14,7 @@ export const VIEWS = {
     compRegistries: 'Devfile Registries',
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
-    devFileRegistry: 'DefaultDevfileRegistry',
+    devFileRegistry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
     serverlessFunctions: 'Serverless Functions',
 };
 
