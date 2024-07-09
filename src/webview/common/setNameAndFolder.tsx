@@ -15,9 +15,9 @@ import {
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
+import { DevfileData, DevfileInfo } from '../../devfile-registry/devfileInfo';
 import { ComponentNameInput } from './componentNameInput';
 import { CreateComponentButton, ErrorAlert } from './createComponentButton';
-import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
 import { PortNumberInput } from './portNumberInput';
 import { ValidationStatus } from './validationResult';
@@ -29,16 +29,34 @@ type Message = {
 
 type SetNameAndFolderProps = {
     goBack: () => void;
-    createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) => void;
-    devfile: Devfile;
+    createComponent: (projectFolder: string, componentName: string, componentVersion: string, addToWorkspace: boolean, portNumber: number) => void;
+    devfileInfo: DevfileInfo;
+    devfile: DevfileData;
     templateProject?: string;
     initialComponentName?: string;
     initialComponentParentFolder?: string;
 };
 
+const getTargetPort = ((devfile: DevfileData, templateProject: string): number => {
+    const component = devfile.components.find((component) => component.name === templateProject);
+    if (component && devfile?.components[0]?.container?.endpoints[0]) {
+        return component.container.endpoints[0].targetPort;
+    }
+
+    // Find first existing component container with a targetPort defined in its endpoint
+    return devfile.components.filter((component) => component.container)
+            .filter((component) => component.container.endpoints && component.container?.endpoints[0])
+            .map((component) => component.container?.endpoints[0].targetPort)
+            .pop() | 0;
+});
+
+const getComponentVersion = ((devfile: DevfileData): string => {
+    return devfile.metadata?.version ? devfile.metadata.version : 'latest';
+});
+
 export function SetNameAndFolder(props: SetNameAndFolderProps) {
     const [componentName, setComponentName] = React.useState(props.initialComponentName);
-    const [portNumber, setPortNumber] = React.useState<number>(props.devfile.port);
+    const [portNumber, setPortNumber] = React.useState<number>(getTargetPort(props.devfile, props.templateProject));
     const [isComponentNameFieldValid, setComponentNameFieldValid] = React.useState(true);
     const [componentNameErrorMessage, setComponentNameErrorMessage] = React.useState(
         'Please enter a component name.',
@@ -139,10 +157,10 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
     }, [componentName]);
 
     React.useEffect(() => {
-        if (props.devfile.port) {
+        if (props.devfile) {
             window.vscodeApi.postMessage({
                 action: 'validatePortNumber',
-                data: `${props.devfile.port}`,
+                data: `${getTargetPort(props.devfile, props.templateProject)}`,
             });
         }
     }, []);
@@ -155,9 +173,9 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
 
             <Stack direction="column" spacing={2} marginTop={2}>
                 {props.devfile ? (
-                    <Paper elevation={4}>
+                <Paper elevation={4}>
                         <Stack margin={2} spacing={2}>
-                            <DevfileListItem devfile={props.devfile} />
+                            <DevfileListItem devfileInfo={props.devfileInfo} devfile={props.devfile} />
                             {/* padding here is to match the padding build into the devfile list component */}
                             {props.templateProject && (
                                 <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
@@ -177,7 +195,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     setComponentName={setComponentName}
                 />
                 {
-                    portNumber &&
+                    portNumber !== undefined &&
                     <PortNumberInput
                         isPortNumberFieldValid={isPortNumberFieldValid}
                         portNumberErrorMessage={portNumberErrorMessage}
@@ -243,6 +261,7 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     </Button>
                     <CreateComponentButton
                         componentName={componentName}
+                        devfileVersion={getComponentVersion(props.devfile)}
                         componentParentFolder={componentParentFolder}
                         addToWorkspace={isAddToWorkspace}
                         portNumber={portNumber}

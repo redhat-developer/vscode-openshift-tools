@@ -10,9 +10,8 @@ import {
     QuickInputButtons, QuickPickItem, ThemeIcon, TreeDataProvider,
     TreeItem, TreeItemCollapsibleState, TreeView, Uri, window
 } from 'vscode';
+import { DevfileRegistry } from './devfile-registry/devfileRegistryWrapper';
 import {
-    ComponentTypeDescription,
-    DevfileComponentType,
     Registry
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
@@ -43,14 +42,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
 
     readonly odo = Odo.Instance;
     private registries: Registry[];
-    private readonly compDescriptions: Set<ComponentTypeDescription> = new Set<ComponentTypeDescription>();
     public subject: Subject<void> = new Subject<void>();
 
-    private initialComponentTypeLoadPromise: Promise<void>;
-
     constructor() {
-        this.initialComponentTypeLoadPromise = this.reloadComponentTypeList();
-        void Progress.execFunctionWithProgress('Loading component types', () => this.initialComponentTypeLoadPromise);
     }
 
     createTreeView(id: string): TreeView<ComponentType> {
@@ -69,7 +63,6 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return ComponentTypesView.viewInstance;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     getTreeItem(element: ComponentType): TreeItem | Thenable<TreeItem> {
         return {
             label: element.name,
@@ -80,26 +73,57 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         };
     }
 
+    async getChildren(parent: ComponentType): Promise<ComponentType[]> {
+        let children: ComponentType[] = [];
+        if (!parent) {
+            const result = await this.getRegistries();
+            const newChildren = result.filter((reg) => reg.name === 'DefaultDevfileRegistry')
+                    .concat(result.filter((reg) => reg.name !== 'DefaultDevfileRegistry').sort());
+            children = newChildren;
+        }
+        return children;
+    }
+
+    getParent?(): ComponentType {
+        return undefined;
+    }
+
     addRegistry(newRegistry: Registry): void {
         if (!this.registries) {
             this.registries = [];
         }
         this.registries.push(newRegistry);
+        this.refresh(true);
         this.reveal(newRegistry);
     }
 
     removeRegistry(targetRegistry: Registry): void {
+        if (!this.registries) {
+            this.registries = [];
+        }
+        this.registries.splice(
+            this.registries.findIndex((registry) => registry.name === targetRegistry.name), 1);
+        this.refresh(true);
+    }
+
+    replaceRegistry(targetRegistry: Registry, newRegistry: Registry): void {
+        if (!this.registries) {
+            this.registries = [];
+        }
         this.registries.splice(
             this.registries.findIndex((registry) => registry.name === targetRegistry.name),
             1,
         );
-        this.refresh(false);
+        this.registries.push(newRegistry);
+        this.refresh(true);
+        this.reveal(newRegistry);
     }
 
-    public async getRegistries(): Promise<Registry[]> {
+
+    private async getRegistries(): Promise<Registry[]> {
         try {
             if (!this.registries) {
-                this.registries = await this.odo.getRegistries();
+                this.registries = await DevfileRegistry.Instance.getRegistries();
             }
         } catch {
             this.registries = [];
@@ -107,53 +131,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         return this.registries;
     }
 
-    public async getCompDescriptions(): Promise<Set<ComponentTypeDescription>> {
-        await this.initialComponentTypeLoadPromise;
-        return this.compDescriptions;
-    }
-
     public getListOfRegistries(): Registry[] {
         return this.registries;
-    }
-
-    private async reloadComponentTypeList(): Promise<void> {
-        this.compDescriptions.clear();
-        try {
-            const devfileComponentTypes = await Odo.Instance.getComponentTypes();
-            await this.getRegistries();
-            await Promise.all(devfileComponentTypes.map(async (devfileComponentType) => {
-                const componentDesc: ComponentTypeDescription = await Odo.Instance.getDetailedComponentInformation(devfileComponentType);
-                componentDesc.devfileData.devfile?.starterProjects?.map((starter: StarterProject) => {
-                    starter.typeName = devfileComponentType.name;
-                });
-                this.compDescriptions.add(componentDesc);
-
-                if (devfileComponentTypes.length === this.compDescriptions.size) {
-                    this.subject.next();
-                }
-            }));
-            this.subject.next();
-        } catch {
-            this.subject.next();
-        }
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    async getChildren(parent: ComponentType): Promise<ComponentType[]> {
-        let children: ComponentType[] = [];
-        if (!parent) {
-            this.registries = await this.getRegistries();
-            /**
-             * no need to show the default devfile registry on tree view
-             */
-            children = this.registries;
-        }
-        return children;
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    getParent?(): ComponentType {
-        return undefined;
     }
 
     reveal(item: Registry): void {
@@ -163,6 +142,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     refresh(cleanCache = true): void {
         if (cleanCache) {
             this.registries = undefined;
+            DevfileRegistry.Instance.clearCache();
         }
         this.onDidChangeTreeDataEmitter.fire(undefined);
     }
@@ -335,31 +315,30 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     break;
                 }
                 case Step.createOrChangeRegistry: {
-                    /**
-                     * For edit, remove the existing registry
-                     */
-                    if (registryContext) {
-                        const notChangedRegisty = registries?.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
-                        if (notChangedRegisty) {
-                            return null;
+                    void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
+                        if (registryContext) {
+                            const notChangedRegisty = registries?.find((registry) => registry.name === regName && registry.url === regURL && registry.secure === (secure === 'Yes'));
+                            if (notChangedRegisty) {
+                                return;
+                            }
                         }
-                        await vscode.commands.executeCommand('openshift.componentTypesView.registry.remove', registryContext, true);
-                    }
 
-                    try {
-                        const response = await fetch(regURL, { method: 'GET' });
-                        const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
-                        if (componentTypes.length > 0) {
-                            void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
+                        try {
+                            const devfileInfos = await DevfileRegistry.Instance.getDevfileInfoList(regURL);
+                            if (devfileInfos.length > 0) {
                                 const newRegistry = await Odo.Instance.addRegistry(regName, regURL, token);
-                                ComponentTypesView.instance.addRegistry(newRegistry);
-                                await ComponentTypesView.instance.reloadComponentTypeList();
-                                ComponentTypesView.instance.refresh(false);
-                            })
+                                if (registryContext) {
+                                    await Odo.Instance.removeRegistry(registryContext.name);
+                                    ComponentTypesView.instance.replaceRegistry(registryContext, newRegistry);
+                                } else {
+                                    ComponentTypesView.instance.addRegistry(newRegistry);
+                                }
+                                ComponentTypesView.instance.subject.next();
+                            }
+                        } catch {
+                            void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
                         }
-                    } catch {
-                        void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
-                    }
+                    });
                     return;
                 }
                 default: {
@@ -370,18 +349,13 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
     }
 
     @vsCommand('openshift.componentTypesView.registry.remove')
-    public static async removeRegistry(registry: Registry, isEdit?: boolean): Promise<void> {
-        const yesNo = isEdit ? 'Yes' : await window.showInformationMessage(
-            `Remove registry '${registry.name}'?`,
-            'Yes',
-            'No',
-        );
+    public static async removeRegistry(registry: Registry): Promise<void> {
+        const yesNo = await window.showInformationMessage(
+            `Remove registry '${registry.name}'?`, 'Yes', 'No');
         if (yesNo === 'Yes') {
             await Odo.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
-            if (!isEdit) {
-                await ComponentTypesView.instance.reloadComponentTypeList();
-            }
+            ComponentTypesView.instance.subject.next();
         }
     }
 

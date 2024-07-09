@@ -16,13 +16,13 @@ import {
     Typography
 } from '@mui/material';
 import * as React from 'react';
-import { Devfile } from '../../common/devfile';
+import { DevfileData } from '../../../devfile-registry/devfileInfo';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
 import { NoSuitableWarning } from '../../common/noSuitableDevfile';
-import { SetNameAndFolder } from '../../common/setNameAndFolder';
 import { buildSanitizedComponentName } from '../../common/sanitize';
+import { SetNameAndFolder } from '../../common/setNameAndFolder';
 
 type Message = {
     action: string;
@@ -30,7 +30,7 @@ type Message = {
 };
 
 type RecommendedDevfileState = {
-    devfile: Devfile;
+    devfile: DevfileData;
     showRecommendation: boolean;
     isLoading: boolean;
     completionValue: number;
@@ -64,7 +64,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isDevfileExistsInRepo: false,
         noRecommendation: false,
     });
-    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
+    const [selectedDevfile, setSelectedDevfile] = React.useState<DevfileData>(undefined);
     const [initialComponentParentFolder, setInitialComponentParentFolder] = React.useState<string>(undefined);
 
     function respondToMessage(messageEvent: MessageEvent) {
@@ -158,7 +158,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true, completionValue: 5 }));
     }
 
-    function getEffectiveDevfile() {
+    function getEffectiveDevfile(): DevfileData {
         return recommendedDevfile.isDevfileExistsInRepo ?
             recommendedDevfile.devfile // An existing Git-Repo devfile
                 : selectedDevfile ?
@@ -167,12 +167,14 @@ export function FromExistingGitRepo({ setCurrentView }) {
     }
 
     function getInitialComponentName() {
-        return getEffectiveDevfile()?.name;
+        const effectiveDevfileMetadata = getEffectiveDevfile()?.metadata;
+        return effectiveDevfileMetadata?.displayName ? effectiveDevfileMetadata.displayName : effectiveDevfileMetadata.name;
     }
 
     function createComponentFromGitRepo(
         projectFolder: string,
         componentName: string,
+        devfileVersion: string,
         addToWorkspace: boolean,
         portNumber: number
     ) {
@@ -180,9 +182,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
             action: 'createComponent',
             data: {
                 devfileDisplayName: selectedDevfile
-                    ? selectedDevfile.name
-                    : recommendedDevfile.devfile.name,
+                    ? selectedDevfile.metadata.name
+                    : recommendedDevfile.devfile.metadata.name,
                 componentName,
+                devfileVersion,
                 gitDestinationPath: projectFolder,
                 isFromTemplateProject: false,
                 portNumber,
@@ -475,6 +478,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                         setCurrentPage('fromGitRepo');
                     }}
                     createComponent={createComponentFromGitRepo}
+                    devfileInfo={undefined}
                     devfile={getEffectiveDevfile()}
                     initialComponentName={buildSanitizedComponentName(getInitialComponentName())}
                     initialComponentParentFolder={initialComponentParentFolder}

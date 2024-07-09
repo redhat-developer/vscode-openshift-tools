@@ -6,14 +6,14 @@ import { fail } from 'assert';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import { suite, suiteSetup } from 'mocha';
-import * as tmp from 'tmp';
 import * as path from 'path';
+import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
+import { Alizer } from '../../src/alizer/alizerWrapper';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
-import { Alizer } from '../../src/alizer/alizerWrapper';
 
 suite('./alizer/alizerWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -62,6 +62,7 @@ suite('./alizer/alizerWrapper.ts', function () {
             tmpFolder2 = Uri.parse(await promisify(tmp.dir)());
             await Odo.Instance.createComponentFromFolder(
                 'nodejs',
+                'latest',
                 undefined,
                 'component1',
                 tmpFolder1,
@@ -69,6 +70,7 @@ suite('./alizer/alizerWrapper.ts', function () {
             );
             await Odo.Instance.createComponentFromFolder(
                 'go',
+                'latest',
                 undefined,
                 'component2',
                 tmpFolder2,
@@ -103,6 +105,7 @@ suite('./alizer/alizerWrapper.ts', function () {
     suite('create component', function() {
 
         const COMPONENT_TYPE = 'dotnet50';
+        const COMPONENT_VERSION = 'latest';
 
         let tmpFolder: string;
 
@@ -115,7 +118,10 @@ suite('./alizer/alizerWrapper.ts', function () {
         });
 
         test('createComponentFromTemplateProject()', async function() {
-            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, 'DefaultDevfileRegistry', 'dotnet50-example');
+            await Odo.Instance.createComponentFromTemplateProject(
+                tmpFolder, 'my-component', 8080,
+                COMPONENT_TYPE, COMPONENT_VERSION,
+                'DefaultDevfileRegistry', 'dotnet50-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {

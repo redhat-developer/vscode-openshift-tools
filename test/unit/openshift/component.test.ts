@@ -13,10 +13,11 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
+import { DevfileInfo } from '../../../src/devfile-registry/devfileInfo';
+import { DevfileRegistry } from '../../../src/devfile-registry/devfileRegistryWrapper';
 import { Oc } from '../../../src/oc/ocWrapper';
 import { Project } from '../../../src/oc/project';
 import { Command } from '../../../src/odo/command';
-import { ComponentTypeAdapter } from '../../../src/odo/componentType';
 import { CommandProvider } from '../../../src/odo/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
@@ -377,12 +378,12 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([
-                new ComponentTypeAdapter(
-                    'componentType3',
-                    undefined,
-                    'description'
-                )
+            sandbox.stub(DevfileRegistry.prototype, 'getRegistryDevfileInfos').resolves([
+                {
+                    name: 'componentType3',
+                    displayName: 'componentType3',
+                    description: 'description',
+                } as DevfileInfo
             ]);
             const warningStub = sandbox.stub(vscode.window, 'showWarningMessage').resolves();
 
@@ -429,7 +430,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(DevfileRegistry.prototype, 'getRegistryDevfileInfos').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             const result = await resultPromise;
@@ -445,7 +446,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(DevfileRegistry.prototype, 'getRegistryDevfileInfos').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             const result = await resultPromise;
@@ -461,7 +462,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(DevfileRegistry.prototype, 'getRegistryDevfileInfos').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             let caughtError;
@@ -482,7 +483,7 @@ suite('OpenShift/Component', function () {
                 contextPath: comp1Folder,
                 component: undefined,
             };
-            sandbox.stub(Odo.prototype, 'getComponentTypes').resolves([]);
+            sandbox.stub(DevfileRegistry.prototype, 'getRegistryDevfileInfos').resolves([]);
             sandbox.stub(vscode.extensions, 'getExtension').returns({} as vscode.Extension<any>);
             const resultPromise = Component.debug(devfileComponentItem2);
             let caughtError;

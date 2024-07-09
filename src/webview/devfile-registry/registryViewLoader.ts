@@ -12,15 +12,13 @@ import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import { vsCommand } from '../../vscommand';
-import { getDevfileCapabilities, getDevfileRegistries, getDevfileTags, isValidProjectFolder, validateName, validatePortNumber } from '../common-ext/createComponentHelpers';
+import { isValidProjectFolder, sendDevfileForVersion, sendUpdatedCapabilities, sendUpdatedDevfileInfos, sendUpdatedRegistries, sendUpdatedTags, validateName, validatePortNumber } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { TemplateProjectIdentifier } from '../common/devfile';
 
-let panel: vscode.WebviewPanel;
-
 vscode.window.onDidChangeActiveColorTheme(function (editor: vscode.ColorTheme) {
-    if (panel) {
-        void panel.webview.postMessage({
+    if (RegistryViewLoader.panel) {
+        void RegistryViewLoader.panel.webview.postMessage({
             action: 'setTheme',
             themeValue: vscode.window.activeColorTheme.kind,
         });
@@ -30,23 +28,31 @@ vscode.window.onDidChangeActiveColorTheme(function (editor: vscode.ColorTheme) {
 async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
     switch (event?.action) {
         case 'init':
-            void panel.webview.postMessage({
-                action: 'setTheme',
-                themeValue: vscode.window.activeColorTheme.kind,
-            })
+            void RegistryViewLoader.panel.webview.postMessage({
+                    action: 'setTheme',
+                    themeValue: vscode.window.activeColorTheme.kind,
+                });
             break;
         case 'getDevfileRegistries':
-            await RegistryViewLoader.sendUpdatedRegistries();
+            await sendUpdatedRegistries(RegistryViewLoader.panel, RegistryViewLoader.url);
+            break;
+        case 'getDevfileInfos':
+            await sendUpdatedDevfileInfos(RegistryViewLoader.panel, RegistryViewLoader.url);
+            break;
+        case 'getDevfile':
+            await sendDevfileForVersion(RegistryViewLoader.panel, event?.data?.devfileInfo, event?.data?.version);
             break;
         case 'getDevfileCapabilities':
-            RegistryViewLoader.sendUpdatedCapabilities();
+            sendUpdatedCapabilities(RegistryViewLoader.panel);
             break;
         case 'getDevfileTags':
-            await RegistryViewLoader.sendUpdatedTags();
+            await sendUpdatedTags(RegistryViewLoader.panel, RegistryViewLoader.url);
             break;
         case 'createComponent': {
             const { projectFolder, componentName } = event.data;
             const templateProject: TemplateProjectIdentifier = event.data.templateProject;
+            const devfileVersion = event.data.devfileVersion && event.data.devfileVersion.length > 0 ?
+                                event.data.devfileVersion : 'latest';
             const portNumber: number = event.data.portNumber;
             const componentFolder = path.join(projectFolder, componentName);
             try {
@@ -56,10 +62,11 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                     componentName,
                     portNumber,
                     templateProject.devfileId,
+                    devfileVersion,
                     templateProject.registryName,
                     templateProject.templateProjectName,
                 );
-                panel.dispose();
+                RegistryViewLoader.panel.dispose();
                 if (
                     event.data.addToWorkspace &&
                     !vscode.workspace.workspaceFolders?.some(
@@ -89,7 +96,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'getInitialWokspaceFolder': {
             const initialWorkspaceFolder = getInitialWorkspaceFolder();
             if (initialWorkspaceFolder) {
-                void panel.webview.postMessage({
+                void RegistryViewLoader.panel.webview.postMessage({
                     action: 'initialWorkspaceFolder',
                     data: initialWorkspaceFolder
                 });
@@ -98,7 +105,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         }
         case 'validateComponentName': {
             const validationMessage = validateName(event.data);
-            void panel.webview.postMessage({
+            void RegistryViewLoader.panel.webview.postMessage({
                 action: 'validatedComponentName',
                 data: validationMessage,
             });
@@ -109,7 +116,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
          */
         case 'validatePortNumber': {
             const validationMessage = validatePortNumber(event.data);
-            void panel.webview.postMessage({
+            void RegistryViewLoader.panel.webview.postMessage({
                 action: 'validatePortNumber',
                 data: validationMessage,
             });
@@ -118,7 +125,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'selectProjectFolderNewProject': {
             const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  event?.data );
             if (workspaceUri) {
-                void panel.webview.postMessage({
+                void RegistryViewLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
                     data: workspaceUri.fsPath,
                 });
@@ -128,7 +135,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'isValidProjectFolder': {
             const { folder, componentName } = event.data;
             const validationResult = await isValidProjectFolder(folder, componentName);
-            void panel.webview.postMessage({
+            void RegistryViewLoader.panel.webview.postMessage({
                 action: 'isValidProjectFolder',
                 data: validationResult,
             });
@@ -150,8 +157,9 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         }
     }
 }
-export default class RegistryViewLoader {
 
+export default class RegistryViewLoader {
+    static panel: vscode.WebviewPanel;
     static url: string;
 
     static get extensionPath() {
@@ -160,29 +168,53 @@ export default class RegistryViewLoader {
 
     static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfile-registry', 'app'));
-        if (panel) {
+        if (RegistryViewLoader.panel) {
             if (RegistryViewLoader.url !== url) {
                 RegistryViewLoader.url = url;
             }
             // If we already have a panel, show it in the target column
-            panel.reveal(vscode.ViewColumn.One);
-            panel.title = title;
+            RegistryViewLoader.panel.reveal(vscode.ViewColumn.One);
+            RegistryViewLoader.panel.title = title;
         } else {
             RegistryViewLoader.url = url;
-            panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
+            RegistryViewLoader.panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
-            panel.webview.html = await loadWebviewHtml('devfile-registry', panel);
-            const messageDisposable = panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
-            panel.onDidDispose(() => {
+            RegistryViewLoader.panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
+            RegistryViewLoader.panel.webview.html = await loadWebviewHtml('devfile-registry', RegistryViewLoader.panel);
+            const messageDisposable = RegistryViewLoader.panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
+
+            const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
+                void sendUpdatedRegistries(RegistryViewLoader.panel).then((registries) => {
+                        if (RegistryViewLoader.url) { // Update title if registry name for the URL provided has changed
+                            const registryName = registries.find((registry) => registry.url === RegistryViewLoader.url)?.name;
+                            if (registryName) {
+                                RegistryViewLoader.panel.title = `Devfile Registry - ${registryName}`;
+                            }
+                        }
+                    })
+            });
+
+            const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
+                sendUpdatedCapabilities(RegistryViewLoader.panel);
+            });
+
+            const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
+                void sendUpdatedTags(RegistryViewLoader.panel);
+            });
+
+            RegistryViewLoader.panel.onDidDispose(() => {
+                tagsSubscription.unsubscribe();
+                capabiliiesySubscription.unsubscribe();
+                registriesSubscription.unsubscribe();
                 messageDisposable.dispose();
-                panel = undefined;
+                RegistryViewLoader.panel = undefined;
             });
         }
-        return panel;
+
+        return RegistryViewLoader.panel;
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInView')
@@ -198,50 +230,7 @@ export default class RegistryViewLoader {
     // eslint-disable-next-line @typescript-eslint/require-await
     @vsCommand('openshift.componentTypesView.registry.closeView')
     static closeRegistryInWebview(): Promise<void> {
-        panel?.dispose();
+        RegistryViewLoader.panel?.dispose();
         return Promise.resolve();
     }
-
-    static async sendUpdatedRegistries() {
-        if (panel) {
-            let registries = await getDevfileRegistries();
-            if (RegistryViewLoader.url) {
-                registries = registries.filter((devfileRegistry) => devfileRegistry.url === RegistryViewLoader.url);
-            }
-            void panel.webview.postMessage({
-                action: 'devfileRegistries',
-                data: registries,
-            });
-        }
-    }
-
-    static sendUpdatedCapabilities() {
-        if (panel) {
-            void panel.webview.postMessage({
-                action: 'devfileCapabilities',
-                data: getDevfileCapabilities(),
-            });
-        }
-    }
-
-    static async sendUpdatedTags() {
-        if (panel) {
-            void panel.webview.postMessage({
-                action: 'devfileTags',
-                data: await getDevfileTags(RegistryViewLoader.url),
-            });
-        }
-    }
 }
-
-ComponentTypesView.instance.subject.subscribe(() => {
-    void RegistryViewLoader.sendUpdatedRegistries();
-});
-
-ComponentTypesView.instance.subject.subscribe(() => {
-    RegistryViewLoader.sendUpdatedCapabilities();
-});
-
-ComponentTypesView.instance.subject.subscribe(() => {
-    void RegistryViewLoader.sendUpdatedTags();
-});

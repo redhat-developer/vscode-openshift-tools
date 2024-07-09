@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import React from 'react';
-import { Alert, Box, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Theme, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
+import { Alert, Box, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Theme, Tooltip, Typography } from '@mui/material';
+import { useTreeViewApiRef } from '@mui/x-tree-view/hooks/useTreeViewApiRef'; // Import the API hook
 import { TreeViewBaseItem } from '@mui/x-tree-view/models';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { useTreeViewApiRef } from '@mui/x-tree-view/hooks/useTreeViewApiRef'; // Import the API hook
-import { HelmListItem } from './helmListItem';
-import { ChartResponse, HelmRepo } from '../../../helm/helmChartType';
-import { VSCodeMessage } from '../vsCodeMessage';
-import { LoadScreen } from '../../common/loading';
-import { HelmModal } from './helmModal';
 import { every } from 'lodash';
+import React from 'react';
+import { ChartResponse, HelmRepo } from '../../../helm/helmChartType';
+import { LoadScreen } from '../../common/loading';
+import { VSCodeMessage } from '../vsCodeMessage';
+import { HelmListItem } from './helmListItem';
+import { HelmModal } from './helmModal';
 
 declare module '@mui/material/SvgIcon' {
     interface SvgIconPropsColorOverrides {
@@ -406,7 +406,7 @@ export function HelmSearch(props: HelmSearchProps) {
             <Stack direction='column' height='100%' spacing={0.5}>
                 {
                     !isSomeHelmChartsRetrieved ?
-                        <LoadScreen title='Retrieving Helm Charts' /> :
+                        <LoadScreen title='Retrieving Helm Charts...' /> :
                         <Stack direction="row" spacing={1} width={'100%'}>
                             {
                                 (helmCharts.length >= 1) &&

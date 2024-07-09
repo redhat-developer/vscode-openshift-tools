@@ -86,13 +86,13 @@ suite('odo commands integration', function () {
             await ODO.execute(
                 Command.createLocalComponent(
                     componentType,
+                    '2.0.0',
                     'DefaultDevfileRegistry',
                     componentName,
                     8080,
                     componentStarterProject,
                     undefined,
-                    undefined,
-                    '2.0.0'
+                    undefined
                 ),
                 componentLocation
             );
@@ -408,13 +408,13 @@ suite('odo commands integration', function () {
              await ODO.execute(
                 Command.createLocalComponent(
                     componentType,
+                    '2.1.1',
                     'DefaultDevfileRegistry',
                     componentName,
                     undefined,
                     componentStarterProject,
                     undefined,
-                    undefined,
-                    '2.1.1'
+                    undefined
                 ),
                 componentLocation
             );

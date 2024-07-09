@@ -5,6 +5,7 @@
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
+import * as hasha from 'hasha';
 import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
@@ -12,6 +13,9 @@ import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
 import { VsCommandError } from './vscommand';
 
 export class ExecutionContext extends Map<string, any> {
+    public static key(value: string): string {
+        return hasha(value);
+    }
 }
 
 export class CliChannel {

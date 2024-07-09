@@ -10,6 +10,8 @@ import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { Alizer } from '../../alizer/alizerWrapper';
+import { AlizerAnalyzeResponse } from '../../alizer/types';
+import { Oc } from '../../oc/ocWrapper';
 import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
@@ -18,8 +20,6 @@ import {
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
-import { AlizerAnalyzeResponse } from '../../alizer/types';
-import { Oc } from '../../oc/ocWrapper';
 
 interface CloneProcess {
     status: boolean;

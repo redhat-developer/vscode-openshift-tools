@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import * as path from 'path';
-import { format } from 'url';
+import { WebviewPanel } from 'vscode';
+import { DevfileInfo } from '../../devfile-registry/devfileInfo';
+import { DevfileRegistry } from '../../devfile-registry/devfileRegistryWrapper';
 import { Registry } from '../../odo/componentType';
 import * as NameValidator from '../../openshift/nameValidator';
-import { ComponentTypesView } from '../../registriesView';
-import { Devfile, DevfileRegistry } from '../common/devfile';
 import { ValidationResult, ValidationStatus } from '../common/validationResult';
 
 /**
@@ -181,69 +180,6 @@ export function validatePortNumber(portNumber: number): string {
 }
 
 /**
- * Returns a list of the devfile registries with their devfiles attached.
- *
- * @returns a list of the devfile registries with their devfiles attached
- */
-export async function getDevfileRegistries(): Promise<DevfileRegistry[]> {
-    const registries = ComponentTypesView.instance.getListOfRegistries();
-    if (!registries || registries.length === 0) {
-        throw new Error('No Devfile registries available. Default registry is missing');
-    }
-    const devfileRegistries = registries.map((registry: Registry) => {
-        return {
-            devfiles: [],
-            name: registry.name,
-            url: registry.url,
-        } as DevfileRegistry;
-    });
-
-    const components = await ComponentTypesView.instance.getCompDescriptions();
-    for (const component of components) {
-        const devfileRegistry = devfileRegistries.find(
-            (devfileRegistry) => format(devfileRegistry.url) === format(component.registry.url),
-        );
-
-        if (!component?.tags.some((value) => value.toLowerCase().includes('deprecate'))) {
-            devfileRegistry.devfiles.push({
-                description: component.description,
-                registryName: devfileRegistry.name,
-                logoUrl: component.devfileData.devfile.metadata.icon,
-                name: component.displayName,
-                id: component.name,
-                starterProjects: component.devfileData.devfile.starterProjects,
-                tags: component.tags,
-                yaml: JSYAML.dump(component.devfileData.devfile),
-                supportsDebug:
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.exec?.group?.kind === 'debug',
-                        ),
-                    ) ||
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.composite?.group?.kind === 'debug',
-                        ),
-                    ),
-                supportsDeploy:
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.exec?.group?.kind === 'deploy',
-                        ),
-                    ) ||
-                    Boolean(
-                        component.devfileData.devfile.commands?.find(
-                            (command) => command.composite?.group?.kind === 'deploy',
-                        ),
-                    ),
-            } as Devfile);
-        }
-    }
-    devfileRegistries.sort((a, b) => (a.name < b.name ? -1 : 1));
-    return devfileRegistries;
-}
-
-/**
  * Returns a list of possible the devfile capabilities.
  *
  * Currently the capabilities are predefined and include:
@@ -261,15 +197,64 @@ export function getDevfileCapabilities(): string[] {
  *
  * @returns a list of the devfile tags
  */
-export async function getDevfileTags(url?: string): Promise<string[]> {
-    const devfileRegistries = await getDevfileRegistries();
+export async function getDevfileTags(registryUrl?: string): Promise<string[]> {
+    const devfileRegistries = await DevfileRegistry.Instance.getRegistryDevfileInfos(registryUrl);
 
     const devfileTags: string[] = [
         ...new Set(
             devfileRegistries
-                .filter((devfileRegistry) => url ? devfileRegistry.url === url : true)
-                .flatMap((_devfileRegistry) => _devfileRegistry.devfiles)
+                .filter((devfileRegistry) => registryUrl ? devfileRegistry.registry.url === registryUrl : true)
                 .flatMap((_devfile) => _devfile.tags))
     ]
     return devfileTags.filter((devfileTag) => !devfileTag.toLowerCase().includes('deprecate'));
+}
+
+export async function sendUpdatedRegistries(panel: WebviewPanel, registryUrl?: string): Promise<Registry[]> {
+    if (panel) {
+        const registries = await DevfileRegistry.Instance.getRegistries(registryUrl)
+        void panel.webview.postMessage({
+            action: 'devfileRegistries',
+            data: registries,
+        });
+        return registries;
+    }
+    return undefined;
+}
+
+export function sendUpdatedCapabilities(panel: WebviewPanel) {
+    if (panel) {
+        void panel.webview.postMessage({
+            action: 'devfileCapabilities',
+            data: getDevfileCapabilities(),
+        });
+    }
+}
+
+export async function sendUpdatedTags(panel: WebviewPanel, registryUrl?: string) {
+    if (panel) {
+        void panel.webview.postMessage({
+            action: 'devfileTags',
+            data: await getDevfileTags(registryUrl),
+        });
+    }
+}
+
+export async function sendUpdatedDevfileInfos(panel: WebviewPanel, registryUrl?: string) {
+    if (panel) {
+        const devfileInfos = await DevfileRegistry.Instance.getRegistryDevfileInfos(registryUrl);
+        void panel.webview.postMessage({
+            action: 'devfileInfos',
+            data: devfileInfos,
+        });
+    }
+}
+
+export async function sendDevfileForVersion(panel: WebviewPanel, devfileInfo?: DevfileInfo, version?: string) {
+    if (panel && devfileInfo) {
+        const devfile = await DevfileRegistry.Instance.getRegistryDevfile(devfileInfo.registry.url, devfileInfo.name, version);
+        void panel.webview.postMessage({
+            action: 'devfile',
+            data: devfile
+        });
+    }
 }

@@ -27,6 +27,7 @@ export type DevfileRegistry = {
 
 export type TemplateProjectIdentifier = {
     devfileId: string;
+    devfileVersion: string;
     registryName: string;
     templateProjectName: string;
 };

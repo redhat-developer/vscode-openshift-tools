@@ -88,6 +88,7 @@ export class RegistryWebViewEditor extends WebViewForm {
             for(const stack of stacks) {
                 if((await stack.getStackName()).includes(stackName)) {
                     await stack.selectStack();
+                    return;
                 }
             }
         });

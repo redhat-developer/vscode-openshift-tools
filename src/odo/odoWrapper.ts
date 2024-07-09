@@ -11,8 +11,8 @@ import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
-import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
-import { ComponentDescription, StarterProject } from './componentTypeDescription';
+import { Registry } from './componentType';
+import { ComponentDescription } from './componentTypeDescription';
 import { BindableService } from './odoTypes';
 
 /**
@@ -30,32 +30,6 @@ export class Odo {
 
     private constructor() {
         // no state
-    }
-
-    public async getComponentTypes(): Promise<ComponentTypeAdapter[]> {
-        // if kc is produced, KUBECONFIG env var is empty or pointing
-
-        const result: CliExitData = await this.execute(
-            new CommandText('odo', 'registry -o json'),
-            undefined,
-            true
-        );
-        const componentTypes: DevfileComponentType[] = this.loadJSON(result.stdout);
-        const devfileItems: ComponentTypeAdapter[] = [];
-
-        componentTypes.map((item) =>
-            devfileItems.push(
-                new ComponentTypeAdapter(
-                    item.name,
-                    undefined,
-                    item.description,
-                    undefined,
-                    item.registry.name,
-                ),
-            ),
-        );
-
-        return devfileItems;
     }
 
     public async describeComponent(
@@ -103,22 +77,24 @@ export class Odo {
 
     public async createComponentFromFolder(
         type: string,
+        version: string = undefined,
         registryName: string,
         name: string,
         location: Uri,
         starter: string = undefined,
         useExistingDevfile = false,
-        customDevfilePath = '',
+        customDevfilePath = ''
     ): Promise<void> {
         await this.execute(
             Command.createLocalComponent(
                 type,
+                version,
                 registryName,
                 name,
                 undefined,
                 starter,
                 useExistingDevfile,
-                customDevfilePath,
+                customDevfilePath
             ),
             location.fsPath,
         );
@@ -140,12 +116,14 @@ export class Odo {
      * Create a component from the given local codebase.
      *
      * @param devfileName the name of the devfile to use
+     * @param devfileVersion the version of the devfile to use
      * @param componentName the name of the component
      * @param portNumber the port to expose on the container that runs the code
      * @param location the location of the local codebase
      */
     public async createComponentFromLocation(
         devfileName: string,
+        devfileVersion: string,
         componentName: string,
         portNumber: number,
         location: Uri,
@@ -153,12 +131,13 @@ export class Odo {
         await this.execute(
             Command.createLocalComponent(
                 devfileName,
+                devfileVersion,
                 undefined,
                 componentName,
                 portNumber,
                 undefined,
                 false,
-                '',
+                ''
             ),
             location.fsPath,
         );
@@ -171,6 +150,7 @@ export class Odo {
      * @param componentName the name of the component
      * @param portNumber the port to expose on the container that runs the code
      * @param devfileName the name of the devfile to use
+     * @param devfileVersion the version of the devfile to use
      * @param registryName the name of the devfile registry that the devfile comes from
      * @param templateProjectName the template project from the devfile to use
      */
@@ -179,12 +159,14 @@ export class Odo {
         componentName: string,
         portNumber: number,
         devfileName: string,
+        devfileVersion: string,
         registryName: string,
         templateProjectName: string,
     ): Promise<void> {
         await this.execute(
             Command.createLocalComponent(
                 devfileName,
+                devfileVersion,
                 registryName,
                 componentName,
                 portNumber,
@@ -192,50 +174,6 @@ export class Odo {
             ),
             componentPath,
         );
-    }
-
-    /**
-     * Returns a list of starter projects for the given Devfile
-     *
-     * TODO: write integration test
-     *
-     * @param componentType the Devfile information
-     * @returns the list of starter projects
-     */
-    public async getStarterProjects(
-        componentType: ComponentTypeAdapter,
-    ): Promise<StarterProject[]> {
-        const descr = await Odo.Instance.execute(this.describeCatalogComponent(componentType));
-        try {
-            const rawJson = JSON.parse(descr.stdout);
-            const dfCompType = rawJson.find(
-                (comp) => comp.registry.name === componentType.registryName,
-            );
-            if (dfCompType.devfileData.devfile.starterProjects) {
-                return dfCompType.devfileData.devfile.starterProjects as StarterProject[];
-            }
-        } catch {
-            // ignore parse errors and return empty array
-        }
-        return [];
-    }
-
-    public async getDetailedComponentInformation(
-        componentType: ComponentTypeAdapter,
-    ): Promise<ComponentTypeDescription> {
-        const result = await this.execute(this.describeCatalogComponent(componentType));
-        const [componentTypeDetails] = JSON.parse(result.stdout) as ComponentTypeDescription[];
-        return componentTypeDetails;
-    }
-
-    private loadJSON<I>(json: string): I {
-        let data: I;
-        try {
-            data = JSON.parse(json);
-        } catch {
-            // ignore parse errors and return empty array
-        }
-        return data;
     }
 
     private async loadRegistryFromPreferences() {
@@ -340,14 +278,5 @@ export class Odo {
                     },
                 } as KubernetesObject;
             });
-    }
-
-    private describeCatalogComponent(componentType: ComponentTypeAdapter): CommandText {
-        return new CommandText('odo', 'registry', [
-            new CommandOption('--details'),
-            new CommandOption('--devfile', componentType.name),
-            new CommandOption('--devfile-registry', componentType.registryName),
-            new CommandOption('-o', 'json', false),
-        ]);
     }
 }
