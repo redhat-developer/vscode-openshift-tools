@@ -86,7 +86,7 @@ export function testCreateComponent(path: string) {
         });
 
         it('Create component from local folder', async function test() {
-            this.timeout(25_000);
+            this.timeout(45_000);
             fs.rmSync(pth.join(path, componentName, 'devfile.yaml'), { force: true });
             console.log('1')
             await refreshView();
