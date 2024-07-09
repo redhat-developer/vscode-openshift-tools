@@ -11,7 +11,6 @@ import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
-import { Registry } from './componentType';
 import { ComponentDescription } from './componentTypeDescription';
 import { BindableService } from './odoTypes';
 
@@ -173,37 +172,6 @@ export class Odo {
                 templateProjectName,
             ),
             componentPath,
-        );
-    }
-
-    private async loadRegistryFromPreferences() {
-        const cliData = await this.execute(new CommandText('odo', 'preference view -o json'));
-        const prefs = JSON.parse(cliData.stdout) as { registries: Registry[] };
-        return prefs.registries;
-    }
-
-    public getRegistries(): Promise<Registry[]> {
-        return this.loadRegistryFromPreferences();
-    }
-
-    public async addRegistry(name: string, url: string, token: string): Promise<Registry> {
-        const command = new CommandText('odo', `preference add registry ${name} ${url}`);
-        if (token) {
-            command.addOption(new CommandOption('--token', token));
-        }
-        await this.execute(command);
-        return {
-            name,
-            secure: !!token,
-            url,
-        };
-    }
-
-    public async removeRegistry(name: string): Promise<void> {
-        await this.execute(
-            new CommandText('odo', `preference remove registry ${name}`, [
-                new CommandOption('--force'),
-            ]),
         );
     }
 

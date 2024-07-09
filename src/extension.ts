@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import {
     authentication,
     commands, env, ExtensionContext, languages, QuickPickItemKind,
@@ -25,16 +26,16 @@ import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
 import { getNamespaceKind, KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
-import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { WelcomePage } from './welcomePage';
 import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 
-import { Oc } from './oc/ocWrapper';
-import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
 import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
+import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
+import { Oc } from './oc/ocWrapper';
+import { OdoPreference } from './odo/odoPreference';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -273,6 +274,8 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     await registerKubernetesCloudProvider();
     void startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
+
+    void OdoPreference.Instance.getRegistries(); // Initializes '~/.odo/preference.json', if not initialized yet
 
     // Wait for finishing Kube Config setup
     await setKubeConfigPromise;

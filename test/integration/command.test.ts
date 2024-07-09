@@ -18,6 +18,7 @@ import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { ComponentDescription } from '../../src/odo/componentTypeDescription';
+import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 
@@ -34,6 +35,7 @@ suite('odo commands integration', function () {
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     suiteSetup(async function() {
+        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
@@ -87,7 +89,7 @@ suite('odo commands integration', function () {
                 Command.createLocalComponent(
                     componentType,
                     '2.0.0',
-                    'DefaultDevfileRegistry',
+                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
                     componentName,
                     8080,
                     componentStarterProject,
@@ -409,7 +411,7 @@ suite('odo commands integration', function () {
                 Command.createLocalComponent(
                     componentType,
                     '2.1.1',
-                    'DefaultDevfileRegistry',
+                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
                     componentName,
                     undefined,
                     componentStarterProject,

@@ -12,8 +12,10 @@ import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
+import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
+import { Platform } from '../../src/util/platform';
 
 suite('./odo/odoWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -21,7 +23,43 @@ suite('./odo/odoWrapper.ts', function () {
     const username = process.env.CLUSTER_USER || 'developer';
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
+    async function dirExists(path: string): Promise<boolean> {
+        try {
+            if ((await fs.stat(path)).isDirectory()) {
+                return true;
+            }
+        } catch {
+            // Ignore
+        }
+        return false;
+    }
+
+    async function fileExists(path: string): Promise<boolean> {
+        try {
+            if ((await fs.stat(path)).isFile()) {
+                return true;
+            }
+        } catch {
+            // Ignore
+        }
+        return false;
+    }
+
+    async function checkOdoPreference() {
+        const odoUserPreferenceDir = `${Platform.getUserHomePath()}/.odo`;
+        const odoUserPreferenceFile = `${odoUserPreferenceDir}/preference.yaml`;
+        if (await dirExists(odoUserPreferenceDir)) {
+            if (!await fileExists(odoUserPreferenceFile)) {
+                fail(`checkOdoPreference: ODO preference file not found: ${odoUserPreferenceFile}! `);
+            }
+        } else {
+            fail(`checkOdoPreference: ODO preference directory not found: ${odoUserPreferenceDir}!`)
+        }
+    }
+
     suiteSetup(async function () {
+        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
+        await checkOdoPreference();
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
@@ -57,6 +95,7 @@ suite('./odo/odoWrapper.ts', function () {
         let tmpFolder2: Uri;
 
         suiteSetup(async function () {
+            await checkOdoPreference();
             await Oc.Instance.createProject(project1);
             tmpFolder1 = Uri.parse(await promisify(tmp.dir)());
             tmpFolder2 = Uri.parse(await promisify(tmp.dir)());
@@ -102,48 +141,6 @@ suite('./odo/odoWrapper.ts', function () {
         });
     });
 
-    suite('registries', function () {
-        const TEST_REGISTRY = 'TestRegistry';
-
-        suiteSetup(async function () {
-            const registries = await Odo.Instance.getRegistries();
-            if (registries.find((registry) => registry.name === TEST_REGISTRY)) {
-                await Odo.Instance.removeRegistry(TEST_REGISTRY);
-            }
-        });
-
-        suiteTeardown(async function () {
-            try {
-                await Odo.Instance.removeRegistry(TEST_REGISTRY);
-            } catch {
-                // do nothing, it's probably already deleted
-            }
-        });
-
-        test('getRegistries()', async function () {
-            const registries = await Odo.Instance.getRegistries();
-            expect(registries).to.be.of.length(1);
-            const registryNames = registries.map((registry) => registry.name);
-            expect(registryNames).to.contain('DefaultDevfileRegistry');
-        });
-
-        test('addRegistry()', async function () {
-            await Odo.Instance.addRegistry(TEST_REGISTRY, 'https://example.org', undefined);
-            const registries = await Odo.Instance.getRegistries();
-            expect(registries).to.be.of.length(2);
-            const registryNames = registries.map((registry) => registry.name);
-            expect(registryNames).to.contain(TEST_REGISTRY);
-        });
-
-        test('removeRegistry()', async function () {
-            await Odo.Instance.removeRegistry(TEST_REGISTRY);
-            const registries = await Odo.Instance.getRegistries();
-            expect(registries).to.be.of.length(1);
-            const registryNames = registries.map((registry) => registry.name);
-            expect(registryNames).to.not.contain(TEST_REGISTRY);
-        });
-    });
-
     suite('create component', function() {
 
         const COMPONENT_TYPE = 'dotnet50';
@@ -152,6 +149,7 @@ suite('./odo/odoWrapper.ts', function () {
         let tmpFolder: string;
 
         suiteSetup(async function() {
+            await checkOdoPreference();
             tmpFolder = await promisify(tmp.dir)();
         });
 
@@ -160,7 +158,8 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('createComponentFromTemplateProject()', async function() {
-            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, COMPONENT_VERSION, 'DefaultDevfileRegistry', 'dotnet50-example');
+            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080,
+                COMPONENT_TYPE, COMPONENT_VERSION, OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME, 'dotnet50-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
@@ -206,6 +205,7 @@ suite('./odo/odoWrapper.ts', function () {
         let componentFolder: string;
 
         setup(async function() {
+            await checkOdoPreference();
             componentFolder = await promisify(tmp.dir)();
             await Odo.Instance.createComponentFromFolder(
                 'nodejs',

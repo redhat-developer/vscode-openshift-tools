@@ -12,6 +12,7 @@ import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
 import { Alizer } from '../../src/alizer/alizerWrapper';
 import { Oc } from '../../src/oc/ocWrapper';
+import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 
@@ -22,6 +23,7 @@ suite('./alizer/alizerWrapper.ts', function () {
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     suiteSetup(async function () {
+        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
@@ -121,7 +123,7 @@ suite('./alizer/alizerWrapper.ts', function () {
             await Odo.Instance.createComponentFromTemplateProject(
                 tmpFolder, 'my-component', 8080,
                 COMPONENT_TYPE, COMPONENT_VERSION,
-                'DefaultDevfileRegistry', 'dotnet50-example');
+                OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME, 'dotnet50-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {

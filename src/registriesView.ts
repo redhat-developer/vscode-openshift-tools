@@ -15,6 +15,7 @@ import {
     Registry
 } from './odo/componentType';
 import { StarterProject } from './odo/componentTypeDescription';
+import { OdoPreference } from './odo/odoPreference';
 import { Odo } from './odo/odoWrapper';
 import { inputValue, quickBtn } from './util/inputValue';
 import { Progress } from './util/progress';
@@ -77,8 +78,8 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         let children: ComponentType[] = [];
         if (!parent) {
             const result = await this.getRegistries();
-            const newChildren = result.filter((reg) => reg.name === 'DefaultDevfileRegistry')
-                    .concat(result.filter((reg) => reg.name !== 'DefaultDevfileRegistry').sort());
+            const newChildren = result.filter((reg) => reg.name === OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME)
+                    .concat(result.filter((reg) => reg.name !== OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME).sort());
             children = newChildren;
         }
         return children;
@@ -326,9 +327,9 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                         try {
                             const devfileInfos = await DevfileRegistry.Instance.getDevfileInfoList(regURL);
                             if (devfileInfos.length > 0) {
-                                const newRegistry = await Odo.Instance.addRegistry(regName, regURL, token);
+                                const newRegistry = await OdoPreference.Instance.addRegistry(regName, regURL, token);
                                 if (registryContext) {
-                                    await Odo.Instance.removeRegistry(registryContext.name);
+                                    await OdoPreference.Instance.removeRegistry(registryContext.name);
                                     ComponentTypesView.instance.replaceRegistry(registryContext, newRegistry);
                                 } else {
                                     ComponentTypesView.instance.addRegistry(newRegistry);
@@ -353,7 +354,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
         const yesNo = await window.showInformationMessage(
             `Remove registry '${registry.name}'?`, 'Yes', 'No');
         if (yesNo === 'Yes') {
-            await Odo.Instance.removeRegistry(registry.name);
+            await OdoPreference.Instance.removeRegistry(registry.name);
             ComponentTypesView.instance.removeRegistry(registry);
             ComponentTypesView.instance.subject.next();
         }
