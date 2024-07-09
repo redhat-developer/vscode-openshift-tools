@@ -18,6 +18,7 @@ import {
     WelcomeContentButton,
     Workbench,
 } from 'vscode-extension-tester';
+import { notificationExists } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 import {
@@ -30,7 +31,6 @@ import {
     RegistryWebViewDevfileWindow,
     RegistryWebViewEditor,
 } from '../common/ui/webview/registryWebViewEditor';
-import { notificationExists } from '../common/conditions';
 
 //TODO: Add more checks for different elements
 export function testCreateComponent(path: string) {
@@ -147,7 +147,7 @@ export function testCreateComponent(path: string) {
             await devfileView.initializeEditor();
             await devfileView.selectRegistryStack('Node.js Runtime');
             await new Promise((res) => {
-                setTimeout(res, 500);
+                setTimeout(res, 1_000);
             });
 
             //Initialize stack window and click Use Devfile

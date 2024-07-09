@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as React from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
@@ -21,8 +20,9 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { InvokeFunctionPageProps } from '../../common/propertyTypes';
+import * as React from 'react';
 import { LoadScreen } from '../../common/loading';
+import { InvokeFunctionPageProps } from '../../common/propertyTypes';
 import './home.scss';
 
 export const InvokeFunctionOrLoading = () => {
@@ -89,7 +89,7 @@ export const InvokeFunctionOrLoading = () => {
     });
 
     if (isLoading) {
-        return <LoadScreen title='Retrieving function information' />;
+        return <LoadScreen title='Retrieving function information...' />;
     }
     return (
         <InvokeFunction

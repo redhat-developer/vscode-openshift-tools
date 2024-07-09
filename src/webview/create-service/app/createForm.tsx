@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { ArrowBack } from '@mui/icons-material';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import {
@@ -12,6 +13,7 @@ import {
     Container,
     FormControl,
     FormHelperText,
+    Grid,
     IconButton,
     InputLabel,
     MenuItem,
@@ -21,28 +23,26 @@ import {
     Stack,
     ThemeProvider,
     Typography,
-    Grid,
 } from '@mui/material';
 import Form from '@rjsf/mui';
 import type {
-    ObjectFieldTemplateProps,
-    TitleFieldProps,
+    ArrayFieldTemplateItemType,
     ArrayFieldTemplateProps,
+    FormContextType,
+    ObjectFieldTemplateProps,
     RJSFSchema,
     StrictRJSFSchema,
-    FormContextType,
-    ArrayFieldTemplateItemType
+    TitleFieldProps
 } from '@rjsf/utils';
-import { getTemplate , getUiOptions} from '@rjsf/utils';
+import { getTemplate, getUiOptions } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import * as React from 'react';
 import 'react-dom';
+import { Converter } from 'showdown';
 import type { CustomResourceDefinitionStub } from '../../common/createServiceTypes';
+import { ErrorPage } from '../../common/errorPage';
 import { LoadScreen } from '../../common/loading';
 import { createVSCodeTheme } from '../../common/vscode-theme';
-import { ArrowBack } from '@mui/icons-material';
-import { Converter } from 'showdown';
-import {ErrorPage} from '../../common/errorPage';
 
 /**
  * A replacement for the RJSF object field component that resembles the one in Patternfly and allows collapsing.
@@ -400,7 +400,7 @@ export function CreateService() {
 
     switch (page) {
         case 'Loading':
-            return <LoadScreen title='Loading ...' />;
+            return <LoadScreen title='Loading...' />;
         case 'Error':
             return <ErrorPage message={error} />;
         case 'PickServiceKind':

@@ -19,6 +19,10 @@
         "*/app/**/*.ts",
         "*/app/**/*.tsx",
         "common/*.tsx",
-        "common/*.ts"
-, "create-deployment/pages/builderImageListItem.tsx", "create-deployment/pages/builderConfig.tsx"    ],
+        "common/*.ts",
+        "create-deployment/pages/builderImageListItem.tsx",
+        "create-deployment/pages/builderConfig.tsx",
+        "common/*.ts",
+        "../devfile-registry/devfileInfo.ts"
+    ],
 }

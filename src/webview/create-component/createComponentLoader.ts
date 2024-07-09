@@ -7,11 +7,15 @@ import * as fse from 'fs-extra';
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
+import * as semver from 'semver';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import { ComponentTypeDescription } from '../../odo/componentType';
+import { Alizer } from '../../alizer/alizerWrapper';
+import { AlizerDevfileResponse, Version } from '../../alizer/types';
+import { DevfileInfo, DevfileInfoExt, DevfileVersionInfo } from '../../devfile-registry/devfileInfo';
+import { DevfileRegistry } from '../../devfile-registry/devfileRegistryWrapper';
 import { Endpoint } from '../../odo/componentTypeDescription';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
@@ -21,17 +25,17 @@ import { DevfileConverter } from '../../util/devfileConverter';
 import { DevfileV1 } from '../../util/devfileV1Type';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
-    getDevfileCapabilities,
-    getDevfileRegistries,
-    getDevfileTags,
     isValidProjectFolder,
+    sendDevfileForVersion,
+    sendUpdatedCapabilities,
+    sendUpdatedDevfileInfos,
+    sendUpdatedRegistries,
+    sendUpdatedTags,
     validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
-import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
-import { AlizerDevfileResponse, Version } from '../../alizer/types';
-import { Alizer } from '../../alizer/alizerWrapper';
+import { Devfile, TemplateProjectIdentifier } from '../common/devfile';
 
 interface CloneProcess {
     status: boolean;
@@ -57,7 +61,7 @@ export default class CreateComponentLoader {
     static async loadView(title: string, folderPath?: string): Promise<WebviewPanel> {
         if (CreateComponentLoader.panel) {
             CreateComponentLoader.panel.reveal();
-            return;
+            return CreateComponentLoader.panel;
         }
         const localResourceRoot = Uri.file(
             path.join(CreateComponentLoader.extensionPath, 'out', 'create-component'),
@@ -80,15 +84,15 @@ export default class CreateComponentLoader {
         });
 
         const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            void sendUpdatedRegistries();
+            void sendUpdatedRegistries(CreateComponentLoader.panel);
         });
 
         const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            sendUpdatedCapabilities();
+            sendUpdatedCapabilities(CreateComponentLoader.panel);
         });
 
         const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            void sendUpdatedTags();
+            void sendUpdatedTags(CreateComponentLoader.panel);
         });
 
         panel.onDidDispose(() => {
@@ -135,33 +139,36 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
-             * The panel requested the list of devfile registries with their devfiles. Respond with this list.
+             * The panel requested the list of devfile registries. Respond with this list.
              */
             case 'getDevfileRegistries': {
-                void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'devfileRegistries',
-                    data: await getDevfileRegistries(),
-                });
+                await sendUpdatedRegistries(CreateComponentLoader.panel);
                 break;
             }
+            /**
+             * The panel requested the list of devfile info. Respond with this list.
+             */
+            case 'getDevfileInfos':
+                await sendUpdatedDevfileInfos(CreateComponentLoader.panel);
+                break;
+            /**
+             * The panel requested the devfile of specified version. Respond with this data.
+             */
+            case 'getDevfile':
+                await sendDevfileForVersion(CreateComponentLoader.panel, message.data?.devfileInfo, message.data?.version);
+                break;
             /**
              * The panel requested the list of devfile capabilities. Respond with this list.
              */
             case 'getDevfileCapabilities': {
-                void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'devfileCapabilities',
-                    data: getDevfileCapabilities(),
-                });
+                sendUpdatedCapabilities(CreateComponentLoader.panel);
                 break;
             }
             /**
              * The panel requested the list of devfile tags. Respond with this list.
              */
             case 'getDevfileTags': {
-                void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'devfileTags',
-                    data: await getDevfileTags(),
-                });
+                await sendUpdatedTags(CreateComponentLoader.panel);
                 break;
             }
             /**
@@ -266,7 +273,7 @@ export default class CreateComponentLoader {
                 break;
             }
             /**
-             * The panel requested to get the receommended devfile given the selected project.
+             * The panel requested to get the recommended devfile given the selected project.
              */
             case 'getRecommendedDevfile': {
                 await CreateComponentLoader.panel.webview.postMessage({
@@ -324,6 +331,8 @@ export default class CreateComponentLoader {
              */
             case 'createComponent': {
                 const componentName: string = message.data.componentName;
+                const devfileVersion = message.data.devfileVersion && message.data.devfileVersion.length > 0 ?
+                                message.data.devfileVersion : 'latest';
                 const portNumber: number = message.data.portNumber;
                 let componentFolder: string =  '';
                 try {
@@ -339,6 +348,7 @@ export default class CreateComponentLoader {
                             componentName,
                             portNumber,
                             templateProject.devfileId,
+                            devfileVersion,
                             templateProject.registryName,
                             templateProject.templateProjectName,
                         );
@@ -366,11 +376,13 @@ export default class CreateComponentLoader {
                             await fs.mkdir(componentFolder, {recursive: true});
                             await fse.copy(tmpFolder.fsPath, componentFolder);
                         }
-                        const devfileType = await getDevfileType(message.data.devfileDisplayName);
+                        const devfileInfo = await getDevfileInfoByDisplayName(message.data.devfileDisplayName);
+                        const devfileType = devfileInfo ? devfileInfo.name : message.data.devfileDisplayName;
                         const componentFolderUri = Uri.file(componentFolder);
                         if (!await isDevfileExists(componentFolderUri)) {
                             await Odo.Instance.createComponentFromLocation(
                                 devfileType,
+                                devfileVersion,
                                 componentName,
                                 portNumber,
                                 Uri.file(componentFolder),
@@ -521,13 +533,13 @@ export default class CreateComponentLoader {
 
     static async getRecommendedDevfile(uri: Uri): Promise<void> {
         let analyzeRes: AlizerDevfileResponse;
-        let compDescriptions: ComponentTypeDescription[] = [];
+        let compDescriptions: DevfileInfoExt[] = [];
         try {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfileStart'
             });
             const alizerAnalyzeRes: AlizerDevfileResponse = await Alizer.Instance.alizerDevfile(uri);
-            compDescriptions = await getCompDescription(alizerAnalyzeRes);
+            compDescriptions = await getCompDescriptionsAfterAnalizer(alizerAnalyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
                 const actions: Array<string> = ['Yes', 'Cancel'];
@@ -542,8 +554,8 @@ export default class CreateComponentLoader {
                         const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await Alizer.Instance.alizerDevfile(uri);
-                        compDescriptions = await getCompDescription(analyzeRes);
-                        const endPoints = getEndPoints(compDescriptions[0]);
+                        compDescriptions = await getCompDescriptionsAfterAnalizer(analyzeRes);
+                        const endPoints = await getEndPoints(compDescriptions[0]);
                         const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(
                             devfileV1,
                             endPoints,
@@ -568,60 +580,88 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfile'
             });
-            const devfileRegistry: DevfileRegistry[] = await getDevfileRegistries();
-            const allDevfiles: Devfile[] = devfileRegistry.flatMap((registry) => registry.devfiles);
-            const devfile: Devfile | undefined =
-                compDescriptions.length !== 0
-                    ? allDevfiles.find(
-                          (devfile) => devfile.name === compDescriptions[0].displayName,
-                      )
-                    : undefined;
-            if (devfile) {
-                devfile.port = compDescriptions[0].devfileData.devfile.components[0].container?.endpoints[0].targetPort;
-            }
+
+            const devfile = (!compDescriptions || compDescriptions.length === 0) ? undefined :
+                    await DevfileRegistry.Instance.getRegistryDevfile(compDescriptions[0].registry.url, compDescriptions[0].name, compDescriptions[0].proposedVersion);
+
+            const devfilePort = devfile?.components[0]?.container?.endpoints[0]?.targetPort;
+
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
                 data: {
                     devfile,
+                    port: devfilePort
                 },
             });
         }
     }
 }
 
-async function getCompDescription(devfile: AlizerDevfileResponse): Promise<ComponentTypeDescription[]> {
-    const compDescriptions = await ComponentTypesView.instance.getCompDescriptions();
-    if (!devfile.Name) {
-        return Array.from(compDescriptions);
-    }
-    return Array.from(compDescriptions).filter((compDesc) => {
-        if (devfile.Name === compDesc.name && getVersion(devfile.Versions, compDesc.version)) {
-            return compDesc;
+function findMostCommonVersion(devfileVersionInfos: DevfileVersionInfo[], analizerVersions: Version[]): string {
+    // Find Alizer's default version
+    const analizerDefaultVersion = analizerVersions.find((version) => version.Default)?.Version;
+    if (analizerDefaultVersion) {
+        const devfileVersion = devfileVersionInfos.find((versionInfo) => versionInfo.version === analizerDefaultVersion);
+        if (devfileVersion) {
+            return devfileVersion.version;
         }
     }
-    );
+
+    // Find most common latest version
+    const maxCommon = semver.sort(devfileVersionInfos.filter((_dfv) => analizerVersions.find((_av) => _dfv.version === _av.Version))
+            .flatMap((_dfv) => _dfv.version))?.pop();
+    return maxCommon;
 }
 
-function getVersion(devfileVersions: Version[], matchedVersion: string): Version {
-    return devfileVersions.find((devfileVersion) => {
-        if (devfileVersion.Version === matchedVersion) {
-            return devfileVersion;
-        }
+/**
+ * Returns an array of objects, that suites the criterias of Analize Responses provided,
+ * and include: DevfileInfo and according devfile version selected from an according analize response:
+ * ```
+ *    {
+ *       ...devfileInfo: DevfileInfo,
+ *       proposedVersion: string
+ *    }
+ * ```
+ * @param analizeResponse
+ * @returns Array of Devfile ibjects added with a Devfile version proposed by analizer
+ */
+async function getCompDescriptionsAfterAnalizer(analizeResponse: AlizerDevfileResponse): Promise<DevfileInfoExt[]> {
+    const compDescriptions = await DevfileRegistry.Instance.getRegistryDevfileInfos();
+
+    if (!analizeResponse) {
+        return compDescriptions.flatMap((devfileInfo) => {
+            const defaultVersion = devfileInfo.versions?.find((version) => version.default).version
+                    || devfileInfo.versions?.pop()?.version || undefined;
+            return {
+                    ...devfileInfo,
+                    proposedVersion: defaultVersion
+                } as DevfileInfoExt;
+        });
     }
+
+    const devfileInfos = compDescriptions.filter((devfileInfo) =>
+                devfileInfo.name === analizeResponse.Name &&
+                findMostCommonVersion(devfileInfo.versions, analizeResponse.Versions) !== undefined)
+            .flatMap((devfileInfo) => {
+                return {
+                        ...devfileInfo,
+                        proposedVersion: findMostCommonVersion(devfileInfo.versions, analizeResponse.Versions)
+                    } as DevfileInfoExt;
+            });
+
+    return devfileInfos;
+}
+
+async function getDevfileInfoByDisplayName(devfileDisplayName: string): Promise<DevfileInfo> {
+    const devfileInfos = await DevfileRegistry.Instance.getRegistryDevfileInfos();
+    return Array.from(devfileInfos).find(
+        (_info) => _info.displayName === devfileDisplayName
     );
 }
 
-async function getDevfileType(devfileDisplayName: string): Promise<string> {
-    const compDescriptions: Set<ComponentTypeDescription> =
-        await ComponentTypesView.instance.getCompDescriptions();
-    const devfileDescription: ComponentTypeDescription = Array.from(compDescriptions).find(
-        (description) => description.displayName === devfileDisplayName,
-    );
-    return devfileDescription ? devfileDescription.name : devfileDisplayName;
-}
-
-function getEndPoints(compDescription: ComponentTypeDescription): Endpoint[] {
-    return compDescription.devfileData.devfile.components[0].container.endpoints;
+async function getEndPoints(devfileInfoExt:DevfileInfoExt): Promise<Endpoint[]> {
+    const devfile = await DevfileRegistry.Instance.getRegistryDevfile(devfileInfoExt.registry.url, devfileInfoExt.name, devfileInfoExt.proposedVersion);
+    return devfile?.components[0]?.container.endpoints;
 }
 
 async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
@@ -672,33 +712,6 @@ async function validateFolderPath(path: string) {
                 isValid,
                 helpText,
             },
-        });
-    }
-}
-
-async function sendUpdatedRegistries() {
-    if (CreateComponentLoader.panel) {
-        void CreateComponentLoader.panel.webview.postMessage({
-            action: 'devfileRegistries',
-            data: await getDevfileRegistries(),
-        });
-    }
-}
-
-function sendUpdatedCapabilities() {
-    if (CreateComponentLoader.panel) {
-        void CreateComponentLoader.panel.webview.postMessage({
-            action: 'devfileCapabilities',
-            data: getDevfileCapabilities(),
-        });
-    }
-}
-
-async function sendUpdatedTags() {
-    if (CreateComponentLoader.panel) {
-        void CreateComponentLoader.panel.webview.postMessage({
-            action: 'devfileTags',
-            data: await getDevfileTags(),
         });
     }
 }

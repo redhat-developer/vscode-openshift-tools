@@ -62,21 +62,24 @@ export class Command {
 
     @verbose
     static createLocalComponent(
-        type = '', // will use empty string in case of undefined type passed in
+        devfileType = '', // will use empty string in case of undefined devfileType passed in
+        devfileVersion: string = undefined,
         registryName: string,
         name: string,
         portNumber: number,
         starter: string = undefined,
         useExistingDevfile = false,
-        customDevfilePath = '',
-        devfileVersion: string = undefined,
+        customDevfilePath = ''
     ): CommandText {
         const cTxt = new CommandText('odo', 'init', [
             new CommandOption('--name', name)
         ]
         );
-        if (type !== '') {
-            cTxt.addOption(new CommandOption('--devfile', type));
+        if (devfileType !== '') {
+            cTxt.addOption(new CommandOption('--devfile', devfileType));
+        }
+        if (devfileVersion) {
+            cTxt.addOption(new CommandOption('--devfile-version', devfileVersion, false));
         }
         if (registryName) {
             cTxt.addOption(new CommandOption('--devfile-registry', registryName));
@@ -89,9 +92,6 @@ export class Command {
         }
         if (customDevfilePath.length > 0) {
             cTxt.addOption(new CommandOption('--devfile-path', customDevfilePath, false));
-        }
-        if (devfileVersion) {
-            cTxt.addOption(new CommandOption('--devfile-version', devfileVersion, false));
         }
         if (portNumber) {
             cTxt.addOption(new CommandOption(' --run-port', portNumber.toString(), false));

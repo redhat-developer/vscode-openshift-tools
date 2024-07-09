@@ -2,31 +2,31 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import {
     Box,
+    Button,
+    Checkbox,
     Container,
     FormControl,
-    PaletteMode,
-    Stack,
-    ThemeProvider,
-    Typography,
-    TextField,
-    FormHelperText,
-    MenuItem,
-    Select,
-    InputLabel,
-    Checkbox,
     FormControlLabel,
-    Button
+    FormHelperText,
+    InputLabel,
+    MenuItem,
+    PaletteMode,
+    Select,
+    Stack,
+    TextField,
+    ThemeProvider,
+    Typography
 } from '@mui/material';
 import * as React from 'react';
 import 'react-dom';
 import type { K8sResourceKind, Port } from '../../common/createServiceTypes';
-import type { RouteInputBoxText } from '../../common/route';
-import { LoadScreen } from '../../common/loading';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
-import { createVSCodeTheme } from '../../common/vscode-theme';
 import { ErrorPage } from '../../common/errorPage';
+import { LoadScreen } from '../../common/loading';
+import type { RouteInputBoxText } from '../../common/route';
+import { createVSCodeTheme } from '../../common/vscode-theme';
 
 /**
  * Component to select which type of service (which CRD) should be created.
@@ -320,7 +320,7 @@ export function CreateService() {
 
     switch (page) {
         case 'Loading':
-            return <LoadScreen title='Loading ...' />;
+            return <LoadScreen title='Loading...' />;
         case 'Error':
             pageElement = (<ErrorPage message={error} />);
             break;

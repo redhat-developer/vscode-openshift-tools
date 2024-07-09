@@ -4,18 +4,16 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import { platform } from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
-import { ascDevfileFirst, ComponentTypeAdapter } from '../odo/componentType';
-import { CommandProvider, StarterProject } from '../odo/componentTypeDescription';
+import { CommandProvider } from '../odo/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import sendTelemetry, { NewComponentCommandProps } from '../telemetry';
+import sendTelemetry from '../telemetry';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -23,14 +21,6 @@ import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webv
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
-
-function createCancelledResult(stepName: string): any {
-    const cancelledResult: any = new String('');
-    cancelledResult.properties = {
-        'cancelled_step': stepName
-    }
-    return cancelledResult;
-}
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -480,154 +470,6 @@ export class Component extends OpenShiftItem {
             // do nothing
         }
         await CreateComponentLoader.loadView('Create Component', context.fsPath);
-    }
-
-    /**
-     * Create a component
-     *
-     * @param folder The folder to use as component context folder
-     * @param selection The folders selected in case of multiple selection in Explorer view.
-     * @param context
-     * @param componentTypeName
-     * @param componentKind
-     * @returns A thenable that resolves to the message to show or empty string if components is already exists or null if command is canceled.
-     * @throws VsCommandError or Error in case of error in cli or code
-     */
-
-    static async createFromRootWorkspaceFolder(folder: Uri, selection: Uri[], opts: {
-        componentTypeName?: string,
-        projectName?: string,
-        applicationName?: string,
-        compName?: string,
-        registryName?: string
-        devFilePath?: string
-    }, isGitImportCall = false): Promise<string | null> {
-        let useExistingDevfile = false;
-        const devFileLocation = path.join(folder.fsPath, 'devfile.yaml');
-        try {
-            await fs.access(devFileLocation);
-            useExistingDevfile = true;
-        } catch {
-            // do not use existing devfile
-        }
-
-        let initialNameValue: string;
-        if (useExistingDevfile) {
-            const file = await fs.readFile(devFileLocation, 'utf8');
-            const devfileYaml = JSYAML.load(file.toString()) as any;
-
-            if (devfileYaml && devfileYaml.metadata && devfileYaml.metadata.name) {
-                initialNameValue = devfileYaml.metadata.name;
-            }
-        }
-
-        const progressIndicator = window.createQuickPick();
-
-        let createStarter: string;
-        let componentType: ComponentTypeAdapter;
-        let componentTypeCandidates: ComponentTypeAdapter[];
-        if (!useExistingDevfile && (!opts || !opts.devFilePath || opts.devFilePath.length === 0)) {
-            const componentTypes = await Odo.Instance.getComponentTypes();
-            progressIndicator.busy = true;
-            progressIndicator.placeholder = opts?.componentTypeName ? `Checking if '${opts.componentTypeName}' Component type is available` : 'Loading available Component types';
-            progressIndicator.show();
-            if (opts?.componentTypeName) {
-                componentTypeCandidates = opts.registryName && opts.registryName.length > 0 ? componentTypes.filter(type => type.name === opts.componentTypeName && type.registryName === opts.registryName) : componentTypes.filter(type => type.name === opts.componentTypeName);
-                if (componentTypeCandidates?.length === 0) {
-                    componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: `Cannot find Component type '${opts.componentTypeName}', select one below to use instead`, ignoreFocusOut: true });
-                } else if (componentTypeCandidates?.length > 1) {
-                    componentType = await window.showQuickPick(componentTypeCandidates.sort(ascDevfileFirst), { placeHolder: `Found more than one Component types '${opts.componentTypeName}', select one below to use`, ignoreFocusOut: true });
-                } else {
-                    [componentType] = componentTypeCandidates;
-                    progressIndicator.hide();
-                }
-            } else {
-                componentType = await window.showQuickPick(componentTypes.sort(ascDevfileFirst), { placeHolder: 'Select Component type', ignoreFocusOut: true });
-            }
-
-            if (!componentType) return createCancelledResult('componentType');
-
-            progressIndicator.placeholder = 'Checking if provided context folder is empty'
-            progressIndicator.show();
-            const workspacePath = `${folder.fsPath.replaceAll('\\', '/')}/`;
-            const dirIsEmpty = (await fs.readdir(workspacePath)).length === 0;
-            progressIndicator.hide();
-            if (dirIsEmpty && !isGitImportCall) {
-                if (opts?.projectName) {
-                    createStarter = opts.projectName;
-                } else {
-                    progressIndicator.placeholder = 'Loading Starter Projects for selected Component Type'
-                    progressIndicator.show();
-
-                    const starterProjects: StarterProject[] = await Odo.Instance.getStarterProjects(componentType);
-                    progressIndicator.hide();
-                    if (starterProjects?.length && starterProjects.length > 0) {
-                        const create = await window.showQuickPick(['Yes', 'No'], { placeHolder: `Initialize Component using ${starterProjects.length === 1 ? '\''.concat(starterProjects[0].name.concat('\' ')) : ''}Starter Project?` });
-                        if (create === 'Yes') {
-                            if (starterProjects.length === 1) {
-                                createStarter = starterProjects[0].name;
-                            } else {
-                                const selectedStarter = await window.showQuickPick(
-                                    starterProjects.map(prj => ({ label: prj.name, description: prj.description })),
-                                    { placeHolder: 'Select Starter Project to initialize Component' }
-                                );
-                                if (!selectedStarter) return createCancelledResult('selectStarterProject');
-                                createStarter = selectedStarter.label;
-                            }
-                        } else if (!create) {
-                            return createCancelledResult('useStaterProjectRequest');;
-                        }
-                    }
-                }
-            }
-        }
-
-        const componentName = opts?.compName || await Component.getName(
-            'Name',
-            initialNameValue?.trim().length > 0 ? initialNameValue : createStarter
-        );
-
-        if (!componentName) return createCancelledResult('componentName');
-        const refreshComponentsView = workspace.getWorkspaceFolder(folder);
-        const createComponentProperties: NewComponentCommandProps = {
-            'component_kind': 'devfile',
-            'component_type': componentType?.name,
-            'component_version': componentType?.version,
-            'starter_project': createStarter,
-            'use_existing_devfile': useExistingDevfile,
-        };
-        try {
-            await Progress.execFunctionWithProgress(
-                `Creating new Component '${componentName}'`,
-                () => Odo.Instance.createComponentFromFolder(
-                    componentType?.name, // in case of using existing devfile
-                    componentType?.registryName,
-                    componentName,
-                    folder,
-                    createStarter,
-                    useExistingDevfile,
-                    opts?.devFilePath
-                )
-            );
-
-            // when creating component based on existing workspace folder refresh components view
-            if (refreshComponentsView) {
-                void commands.executeCommand('openshift.componentsView.refresh');
-            }
-
-            const result: any = new String(`Component '${componentName}' successfully created. Perform actions on it from Components View.`);
-            result.properties = createComponentProperties;
-            return result;
-        } catch (err) {
-            if (err instanceof VsCommandError) {
-                throw new VsCommandError(
-                    `Error occurred while creating Component '${componentName}': ${err.message}`,
-                    `Error occurred while creating Component: ${err.telemetryMessage}`, err,
-                    createComponentProperties
-                );
-            }
-            throw err;
-        }
     }
 
     @vsCommand('openshift.component.debug', true)

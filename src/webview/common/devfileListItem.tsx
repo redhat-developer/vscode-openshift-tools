@@ -5,12 +5,13 @@
 import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
-import { Devfile } from '../common/devfile';
+import validator from 'validator';
 import DevfileLogo from '../../../images/context/devfile.png';
-import validator from 'validator'
+import { DevfileData, DevfileInfo } from '../../devfile-registry/devfileInfo';
 
 export type DevfileListItemProps = {
-    devfile: Devfile;
+    devfileInfo?: DevfileInfo;
+    devfile: DevfileData;
     buttonCallback?: () => void;
     showFullDescription?: boolean;
 };
@@ -37,6 +38,7 @@ export function DevfileListItem(props: DevfileListItemProps) {
                     }}
                 >
                     <DevfileListContent
+                        devfileInfo={props.devfileInfo}
                         devfile={props.devfile}
                         buttonCallback={props.buttonCallback}
                         showFullDescription={props.showFullDescription}
@@ -44,7 +46,11 @@ export function DevfileListItem(props: DevfileListItemProps) {
                 </Box>
             ) : (
                 <>
-                    <DevfileListContent devfile={props.devfile} showFullDescription={props.showFullDescription} />
+                    <DevfileListContent
+                        devfileInfo={props.devfileInfo}
+                        devfile={props.devfile}
+                        showFullDescription={props.showFullDescription}
+                    />
                 </>
             )}
         </>
@@ -54,6 +60,17 @@ export function DevfileListItem(props: DevfileListItemProps) {
 function DevfileListContent(props: DevfileListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
+
+    const icon = checkedDevfileLogoUrl(props.devfile?.metadata?.icon ?
+            props.devfile.metadata.icon : props.devfileInfo?.icon);
+    const name =  props.devfile?.metadata?.displayName ? props.devfile.metadata.displayName : props.devfileInfo?.displayName;
+    const version = props.devfile?.metadata?.version ? props.devfile.metadata.version : undefined;
+    const registryName = props.devfileInfo?.registry?.name;
+    const isDebugSupported = props.devfileInfo?.versions?.some((version) => version.commandGroups.debug === true);
+    const isDeploySupported = props.devfileInfo?.versions?.some((version) => version.commandGroups.deploy === true);
+    const tags = props.devfileInfo?.tags;
+    const description = props.devfile?.metadata?.description ?
+            props.devfile.metadata.description : props.devfileInfo?.description;
     return (
         <Stack direction="row" spacing={3} alignItems="center">
             <Box
@@ -67,7 +84,7 @@ function DevfileListContent(props: DevfileListItemProps) {
                     borderRadius: '4px',
                 }}
             >
-                <img src={checkedDevfileLogoUrl(props.devfile.logoUrl)} style={{
+                <img src={icon} style={{
                     maxWidth: !props.showFullDescription ? '3em' : '6em',
                     maxHeight: !props.showFullDescription ? '3em' : '6em'
                 }} />
@@ -83,47 +100,50 @@ function DevfileListContent(props: DevfileListItemProps) {
                     <Typography
                         id="devfileName"
                         variant="body1"
-                        maxWidth={'30%'}
+                        maxWidth={'40%'}
                         sx={{
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
                         }}
                     >
-                        {props.devfile.name}
+                        {name}{ version && `, v. ${version}`}
                     </Typography>
 
-                    {props.devfile.registryName && (
-                        <Typography variant="body2" fontStyle="italic" maxWidth={'50%'}>
-                            from {props.devfile.registryName}
-                        </Typography>
+                    {
+                        registryName && (
+                            <Typography variant="body2" fontStyle="italic" maxWidth={'50%'}>
+                                from {registryName}
+                            </Typography>
                     )}
 
                     <Stack direction="row" spacing={1} maxWidth={'30%'}>
                         {
-                            props.devfile.supportsDebug && <Chip
-                                size="small"
-                                label="Debug Support"
-                                icon={<Check />}
-                                color={'success'}
-                            />
+                            isDebugSupported &&
+                                <Chip
+                                    size="small"
+                                    label="Debug Support"
+                                    icon={<Check />}
+                                    color={'success'}
+                                />
                         }
                         {
-                            props.devfile.supportsDeploy && <Chip
-                                size="small"
-                                label="Deploy Support"
-                                icon={<Check />}
-                                color={'success'}
-                            />
+                            isDeploySupported &&
+                                <Chip
+                                    size="small"
+                                    label="Deploy Support"
+                                    icon={<Check />}
+                                    color={'success'}
+                                />
                         }
-                        {(props.devfile.tags && props.devfile.tags.map((tag, i) => {
+                        {(tags && tags.map((tag, i) => {
                             if (i >= 4) {
                                 return;
                             }
                             return <Chip size="small" label={tag} key={tag} />;
                         }))}
-                        {(props.devfile.tags && props.devfile.tags.length > 4 && (
-                            <Tooltip title={props.devfile.tags.slice(4).join(', ')}>
+                        {(tags && tags.length > 4 && (
+                            <Tooltip title={tags.slice(4).join(', ')}>
                                 <Chip size="small" label="• • •" />
                             </Tooltip>
                         ))}
@@ -140,7 +160,7 @@ function DevfileListContent(props: DevfileListItemProps) {
                             maxHeight: !props.showFullDescription ? '4rem' : 'unset'
                         }}
                     >
-                        {props.devfile.description}
+                        {description}
                     </Typography>
                 </Stack>
             </Stack>

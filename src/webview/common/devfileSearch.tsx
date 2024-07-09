@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { yaml } from '@codemirror/lang-yaml';
 import { Close, FileCopy, Launch, Search } from '@mui/icons-material';
 import {
     Box,
@@ -28,15 +29,15 @@ import {
     Typography,
     useMediaQuery
 } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
 import { every } from 'lodash';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
+import { DevfileData, DevfileInfo, DevfileRegistryInfo } from '../../devfile-registry/devfileInfo';
+import { TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
 import { LoadScreen } from './loading';
-import CodeMirror from '@uiw/react-codemirror';
-import { yaml } from '@codemirror/lang-yaml';
 import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from './vscode-theme';
 
 // in order to add custom named colours for use in Material UI's `color` prop,
@@ -120,7 +121,7 @@ function SearchBar(props: {
                     }}
                 />
                 <Typography align="center" flexGrow="1">
-                    Showing items {(props.currentPage - 1) * props.perPageCount + 1} -{' '}
+                    Showing items { props.numPages > 0 ? (props.currentPage - 1) * props.perPageCount + 1 : 0} -{' '}
                     {Math.min(props.currentPage * props.perPageCount, props.devfilesLength)} of{' '}
                     {props.devfilesLength}
                 </Typography>
@@ -256,25 +257,65 @@ function TagsPicker(props: {
 const SelectTemplateProject = React.forwardRef(
     (
         props: {
-            devfile: Devfile;
+            devfileInfo: DevfileInfo;
+            selectedDevfileVersion?: string;
+            setSelectedDevfile: (selected: DevfileData) => void;
             setSelectedProject: (projectName: string) => void;
             closeModal: () => void;
             theme: Theme;
         }
     ) => {
+        const [isSomeDevfileRetrieved, setSomeDevfileRetrieved] = React.useState(false);
+        const [selectedDevfileVersion, setSelectedDevfileVersion] = React.useState<string>(undefined);
+        const [selectedDevfile, setSelectedDevfile] = React.useState<DevfileData>(undefined);
         const [selectedTemplateProject, setSelectedTemplateProject] = React.useState('');
         const [isInteracted, setInteracted] = React.useState(false);
         const [isYamlCopied, setYamlCopied] = React.useState(false);
 
-        const isWideEnough = useMediaQuery('(min-width: 900px)');
+        function respondToMessage(messageEvent: MessageEvent) {
+            const message = messageEvent.data as Message;
+            switch (message.action) {
+                case 'devfile': {
+                    if (message.data) {
+                        const devfile = message.data;
+                        setSelectedDevfileVersion((_version) => devfile.metadata?.version);
+                        setSelectedDevfile((_devfile) => devfile);
+                        setSomeDevfileRetrieved(_unused => true);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
 
         React.useEffect(() => {
-            if (props.devfile.starterProjects && props.devfile.starterProjects.length > 0) {
-                setSelectedTemplateProject((_) => props.devfile.starterProjects[0].name);
-            }
+            window.addEventListener('message', respondToMessage);
+            return () => {
+                window.removeEventListener('message', respondToMessage);
+            };
         }, []);
 
-        const starterProjects = props.devfile.starterProjects ? props.devfile.starterProjects : [];
+        React.useEffect(() => {
+            window.vscodeApi.postMessage(
+                {
+                    action: 'getDevfile',
+                    data: {
+                        devfileInfo: props.devfileInfo,
+                        version: selectedDevfileVersion
+                    }
+                });
+        }, []);
+
+        React.useEffect(() => {
+            if (selectedDevfile) {
+                if (selectedDevfile.starterProjects && selectedDevfile.starterProjects.length > 0) {
+                    setSelectedTemplateProject((_) => selectedDevfile.starterProjects[0].name);
+                }
+            }
+        }, [selectedDevfile]);
+
+        const starterProjects = selectedDevfile?.starterProjects ? selectedDevfile.starterProjects : [];
         let helperText = '';
         switch (starterProjects.length) {
             case 0:
@@ -286,6 +327,29 @@ const SelectTemplateProject = React.forwardRef(
             default:
                 if (isInteracted && !selectedTemplateProject) {
                     helperText = 'Select a template project';
+                }
+                break;
+        }
+
+        const versions = props.devfileInfo.versions ? props.devfileInfo.versions : [];
+        const initialSelectedVersion = selectedDevfileVersion
+                || props.devfileInfo.versions.filter((versionInfo) => versionInfo.default).pop()?.version
+                || props.devfileInfo.versions.pop()?.version;
+        if (!selectedDevfileVersion) {
+            setSelectedDevfileVersion(initialSelectedVersion);
+        }
+
+        let versionHelperText = '';
+        switch (versions.length) {
+            case 0:
+                versionHelperText = 'No available versions';
+                break;
+            case 1:
+                versionHelperText = 'Only one version is available for the Devfile';
+                break;
+            default:
+                if (isInteracted && !selectedDevfileVersion) {
+                    versionHelperText = 'Select a version';
                 }
                 break;
         }
@@ -307,7 +371,11 @@ const SelectTemplateProject = React.forwardRef(
                 return fullSelectedTemplateProject.zip.location;
             }
             return undefined;
-        }, [selectedTemplateProject]);
+        }, [selectedDevfile, selectedTemplateProject]);
+
+        const isWideEnough = useMediaQuery('(min-width: 900px)');
+
+        const isVersionError = !props.devfileInfo.versions?.length || (isInteracted && !selectedDevfileVersion);
 
         const isError = !starterProjects.length || (isInteracted && !selectedTemplateProject);
 
@@ -324,124 +392,179 @@ const SelectTemplateProject = React.forwardRef(
                     padding: 2,
                 }}
             >
-                <Stack direction="column" spacing={2}>
-                    <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                        marginBottom={1}
-                    >
-                        <DevfileListItem devfile={props.devfile} showFullDescription />
-                        <IconButton onClick={props.closeModal}>
-                            <Close color="textSecondary" fontSize='small' />
-                        </IconButton>
+                {
+                    !isSomeDevfileRetrieved ?
+                    <Stack direction="column" spacing={2}>
+                        <LoadScreen title='Retrieving the Devfile...' />
                     </Stack>
-                    <FormControl fullWidth>
-                        <InputLabel id="template-select-label">Template Project</InputLabel>
-                        <Select
-                            value={selectedTemplateProject}
-                            onChange={(event) => {
-                                setSelectedTemplateProject(event.target.value);
-                            }}
-                            onClick={(_e) => {
-                                setInteracted(true);
-                            }}
-                            disabled={starterProjects.length < 2}
-                            error={isError}
-                            sx={{ flexGrow: '1' }}
-                            label="Template Project"
-                            labelId="template-select-label"
+                    :
+                    <Stack direction="column" spacing={2}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            marginBottom={1}
                         >
-                            {starterProjects.map((sampleProject) => {
-                                return (
-                                    <MenuItem value={sampleProject.name} key={sampleProject.name}>
-                                        {sampleProject.name}
-                                    </MenuItem>
-                                );
-                            })}
-                        </Select>
-                        <Stack direction="row" justifyContent="space-between">
-                            <FormHelperText error={isError}>{helperText}</FormHelperText>
-                            <Stack direction="row" marginTop={1} spacing={2}>
-                                <LinkButton
-                                    href={projectUrl}
-                                    disabled={!projectUrl}
-                                    onClick={() => {
+                            <DevfileListItem
+                                devfileInfo={props.devfileInfo}
+                                devfile={selectedDevfile}
+                                showFullDescription
+                            />
+                            <IconButton onClick={props.closeModal}>
+                                <Close color="textSecondary" fontSize='small' />
+                            </IconButton>
+                        </Stack>
+                        <FormControl fullWidth>
+                            <Stack direction="row" justifyContent="space-between">
+                                <InputLabel id='version-select-label'>Version</InputLabel>
+                                <Select
+                                    value={initialSelectedVersion}
+                                    onChange={(event) => {
+                                        const devfileVersion = props.devfileInfo.versions.filter((versionInfo) => versionInfo.version === event.target.value).pop();
+                                        if (selectedDevfileVersion !== event.target.value) {
+                                            setSelectedDevfileVersion(devfileVersion.version);
+                                            window.vscodeApi.postMessage(
+                                            {
+                                                action: 'getDevfile',
+                                                data: {
+                                                    devfileInfo: props.devfileInfo,
+                                                    version: devfileVersion.version
+                                                }
+                                            });
+                                        }
+                                    }}
+                                    onClick={(_e) => {
+                                        setInteracted(true);
+                                    }}
+                                    disabled={!props.devfileInfo.versions || props.devfileInfo.versions.length < 2}
+                                    error={isVersionError}
+                                    sx={{ flexGrow: '1' }}
+                                    label='Versions'
+                                    labelId='version-select-label'
+                                >
+                                    {props.devfileInfo.versions.map((versionInfo) => {
+                                        return (
+                                            <MenuItem value={versionInfo.version} key={versionInfo.version}>
+                                                {versionInfo.version}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                            </Stack>
+                            <Stack direction="row" justifyContent="space-between">
+                                <FormHelperText error={isVersionError}>{versionHelperText}</FormHelperText>
+                            </Stack>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <Stack direction="row" justifyContent="space-between">
+                                <InputLabel id="template-select-label">Template Project</InputLabel>
+                                <Select
+                                    value={selectedTemplateProject}
+                                    onChange={(event) => {
+                                        setSelectedTemplateProject(event.target.value);
+                                    }}
+                                    onClick={(_e) => {
+                                        setInteracted(true);
+                                    }}
+                                    disabled={starterProjects.length < 2}
+                                    error={isError}
+                                    sx={{ flexGrow: '1' }}
+                                    label="Template Project"
+                                    labelId="template-select-label"
+                                >
+                                    {starterProjects.map((sampleProject) => {
+                                        return (
+                                            <MenuItem value={sampleProject.name} key={sampleProject.name}>
+                                                {sampleProject.name}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                            </Stack>
+                            <Stack direction="row" justifyContent="space-between">
+                                <FormHelperText error={isError}>{helperText}</FormHelperText>
+                                <Stack direction="row" marginTop={1} spacing={2}>
+                                    <LinkButton
+                                        href={projectUrl}
+                                        disabled={!projectUrl}
+                                        onClick={() => {
+                                            window.vscodeApi.postMessage({
+                                                action: 'sendTelemetry',
+                                                data: {
+                                                    actionName: 'devfileSearchOpenProjectInBrowser',
+                                                    properties: {
+                                                        // eslint-disable-next-line camelcase
+                                                        component_type: props.devfileInfo.name,
+                                                        // eslint-disable-next-line camelcase
+                                                        starter_project: selectedTemplateProject,
+                                                    },
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        Open Project in Browser
+                                    </LinkButton>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => {
+                                            props.setSelectedDevfile(selectedDevfile);
+                                            props.setSelectedProject(selectedTemplateProject);
+                                        }}
+                                        disabled={!selectedTemplateProject}
+                                    >
+                                        Use Devfile
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                        </FormControl>
+                        <Box justifyContent='space-between'>
+                            <Box paddingTop={1} style={{ float: 'right' }}>
+                                <CopyToClipboard
+                                    text={selectedDevfile.yaml}
+                                    onCopy={() => {
                                         window.vscodeApi.postMessage({
                                             action: 'sendTelemetry',
                                             data: {
-                                                actionName: 'devfileSearchOpenProjectInBrowser',
+                                                actionName: 'devfileSearchCopiedYaml',
                                                 properties: {
                                                     // eslint-disable-next-line camelcase
-                                                    component_type: props.devfile.name,
+                                                    component_type: props.devfileInfo.name,
                                                     // eslint-disable-next-line camelcase
                                                     starter_project: selectedTemplateProject,
                                                 },
                                             },
                                         });
+                                        setYamlCopied((_) => true);
                                     }}
                                 >
-                                    Open Project in Browser
-                                </LinkButton>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => {
-                                        props.setSelectedProject(selectedTemplateProject);
-                                    }}
-                                    disabled={!selectedTemplateProject}
-                                >
-                                    Use Devfile
-                                </Button>
-                            </Stack>
-                        </Stack>
-                    </FormControl>
-                    <Box justifyContent='space-between'>
-                        <Box paddingTop={1} style={{ float: 'right' }}>
-                            <CopyToClipboard
-                                text={props.devfile.yaml}
-                                onCopy={() => {
-                                    window.vscodeApi.postMessage({
-                                        action: 'sendTelemetry',
-                                        data: {
-                                            actionName: 'devfileSearchCopiedYaml',
-                                            properties: {
-                                                // eslint-disable-next-line camelcase
-                                                component_type: props.devfile.name,
-                                                // eslint-disable-next-line camelcase
-                                                starter_project: selectedTemplateProject,
-                                            },
-                                        },
-                                    });
-                                    setYamlCopied((_) => true);
-                                }}
-                            >
-                                <Tooltip
-                                    title={isYamlCopied ? 'Copied!' : 'Copy YAML'}
-                                    onMouseLeave={() => {
-                                        setTimeout(() => setYamlCopied((_) => false), 200);
-                                    }}
-                                    arrow
-                                >
-                                    <IconButton>
-                                        <FileCopy color="textSecondary" />
-                                    </IconButton>
-                                </Tooltip>
-                            </CopyToClipboard>
+                                    <Tooltip
+                                        title={isYamlCopied ? 'Copied!' : 'Copy YAML'}
+                                        onMouseLeave={() => {
+                                            setTimeout(() => setYamlCopied((_) => false), 200);
+                                        }}
+                                        arrow
+                                    >
+                                        <IconButton>
+                                            <FileCopy color="textSecondary" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </CopyToClipboard>
+                            </Box>
+                            <CodeMirror
+                                value={selectedDevfile.yaml}
+                                height='400px'
+                                width='fullWidth'
+                                extensions={[yaml()]}
+                                readOnly
+                                theme={props.theme?.palette.mode === 'light' ? vsLightCodeMirrorTheme : vsDarkCodeMirrorTheme}
+                                basicSetup={{
+                                    lineNumbers: true,
+                                    highlightActiveLine: true,
+                                    syntaxHighlighting: true
+                                }} />
                         </Box>
-                        <CodeMirror
-                            value={props.devfile.yaml}
-                            height='400px'
-                            width='fullWidth'
-                            extensions={[yaml()]}
-                            readOnly
-                            theme={props.theme?.palette.mode === 'light' ? vsLightCodeMirrorTheme : vsDarkCodeMirrorTheme}
-                            basicSetup={{
-                                lineNumbers: true,
-                                highlightActiveLine: true,
-                                syntaxHighlighting: true
-                            }} />
-                    </Box>
-                </Stack>
+                    </Stack>
+                }
             </Paper>
         );
     },
@@ -451,12 +574,20 @@ export type DevfileSearchProps = {
     titleText: string;
 
     /**
+     * The callback to run when the user selects a DevfileInfo.
+     *
+     * In order to avoid showing the template project selector,
+     * write a callback that removes the DevfileSearch component from the page.
+     */
+    setSelectedDevfileInfo?: (selected: DevfileInfo) => void;
+
+    /**
      * The callback to run when the user selects a Devfile.
      *
      * In order to avoid showing the template project selector,
      * write a callback that removes the DevfileSearch component from the page.
      */
-    setSelectedDevfile?: (selected: Devfile) => void;
+    setSelectedDevfile?: (selected: DevfileData) => void;
 
     /**
      * The callback to run when the user selects a template project.
@@ -479,22 +610,30 @@ export type DevfileSearchProps = {
  *
  * @returns true if the specified Devfile should be included in the search results, and false otherwise
  */
-function isToBeIncluded(devfile: Devfile, tagFilter: string[], debugSupportFilter: boolean, deploySupportFilter: boolean): boolean {
-    const includesDebugSupport = debugSupportFilter === false || debugSupportFilter === devfile.supportsDebug;
-    const includesDeploySupport = deploySupportFilter === false || deploySupportFilter === devfile.supportsDeploy;
-    const includesTags = tagFilter.length === 0 || devfile.tags.filter((_devfileTag) => {
+function isToBeIncluded(devfileInfo: DevfileInfo, tagFilter: string[], debugSupportFilter: boolean, deploySupportFilter: boolean): boolean {
+    const includesDebugSupport = debugSupportFilter === false ||
+            devfileInfo.versions.some((version) => version.commandGroups.debug === debugSupportFilter);
+    const includesDeploySupport = deploySupportFilter === false ||
+            devfileInfo.versions.some((version) => version.commandGroups.deploy === deploySupportFilter);
+    const includesTags = tagFilter.length === 0 || devfileInfo.tags.filter((_devfileTag) => {
         return tagFilter.find((_selectedTags) => _devfileTag === _selectedTags) !== undefined;
     }).length > 0;
 
     return includesDebugSupport && includesDeploySupport && includesTags;
 }
 
+function getDefaultDevfileVersion(devfileInfo: DevfileInfo): string {
+    return devfileInfo.versions.find((_versionInfo) => _versionInfo.default)?.version || 'latest';
+}
+
 export function DevfileSearch(props: DevfileSearchProps) {
     const ITEMS_PER_PAGE = 12;
 
-    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>();
+    const [isSomeDevfileInfoRetrieved, setSomeDevfileInfoRetrieved] = React.useState(false);
+    const [selectedDevfileInfo, setSelectedDevfileInfo] = React.useState<DevfileInfo>();
     const [currentPage, setCurrentPage] = React.useState(1);
-    const [devfileRegistries, setDevfileRegistries] = React.useState<DevfileRegistry[]>([]);
+    const [devfileRegistries, setDevfileRegistries] = React.useState<DevfileRegistryInfo[]>([]);
+    const [devfileInfos, setDevfileInfos] = React.useState<DevfileInfo[]>([]);
     const [registryEnabled, setRegistryEnabled] = React.useState<
         { registryName: string; registryUrl: string; enabled: boolean }[]
     >([]);
@@ -515,6 +654,14 @@ export function DevfileSearch(props: DevfileSearchProps) {
         switch (message.action) {
             case 'devfileRegistries': {
                 setDevfileRegistries((_devfileRegistries) => message.data);
+                setDevfileInfos((_devfileInfos) => []);
+                setSomeDevfileInfoRetrieved(_unused => false);
+                window.vscodeApi.postMessage({ action: 'getDevfileInfos' });
+                break;
+            }
+            case 'devfileInfos': {
+                setDevfileInfos((_devfileInfos) => message.data);
+                setSomeDevfileInfoRetrieved(_unused => true);
                 break;
             }
             case 'devfileCapabilities': {
@@ -567,8 +714,10 @@ export function DevfileSearch(props: DevfileSearchProps) {
     React.useEffect(() => clearDevfileAll(), [devfileTags]);
 
     React.useEffect(() => {
-        props.setSelectedDevfile(selectedDevfile);
-    }, [selectedDevfile]);
+        if (props.setSelectedDevfileInfo) {
+            props.setSelectedDevfileInfo(selectedDevfileInfo);
+        }
+    }, [selectedDevfileInfo]);
 
     React.useEffect(() => {
         window.addEventListener('message', respondToMessage);
@@ -579,6 +728,10 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     React.useEffect(() => {
         window.vscodeApi.postMessage({ action: 'getDevfileRegistries' });
+    }, []);
+
+    React.useEffect(() => {
+        window.vscodeApi.postMessage({ action: 'getDevfileInfos' });
     }, []);
 
     React.useEffect(() => {
@@ -593,16 +746,16 @@ export function DevfileSearch(props: DevfileSearchProps) {
         setCurrentPage((_) => 1);
     }, [registryEnabled, capabilityEnabled, tagEnabled, searchText]);
 
-    if (!devfileRegistries) {
-        return <LoadScreen title="Retrieving list of Devfiles" />;
+    if (!devfileInfos) {
+        return <LoadScreen title="Retrieving list of Devfiles..." />;
     }
 
     if (!devfileCapabilities) {
-        return <LoadScreen title="Retrieving list of Devfile Capabilities" />;
+        return <LoadScreen title="Retrieving list of Devfile Capabilities..." />;
     }
 
     if (!devfileTags) {
-        return <LoadScreen title="Retrieving list of Devfile Tags" />;
+        return <LoadScreen title="Retrieving list of Devfile Tags..." />;
     }
 
     const activeRegistries = registryEnabled //
@@ -623,17 +776,16 @@ export function DevfileSearch(props: DevfileSearchProps) {
         .filter((_tag) => _tag.enabled) //
         .map((_tag) => _tag.name);
 
-    const devfiles: Devfile[] = devfileRegistries //
-        .filter((devfileRegistry) => activeRegistries.includes(devfileRegistry.name)) //
-        .flatMap((devfileRegistry) => devfileRegistry.devfiles) //
-        .filter((devfile) => isToBeIncluded(devfile, activeTags, debugSupport, deploySupport)) //
-        .filter((devfile) => {
+    const devfiles: DevfileInfo[] = devfileInfos //
+        .filter((devfileInfo) => activeRegistries.includes(devfileInfo.registry.name)) //
+        .filter((devfileInfo) => isToBeIncluded(devfileInfo, activeTags, debugSupport, deploySupport)) //
+        .filter((devfileInfo) => {
             const searchTerms = searchText.split(/\s+/);
             return every(
                 searchTerms.map(
                     (searchTerm) =>
-                        devfile.name.toLowerCase().includes(searchTerm) ||
-                        devfile.tags.find((tag) => tag.toLowerCase().includes(searchTerm)),
+                        devfileInfo.name.toLowerCase().includes(searchTerm) ||
+                        devfileInfo.tags.find((tag) => tag.toLowerCase().includes(searchTerm)),
                 ),
             );
         });
@@ -647,161 +799,168 @@ export function DevfileSearch(props: DevfileSearchProps) {
             return 1;
         }
 
-        if (a.supportsDebug && !b.supportsDebug) {
+        const aSupportsDebug = a.versions.some((version) => version.commandGroups.debug === true);
+        const bSupportsDebug = b.versions.some((version) => version.commandGroups.debug === true);
+
+        if (aSupportsDebug && !bSupportsDebug) {
             return -1;
-        } else if (b.supportsDebug && !a.supportsDebug) {
+        } else if (bSupportsDebug && !aSupportsDebug) {
             return 1;
         }
 
-        return a.name < b.name ? -1 : 1;
+        return a.displayName < b.displayName ? -1 : 1;
     });
 
     return (
         <>
             <Stack direction="column" height="100%" spacing={0.5}>
-                <Stack direction="row" spacing={1} width={'100%'}>
-                    <Stack direction="column" maxWidth={'30%'} sx={{
-                        height: 'calc(100vh - 100px)',
-                        overflow: 'scroll'
-                    }} spacing={0}>
-                        <Typography variant="body2" marginBottom={1}>
-                            Filter by
-                        </Typography>
+                {
+                    !isSomeDevfileInfoRetrieved ?
+                        <LoadScreen title='Retrieving Devfiles...' /> :
+                        <Stack direction="row" spacing={1} width={'100%'}>
+                            <Stack direction="column" maxWidth={'30%'} sx={{
+                                height: 'calc(100vh - 100px)',
+                                overflow: 'scroll'
+                            }} spacing={0}>
+                                <Typography variant="body2" marginBottom={1}>
+                                    Filter by
+                                </Typography>
 
-                        {
-                            devfileRegistries.length > 1 && (
-                                <>
-                                    <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                        Devfile Registries
-                                    </Typography>
-                                    <RegistriesPicker
-                                        registryEnabled={registryEnabled}
-                                        setRegistryEnabled={setRegistryEnabled}
-                                    />
-                                    <Divider orientation="horizontal" sx={{ width: '100%' }} />
-                                </>
-                            )
-                        }
-
-                        {
-                            devfileCapabilities.length > 0 && (
-                                <Stack direction="column" spacing={0}>
-                                    <Typography variant="body2" marginBottom={1} marginTop={1}>
-                                        Support
-                                    </Typography>
-                                    <Stack direction="column" useFlexGap={true} width="100%" spacing={1}>
-                                        {
-                                            devfileCapabilities.length > 0 && (
-                                                <>
-                                                    <TagsPicker
-                                                        tagEnabled={capabilityEnabled}
-                                                        setTagEnabled={setCapabilityEnabled} />
-                                                    <Divider orientation="horizontal" sx={{ width: '100%' }} />
-                                                </>
-                                            )
-                                        }
-                                    </Stack>
-                                </Stack>
-                            )
-                        }
-
-                        {
-                            devfileTags.length > 0 && (
-                                <>
-                                    <Stack id='tags' direction="column" sx={{
-                                        height: !showMore ? '55vh' : 'calc(300vh - 150px)',
-                                        overflow: !showMore ? 'hidden' : 'scroll'
-                                    }} spacing={0}>
-                                        <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                            Tags
-                                        </Typography>
-                                        <TagsPicker
-                                            tagEnabled={tagEnabled}
-                                            setTagEnabled={setTagEnabled} />
-                                    </Stack>
-                                    <Stack direction='row' gap={2}>
-                                        <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                            <Link
-                                                component="button"
-                                                variant="body2"
-                                                underline='none'
-                                                sx={{ color: 'var(--vscode-button-foreground) !important' }}
-                                                onClick={() => {
-                                                    setShowMore((prev) => !prev);
-                                                    if (showMore) {
-                                                        const myDiv = document.getElementById('tags');
-                                                        myDiv.scrollTop = 0;
-                                                    }
-                                                }}
-                                            >
-                                                Show {!showMore ? 'more' : 'less'}
-                                            </Link>
-                                        </Typography>
-                                        {
-                                            activeTags.length > 0 &&
+                                {
+                                    devfileRegistries.length > 1 && (
+                                        <>
                                             <Typography variant="body2" marginTop={1} marginBottom={1}>
-                                                <Link
-                                                    component="button"
-                                                    color='error'
-                                                    variant="body2"
-                                                    underline='none'
-                                                    onClick={() => {
-                                                        clearDevfileAll()
-                                                    }}
-                                                >
-                                                    Clear {activeTags.length > 1 ? 'all' : ''}
-                                                </Link>
+                                                Devfile Registries
                                             </Typography>
-                                        }
-                                    </Stack>
-                                </>
-                            )
-                        }
-                    </Stack>
+                                            <RegistriesPicker
+                                                registryEnabled={registryEnabled}
+                                                setRegistryEnabled={setRegistryEnabled}
+                                            />
+                                            <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                        </>
+                                    )
+                                }
 
-                    <Divider orientation="vertical" sx={{ height: 'calc(100vh - 80px)' }} />
+                                {
+                                    devfileCapabilities.length > 0 && (
+                                        <Stack direction="column" spacing={0}>
+                                            <Typography variant="body2" marginBottom={1} marginTop={1}>
+                                                Support
+                                            </Typography>
+                                            <Stack direction="column" useFlexGap={true} width="100%" spacing={1}>
+                                                {
+                                                    devfileCapabilities.length > 0 && (
+                                                        <>
+                                                            <TagsPicker
+                                                                tagEnabled={capabilityEnabled}
+                                                                setTagEnabled={setCapabilityEnabled} />
+                                                            <Divider orientation="horizontal" sx={{ width: '100%' }} />
+                                                        </>
+                                                    )
+                                                }
+                                            </Stack>
+                                        </Stack>
+                                    )
+                                }
 
-                    <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
-                        <SearchBar
-                            searchText={searchText}
-                            setSearchText={setSearchText}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            numPages={
-                                Math.floor(devfiles.length / ITEMS_PER_PAGE) +
-                                (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)
-                            }
-                            perPageCount={ITEMS_PER_PAGE}
-                            devfilesLength={devfiles.length}
-                        />
-                        {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
-                        {/* 5em is the padding at the top of the page */}
-                        <Stack
-                            id="devfileList"
-                            direction="column"
-                            sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
-                            divider={<Divider />}
-                            width={'100%'}
-                        >
-                            {devfiles
-                                .slice(
-                                    (currentPage - 1) * ITEMS_PER_PAGE,
-                                    Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length),
-                                )
-                                .map((devfile) => {
-                                    return (
-                                        <DevfileListItem
-                                            key={`${devfile.registryName}-${devfile.name}`}
-                                            devfile={devfile}
-                                            buttonCallback={() => {
-                                                setSelectedDevfile(devfile);
-                                            }}
-                                        />
-                                    );
-                                })}
+                                {
+                                    devfileTags.length > 0 && (
+                                        <>
+                                            <Stack id='tags' direction="column" sx={{
+                                                height: !showMore ? '55vh' : 'calc(300vh - 150px)',
+                                                overflow: !showMore ? 'hidden' : 'scroll'
+                                            }} spacing={0}>
+                                                <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                                    Tags
+                                                </Typography>
+                                                <TagsPicker
+                                                    tagEnabled={tagEnabled}
+                                                    setTagEnabled={setTagEnabled} />
+                                            </Stack>
+                                            <Stack direction='row' gap={2}>
+                                                <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                                    <Link
+                                                        component="button"
+                                                        variant="body2"
+                                                        underline='none'
+                                                        sx={{ color: 'var(--vscode-button-foreground) !important' }}
+                                                        onClick={() => {
+                                                            setShowMore((prev) => !prev);
+                                                            if (showMore) {
+                                                                const myDiv = document.getElementById('tags');
+                                                                myDiv.scrollTop = 0;
+                                                            }
+                                                        }}
+                                                    >
+                                                        Show {!showMore ? 'more' : 'less'}
+                                                    </Link>
+                                                </Typography>
+                                                {
+                                                    activeTags.length > 0 &&
+                                                    <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                                        <Link
+                                                            component="button"
+                                                            color='error'
+                                                            variant="body2"
+                                                            underline='none'
+                                                            onClick={() => {
+                                                                clearDevfileAll()
+                                                            }}
+                                                        >
+                                                            Clear {activeTags.length > 1 ? 'all' : ''}
+                                                        </Link>
+                                                    </Typography>
+                                                }
+                                            </Stack>
+                                        </>
+                                    )
+                                }
+                            </Stack>
+                            <Divider orientation="vertical" sx={{ height: 'calc(100vh - 80px)' }} />
+
+                            <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
+                                <SearchBar
+                                    searchText={searchText}
+                                    setSearchText={setSearchText}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    numPages={
+                                        Math.floor(devfiles.length / ITEMS_PER_PAGE) +
+                                        (devfiles.length % ITEMS_PER_PAGE > 0.0001 ? 1 : 0)
+                                    }
+                                    perPageCount={ITEMS_PER_PAGE}
+                                    devfilesLength={devfiles.length}
+                                />
+                                {/* 320px is the approximate combined height of the top bar and bottom bar in the devfile search view */}
+                                {/* 5em is the padding at the top of the page */}
+                                <Stack
+                                    id="devfileList"
+                                    direction="column"
+                                    sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
+                                    divider={<Divider />}
+                                    width={'100%'}
+                                >
+                                    {devfiles
+                                        .slice(
+                                            (currentPage - 1) * ITEMS_PER_PAGE,
+                                            Math.min(currentPage * ITEMS_PER_PAGE, devfiles.length),
+                                        )
+                                        .map((devfileInfo) => {
+                                            return (
+                                                <DevfileListItem
+                                                    key={`${devfileInfo.registry.name}-${devfileInfo.name}`}
+                                                    devfileInfo={devfileInfo}
+                                                    devfile={undefined}
+                                                    buttonCallback={() => {
+                                                        setSelectedDevfileInfo(devfileInfo);
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                </Stack>
+                            </Stack>
                         </Stack>
-                    </Stack>
-                </Stack>
+                }
                 <Stack direction="row-reverse" justifyContent="space-between" alignItems="center">
                     <DevfileExplanation />
                     {props.goBack && (
@@ -818,25 +977,33 @@ export function DevfileSearch(props: DevfileSearchProps) {
             </Stack>
             <Modal
                 onClose={() => {
-                    setSelectedDevfile(undefined);
+                    setSelectedDevfileInfo(undefined);
                 }}
-                open={!!selectedDevfile}
+                open={!!selectedDevfileInfo}
                 disableScrollLock
             >
                 <SelectTemplateProject
-                    devfile={selectedDevfile}
+                    devfileInfo={selectedDevfileInfo}
                     setSelectedProject={(projectName) => {
-                        if (!selectedDevfile) {
+                        if (!selectedDevfileInfo) {
                             return;
                         }
-                        props.setSelectedTemplateProject({
-                            devfileId: selectedDevfile.id,
-                            registryName: selectedDevfile.registryName,
-                            templateProjectName: projectName,
-                        });
+                        if (props.setSelectedTemplateProject) {
+                            props.setSelectedTemplateProject({
+                                devfileId: selectedDevfileInfo.name,
+                                devfileVersion: getDefaultDevfileVersion(selectedDevfileInfo),
+                                registryName: selectedDevfileInfo.registry.name,
+                                templateProjectName: projectName,
+                            });
+                        }
+                    }}
+                    setSelectedDevfile={(devfile) => {
+                        if (props.setSelectedDevfile) {
+                            props.setSelectedDevfile(devfile);
+                        }
                     }}
                     closeModal={() => {
-                        setSelectedDevfile((_) => undefined);
+                        setSelectedDevfileInfo((_) => undefined);
                     }}
                     theme={props.theme}
                 />

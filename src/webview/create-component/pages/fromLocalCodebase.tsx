@@ -15,12 +15,12 @@ import {
     Typography
 } from '@mui/material';
 import * as React from 'react';
+import { DevfileData } from '../../../devfile-registry/devfileInfo';
 import { ComponentNameInput } from '../../common/componentNameInput';
 import {
     CreateComponentButton,
     ErrorAlert
 } from '../../common/createComponentButton';
-import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
@@ -36,7 +36,7 @@ type Message = {
 type CurrentPage = 'fromLocalCodeBase' | 'selectDifferentDevfile';
 
 type RecommendedDevfileState = {
-    devfile: Devfile;
+    devfile: DevfileData;
     showRecommendation: boolean;
     isLoading: boolean;
     isDevfileExistsInFolder: boolean;
@@ -72,9 +72,26 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         isDevfileExistsInFolder: false,
     });
 
-    const [selectedDevfile, setSelectedDevfile] = React.useState<Devfile>(undefined);
+    const [selectedDevfile, setSelectedDevfile] = React.useState<DevfileData>(undefined);
 
     const [createComponentErrorMessage, setCreateComponentErrorMessage] = React.useState('');
+
+    function getTargetPort(devfile: DevfileData): number {
+        return devfile?.components?.filter((component) => component.container)
+                .filter((component) => component.container.endpoints && component.container?.endpoints[0])
+                .map((component) => component.container?.endpoints[0].targetPort)
+                .pop();
+    };
+
+    function getComponentVersion(devfile: DevfileData): string {
+        return devfile?.metadata?.version ? devfile.metadata.version : 'latest';
+    };
+
+    function getEffectiveDevfile(): DevfileData {
+        return selectedDevfile ? selectedDevfile :
+            recommendedDevfile && recommendedDevfile.devfile ?
+                recommendedDevfile.devfile : undefined;
+    };
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -168,6 +185,14 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         window.vscodeApi.postMessage({ action: 'getInitialWokspaceFolder' });
     }, []);
 
+    React.useEffect(() => {
+        setPortNumber(getTargetPort(getEffectiveDevfile()));
+        window.vscodeApi.postMessage({
+            action: 'validatePortNumber',
+            data: portNumber,
+        });
+    }, [recommendedDevfile, selectedDevfile]);
+
     function handleNext() {
         window.vscodeApi.postMessage({
             action: 'getRecommendedDevfile',
@@ -176,14 +201,15 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
         setRecommendedDevfile((prevState) => ({ ...prevState, isLoading: true }));
     }
 
-    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) {
+    function createComponentFromLocalCodebase(projectFolder: string, componentName: string, devfileVersion: string, addToWorkspace: boolean, portNumber: number) {
         window.vscodeApi.postMessage({
             action: 'createComponent',
             data: {
                 devfileDisplayName: selectedDevfile
-                    ? selectedDevfile.name
-                    : recommendedDevfile.devfile.name,
+                    ? selectedDevfile.metadata.name
+                    : recommendedDevfile.devfile.metadata.name,
                 componentName,
+                devfileVersion,
                 portNumber,
                 path: projectFolder,
                 isFromTemplateProject: false,
@@ -209,7 +235,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                 setComponentName={setComponentName}
                             />
                             {
-                                portNumber &&
+                                portNumber !== undefined &&
                                 <PortNumberInput
                                     isPortNumberFieldValid={isPortNumberFieldValid}
                                     portNumberErrorMessage={portNumberErrorMessage}
@@ -358,9 +384,10 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                                 SELECT A DIFFERENT DEVFILE
                                             </Button>
                                             {(recommendedDevfile.showRecommendation ||
-                                                selectedDevfile) && (
+                                                setSelectedDevfile) && (
                                                     <CreateComponentButton
                                                         componentName={componentName}
+                                                        devfileVersion={getComponentVersion(getEffectiveDevfile())}
                                                         componentParentFolder={projectFolder}
                                                         addToWorkspace={true}
                                                         portNumber={portNumber}
@@ -428,7 +455,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                             goBack={() => {
                                 setCurrentPage('fromLocalCodeBase');
                             }}
-                            setSelectedDevfile={setSelectedDevfile}
+                            setSelectedDevfile={(_df) => {
+                                setSelectedDevfile(_df);
+                            }}
                         />
                     ) : (
                         setCurrentPage('fromLocalCodeBase')

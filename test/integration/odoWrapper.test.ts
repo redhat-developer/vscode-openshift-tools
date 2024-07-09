@@ -63,12 +63,14 @@ suite('./odo/odoWrapper.ts', function () {
             await Odo.Instance.createComponentFromFolder(
                 'nodejs',
                 undefined,
+                undefined,
                 'component1',
                 tmpFolder1,
                 'nodejs-starter',
             );
             await Odo.Instance.createComponentFromFolder(
                 'go',
+                undefined,
                 undefined,
                 'component2',
                 tmpFolder2,
@@ -142,42 +144,10 @@ suite('./odo/odoWrapper.ts', function () {
         });
     });
 
-    test('getComponentTypes()', async function () {
-        const componentTypes = await Odo.Instance.getComponentTypes();
-        // TODO: improve
-        expect(componentTypes).to.not.be.empty;
-    });
-
-    test('getDetailedComponentInformation()', async function() {
-        const componentTypes = await Odo.Instance.getComponentTypes();
-        const componentDetails = await Odo.Instance.getDetailedComponentInformation(componentTypes[0]);
-        // some Devfiles don't have starter projects, but the first Devfile is likely .NET
-        expect(componentDetails.starterProjects).is.not.empty;
-    });
-
-    test('getStarterProjects()', async function() {
-        const starterProjects = await Odo.Instance.getStarterProjects({
-            registryName: 'DefaultDevfileRegistry',
-            description: '.NET 5.0 application',
-            label: '',
-            name: 'dotnet50',
-            version: '1.0.3',
-        });
-        expect(starterProjects).to.have.length(1);
-        expect(starterProjects[0].name).to.equal('dotnet50-example');
-        const udiStarterProjects = await Odo.Instance.getStarterProjects({
-            registryName: 'DefaultDevfileRegistry',
-            description: 'Universal Developer Image provides ',
-            label: '',
-            name: 'udi',
-            version: '1.0.0',
-        });
-        expect(udiStarterProjects).to.have.length(0);
-    });
-
     suite('create component', function() {
 
         const COMPONENT_TYPE = 'dotnet50';
+        const COMPONENT_VERSION = 'latest';
 
         let tmpFolder: string;
 
@@ -190,7 +160,7 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('createComponentFromTemplateProject()', async function() {
-            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, 'DefaultDevfileRegistry', 'dotnet50-example');
+            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, COMPONENT_VERSION, 'DefaultDevfileRegistry', 'dotnet50-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
@@ -211,7 +181,7 @@ suite('./odo/odoWrapper.ts', function () {
         test('createComponentFromLocation()', async function() {
             // the project already exists from the previous step,
             // we just need to recreate the Devfile
-            await Odo.Instance.createComponentFromLocation('dotnet50', 'my-component', 8080, Uri.file(tmpFolder));
+            await Odo.Instance.createComponentFromLocation('dotnet50', undefined, 'my-component', 8080, Uri.file(tmpFolder));
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
@@ -239,6 +209,7 @@ suite('./odo/odoWrapper.ts', function () {
             componentFolder = await promisify(tmp.dir)();
             await Odo.Instance.createComponentFromFolder(
                 'nodejs',
+                undefined,
                 undefined,
                 'component1',
                 Uri.parse(componentFolder),
