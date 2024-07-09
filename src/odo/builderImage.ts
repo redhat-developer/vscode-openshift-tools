@@ -7,9 +7,10 @@ import * as semver from 'semver';
 import * as _ from 'lodash';
 import { CommandText } from '../base/command';
 import { K8sResourceCommon, K8sResourceKind, Service } from '../k8s/olm/types';
-import { AnalyzeResponse } from './componentType';
 import { CliExitData } from '../util/childProcessUtil';
 import { Odo } from './odoWrapper';
+import { vsCommand } from '../vscommand';
+import CreateDeploymentLoader from '../webview/create-deployment/createDeploymentLoader';
 
 export interface BuilderImage {
     readonly name: string;
@@ -49,7 +50,7 @@ interface ImageTag {
     [key: string]: unknown;
 }
 
-interface NormalizedBuilderImages {
+export interface NormalizedBuilderImages {
     [builderImageName: string]: BuilderImage;
 }
 
@@ -68,7 +69,12 @@ export class BuilderImageWrapper {
         // no state
     }
 
-    public async getBuilder(analyzeRes: AnalyzeResponse[]): Promise<NormalizedBuilderImages> {
+    @vsCommand('openshift.deployment.create.buildConfig')
+    static async createComponent(): Promise<void> {
+        await CreateDeploymentLoader.loadView('Create Deployment');
+    }
+
+    public async getBuilder(): Promise<NormalizedBuilderImages> {
         const cliData: CliExitData = await Odo.Instance.execute(
             new CommandText('oc', 'get imagestreams -o json -n openshift')
         );
