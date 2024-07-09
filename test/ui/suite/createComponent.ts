@@ -88,31 +88,48 @@ export function testCreateComponent(path: string) {
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
             fs.rmSync(pth.join(path, componentName, 'devfile.yaml'), { force: true });
+            console.log('1')
             await refreshView();
+            console.log('2')
             await loadCreateComponentButton();
+            console.log('3')
             await clickCreateComponent();
+            console.log('4')
 
             const createCompView = await initializeEditor();
+            console.log('5')
             await createCompView.createComponentFromLocalCodebase();
+            console.log('6')
 
             const localCodeBasePage = new LocalCodeBasePage();
+            console.log('7')
             await localCodeBasePage.initializeEditor();
+            console.log('8')
             await localCodeBasePage.insertComponentName(componentName);
+            console.log('9')
             await localCodeBasePage.clickSelectFolderButton();
+            console.log('10')
 
             const input = await InputBox.create();
+            console.log('11')
             await input.setText(pth.join(path, componentName));
+            console.log('12')
             await input.confirm();
+            console.log('13')
 
             await localCodeBasePage.clickNextButton();
+            console.log('14')
             await new Promise((res) => {
                 setTimeout(res, 500);
             });
+            console.log('15')
             await localCodeBasePage.clickCreateComponent();
+            console.log('16')
             await new Promise((res) => {
                 setTimeout(res, 6_000);
             });
 
+            console.log('17')
             expect(await section.findItem(componentName)).to.be.not.undefined;
             dlt = true;
         });
