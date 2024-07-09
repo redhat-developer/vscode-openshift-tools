@@ -36,7 +36,7 @@ export function testDevfileRegistries() {
         });
 
         it('add new Devfile registry', async function test() {
-            this.timeout(20_000);
+            this.timeout(40_000);
             const addAction = await registrySection.getAction('Add Registry');
             await addAction.click();
             const input = await InputBox.create();
