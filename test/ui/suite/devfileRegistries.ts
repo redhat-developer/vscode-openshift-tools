@@ -54,7 +54,7 @@ export function testDevfileRegistries() {
             let stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
             //If statement for greater timeout in cases where loading takes more time than expected
             if(stageRegistry === undefined) {
-                await new Promise((res) => { setTimeout(res, 10_000); });
+                await new Promise((res) => { setTimeout(res, 20_000); });
                 stageRegistry = await (registrySection as CustomTreeSection).findItem('stageRegistry');
             }
             expect(stageRegistry).not.undefined;
