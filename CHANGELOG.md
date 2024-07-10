@@ -1,20 +1,36 @@
 # Change Log
 
+## 1.15.0 (July 16, 2024)
+
+ * [#4291](https://github.com/redhat-developer/vscode-openshift-tools/pull/4291) Fix issue opening Routes node in OpenShift explorer
+ * [#4283](https://github.com/redhat-developer/vscode-openshift-tools/pull/4283) Added validation for container image to be deployed from an image URL
+ * [#4255](https://github.com/redhat-developer/vscode-openshift-tools/issues/4255) Remove outdated method from the extension activation
+ * [#4247](https://github.com/redhat-developer/vscode-openshift-tools/pull/4247) Remove dependency to 'make-fetch-happen' NPM module
+ * [#4233](https://github.com/redhat-developer/vscode-openshift-tools/issues/4233) Cluster Webview: sandbox detection status never ends
+ * [#4184](https://github.com/redhat-developer/vscode-openshift-tools/pull/4184) Use 'paste' icon for pasting from Clipboard
+ * [#4183](https://github.com/redhat-developer/vscode-openshift-tools/issues/4183) ODO CLI binary stopped working after Devfile schema update to v.2.2.2
+ * [#4172](https://github.com/redhat-developer/vscode-openshift-tools/issues/4172) There is no error/warning notification when Helm Chart cannot be installed
+ * [#4166](https://github.com/redhat-developer/vscode-openshift-tools/pull/4166) Trim token value from Clipboard when logging in to DevSandbox
+ * [#4165](https://github.com/redhat-developer/vscode-openshift-tools/issues/4165) Use the value saved in the clipboard when logging in using a token
+ * [#4118](https://github.com/redhat-developer/vscode-openshift-tools/issues/4118) Migrate Kubernetes Resource Link Provider from Kubernetes VSCode Extension to OpenShift Toolkit
+ * [#4033](https://github.com/redhat-developer/vscode-openshift-tools/issues/4033) Migrate to upstream version for Helm CLI binary
+ * [#3823](https://github.com/redhat-developer/vscode-openshift-tools/issues/3823) Display status information for Deployments in Application Explorer tree
+
 ## 1.14.0 (May 29, 2024)
 
- * [#3906](https://github.com/redhat-developer/vscode-openshift-tools/issues/3906) Add a new UI for showing, adding, and removing port forwards.
- * [#4086](https://github.com/redhat-developer/vscode-openshift-tools/issues/4086) Create a webview for creating routes from the extension.
- * [#3849](https://github.com/redhat-developer/vscode-openshift-tools/issues/3849) Add progress indicator for Login, Switch context, and Change project actions.
- * [#4109](https://github.com/redhat-developer/vscode-openshift-tools/pull/4109) Fix login to sandbox workflow.
- * [#4101](https://github.com/redhat-developer/vscode-openshift-tools/issues/4101) Project not listed if it has a display name annotation.
- * [#4092](https://github.com/redhat-developer/vscode-openshift-tools/issues/4092) Trying to create a serverless function using the Spring Boot template causes the webview to fail.
- * [#4083](https://github.com/redhat-developer/vscode-openshift-tools/issues/4083) Helm charts may not load on Linux under certain conditions.
- * [#3999](https://github.com/redhat-developer/vscode-openshift-tools/issues/3999) Support projects/namespaces on clusters where the listing of projects is restricted.
- * [#3990](https://github.com/redhat-developer/vscode-openshift-tools/issues/3990) Remove dependence on VS Code Kubernetes extension and use 'oc' binary instead of relying on 'kubectl' binary provided by VS Code Kubernetes.
- * [#3987](https://github.com/redhat-developer/vscode-openshift-tools/issues/3987) Prevent App. Explorer from hanging on extension loading if logged out from a cluster.
- * [#3971](https://github.com/redhat-developer/vscode-openshift-tools/issues/3971) Fix bug where re-logging in does not ask for username and password under certain conditions.
- * [#3925](https://github.com/redhat-developer/vscode-openshift-tools/issues/3925), [#4064](https://github.com/redhat-developer/vscode-openshift-tools/pull/4064)  Fixed 'stdout maxBuffer length exceeded' error, a proposal message is added to change the maximum buffer size of standard output in case of 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' error appearance.
- * [#3845](https://github.com/redhat-developer/vscode-openshift-tools/issues/3845) Fix bug where opening deployment logs would fail if you switched projects while they loaded.
+ * [#3906](https://github.com/redhat-developer/vscode-openshift-tools/issues/3906) Add a new UI for showing, adding, and removing port forwards
+ * [#4086](https://github.com/redhat-developer/vscode-openshift-tools/issues/4086) Create a webview for creating routes from the extension
+ * [#3849](https://github.com/redhat-developer/vscode-openshift-tools/issues/3849) Add progress indicator for Login, Switch context, and Change project actions
+ * [#4109](https://github.com/redhat-developer/vscode-openshift-tools/pull/4109) Fix login to sandbox workflow
+ * [#4101](https://github.com/redhat-developer/vscode-openshift-tools/issues/4101) Project not listed if it has a display name annotation
+ * [#4092](https://github.com/redhat-developer/vscode-openshift-tools/issues/4092) Trying to create a serverless function using the Spring Boot template causes the webview to fail
+ * [#4083](https://github.com/redhat-developer/vscode-openshift-tools/issues/4083) Helm charts may not load on Linux under certain conditions
+ * [#3999](https://github.com/redhat-developer/vscode-openshift-tools/issues/3999) Support projects/namespaces on clusters where the listing of projects is restricted
+ * [#3990](https://github.com/redhat-developer/vscode-openshift-tools/issues/3990) Remove dependence on VS Code Kubernetes extension and use 'oc' binary instead of relying on 'kubectl' binary provided by VS Code Kubernetes
+ * [#3987](https://github.com/redhat-developer/vscode-openshift-tools/issues/3987) Prevent App. Explorer from hanging on extension loading if logged out from a cluster
+ * [#3971](https://github.com/redhat-developer/vscode-openshift-tools/issues/3971) Fix bug where re-logging in does not ask for username and password under certain conditions
+ * [#3925](https://github.com/redhat-developer/vscode-openshift-tools/issues/3925), [#4064](https://github.com/redhat-developer/vscode-openshift-tools/pull/4064)  Fixed 'stdout maxBuffer length exceeded' error, a proposal message is added to change the maximum buffer size of standard output in case of 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' error appearance
+ * [#3845](https://github.com/redhat-developer/vscode-openshift-tools/issues/3845) Fix bug where opening deployment logs would fail if you switched projects while they loaded
 
 ## 1.13.0 (April 10, 2024)
 
@@ -28,26 +44,26 @@
  * [#3918](https://github.com/redhat-developer/vscode-openshift-tools/issues/3918) Use "namespaces" wording on kubernetes clusters and "projects" wording on OpenShift clusters
 
 ## 1.12.0 (February 28, 2024)
- * [#3880](https://github.com/redhat-developer/vscode-openshift-tools/pull/3880) Do not call getAllComponents() in activate.
- * [#3112](https://github.com/redhat-developer/vscode-openshift-tools/issues/3112) Extension takes several minutes to start if the current `~/.kube/config` context is an inaccessible cluster.
- * [#3931](https://github.com/redhat-developer/vscode-openshift-tools/issues/3931) New Serverless Function is not shown after creation.
- * [#3928](https://github.com/redhat-developer/vscode-openshift-tools/issues/3928) Can't load Helm chart.
- * [#3879](https://github.com/redhat-developer/vscode-openshift-tools/pull/3879) When turned to use a service account for a Sandbox a wrong warning message appears.
- * [#3848](https://github.com/redhat-developer/vscode-openshift-tools/pull/3848) Stop trying to connect to a cluster when it doesn't appear to be available.
- * [#3841](https://github.com/redhat-developer/vscode-openshift-tools/pull/3841) Update func CLI to 1.13.0.
- * [#3838](https://github.com/redhat-developer/vscode-openshift-tools/issues/3838) New and Improved sign-in for Developer Sandbox Login experience.
- * [#3822](https://github.com/redhat-developer/vscode-openshift-tools/issues/3822) Add Context menu item to scale OpenShift Deployments.
- * [#3814](https://github.com/redhat-developer/vscode-openshift-tools/issues/3814) "Open in Console" context menu item appears for non-OpenShift clusters.
- * [#3813](https://github.com/redhat-developer/vscode-openshift-tools/pull/3813) Force refresh App explorer on create project when new project name is the same as the one set in the current-context.
- * [#3812](https://github.com/redhat-developer/vscode-openshift-tools/issues/3812) As a user I initially couldn't find "Change Active Project".
- * [#3804](https://github.com/redhat-developer/vscode-openshift-tools/pull/3804) Improve switch context workflow.
- * [#3665](https://github.com/redhat-developer/vscode-openshift-tools/issues/3665) Enhance dev on podman experience.
- * [#3640](https://github.com/redhat-developer/vscode-openshift-tools/issues/3640) Show context menu to Open in Terminal for the function created.
- * [#3638](https://github.com/redhat-developer/vscode-openshift-tools/issues/3638) Show vscode notification message if docker is not started for Fn commands.
- * [#3512](https://github.com/redhat-developer/vscode-openshift-tools/issues/3512) Add paste to the OpenShift terminal.
- * [#3405](https://github.com/redhat-developer/vscode-openshift-tools/issues/3405) Fix podman detection prompt.
- * [#2581](https://github.com/redhat-developer/vscode-openshift-tools/issues/2581) Cannot Start Dev action on quarkus component until an OpenShift Project is created.
- * [#2418](https://github.com/redhat-developer/vscode-openshift-tools/issues/2418) Allow to deploy docker images to connected OpenShift cluster.
+ * [#3880](https://github.com/redhat-developer/vscode-openshift-tools/pull/3880) Do not call getAllComponents() in activate
+ * [#3112](https://github.com/redhat-developer/vscode-openshift-tools/issues/3112) Extension takes several minutes to start if the current `~/.kube/config` context is an inaccessible cluster
+ * [#3931](https://github.com/redhat-developer/vscode-openshift-tools/issues/3931) New Serverless Function is not shown after creation
+ * [#3928](https://github.com/redhat-developer/vscode-openshift-tools/issues/3928) Can't load Helm chart
+ * [#3879](https://github.com/redhat-developer/vscode-openshift-tools/pull/3879) When turned to use a service account for a Sandbox a wrong warning message appears
+ * [#3848](https://github.com/redhat-developer/vscode-openshift-tools/pull/3848) Stop trying to connect to a cluster when it doesn't appear to be available
+ * [#3841](https://github.com/redhat-developer/vscode-openshift-tools/pull/3841) Update func CLI to 1.13.0
+ * [#3838](https://github.com/redhat-developer/vscode-openshift-tools/issues/3838) New and Improved sign-in for Developer Sandbox Login experience
+ * [#3822](https://github.com/redhat-developer/vscode-openshift-tools/issues/3822) Add Context menu item to scale OpenShift Deployments
+ * [#3814](https://github.com/redhat-developer/vscode-openshift-tools/issues/3814) "Open in Console" context menu item appears for non-OpenShift clusters
+ * [#3813](https://github.com/redhat-developer/vscode-openshift-tools/pull/3813) Force refresh App explorer on create project when new project name is the same as the one set in the current-context
+ * [#3812](https://github.com/redhat-developer/vscode-openshift-tools/issues/3812) As a user I initially couldn't find "Change Active Project"
+ * [#3804](https://github.com/redhat-developer/vscode-openshift-tools/pull/3804) Improve switch context workflow
+ * [#3665](https://github.com/redhat-developer/vscode-openshift-tools/issues/3665) Enhance dev on podman experience
+ * [#3640](https://github.com/redhat-developer/vscode-openshift-tools/issues/3640) Show context menu to Open in Terminal for the function created
+ * [#3638](https://github.com/redhat-developer/vscode-openshift-tools/issues/3638) Show vscode notification message if docker is not started for Fn commands
+ * [#3512](https://github.com/redhat-developer/vscode-openshift-tools/issues/3512) Add paste to the OpenShift terminal
+ * [#3405](https://github.com/redhat-developer/vscode-openshift-tools/issues/3405) Fix podman detection prompt
+ * [#2581](https://github.com/redhat-developer/vscode-openshift-tools/issues/2581) Cannot Start Dev action on quarkus component until an OpenShift Project is created
+ * [#2418](https://github.com/redhat-developer/vscode-openshift-tools/issues/2418) Allow to deploy docker images to connected OpenShift cluster
 
 ## 1.11.0 (December 13, 2023)
  * [#3609](https://github.com/redhat-developer/vscode-openshift-tools/issues/3609) Manage helm repositories
@@ -75,77 +91,77 @@
  * [#3527](https://github.com/redhat-developer/vscode-openshift-tools/issues/3527) Build cannot download func dependency, if the project is checked out to a directory with a dot character
 
 ## 1.10.0 (November 2, 2023)
- * [#3491](https://github.com/redhat-developer/vscode-openshift-tools/pull/3491) Deploy a serverless function using Tekton.
- * [#3352](https://github.com/redhat-developer/vscode-openshift-tools/issues/3352) Support different build configurations for serverless functions.
- * [#2873](https://github.com/redhat-developer/vscode-openshift-tools/issues/2873) CodeLenses to Apply/Delete a Kubernetes YAML file.
- * [#3508](https://github.com/redhat-developer/vscode-openshift-tools/pull/3508) List Operator-backed services in the Application Explorer sidebar.
- * [#3475](https://github.com/redhat-developer/vscode-openshift-tools/pull/3475) Add "OK" and "Cancel" buttons to cluster login input fields.
- * [#3452](https://github.com/redhat-developer/vscode-openshift-tools/issues/3452) When creating a component, use the first workspace folder as an initial path value.
- * [#3386](https://github.com/redhat-developer/vscode-openshift-tools/issues/3386) Fix creating a component from Git when a Devfile exists in git repo.
- * [#3384](https://github.com/redhat-developer/vscode-openshift-tools/issues/3384) Fix scrolling section in welcome page for some display scaling settings.
- * [#3357](https://github.com/redhat-developer/vscode-openshift-tools/issues/3357) Add possibility to "go back" when logging into a cluster.
- * [#3354](https://github.com/redhat-developer/vscode-openshift-tools/issues/3354) Improve the Helm UI so that it resembles the "Create Component" > "From Template" UI.
- * [#3353](https://github.com/redhat-developer/vscode-openshift-tools/issues/3353) Keybinding and context menu for copy and select all in terminal.
- * [#3339](https://github.com/redhat-developer/vscode-openshift-tools/issues/3339) Use VSCode SecretStorage API instead of 'keytar'.
- * [#3318](https://github.com/redhat-developer/vscode-openshift-tools/issues/3318) Refresh the components tree view when Devfiles are deleted.
- * [#3294](https://github.com/redhat-developer/vscode-openshift-tools/issues/3294) Sanitize the suggested component name in the "Create Component" > "Import from Git" workflow.
- * [#3138](https://github.com/redhat-developer/vscode-openshift-tools/issues/3138) In the terminal, if a command is rerun after exiting, close the old tab.
- * [#3137](https://github.com/redhat-developer/vscode-openshift-tools/issues/3137) "Select All" functionality for OpenShift Terminal.
- * [#3135](https://github.com/redhat-developer/vscode-openshift-tools/issues/3135) Add button to clear contents of terminal in OpenShift Terminal view.
- * [#3134](https://github.com/redhat-developer/vscode-openshift-tools/issues/3134) Automatically create a component folder for manually typed in path in "Create Component" workflow.
- * [#3081](https://github.com/redhat-developer/vscode-openshift-tools/issues/3081) Fix "Create Service" view.
- * [#3040](https://github.com/redhat-developer/vscode-openshift-tools/issues/3040) Display Progress Information when cloning project during "Create Component" > "Import From Git".
- * [#2589](https://github.com/redhat-developer/vscode-openshift-tools/issues/2589) Add support for running 'odo dev' without watching resources for changes and instead rebuild when 'p' is pressed in the terminal.
- * [#1803](https://github.com/redhat-developer/vscode-openshift-tools/issues/1803) Make it easier to select all "Watch log" content in the terminal, and remove the alternative editor.
- * [#3382](https://github.com/redhat-developer/vscode-openshift-tools/issues/3382) Support `KUBECONFIG` environment variable.
- * [#3492](https://github.com/redhat-developer/vscode-openshift-tools/pull/3492) Add repo URL in the Helm UI.
- * [#3514](https://github.com/redhat-developer/vscode-openshift-tools/issues/3514) Fix error that prevents logging into a cluster using a token.
+ * [#3491](https://github.com/redhat-developer/vscode-openshift-tools/pull/3491) Deploy a serverless function using Tekton
+ * [#3352](https://github.com/redhat-developer/vscode-openshift-tools/issues/3352) Support different build configurations for serverless functions
+ * [#2873](https://github.com/redhat-developer/vscode-openshift-tools/issues/2873) CodeLenses to Apply/Delete a Kubernetes YAML file
+ * [#3508](https://github.com/redhat-developer/vscode-openshift-tools/pull/3508) List Operator-backed services in the Application Explorer sidebar
+ * [#3475](https://github.com/redhat-developer/vscode-openshift-tools/pull/3475) Add "OK" and "Cancel" buttons to cluster login input fields
+ * [#3452](https://github.com/redhat-developer/vscode-openshift-tools/issues/3452) When creating a component, use the first workspace folder as an initial path value
+ * [#3386](https://github.com/redhat-developer/vscode-openshift-tools/issues/3386) Fix creating a component from Git when a Devfile exists in git repo
+ * [#3384](https://github.com/redhat-developer/vscode-openshift-tools/issues/3384) Fix scrolling section in welcome page for some display scaling settings
+ * [#3357](https://github.com/redhat-developer/vscode-openshift-tools/issues/3357) Add possibility to "go back" when logging into a cluster
+ * [#3354](https://github.com/redhat-developer/vscode-openshift-tools/issues/3354) Improve the Helm UI so that it resembles the "Create Component" > "From Template" UI
+ * [#3353](https://github.com/redhat-developer/vscode-openshift-tools/issues/3353) Keybinding and context menu for copy and select all in terminal
+ * [#3339](https://github.com/redhat-developer/vscode-openshift-tools/issues/3339) Use VSCode SecretStorage API instead of 'keytar'
+ * [#3318](https://github.com/redhat-developer/vscode-openshift-tools/issues/3318) Refresh the components tree view when Devfiles are deleted
+ * [#3294](https://github.com/redhat-developer/vscode-openshift-tools/issues/3294) Sanitize the suggested component name in the "Create Component" > "Import from Git" workflow
+ * [#3138](https://github.com/redhat-developer/vscode-openshift-tools/issues/3138) In the terminal, if a command is rerun after exiting, close the old tab
+ * [#3137](https://github.com/redhat-developer/vscode-openshift-tools/issues/3137) "Select All" functionality for OpenShift Terminal
+ * [#3135](https://github.com/redhat-developer/vscode-openshift-tools/issues/3135) Add button to clear contents of terminal in OpenShift Terminal view
+ * [#3134](https://github.com/redhat-developer/vscode-openshift-tools/issues/3134) Automatically create a component folder for manually typed in path in "Create Component" workflow
+ * [#3081](https://github.com/redhat-developer/vscode-openshift-tools/issues/3081) Fix "Create Service" view
+ * [#3040](https://github.com/redhat-developer/vscode-openshift-tools/issues/3040) Display Progress Information when cloning project during "Create Component" > "Import From Git"
+ * [#2589](https://github.com/redhat-developer/vscode-openshift-tools/issues/2589) Add support for running 'odo dev' without watching resources for changes and instead rebuild when 'p' is pressed in the terminal
+ * [#1803](https://github.com/redhat-developer/vscode-openshift-tools/issues/1803) Make it easier to select all "Watch log" content in the terminal, and remove the alternative editor
+ * [#3382](https://github.com/redhat-developer/vscode-openshift-tools/issues/3382) Support `KUBECONFIG` environment variable
+ * [#3492](https://github.com/redhat-developer/vscode-openshift-tools/pull/3492) Add repo URL in the Helm UI
+ * [#3514](https://github.com/redhat-developer/vscode-openshift-tools/issues/3514) Fix error that prevents logging into a cluster using a token
 
 ## 1.9.1 (September 28, 2023)
- * [#3342](https://github.com/redhat-developer/vscode-openshift-tools/issues/3342) Sandbox page in `Add OpenShift Cluster` editor stays in 'Detecting' status forever.
- * [#3356](https://github.com/redhat-developer/vscode-openshift-tools/issues/3356) Extension fails to activate when a deleted folder is in the workspace.
+ * [#3342](https://github.com/redhat-developer/vscode-openshift-tools/issues/3342) Sandbox page in `Add OpenShift Cluster` editor stays in 'Detecting' status forever
+ * [#3356](https://github.com/redhat-developer/vscode-openshift-tools/issues/3356) Extension fails to activate when a deleted folder is in the workspace
 
 ## 1.9.0 (September 26, 2023)
- * [#3086](https://github.com/redhat-developer/vscode-openshift-tools/issues/3086) In Devfile search view, you can now filter by debug/deploy support and tags.
- * [#2781](https://github.com/redhat-developer/vscode-openshift-tools/issues/2781) Add support for Devfile port and name detection.
- * [#2819](https://github.com/redhat-developer/vscode-openshift-tools/issues/2819) Create a separate terminal pane for all vscode-openshift related commands to run in.
- * [#3316](https://github.com/redhat-developer/vscode-openshift-tools/issues/3316) Fix bug where invoking "Cloud Events" functions didn't work.
- * [#2854](https://github.com/redhat-developer/vscode-openshift-tools/issues/2854) Killing terminal from older start dev action stops current dev.
- * [#3323](https://github.com/redhat-developer/vscode-openshift-tools/issues/3323) Prevent "Create Dev Sandbox" wizard from getting stuck at loading screen.
- * [#3293](https://github.com/redhat-developer/vscode-openshift-tools/issues/3293) Trying "Create Component" with a mostly empty git repository doesn't work.
- * [#3324](https://github.com/redhat-developer/vscode-openshift-tools/issues/3324) Remove "Connect on Slack" button in "Dev Sandbox" wizard, since the link no longer works.
+ * [#3086](https://github.com/redhat-developer/vscode-openshift-tools/issues/3086) In Devfile search view, you can now filter by debug/deploy support and tags
+ * [#2781](https://github.com/redhat-developer/vscode-openshift-tools/issues/2781) Add support for Devfile port and name detection
+ * [#2819](https://github.com/redhat-developer/vscode-openshift-tools/issues/2819) Create a separate terminal pane for all vscode-openshift related commands to run in
+ * [#3316](https://github.com/redhat-developer/vscode-openshift-tools/issues/3316) Fix bug where invoking "Cloud Events" functions didn't work
+ * [#2854](https://github.com/redhat-developer/vscode-openshift-tools/issues/2854) Killing terminal from older start dev action stops current dev
+ * [#3323](https://github.com/redhat-developer/vscode-openshift-tools/issues/3323) Prevent "Create Dev Sandbox" wizard from getting stuck at loading screen
+ * [#3293](https://github.com/redhat-developer/vscode-openshift-tools/issues/3293) Trying "Create Component" with a mostly empty git repository doesn't work
+ * [#3324](https://github.com/redhat-developer/vscode-openshift-tools/issues/3324) Remove "Connect on Slack" button in "Dev Sandbox" wizard, since the link no longer works
 
 ## 1.8.0 (September 14, 2023)
- * [#3128](https://github.com/redhat-developer/vscode-openshift-tools/issues/3128) Create Serverless Functions based on templates from configured template repositories.
- * [#3251](https://github.com/redhat-developer/vscode-openshift-tools/issues/3251) Add a walkthrough for creating a Serverless Function from a template.
- * [#3260](https://github.com/redhat-developer/vscode-openshift-tools/issues/3260) Improve README with content about Serverless Functions.
- * [#3136](https://github.com/redhat-developer/vscode-openshift-tools/issues/3136) Fix newly created Serverless Functions not appearing in serverless functions view when they are created outside of the workspace.
- * [#3154](https://github.com/redhat-developer/vscode-openshift-tools/issues/3154) Fix "No such file" error when opening "Create OpenShift Local Cluster".
- * [#3145](https://github.com/redhat-developer/vscode-openshift-tools/issues/3145) Don't show the current namespace in the Serverless Functions view.
- * [#3268](https://github.com/redhat-developer/vscode-openshift-tools/issues/3268) Fix Developer Sandbox WebView font color not adapting when switching to a light theme.
- * [#3272](https://github.com/redhat-developer/vscode-openshift-tools/issues/3272) Fix links to screencasts in READMEs.
- * [#3091](https://github.com/redhat-developer/vscode-openshift-tools/issues/3091) Depend on vscode-kubernetes while developing and testing the extension.
- * [#3239](https://github.com/redhat-developer/vscode-openshift-tools/pull/3239) Update crc to 2.26.0.
- * [#3189](https://github.com/redhat-developer/vscode-openshift-tools/pull/3189) Check for and remove cycles in module dependencies.
- * Update many of the extension dependencies.
- * Remove many unused extension dependencies.
+ * [#3128](https://github.com/redhat-developer/vscode-openshift-tools/issues/3128) Create Serverless Functions based on templates from configured template repositories
+ * [#3251](https://github.com/redhat-developer/vscode-openshift-tools/issues/3251) Add a walkthrough for creating a Serverless Function from a template
+ * [#3260](https://github.com/redhat-developer/vscode-openshift-tools/issues/3260) Improve README with content about Serverless Functions
+ * [#3136](https://github.com/redhat-developer/vscode-openshift-tools/issues/3136) Fix newly created Serverless Functions not appearing in serverless functions view when they are created outside of the workspace
+ * [#3154](https://github.com/redhat-developer/vscode-openshift-tools/issues/3154) Fix "No such file" error when opening "Create OpenShift Local Cluster"
+ * [#3145](https://github.com/redhat-developer/vscode-openshift-tools/issues/3145) Don't show the current namespace in the Serverless Functions view
+ * [#3268](https://github.com/redhat-developer/vscode-openshift-tools/issues/3268) Fix Developer Sandbox WebView font color not adapting when switching to a light theme
+ * [#3272](https://github.com/redhat-developer/vscode-openshift-tools/issues/3272) Fix links to screencasts in READMEs
+ * [#3091](https://github.com/redhat-developer/vscode-openshift-tools/issues/3091) Depend on vscode-kubernetes while developing and testing the extension
+ * [#3239](https://github.com/redhat-developer/vscode-openshift-tools/pull/3239) Update crc to 2.26.0
+ * [#3189](https://github.com/redhat-developer/vscode-openshift-tools/pull/3189) Check for and remove cycles in module dependencies
+ * Update many of the extension dependencies
+ * Remove many unused extension dependencies
 
 ## 1.7.0 (August 31, 2023)
- * [#3010](https://github.com/redhat-developer/vscode-openshift-tools/issues/3010) Create UI for invoking serverless functions.
- * [#3056](https://github.com/redhat-developer/vscode-openshift-tools/issues/3056) Configure serverless function environment, labels, volumes, and git.
- * [#3055](https://github.com/redhat-developer/vscode-openshift-tools/issues/3055) Manage repositories of serverless function templates.
- * [#2811](https://github.com/redhat-developer/vscode-openshift-tools/issues/2811) View and run devfile commands on running components from the components view.
- * [#2668](https://github.com/redhat-developer/vscode-openshift-tools/issues/2668) Support binding services to a component.
- * [#3131](https://github.com/redhat-developer/vscode-openshift-tools/pull/3131) Update `odo` to 3.14.0.
- * [#3119](https://github.com/redhat-developer/vscode-openshift-tools/pull/3119) Update `crc` to 2.25.0.
- * [#3133](https://github.com/redhat-developer/vscode-openshift-tools/pull/3133) Background of "Create serverless function" UI respects the user's colour theme.
- * [#3104](https://github.com/redhat-developer/vscode-openshift-tools/issues/3104) Import from git no longer fails if there is an existing Devfile.
- * [#3127](https://github.com/redhat-developer/vscode-openshift-tools/issues/3127) Fixed "Create Component from Folder" doesn't trim suggested name to last portion of the path on Windows.
- * [#3122](https://github.com/redhat-developer/vscode-openshift-tools/issues/3122) Fixed "Create Component From Folder" always uses first open folder, regardless of which one was right clicked on.
- * [#3150](https://github.com/redhat-developer/vscode-openshift-tools/issues/3150) Attempt to sanitize the suggest name for the component in "Create Component from Folder".
+ * [#3010](https://github.com/redhat-developer/vscode-openshift-tools/issues/3010) Create UI for invoking serverless functions
+ * [#3056](https://github.com/redhat-developer/vscode-openshift-tools/issues/3056) Configure serverless function environment, labels, volumes, and git
+ * [#3055](https://github.com/redhat-developer/vscode-openshift-tools/issues/3055) Manage repositories of serverless function templates
+ * [#2811](https://github.com/redhat-developer/vscode-openshift-tools/issues/2811) View and run devfile commands on running components from the components view
+ * [#2668](https://github.com/redhat-developer/vscode-openshift-tools/issues/2668) Support binding services to a component
+ * [#3131](https://github.com/redhat-developer/vscode-openshift-tools/pull/3131) Update `odo` to 3.14.0
+ * [#3119](https://github.com/redhat-developer/vscode-openshift-tools/pull/3119) Update `crc` to 2.25.0
+ * [#3133](https://github.com/redhat-developer/vscode-openshift-tools/pull/3133) Background of "Create serverless function" UI respects the user's colour theme
+ * [#3104](https://github.com/redhat-developer/vscode-openshift-tools/issues/3104) Import from git no longer fails if there is an existing Devfile
+ * [#3127](https://github.com/redhat-developer/vscode-openshift-tools/issues/3127) Fixed "Create Component from Folder" doesn't trim suggested name to last portion of the path on Windows
+ * [#3122](https://github.com/redhat-developer/vscode-openshift-tools/issues/3122) Fixed "Create Component From Folder" always uses first open folder, regardless of which one was right clicked on
+ * [#3150](https://github.com/redhat-developer/vscode-openshift-tools/issues/3150) Attempt to sanitize the suggest name for the component in "Create Component from Folder"
 
 ## 1.6.0 (August 14, 2023)
- * [#2922](https://github.com/redhat-developer/vscode-openshift-tools/issues/2922) Combine different component creation strategies ("From Git", "From Local Folder", "From Template") into one, new UI.
+ * [#2922](https://github.com/redhat-developer/vscode-openshift-tools/issues/2922) Combine different component creation strategies ("From Git", "From Local Folder", "From Template") into one, new UI
  * [#3039](https://github.com/redhat-developer/vscode-openshift-tools/issues/3039) Add `Create Component from Folder` context menu item to quickly create components from file explorer
  * [#2993](https://github.com/redhat-developer/vscode-openshift-tools/issues/2993) Create, build, and run KNative Serverless functions
  * [#3073](https://github.com/redhat-developer/vscode-openshift-tools/pull/3073) Deploy, redeploy, and undeploy KNative Serverless functions
@@ -162,8 +178,8 @@
  * [#2965](https://github.com/redhat-developer/vscode-openshift-tools/issues/2965) Prevent users from creating two devfile registries with the same URL
  * [#2964](https://github.com/redhat-developer/vscode-openshift-tools/issues/2964) Adding a new Devfile registry refreshes the Devfile registry UI
  * [#2940](https://github.com/redhat-developer/vscode-openshift-tools/issues/2940) During "Import from Git", remove the repo if cloning fails
- * [#2915](https://github.com/redhat-developer/vscode-openshift-tools/issues/2915) Fix validation of git URLs containing issue numbers during "Import from Git".
- * [#2910](https://github.com/redhat-developer/vscode-openshift-tools/issues/2910) "Describe Component" context menu now respects `openshiftToolkit.useWebviewInsteadOfTerminalView`.
+ * [#2915](https://github.com/redhat-developer/vscode-openshift-tools/issues/2915) Fix validation of git URLs containing issue numbers during "Import from Git"
+ * [#2910](https://github.com/redhat-developer/vscode-openshift-tools/issues/2910) "Describe Component" context menu now respects `openshiftToolkit.useWebviewInsteadOfTerminalView`
  * [#2840](https://github.com/redhat-developer/vscode-openshift-tools/issues/2840) Add OpenShift binaries to Dev Containers
  * [#2808](https://github.com/redhat-developer/vscode-openshift-tools/issues/2808) Prompt to install podman if it's not present on the system (when attempting to run "Dev on Podman")
  * [#2628](https://github.com/redhat-developer/vscode-openshift-tools/issues/2628) Open in Developer console fails for Kubernetes applications
@@ -557,10 +573,10 @@ Noteworthy changes:
 
 Noteworthy changes:
  - [#1235](https://github.com/redhat-developer/vscode-openshift-tools/issues/1235)
-    - Add webview to run CodeReady Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension.
-    - Add Extension Settings for CRC binary location, pull secret, optional configurations.
-    - Provide CRC Start/Stop/Refresh actions in the webview.
- - [#1707](https://github.com/redhat-developer/vscode-openshift-tools/issues/1707) Add Stop CRC action in Status Bar.
+    - Add webview to run CodeReady Containers (CRC) `1.15.0` from extension. This allows to run a local instance of OpenShift `4.5.7` directly from the extension
+    - Add Extension Settings for CRC binary location, pull secret, optional configurations
+    - Provide CRC Start/Stop/Refresh actions in the webview
+ - [#1707](https://github.com/redhat-developer/vscode-openshift-tools/issues/1707) Add Stop CRC action in Status Bar
  - [#1092](https://github.com/redhat-developer/vscode-openshift-tools/issues/1092) Deleting application only deletes components, not services
  - [#1332](https://github.com/redhat-developer/vscode-openshift-tools/issues/1332) Stop running 'odo debug' when component deleted or undeployed
  - [#1341](https://github.com/redhat-developer/vscode-openshift-tools/issues/1341) Starting debug twice on the same component should not be allowed
@@ -607,9 +623,9 @@ Noteworthy changes:
 
 This release adds `OpenShift: Debug` command for Java and Node.js components. The command is available form command palette and OpenShift Application View context
 menu for nodes representing Components. See issues [#1322](https://github.com/redhat-developer/vscode-openshift-tools/pull/1322) and
-[#1328](https://github.com/redhat-developer/vscode-openshift-tools/pull/1328) for details.
+[#1328](https://github.com/redhat-developer/vscode-openshift-tools/pull/1328) for details
 
-It also includes update for OpenShift Do CLI. Version 1.0.2 will be downloaded after extension is updated to this release.
+It also includes update for OpenShift Do CLI. Version 1.0.2 will be downloaded after extension is updated to this release
 
 
 ## 0.1.2 (November 18, 2019)
@@ -629,7 +645,7 @@ This release brings to you:
 
 Halloween Release 🎃
 
-This release is built on top of 0.1.0. If any developer is migrating from `<=0.0.23` release, please follow the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0).
+This release is built on top of 0.1.0. If any developer is migrating from `<=0.0.23` release, please follow the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0)
 
 ## Updates
 * Extension uses [OpenShift Do(odo) 1.0.0 GA](https://github.com/openshift/odo/releases/tag/v1.0.0)
@@ -652,34 +668,34 @@ This release is built on top of 0.1.0. If any developer is migrating from `<=0.0
 ## 0.1.0 (September 19, 2019)
 This release involves *Breaking Changes* !!
 
-* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View.
-* For older versions, here is the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0).
+* Components created with previous version will no longer be identified. Therefore after extension is updated to new version(`0.1.0`) all previously deployed components won't be visible in OpenShift Application View
+* For older versions, here is the [Migration Guide](https://github.com/redhat-developer/vscode-openshift-tools/wiki/Migration-to-v0.1.0)
 
 ### Added
-* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service.
+* Every component/service needs to have a context folder. The extension will prompt the user to specify the context folder with the creation of component/service
 * The selected context folder will reside in the vscode workspace.
-* `Create Component` creates a local component configuration within `./.odo/config.yaml` in the context folder selected, nothing is created on the cluster at this point.
-* All component configurations are saved to ./.odo/config.yaml. You can commit this file to your repository to easily recreate component with the same configuration later, or to share it with someone else.
-* To deploy the component to a cluster or to apply config changes, run `PUSH` command for the component.
-    * `PUSH` will create component/urls/storage on the OpenShift cluster and push your local files to it.
-* `Import` actions for components which were created using old versions of the extension.
-* Support for OpenShift 4.x clusters.
+* `Create Component` creates a local component configuration within `./.odo/config.yaml` in the context folder selected, nothing is created on the cluster at this point
+* All component configurations are saved to ./.odo/config.yaml. You can commit this file to your repository to easily recreate component with the same configuration later, or to share it with someone else
+* To deploy the component to a cluster or to apply config changes, run `PUSH` command for the component
+    * `PUSH` will create component/urls/storage on the OpenShift cluster and push your local files to it
+* `Import` actions for components which were created using old versions of the extension
+* Support for OpenShift 4.x clusters
 * Update Actions to Navigation Item
-    * Add Switch Contexts - This will help users to switch contexts from kubeconfig.
-    * Add Issue tracker - Users can directly file extension issues/feedback.
-* Added Multiple Actions to Kubernetes resources in Kubernetes View.
+    * Add Switch Contexts - This will help users to switch contexts from kubeconfig
+    * Add Issue tracker - Users can directly file extension issues/feedback
+* Added Multiple Actions to Kubernetes resources in Kubernetes View
     * For Build Configs - Start Build, Rebuild, Show Logs, Follow Logs
     * For Deployment Configs - Deploy, Show Logs
-    * Add `Open in Console` for k8s resources in Kubernetes View.
+    * Add `Open in Console` for k8s resources in Kubernetes View
 
 ### Changes
-* The openshift labels used internally by odo to identify its components, have been updated to match https://github.com/gorkem/app-labels/blob/master/labels-annotation-for-openshift.adoc.
+* The openshift labels used internally by odo to identify its components, have been updated to match https://github.com/gorkem/app-labels/blob/master/labels-annotation-for-openshift.adoc
 * Components can be in 3 stages:
-    * pushed - When the components are deployed into the cluster.
-    * not pushed - When are the components are in local config but NOT deployed into the cluster.
-    * no context - When there is no context folder associated with the component in the workspace.
-* Extension uses [odo-v1.0.0-beta5](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5).
-* Remove Clusters view from OpenShift Views Container. Users can perform all the required action from Kubernetes extension Clusters view.
+    * pushed - When the components are deployed into the cluster
+    * not pushed - When are the components are in local config but NOT deployed into the cluster
+    * no context - When there is no context folder associated with the component in the workspace
+* Extension uses [odo-v1.0.0-beta5](https://github.com/openshift/odo/releases/tag/v1.0.0-beta5)
+* Remove Clusters view from OpenShift Views Container. Users can perform all the required action from Kubernetes extension Clusters view
 
 ### Fixes
 * [#1117](https://github.com/redhat-developer/vscode-openshift-tools/pull/1117) Import command for components without context
@@ -691,7 +707,7 @@ This release involves *Breaking Changes* !!
 * [#1115](https://github.com/redhat-developer/vscode-openshift-tools/pull/1115) Remove recursive search from binary component selection
 * [#1113](https://github.com/redhat-developer/vscode-openshift-tools/pull/1113) Add binary file list from context folder in the quickPick
 * [#950](https://github.com/redhat-developer/vscode-openshift-tools/pull/950) Provide context folder selection if no workspace present
-* [#1046](https://github.com/redhat-developer/vscode-openshift-tools/pull/1046) Use users home folder as current directory when deleting service.
+* [#1046](https://github.com/redhat-developer/vscode-openshift-tools/pull/1046) Use users home folder as current directory when deleting service
 * `Open in Browser` commands should show only components in `pushed` state
 * `Link/Unlink` commands and services should show only components in `pushed` state
 * Remove circular dependencies introduced by extension context
@@ -785,7 +801,7 @@ This release involves *Breaking Changes* !!
 * Add support to create component with binary file [#347](https://github.com/redhat-developer/vscode-openshift-tools/pull/347)
 * Improve `push` command feature to show build log directly into vscode terminal [#416](https://github.com/redhat-developer/vscode-openshift-tools/issues/416)
 * Improve progress representation for long running commands [#422](https://github.com/redhat-developer/vscode-openshift-tools/pull/422)
-* Add fix to stop downloading odo/oc when cluster is down [#406](https://github.com/redhat-developer/vscode-openshift-tools/pull/406).
+* Add fix to stop downloading odo/oc when cluster is down [#406](https://github.com/redhat-developer/vscode-openshift-tools/pull/406)
 * Commands executed in vscode terminal always use odo from `~/.vs-openshift` directory [#305](https://github.com/redhat-developer/vscode-openshift-tools/pull/409)
 * Update packages and transitive dependencies to fix security vulnerabilities
 * Add more test scenarios and improve code coverage
