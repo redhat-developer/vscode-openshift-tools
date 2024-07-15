@@ -152,12 +152,23 @@ export class Deployment {
 
             disposables.push(inputBox.onDidHide(() => resolve(null)));
 
-            disposables.push(inputBox.onDidChangeValue((e) => {
+            disposables.push(inputBox.onDidChangeValue(async (e) => {
                 if (validator.isURL(inputBox.value)) {
                     inputBox.validationMessage = undefined;
                 } else {
                     inputBox.validationMessage = 'Please enter a valid URL';
                 }
+
+                //check the mentioned url has image referece
+                inputBox.validationMessage = 'Checking the image info'
+                inputBox.enabled = false;
+                if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
+                    inputBox.validationMessage = 'Image referece is not valid'
+                } else {
+                    inputBox.validationMessage = undefined;
+                }
+                inputBox.enabled = true;
+
             }));
 
             disposables.push(inputBox.onDidAccept((e) => {
@@ -218,7 +229,7 @@ export class Deployment {
                     inputBox.validationMessage = undefined;
                 } else {
                     inputBox.validationMessage = validateRFC1123DNSLabel('Must be a valid Kubernetes name', inputBox.value);
-                    if (inputBox.validationMessage.length === 0) {
+                    if (!inputBox.validationMessage) {
                         inputBox.validationMessage = undefined;
                     }
                 }
