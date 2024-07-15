@@ -1,43 +1,43 @@
 {
     "odo": {
-        "description": "odo CLI",
-        "vendor": "Red Hat, Inc.",
+        "description": "ODO CLI tool",
+        "vendor": "Red Hat Developer",
         "name": "odo",
-        "version": "3.15.0",
-        "versionRange": "^3.15.0",
-        "versionRangeLabel": "version >= 3.15.0",
+        "version": "3.16.1",
+        "versionRange": "^3.16.1",
+        "versionRangeLabel": "version >= 3.16.1",
         "dlFileName": "odo",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-windows-amd64.exe.zip",
-                "sha256sum": "cf8ddcd46025325dd9e5f8b5f38ef8ea45d49a79c127b48c2b9c5b2ccb93afaa",
-                "dlFileName": "odo-windows-amd64.exe.zip",
-                "cmdFileName": "odo-windows-amd64.exe"
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-windows-amd64-817faa69f.zip",
+                "sha256sum": "f7d20eb8432b1b267d3fee0f7e653f12c0857cd56142583a5d600789794223e2",
+                "dlFileName": "odo-windows-amd64.zip",
+                "cmdFileName": "odo-windows-amd64-817faa69f.exe"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-amd64.tar.gz",
-                "sha256sum": "45e96d490c593d994689156d17f5e1f1bf208f651ce19d74160ef12cb741b113",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-amd64-817faa69f.tar.gz",
+                "sha256sum": "c22ab1b0622880542ff48da797cac50e9454d344205df426b62a10be3d9693aa",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
-                "cmdFileName": "odo-darwin-amd64"
+                "cmdFileName": "odo-darwin-amd64-817faa69f"
             },
             "darwin-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-darwin-arm64.tar.gz",
-                "sha256sum": "dade9c0679d2624d80818ed66a5d80d161c291b6a9e72dde8c6b7573843c175e",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-arm64-817faa69f.tar.gz",
+                "sha256sum": "42ec37076e014d4eee69a2f3b2bef90ec3c62deaba769128cd9cbdb2151667f2",
                 "dlFileName": "odo-darwin-arm64.tar.gz",
-                "cmdFileName": "odo-darwin-arm64"
+                "cmdFileName": "odo-darwin-arm64-817faa69f"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-linux-amd64.tar.gz",
-                "sha256sum": "77e999ec3eca99ea17e9345496866afc9c1ae67d3069c9433659b801dab9c302",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-amd64-817faa69f.tar.gz",
+                "sha256sum": "ce2abb34ad650b9e37357aa34a92ab8e99207d27846a93406d07c524d9c883b5",
                 "dlFileName": "odo-linux-amd64.tar.gz",
-                "cmdFileName": "odo"
+                "cmdFileName": "odo-linux-amd64-817faa69f"
             },
             "linux-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/odo/v3.15.0/odo-linux-arm64.tar.gz",
-                "sha256sum": "b154cb06fbc423006b8892b302d5e6701986c9bbaa872efc2a7056b787a152e1",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-817faa69f.tar.gz",
+                "sha256sum": "37675a5b1025614eb8d272dda1445ae2482499201814d4c31f20b8c4c75c9226",
                 "dlFileName": "odo-linux-arm64.tar.gz",
-                "cmdFileName": "odo"
+                "cmdFileName": "odo-linux-arm64-817faa69f"
             }
         }
     },
@@ -46,39 +46,39 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.15.16",
-        "versionRange": "^4.15.16",
-        "versionRangeLabel": "version >= 4.15.16 and < 5.0.0",
+        "version": "4.16.1",
+        "versionRange": "^4.16.1",
+        "versionRangeLabel": "version >= 4.16.1 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.16/openshift-client-windows-4.15.16.zip",
-                "sha256sum": "3bef0f76b635c5c21eeae284c50456d3f0909c88605e0c1ec407e89f07dc9b6c",
-                "dlFileName": "openshift-client-windows-4.15.16.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.1/openshift-client-windows-4.16.1.zip",
+                "sha256sum": "452ed04fda0723e729389fc5bcabeb793fe971f1e6d1ec6ebedb9729964348fd",
+                "dlFileName": "openshift-client-windows-4.16.1.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.16/openshift-client-mac-4.15.16.tar.gz",
-                "sha256sum": "9b0dffc64107aa046e18f93cf3d791e7ac9efbbca72a3db68db008f33c0e8518",
-                "dlFileName": "openshift-client-mac-4.15.16.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.1/openshift-client-mac-4.16.1.tar.gz",
+                "sha256sum": "c2aae5669240b8c1d1f99acbca07ef74fae817e5f057602dfeffbe7920843871",
+                "dlFileName": "openshift-client-mac-4.16.1.tar.gz",
                 "cmdFileName": "oc"
             },
             "darwin-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.16/openshift-client-mac-arm64-4.15.16.tar.gz",
-                "sha256sum": "8b71144e98d0c65637124c0aea49d66dabc4d62e98a17ab469c5237688da78e7",
-                "dlFileName": "openshift-client-mac-arm64-4.15.16.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.1/openshift-client-mac-arm64-4.16.1.tar.gz",
+                "sha256sum": "926873c66cbb12ba4c6e405cf8f7e654818f228f29178a2814caa246d1220004",
+                "dlFileName": "openshift-client-mac-arm64-4.16.1.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.16/openshift-client-linux-4.15.16.tar.gz",
-                "sha256sum": "6cd2eda669f8ea57067013247ed6bbc74087008d260ca31bfd539209fd429e80",
-                "dlFileName": "openshift-client-linux-4.15.16.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.1/openshift-client-linux-4.16.1.tar.gz",
+                "sha256sum": "09eed8513b7331954829411a7f878c817c8f0af567dfc74dade86ea5bc2732e2",
+                "dlFileName": "openshift-client-linux-4.16.1.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.15.16/openshift-client-linux-arm64-4.15.16.tar.gz",
-                "sha256sum": "3716d3c60caec1cc98144d87b5793a05b6cc18728b55494b3453bba9ba95ce1b",
-                "dlFileName": "openshift-client-linux-arm64-4.15.16.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.1/openshift-client-linux-arm64-4.16.1.tar.gz",
+                "sha256sum": "6e4d31bc64a36296e210f91c0539e011b2a812de6a2c77b3ae92565dffa1346c",
+                "dlFileName": "openshift-client-linux-arm64-4.16.1.tar.gz",
                 "cmdFileName": "oc"
             }
         }
@@ -127,44 +127,49 @@
         }
     },
     "helm": {
-        "description": "oc helm CLI",
-        "vendor": "Red Hat, Inc.",
+        "description": "Helm CLI tool",
+        "vendor": "The Helm Project",
         "name": "helm",
-        "version": "3.13.2",
-        "versionRange": "^3.13.2",
-        "versionRangeLabel": "version >= 3.13.2",
+        "version": "3.15.3",
+        "versionRange": "^3.15.3",
+        "versionRangeLabel": "version >= 3.15.3",
         "dlFileName": "helm",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.13.2/helm-windows-amd64.exe.zip",
-                "sha256sum": "12de9ce0ca57b1408e7f912ad864f103600f2ecc4b7309a4c6925e3e9ad28a4f",
-                "dlFileName": "helm-windows-amd64.exe.zip",
-                "cmdFileName": "helm-windows-amd64.exe"
+                "url": "https://get.helm.sh/helm-v3.15.3-windows-amd64.zip",
+                "sha256sum": "fd857635bbb38b20a91731e5d084c2e21503b0f797b153e3246de01676819f23",
+                "dlFileName": "helm-windows-amd64.zip",
+                "cmdFileName": "helm.exe",
+                "filePrefix": "windows-amd64/"
             },
             "darwin": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.13.2/helm-darwin-amd64.tar.gz",
-                "sha256sum": "ebde3c602bcb3ddc8a8d51e9410d71378f3f73099dc29952d1a667cc7f483812",
+                "url": "https://get.helm.sh/helm-v3.15.3-darwin-amd64.tar.gz",
+                "sha256sum": "68306cbd9808271cd95974328e4238c052c8495e09b0038828b65190491aeb9c",
                 "dlFileName": "helm-darwin-amd64.tar.gz",
-                "cmdFileName": "helm-darwin-amd64"
+                "cmdFileName": "helm",
+                "filePrefix": "darwin-amd64/"
             },
             "darwin-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.13.2/helm-darwin-arm64.tar.gz",
-                "sha256sum": "fc369722c4a39e9a6249ad07605161bfa04637ac12d773629e64600cc3a2694c",
+                "url": "https://get.helm.sh/helm-v3.15.3-darwin-arm64.tar.gz",
+                "sha256sum": "9ed53b19cfd935908c5269ba3e88028462fc4c249f85f937ae8cc04b6fe9cead",
                 "dlFileName": "helm-darwin-arm64.tar.gz",
-                "cmdFileName": "helm-darwin-arm64"
+                "cmdFileName": "helm",
+                "filePrefix": "darwin-arm64/"
             },
             "linux": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.13.2/helm-linux-amd64.tar.gz",
-                "sha256sum": "fa4986b6abcd599d899d2e1750123498e1d90edea77c9afd48333b6cce19ce0a",
+                "url": "https://get.helm.sh/helm-v3.15.3-linux-amd64.tar.gz",
+                "sha256sum": "ad871aecb0c9fd96aa6702f6b79e87556c8998c2e714a4959bf71ee31282ac9c",
                 "dlFileName": "helm-linux-amd64.tar.gz",
-                "cmdFileName": "helm-linux-amd64"
+                "cmdFileName": "helm",
+                "filePrefix": "linux-amd64/"
             },
             "linux-arm64": {
-                "url": "https://developers.redhat.com/content-gateway/rest/mirror2/pub/openshift-v4/clients/helm/3.13.2/helm-linux-arm64.tar.gz",
-                "sha256sum": "bd0590fc831d3c3ec08f2148c2126f90ccdb0a4bb9e541cb8e8bd1d3f3b6c1b4",
+                "url": "https://get.helm.sh/helm-v3.15.3-linux-arm64.tar.gz",
+                "sha256sum": "bd57697305ba46fef3299b50168a34faa777dd2cf5b43b50df92cca7ed118cce",
                 "dlFileName": "helm-linux-arm64.tar.gz",
-                "cmdFileName": "helm-linux-arm64"
+                "cmdFileName": "helm",
+                "filePrefix": "linux-arm64/"
             }
         }
     },
@@ -172,7 +177,7 @@
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
         "name": "crc",
-        "crcVersion": "2.37.1",
-        "openshiftVersion": "4.15.14"
+        "crcVersion": "2.38.0",
+        "openshiftVersion": "4.15.17"
     }
 }

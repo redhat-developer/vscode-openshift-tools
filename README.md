@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](https://github.com/redhat-developer/vscode-openshift-tools/blob/main/LICENSE)
 
 
-[Walthrough Running a Demo App](./doc/wild-west-demo-app-walkthrough.md) •
+[Walkthrough Running a Demo App](./doc/wild-west-demo-app-walkthrough.md) •
 [Getting Started](#getting-started) •
 [Quick Start for Application Development](#quick-start---showcasing-component-creation) •
 [Quick Start for Serverless Development](#quick-start---showcasing-serverless-workflow) •
@@ -138,8 +138,6 @@ See the [change log](CHANGELOG.md).
 This is an open-source project open to anyone. This project welcomes contributions and suggestions!
 
 For information on getting started, please take a look at the [CONTRIBUTING instructions](CONTRIBUTING.md).
-
-Download the most recent `openshift-toolkit-<version>.vsix` file from the [release](https://github.com/redhat-developer/vscode-openshift-tools/releases) and install it by following the instructions [here](https://code.visualstudio.com/docs/editor/extension-gallery#_install-from-a-vsix). Stable releases are archived [here](https://download.jboss.org/jbosstools/adapters/stable/vscode-openshift-tools/).
 
 ## Feedback
 

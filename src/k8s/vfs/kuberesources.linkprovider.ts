@@ -190,7 +190,7 @@ function siblings(node: Node): MappingItem[] {
 
         if (jl.isObject(parent as jl.JsonNode)) {
             const obj = parent as jl.JsonObject;
-            return obj.children.filter((c) => jl.isProperty(c)) as jl.JsonProperty[];
+            return obj.children.filter((c) => jl.isProperty(c));
         }
     }
     return [];

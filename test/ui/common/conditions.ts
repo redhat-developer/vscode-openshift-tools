@@ -91,6 +91,15 @@ export async function welcomeContentButtonsAreLoaded(welcomeContentSection: Welc
     }, timeout);
 }
 
+export async function welcomeContentIsLoaded(viewSection: ViewSection, timeout = 60_000) {
+    return viewSection.getDriver().wait(async () => {
+        const welcomeContent = await viewSection.findWelcomeContent();
+        if(welcomeContent) {
+            return welcomeContent
+        }
+    }, timeout);
+}
+
 export async function webViewIsOpened(name: string, driver: WebDriver, timeout = 10_000) {
     return driver.wait(async () => {
         try {

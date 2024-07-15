@@ -211,7 +211,7 @@ suite('Openshift/Cluster', function() {
             });
 
             test('checks cluster url name is valid url', async () => {
-                let result: string | Thenable<string>;
+                let result;
                 quickPickStub.onFirstCall().resolves({description: 'Current Context', label: '$(plus) Provide new URL...'});
                 inputStub.onFirstCall().callsFake((options?: vscode.InputBoxOptions): Thenable<string> => {
                     result = options.validateInput('http://127.0.0.1:9999');
@@ -222,7 +222,7 @@ suite('Openshift/Cluster', function() {
             });
 
             test('checks user name is not empty', async () => {
-                let result: string | Thenable<string>;
+                let result;
                 quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
                 quickPickStub.onSecondCall().resolves({label: 'Credentials'});
                 quickPickStub.onThirdCall().resolves({description: 'Current Context', label: '$(plus) Add new user...'});

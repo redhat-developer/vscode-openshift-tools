@@ -14,7 +14,6 @@ import { Progress } from '../../util/progress';
 import { vsCommand } from '../../vscommand';
 import { validateName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
-import fetch = require('make-fetch-happen');
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];

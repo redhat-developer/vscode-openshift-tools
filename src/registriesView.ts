@@ -20,7 +20,6 @@ import { Odo } from './odo/odoWrapper';
 import { inputValue, quickBtn } from './util/inputValue';
 import { Progress } from './util/progress';
 import { vsCommand, VsCommandError } from './vscommand';
-import fetch = require('make-fetch-happen');
 
 type ComponentType = Registry;
 
@@ -348,9 +347,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                     }
 
                     try {
-                        const response = await fetch(regURL, {
-                            method: 'GET',
-                        });
+                        const response = await fetch(regURL, { method: 'GET' });
                         const componentTypes = JSON.parse(await response.text()) as DevfileComponentType[];
                         if (componentTypes.length > 0) {
                             void Progress.execFunctionWithProgress('Devfile registry is updating',async () => {
