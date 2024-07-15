@@ -208,7 +208,7 @@ export class LocalCodeBasePage extends Page {
 
     public async clickCreateComponent(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const button = await this.getCreateComponentButton(webView);
+            const button = await this.createButtonExists(webView);
             await button.click();
         });
     }
@@ -219,6 +219,19 @@ export class LocalCodeBasePage extends Page {
 
     private async getSelectFolderButton(webView: WebView): Promise<WebElement> {
         return await webView.findWebElement(By.xpath('//button[contains(text(), "Select Folder")]'));
+    }
+
+    private async createButtonExists(webView: WebView, timeout = 60_000): Promise<WebElement> {
+        return webView.getDriver().wait(async () => {
+            try {
+                const button = await this.getCreateComponentButton(webView);
+                if (button) {
+                    return button;
+                }
+            } catch (err) {
+                return null;
+            }
+        }, timeout);
     }
 
     private async getCreateComponentButton(webView: WebView): Promise<WebElement> {
