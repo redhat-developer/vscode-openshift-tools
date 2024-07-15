@@ -14,6 +14,7 @@ import { validateRFC1123DNSLabel } from './openshift/nameValidator';
 import { inputValue, quickBtn } from './util/inputValue';
 import { vsCommand } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
+import { Progress } from './util/progress';
 
 export class Deployment {
 
@@ -162,14 +163,19 @@ export class Deployment {
             }));
 
             disposables.push(inputBox.onDidAccept(async (_e) => {
-
                 //check url has image
                 if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
-                    if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
-                        inputBox.validationMessage = 'Image referece is not valid'
-                    } else {
-                        inputBox.validationMessage = undefined;
-                    }
+                    inputBox.busy = true;
+                    inputBox.enabled = false;
+                    await Progress.execFunctionWithProgress(`Fetching Image info ${inputBox.value}`, async () => {
+                        if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
+                            inputBox.validationMessage = 'Image referece is not valid'
+                        } else {
+                            inputBox.validationMessage = undefined;
+                        }
+                    });
+                    inputBox.enabled = true;
+                    inputBox.busy = false;
                 }
 
                 if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
