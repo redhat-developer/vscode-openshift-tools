@@ -675,6 +675,13 @@ export class Oc {
             .catch((error) => namespaces);
     }
 
+    public async hasImageInfo(url: string): Promise<boolean> {
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `image info ${url}`), undefined, false
+        );
+        return result.error && result.stderr.length > 0 ? false : true;
+    }
+
     /**
      * Returns the oc command to list all resources of the given type in the given (or current) namespace
      *
