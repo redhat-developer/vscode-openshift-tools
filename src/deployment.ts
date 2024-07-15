@@ -152,26 +152,26 @@ export class Deployment {
 
             disposables.push(inputBox.onDidHide(() => resolve(null)));
 
-            disposables.push(inputBox.onDidChangeValue(async (e) => {
+            disposables.push(inputBox.onDidChangeValue((e) => {
                 if (validator.isURL(inputBox.value)) {
                     inputBox.validationMessage = undefined;
                 } else {
                     inputBox.validationMessage = 'Please enter a valid URL';
                 }
 
-                //check the mentioned url has image referece
-                inputBox.validationMessage = 'Checking the image info'
-                inputBox.enabled = false;
-                if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
-                    inputBox.validationMessage = 'Image referece is not valid'
-                } else {
-                    inputBox.validationMessage = undefined;
-                }
-                inputBox.enabled = true;
-
             }));
 
-            disposables.push(inputBox.onDidAccept((e) => {
+            disposables.push(inputBox.onDidAccept(async (_e) => {
+
+                //check url has image
+                if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
+                    if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
+                        inputBox.validationMessage = 'Image referece is not valid'
+                    } else {
+                        inputBox.validationMessage = undefined;
+                    }
+                }
+
                 if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
                     resolve(inputBox.value);
                     inputBox.hide();
