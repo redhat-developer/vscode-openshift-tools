@@ -676,8 +676,9 @@ export class Oc {
     }
 
     public async hasImageInfo(url: string): Promise<boolean> {
+        const imageURL = url.lastIndexOf(':') < 0 ? `${url}:latest` : url;
         const result = await CliChannel.getInstance().executeTool(
-            new CommandText('oc', `image info ${url}`), undefined, false
+            new CommandText('oc', `image info ${imageURL} --show-multiarch=true`), undefined, false
         );
         return result.error && result.stderr.length > 0 ? false : true;
     }

@@ -6,7 +6,7 @@
 import { KubernetesObject } from '@kubernetes/client-node';
 import * as path from 'path';
 import validator from 'validator';
-import { Disposable, QuickInputButtons, ThemeIcon, TreeItem, window } from 'vscode';
+import { Disposable, InputBox, QuickInputButtons, ThemeIcon, TreeItem, window } from 'vscode';
 import { CommandText } from './base/command';
 import { DeploymentPodObject, OpenShiftExplorer } from './explorer';
 import { Oc } from './oc/ocWrapper';
@@ -164,20 +164,7 @@ export class Deployment {
 
             disposables.push(inputBox.onDidAccept(async (_e) => {
                 //check url has image
-                if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
-                    inputBox.busy = true;
-                    inputBox.enabled = false;
-                    await Progress.execFunctionWithProgress(`Fetching Image info ${inputBox.value}`, async () => {
-                        if (! await Oc.Instance.hasImageInfo(inputBox.value)) {
-                            inputBox.validationMessage = 'Image referece is not valid'
-                        } else {
-                            inputBox.validationMessage = undefined;
-                        }
-                    });
-                    inputBox.enabled = true;
-                    inputBox.busy = false;
-                }
-
+                await Deployment.validateImageInfo(inputBox);
                 if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
                     resolve(inputBox.value);
                     inputBox.hide();
@@ -185,7 +172,7 @@ export class Deployment {
                 }
             }));
 
-            disposables.push(inputBox.onDidTriggerButton((button) => {
+            disposables.push(inputBox.onDidTriggerButton(async (button) => {
                 if (button === QuickInputButtons.Back) {
                     inputBox.hide();
                     resolve(undefined);
@@ -193,6 +180,8 @@ export class Deployment {
                     inputBox.hide();
                     resolve(null);
                 } else if (button === okBtn) {
+                    //check url has image
+                    await Deployment.validateImageInfo(inputBox);
                     if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
                         inputBox.hide();
                         resolve(inputBox.value);
@@ -203,6 +192,22 @@ export class Deployment {
 
             inputBox.show();
         });
+    }
+
+    private static async validateImageInfo(inputBox: InputBox): Promise<void> {
+        if (inputBox.validationMessage === undefined && inputBox.value !== undefined) {
+            inputBox.busy = true;
+            inputBox.enabled = false;
+            await Progress.execFunctionWithProgress(`Fetching Image info ${inputBox.value}`, async () => {
+                if (!await Oc.Instance.hasImageInfo(inputBox.value)) {
+                    inputBox.validationMessage = 'Image referece is not valid';
+                } else {
+                    inputBox.validationMessage = undefined;
+                }
+            });
+            inputBox.enabled = true;
+            inputBox.busy = false;
+        }
     }
 
     /**
