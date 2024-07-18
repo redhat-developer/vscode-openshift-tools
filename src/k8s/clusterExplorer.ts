@@ -5,13 +5,13 @@
 
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
-import { Build } from './build';
-import { DeploymentConfig } from './deploymentConfig';
-import path = require('path');
-import { ClusterServiceVersion } from './csv';
-import { isOpenShift } from '../util/kubeUtils';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import { isOpenShiftCluster } from '../util/kubeUtils';
+import { Build } from './build';
+import { ClusterServiceVersion } from './csv';
+import { DeploymentConfig } from './deploymentConfig';
+import path = require('path');
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 
@@ -30,7 +30,7 @@ async function initNamespaceName(node: k8s.ClusterExplorerV1.ClusterExplorerReso
 async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourceNode, treeItem: vscode.TreeItem): Promise<void> {
   if ((node as any).nodeType === 'context') {
       lastNamespace = await initNamespaceName(node);
-      if (await isOpenShift()) {
+      if (await isOpenShiftCluster()) {
           treeItem.iconPath = vscode.Uri.file(path.join(__dirname, '../../../images/context/cluster-node.png'));
       }
   }
@@ -59,14 +59,14 @@ export async function extendClusterExplorer(): Promise<void> {
     if (clusterExplorerAPI.available) {
         clusterExplorer = clusterExplorerAPI.api;
         const nodeContributors = [
-            clusterExplorer.nodeSources.resourceFolder('Projects', 'Projects', 'Project', 'project').if(isOpenShift).at(undefined),
-            clusterExplorer.nodeSources.resourceFolder('Templates', 'Templates', 'Template', 'template').if(isOpenShift).at(undefined),
-            clusterExplorer.nodeSources.resourceFolder('ImageStreams', 'ImageStreams', 'ImageStream', 'ImageStream').if(isOpenShift).at('Workloads'),
-            clusterExplorer.nodeSources.resourceFolder('Routes', 'Routes', 'Route', 'route').if(isOpenShift).at('Network'),
-            clusterExplorer.nodeSources.resourceFolder('DeploymentConfigs', 'DeploymentConfigs', 'DeploymentConfig', 'dc').if(isOpenShift).at('Workloads'),
-            clusterExplorer.nodeSources.resourceFolder('BuildConfigs', 'BuildConfigs', 'BuildConfig', 'bc').if(isOpenShift).at('Workloads'),
-            clusterExplorer.nodeSources.groupingFolder('Operators', 'Operators').if(isOpenShift).at(undefined),
-            clusterExplorer.nodeSources.resourceFolder('ClusterServiceVersion', 'ClusterServiceVersions', 'ClusterServiceVersion', 'csv').if(isOpenShift).at('Operators'),
+            clusterExplorer.nodeSources.resourceFolder('Projects', 'Projects', 'Project', 'project').if(isOpenShiftCluster).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('Templates', 'Templates', 'Template', 'template').if(isOpenShiftCluster).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('ImageStreams', 'ImageStreams', 'ImageStream', 'ImageStream').if(isOpenShiftCluster).at('Workloads'),
+            clusterExplorer.nodeSources.resourceFolder('Routes', 'Routes', 'Route', 'route').if(isOpenShiftCluster).at('Network'),
+            clusterExplorer.nodeSources.resourceFolder('DeploymentConfigs', 'DeploymentConfigs', 'DeploymentConfig', 'dc').if(isOpenShiftCluster).at('Workloads'),
+            clusterExplorer.nodeSources.resourceFolder('BuildConfigs', 'BuildConfigs', 'BuildConfig', 'bc').if(isOpenShiftCluster).at('Workloads'),
+            clusterExplorer.nodeSources.groupingFolder('Operators', 'Operators').if(isOpenShiftCluster).at(undefined),
+            clusterExplorer.nodeSources.resourceFolder('ClusterServiceVersion', 'ClusterServiceVersions', 'ClusterServiceVersion', 'csv').if(isOpenShiftCluster).at('Operators'),
             Build.getNodeContributor(),
             DeploymentConfig.getNodeContributor(),
             ClusterServiceVersion.getNodeContributor()

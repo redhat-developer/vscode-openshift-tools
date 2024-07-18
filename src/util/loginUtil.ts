@@ -6,7 +6,7 @@
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
-import { isOpenShift } from './kubeUtils';
+import { isOpenShiftCluster } from './kubeUtils';
 
 export class LoginUtil {
 
@@ -48,7 +48,7 @@ export class LoginUtil {
      * @throws if you are not currently logged into an OpenShift cluster
      */
     public async logout(): Promise<void> {
-        if (await isOpenShift()) {
+        if (await isOpenShiftCluster()) {
             // This doesn't change the 'current-context' value in Kube config, but removes the
             // user record for the current cluster.
             await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'logout'), { timeout: 5000 });

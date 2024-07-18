@@ -13,9 +13,10 @@ import { promisify } from 'util';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
-import { ClusterType } from '../../src/oc/types';
-import { LoginUtil } from '../../src/util/loginUtil';
 import { Project } from '../../src/oc/project';
+import { ClusterType } from '../../src/oc/types';
+import { isOpenShiftCluster } from '../../src/util/kubeUtils';
+import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./oc/ocWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -252,7 +253,7 @@ suite('./oc/ocWrapper.ts', function () {
     });
 
     test('isOpenShiftCluster()', async function() {
-        const checkIsOpenShift = await Oc.Instance.isOpenShiftCluster();
+        const checkIsOpenShift = await isOpenShiftCluster();
         expect(checkIsOpenShift).to.equal(isOpenShift);
     });
 

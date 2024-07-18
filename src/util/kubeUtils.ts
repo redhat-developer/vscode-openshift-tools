@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
 import { CommandText } from '../base/command';
-import { CliChannel } from '../cli';
+import { CliChannel, ExecutionContext } from '../cli';
 import { Platform } from './platform';
 
 function fileExists(file: string): boolean {
@@ -186,15 +186,22 @@ export async function setKubeConfig(): Promise<void> {
     }
 }
 
-export async function isOpenShift(): Promise<boolean> {
+export async function isOpenShiftCluster(executionContext?: ExecutionContext): Promise<boolean> {
     try {
-        const stdout = await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'api-versions'), { timeout: 5000 });
+        const stdout = await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'api-versions'), { timeout: 5000 }, executionContext);
         return stdout.includes('apps.openshift.io/v1');
     } catch(error) {
         return false;
     }
   }
 
-  export async function getNamespaceKind(): Promise<string> {
-      return (await isOpenShift()) ? 'Project' : 'Namespace';
-  }
+export async function getNamespaceKind(executionContext?: ExecutionContext): Promise<string> {
+    if (executionContext && executionContext.has(getNamespaceKind.name)) {
+        return executionContext.get(getNamespaceKind.name);
+    }
+    const result: string = (await isOpenShiftCluster(executionContext)) ? 'Project' : 'Namespace';
+    if (executionContext) {
+        executionContext.set(getNamespaceKind.name, result);
+    }
+    return result;
+}

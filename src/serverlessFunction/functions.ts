@@ -5,10 +5,12 @@
 
 import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
-import { CliChannel } from '../cli';
+import { CliChannel, ExecutionContext } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { isTektonAware } from '../tekton/tekton';
+import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
+import { getNamespaceKind, isOpenShiftCluster } from '../util/kubeUtils';
 import { Progress } from '../util/progress';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
@@ -17,8 +19,6 @@ import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, FunctionSession } from './types';
 import Dockerode = require('dockerode');
-import { CliExitData, ChildProcessUtil } from '../util/childProcessUtil';
-import { getNamespaceKind } from '../util/kubeUtils';
 
 interface DockerStatus {
     error: boolean;
@@ -76,15 +76,16 @@ export class Functions {
     }
 
     public async onClusterBuild(context: FunctionObject): Promise<void> {
+        const executionContext: ExecutionContext = new ExecutionContext();
 
-        if (!await isTektonAware()) {
+        if (!await isTektonAware(executionContext)) {
             await window.showWarningMessage(
                 'This action requires Tekton to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
             );
             return null;
         }
 
-        if (!await isKnativeServingAware()) {
+        if (!await isKnativeServingAware(executionContext)) {
             await window.showWarningMessage(
                 'This action requires Knative Serving to be installed on the cluster. Please install it and then proceed to build the function on the cluster.',
             );
@@ -101,14 +102,14 @@ export class Functions {
             return null;
         }
 
-        const currentNamespace: string = await Oc.Instance.getActiveProject();
+        const currentNamespace: string = await Oc.Instance.getActiveProject(executionContext);
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (!yamlContent) {
             return null;
         }
 
         const deployedNamespace = yamlContent.deploy?.namespace || undefined;
-        const kind = await getNamespaceKind();
+        const kind = await getNamespaceKind(executionContext);
         if (deployedNamespace && deployedNamespace !== currentNamespace) {
             const response = await window.showInformationMessage(`Function ${kind} (declared in func.yaml) is different from the current active ${kind}. Deploy function ${context.name} to current ${kind} ${currentNamespace}?`,
                 'Ok',
@@ -117,13 +118,13 @@ export class Functions {
                 return null;
             }
         }
-        await this.clustrBuildTerminal(context, currentNamespace, buildImage, gitModel);
+        await this.clustrBuildTerminal(context, currentNamespace, buildImage, gitModel, executionContext);
     }
 
-    private async clustrBuildTerminal(context: FunctionObject, namespace: string, buildImage: string, gitModel: GitModel) {
-        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
+    private async clustrBuildTerminal(context: FunctionObject, namespace: string, buildImage: string, gitModel: GitModel, executionContext: ExecutionContext) {
+        const isOpenShift = await isOpenShiftCluster(executionContext);
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.onClusterBuildFunction(context.folderURI.fsPath, namespace, buildImage, gitModel, isOpenShiftCluster),
+            ServerlessCommand.onClusterBuildFunction(context.folderURI.fsPath, namespace, buildImage, gitModel, isOpenShift),
             `On Cluster Build: ${context.name}`,
             context.folderURI.fsPath,
             process.env, {
@@ -189,10 +190,10 @@ export class Functions {
     }
 
     private async buildProcess(context: FunctionObject, s2iBuild: boolean) {
-        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
+        const isOpenShift = await isOpenShiftCluster();
         const buildImage = await this.getImage(context.folderURI);
         const terminalKey = `build-${context.folderURI.fsPath}`;
-        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack', buildImage, isOpenShiftCluster, terminalKey);
+        await this.buildTerminal(context, s2iBuild ? 's2i' : 'pack', buildImage, isOpenShift, terminalKey);
     }
 
     private async buildTerminal(context: FunctionObject, builder: string, buildImage: string, isOpenShiftCluster: boolean, terminalKey: string) {
@@ -266,37 +267,38 @@ export class Functions {
     }
 
     public async deploy(context: FunctionObject) {
-        const currentNamespace: string = await Oc.Instance.getActiveProject();
+        const executionContext: ExecutionContext = new ExecutionContext();
+        const currentNamespace: string = await Oc.Instance.getActiveProject(executionContext);
         const yamlContent = await Utils.getFuncYamlContent(context.folderURI.fsPath);
         if (yamlContent) {
             const deployedNamespace = yamlContent.deploy?.namespace || undefined;
             if (!deployedNamespace || (deployedNamespace === currentNamespace)) {
-                await this.deployProcess(context, deployedNamespace, yamlContent);
+                await this.deployProcess(context, deployedNamespace, yamlContent, executionContext);
             } else if (deployedNamespace !== currentNamespace) {
                 const kind = await getNamespaceKind();
                 const response = await window.showInformationMessage(`Function ${kind} (declared in func.yaml) is different from the current active ${kind}. Deploy function ${context.name} to current ${kind} ${currentNamespace}?`,
                     'Ok',
                     'Cancel');
                 if (response === 'Ok') {
-                    await this.deployProcess(context, currentNamespace, yamlContent);
+                    await this.deployProcess(context, currentNamespace, yamlContent, executionContext);
                 }
             }
         }
     }
 
-    private async deployProcess(context: FunctionObject, deployedNamespace: string, yamlContent: FunctionContent) {
+    private async deployProcess(context: FunctionObject, deployedNamespace: string, yamlContent: FunctionContent, executionContext: ExecutionContext) {
         if (!yamlContent.image || !Functions.imageRegex.test(yamlContent.image)) {
             void window.showErrorMessage(`Function ${context.name} has invalid imaage`)
             return;
         }
-        const isOpenShiftCluster = await Oc.Instance.isOpenShiftCluster();
+        const isOpenShift = await isOpenShiftCluster(executionContext);
         const buildImage = await this.getImage(context.folderURI);
 
         // fail after two failed login attempts
         let triedLoginTwice = false;
 
         const terminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-            ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, isOpenShiftCluster),
+            ServerlessCommand.deployFunction(context.folderURI.fsPath, buildImage, deployedNamespace, isOpenShift),
             `Deploy: ${context.name}`,
             context.folderURI.fsPath,
             undefined,
