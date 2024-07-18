@@ -34,14 +34,16 @@ export class Oc {
      *
      * @param resourceType the type of resource to get a list of
      * @param namespace the namespace to list the resources of (defaults to the current namespace if none is provided)
+     * @param appName the name of the application
      * @returns a list of all resources of the given type in the given namespace
      */
     public async getKubernetesObjects(
         resourceType: string,
         namespace?: string,
+        appName?: string
     ): Promise<KubernetesObject[]> {
         const result = await CliChannel.getInstance().executeTool(
-            Oc.getKubernetesObjectCommand(resourceType, namespace),
+            Oc.getKubernetesObjectCommand(resourceType, namespace, appName),
         );
         return JSON.parse(result.stdout).items;
     }
@@ -688,11 +690,13 @@ export class Oc {
      *
      * @param resourceType the resource type to get
      * @param namespace the namespace from which to get all the stateful sets
+     * @param appName the name of the application
      * @returns the oc command to list all resources of the given type in the given (or current) namespace
      */
     private static getKubernetesObjectCommand(
         resourceType: string,
         namespace?: string,
+        appName?: string
     ): CommandText {
         if (!resourceType) {
             throw new Error('Must pass the resource type to get');
@@ -700,6 +704,9 @@ export class Oc {
         const args = [new CommandOption('-o', 'json')];
         if (namespace) {
             args.push(new CommandOption('--namespace', namespace));
+        }
+        if (appName) {
+            args.push(new CommandOption('-l', `app=${appName}`));
         }
         return new CommandText('oc',  `get ${resourceType}`, args);
     }
