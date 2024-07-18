@@ -519,8 +519,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             }
         } else if ('kind' in element && element.kind === 'Deployment') {
             try {
-                const pods = await Oc.Instance.getKubernetesObjects('pods');
-                return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+                return this.getPods(element);
             } catch {
                 return [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
             }
@@ -659,8 +658,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     public async getPods(element: KubernetesObject | OpenShiftObject) {
-        const pods = await Oc.Instance.getKubernetesObjects('pods');
-        return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+        return await Oc.Instance.getKubernetesObjects('pods', undefined, element.metadata.name);
     }
 
     refresh(target?: ExplorerItem): void {
