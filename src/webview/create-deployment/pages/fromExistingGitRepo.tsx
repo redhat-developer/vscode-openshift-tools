@@ -16,7 +16,7 @@ import {
     Typography
 } from '@mui/material';
 import * as React from 'react';
-import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
+import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
 import { BuilderImage } from '../../common/buildImage';
 import { BuilderImageListItem } from '../../common/builderImageListItem';
@@ -375,7 +375,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 : 'Recommended BuilderImage'}
                                         </Typography>
                                         {!recommendedBuilderImage.isBuilderImageExistsInRepo && (
-                                            <DevfileRecommendationInfo />
+                                            <RecommendationInfo infoMessage='Recommended based on a scan of build image of the project.'/>
                                         )}
                                     </Stack>
                                     {recommendedBuilderImage.isBuilderImageExistsInRepo ? (
@@ -427,6 +427,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     setSelectedBuilderImage(undefined);
                                                     setCurrentPage('selectDifferentBuilderImage');
                                                 }}
+                                                disabled
                                             >
                                                 SELECT A DIFFERENT Builder Image
                                             </Button>

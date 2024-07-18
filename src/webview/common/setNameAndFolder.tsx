@@ -16,7 +16,7 @@ import {
 import * as React from 'react';
 import 'react-dom';
 import { ComponentNameInput } from './componentNameInput';
-import { CreateComponentButton, CreateComponentErrorAlert } from './createComponentButton';
+import { CreateComponentButton, ErrorAlert } from './createComponentButton';
 import { Devfile } from './devfile';
 import { DevfileListItem } from './devfileListItem';
 import { PortNumberInput } from './portNumberInput';
@@ -254,8 +254,8 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                         setLoading={setLoading}
                     />
                 </Stack>
-                <CreateComponentErrorAlert
-                    createComponentErrorMessage={createComponentErrorMessage}
+                <ErrorAlert
+                    errorMessage={createComponentErrorMessage}
                 />
             </Stack>
         </Stack>

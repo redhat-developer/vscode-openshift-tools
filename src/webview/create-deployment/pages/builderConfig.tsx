@@ -2,27 +2,22 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import * as React from 'react';
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Button,
-    Checkbox,
     FormControl,
-    FormControlLabel,
-    FormGroup,
     InputLabel,
     MenuItem,
     Select,
     Stack,
     Typography
 } from '@mui/material';
-import * as React from 'react';
 import 'react-dom';
 import { ComponentNameInput } from '../../common/componentNameInput';
-import { CreateComponentErrorAlert } from '../../common/createComponentButton';
+import { ErrorAlert } from '../../common/createComponentButton';
 import { BuilderImage } from '../../common/buildImage';
+import ConstructionIcon from '@mui/icons-material/Construction';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 type Message = {
     action: string;
@@ -31,16 +26,14 @@ type Message = {
 
 type BuilderConfigurationProps = {
     goBack: () => void;
-    //createComponent: (projectFolder: string, componentName: string, addToWorkspace: boolean, portNumber: number) => void;
     builderImage: BuilderImage;
     appName: string;
     name: string;
-    // templateProject?: string;
-    //initialComponentParentFolder?: string;
 };
 
 export function BuilderConfiguration(props: BuilderConfigurationProps) {
     const [appName, setAppName] = React.useState(props.appName);
+    const [isLoading, setLoading] = React.useState(false);
     const [isAppNameFieldValid, setAppNameFieldValid] = React.useState(false);
     const [appNameErrorMessage, setAppNameErrorMessage] = React.useState(
         'Please enter a application name.',
@@ -50,35 +43,12 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
     const [configNameErrorMessage, setConfigNameErrorMessage] = React.useState(
         'Please enter a build config name.',
     );
-    const [createComponentErrorMessage, setCreateComponentErrorMessage] = React.useState('');
+    const [createDeploymentErrorMessage, setCreateDeploymentErrorMessage] = React.useState('');
     const buildOptions = ['Build', 'Pipelines'];
     const resourceTypes = ['Deployment', 'DeploymentConfig', 'Serverless Deployment'];
     const targetPorts = ['8080', '8443'];
-    const [advancedBuildOptions, setAdvancedBuildOptions] = React.useState([
-        {
-            'label': 'Configure a webhook build trigger',
-            'enable': true,
-            'priority': 0
-        },
-        {
-            'label': 'Automatically build a new Image when the Builder Image changes',
-            'enable': true,
-            'priority': 1
-        },
-        {
-            'label': 'Launch the first build when the build configuration is created',
-            'enable': true,
-            'priority': 2
-        }
-    ]);
-    const [advancedDeploymentOptions, setAdvancedDeploymentOptions] = React.useState([
-        {
-            'label': 'Auto deploy when new Image is available',
-            'enable': true
-        },
-    ])
     const [buildOption, setBuildOption] = React.useState('Build');
-    const [resourceType, setResourceType] = React.useState('Serverless Deployment');
+    const [resourceType, setResourceType] = React.useState('Deployment');
     const [targetPort, setTargetPort] = React.useState('8080');
 
     function respondToMessage(messageEvent: MessageEvent) {
@@ -105,8 +75,8 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                 break;
             }
             case 'createBuildConfigFailed': {
-                //setLoading(false);
-                setCreateComponentErrorMessage(message.data);
+                setLoading(false);
+                setCreateDeploymentErrorMessage(message.data);
                 break;
             }
             default:
@@ -138,10 +108,6 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
             });
         }
     }, []);
-
-    function sortByPriority(oldVal: { label: string; enable: boolean; priority: number; }, newVal: { label: string; enable: boolean; priority: number; }): number {
-        return oldVal.priority - newVal.priority
-    }
 
     return (
         <Stack direction="column" spacing={3}>
@@ -190,7 +156,32 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                         })}
                     </Select>
                 </FormControl>
-                <Accordion className="accordion">
+                <div style={{ position: 'relative' }}>
+                    <Typography variant="h5">Deploy</Typography>
+                </div>
+                <FormControl fullWidth>
+                    <InputLabel id="resource-select-label">Resource Type</InputLabel>
+                    <Select
+                        value={resourceType}
+                        onChange={(event) => {
+                            setResourceType(event.target.value);
+                        }}
+                        sx={{ flexGrow: '1' }}
+                        label="Resource Type"
+                        labelId="resource-option-label"
+                        disabled
+                    >
+                        {resourceTypes.map((resource: string) => {
+                            return (
+                                <MenuItem value={resource} key={resource}>
+                                    {resource}
+                                </MenuItem>
+                            );
+                        })}
+                    </Select>
+                </FormControl>
+                {/* commented below lines as we support only build and deployment.
+                 <Accordion className="accordion">
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>Show advanced Build option</Typography>
                     </AccordionSummary>
@@ -229,29 +220,6 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                         </FormGroup>
                     </AccordionDetails>
                 </Accordion>
-                <div style={{ position: 'relative' }}>
-                    <Typography variant="h5">Deploy</Typography>
-                </div>
-                <FormControl fullWidth>
-                    <InputLabel id="resource-select-label">Resource Type</InputLabel>
-                    <Select
-                        value={resourceType}
-                        onChange={(event) => {
-                            setResourceType(event.target.value);
-                        }}
-                        sx={{ flexGrow: '1' }}
-                        label="Resource Type"
-                        labelId="resource-option-label"
-                    >
-                        {resourceTypes.map((resource: string) => {
-                            return (
-                                <MenuItem value={resource} key={resource}>
-                                    {resource}
-                                </MenuItem>
-                            );
-                        })}
-                    </Select>
-                </FormControl>
                 <Accordion className="accordion">
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>Show advanced Deployment option</Typography>
@@ -288,6 +256,7 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                         </FormGroup>
                     </AccordionDetails>
                 </Accordion>
+                */}
                 <div style={{ position: 'relative' }}>
                     <Typography variant="h5">Advanced options</Typography>
                 </div>
@@ -315,9 +284,21 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                     <Button variant="text" onClick={props.goBack}>
                         Back
                     </Button>
+                    <LoadingButton
+                        variant="contained"
+                        onClick={() => {
+                            setLoading(true);
+                        }}
+                        disabled={!configName}
+                        loading={isLoading}
+                        loadingPosition="start"
+                        startIcon={<ConstructionIcon />}
+                    >
+                        <span>Create Deployment</span>
+                    </LoadingButton>
                 </Stack>
-                <CreateComponentErrorAlert
-                    createComponentErrorMessage={createComponentErrorMessage}
+                <ErrorAlert
+                    errorMessage={createDeploymentErrorMessage}
                 />
             </Stack>
         </Stack>

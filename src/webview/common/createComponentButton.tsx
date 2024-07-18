@@ -20,6 +20,10 @@ export type CreateComponentButtonProps = {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+export type ErrorAlertProps = {
+    errorMessage: string;
+}
+
 export function CreateComponentButton(props: CreateComponentButtonProps) {
     return (
         <LoadingButton
@@ -38,13 +42,13 @@ export function CreateComponentButton(props: CreateComponentButtonProps) {
     );
 }
 
-export function CreateComponentErrorAlert({ createComponentErrorMessage }) {
+export function ErrorAlert( props: ErrorAlertProps) {
     return (
         <>
-            {createComponentErrorMessage.length !== 0 &&
+            {props.errorMessage?.length !== 0 &&
                 <Alert severity="error">
                     <AlertTitle>Create Component Failed:</AlertTitle>
-                    {createComponentErrorMessage}
+                    {props.errorMessage}
                 </Alert>
             }
         </>

@@ -333,8 +333,13 @@ export default class CreateDeploymentLoader {
                 'Unable to analyze the builder Image',
             );
         } finally {
-            const language = analyzeRes[0].devfile.indexOf('-') !== -1 ? analyzeRes[0].devfile.split('-')[0] : analyzeRes[0].devfile;
-            const receommendedBuilderImage = builderImages[language];
+            let language = analyzeRes[0].devfile.indexOf('-') !== -1 ? analyzeRes[0].devfile.split('-')[0] : analyzeRes[0].devfile;
+            const defaultLanguage = 'java'
+            let receommendedBuilderImage = builderImages[language]
+            if (!receommendedBuilderImage) {
+                language = defaultLanguage;
+                receommendedBuilderImage = builderImages[language];
+            }
             receommendedBuilderImage.iconClass = `icon-${language}`;
             void CreateDeploymentLoader.panel.webview.postMessage({
                 action: 'recommendedBuilderImage',

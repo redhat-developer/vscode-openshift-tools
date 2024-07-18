@@ -5,10 +5,14 @@
 import { Alert } from '@mui/material';
 import * as React from 'react';
 
-export function DevfileRecommendationInfo() {
+export type RecommendationInfo = {
+    infoMessage: string;
+};
+
+export function RecommendationInfo(props: RecommendationInfo) {
     return (
         <Alert severity="info">
-            Recommended based on a scan of languages and structure of the project.
+            {props.infoMessage}
         </Alert>
     );
 }
