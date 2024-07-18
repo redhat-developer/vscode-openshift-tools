@@ -4,12 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
-import * as vscode from 'vscode';
 import * as cp from 'child_process';
+import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
 import { VsCommandError } from './vscommand';
+
+export class ExecutionContext extends Map<string, any> {
+}
 
 export class CliChannel {
 
@@ -52,13 +55,23 @@ export class CliChannel {
         return optsCopy;
     }
 
-    async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = true): Promise<CliExitData> {
+    async executeTool(command: CommandText, opts?: cp.ExecOptions, fail = true, executionContext?: ExecutionContext): Promise<CliExitData> {
         const commandActual = command.toString();
         const commandPrivacy = command.privacyMode(true).toString();
         const [cmd] = commandActual.split(' ');
         const toolLocation = await ToolsConfig.detect(cmd);
         const optsCopy = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv())
+
+        if (executionContext && executionContext.has(commandActual)) {
+            return executionContext.get(commandActual);
+        }
+
         const result: CliExitData = await ChildProcessUtil.Instance.execute(toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, optsCopy);
+
+        if (executionContext) {
+            executionContext.set(commandActual, result);
+        }
+
         if (result.error && fail) {
             if (result.error.code && result.error.code.toString() === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
                 void vscode.window.showErrorMessage('Do you want to change the maximum \'stdout\' buffer size by modifying the \'openshiftToolkit.execMaxBufferLength\' preference value?', 'Yes', 'Cancel')
@@ -86,7 +99,12 @@ export class CliChannel {
      * @param opts Execution options that may be used to specify operation timeout, maximun buffer size, etc.
      * @returns Output of from the command execution
      */
-    async executeSyncTool(cmd: CommandText, opts: cp.ExecFileOptions): Promise<string> {
+    async executeSyncTool(cmd: CommandText, opts: cp.ExecFileOptions, executionContext?: ExecutionContext): Promise<string> {
+        const key = cmd.toString();
+        if (executionContext && executionContext.has(key)) {
+            return executionContext.get(key);
+        }
+
         const options = {
             ...opts,
         } as cp.ExecFileOptionsWithStringEncoding
@@ -106,6 +124,13 @@ export class CliChannel {
 
         const toolLocation = await ToolsConfig.detect(cmd.command);
         const optWithTelemetryEnv = CliChannel.applyEnv(options, CliChannel.createTelemetryEnv()) as cp.ExecFileSyncOptionsWithStringEncoding;
-        return cp.execFileSync(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);
+
+        const result: string = cp.execFileSync(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);
+
+        if (executionContext) {
+            executionContext.set(key, result);
+        }
+
+        return result;
     }
 }

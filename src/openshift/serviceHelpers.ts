@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { ExecutionContext } from '../cli';
 import { K8sResourceKind } from '../k8s/olm/types';
 import { Oc } from '../oc/ocWrapper';
 import {
@@ -10,10 +11,9 @@ import {
     CustomResourceDefinitionStub,
 } from '../webview/common/createServiceTypes';
 
-export async function getServiceKindStubs(): Promise<CustomResourceDefinitionStub[]> {
+export async function getServiceKindStubs(executionContext?: ExecutionContext): Promise<CustomResourceDefinitionStub[]> {
     const clusterServiceVersions = (await Oc.Instance.getKubernetesObjects(
-        'csv',
-    )) as ClusterServiceVersion[];
+        'csv', undefined, undefined, executionContext)) as ClusterServiceVersion[];
     return clusterServiceVersions.flatMap((clusterServiceVersion) => {
         const serviceKinds = clusterServiceVersion.spec.customresourcedefinitions.owned;
         for (const serviceKind of serviceKinds) {
@@ -23,8 +23,7 @@ export async function getServiceKindStubs(): Promise<CustomResourceDefinitionStu
     });
 }
 
-export async function getServices(): Promise<K8sResourceKind[]> {
+export async function getServices(executionContext?: ExecutionContext): Promise<K8sResourceKind[]> {
     return (await Oc.Instance.getKubernetesObjects(
-        'service'
-    )) as unknown as K8sResourceKind[];
+        'service', undefined, undefined, executionContext)) as unknown as K8sResourceKind[];
 }
