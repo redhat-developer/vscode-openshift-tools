@@ -6,13 +6,12 @@
 import { KubernetesObject } from '@kubernetes/client-node/dist/types';
 import * as fs from 'fs/promises';
 import * as tmp from 'tmp';
+import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
-import { CliChannel } from '../cli';
-import { KubeConfigUtils } from '../util/kubeUtils';
-import { Platform } from '../util/platform';
+import { CliChannel, ExecutionContext } from '../cli';
+import { isOpenShiftCluster, KubeConfigUtils } from '../util/kubeUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
-import validator from 'validator';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -34,15 +33,18 @@ export class Oc {
      *
      * @param resourceType the type of resource to get a list of
      * @param namespace the namespace to list the resources of (defaults to the current namespace if none is provided)
+     * @param appName the name of the application
      * @returns a list of all resources of the given type in the given namespace
      */
     public async getKubernetesObjects(
         resourceType: string,
         namespace?: string,
+        appName?: string,
+        executionContext?: ExecutionContext
     ): Promise<KubernetesObject[]> {
         const result = await CliChannel.getInstance().executeTool(
-            Oc.getKubernetesObjectCommand(resourceType, namespace),
-        );
+            Oc.getKubernetesObjectCommand(resourceType, namespace, appName),
+            undefined, true, executionContext);
         return JSON.parse(result.stdout).items;
     }
 
@@ -73,17 +75,18 @@ export class Oc {
         resourceType: string,
         resourceName: string,
         namespace?: string,
+        executionContext?: ExecutionContext
     ): Promise<KubernetesObject> {
         const result = await CliChannel.getInstance().executeTool(
             Oc.getSingleKubernetesObjectCommand(resourceType, resourceName, namespace),
-        );
+            undefined, true, executionContext);
         return JSON.parse(result.stdout);
     }
 
-    public async getAllKubernetesObjects(namespace?: string): Promise<KubernetesObject[]> {
+    public async getAllKubernetesObjects(namespace?: string, executionContext?: ExecutionContext): Promise<KubernetesObject[]> {
         const result = await CliChannel.getInstance().executeTool(
             Oc.getKubernetesObjectCommand('all', namespace),
-        );
+            undefined, true, executionContext);
         return JSON.parse(result.stdout).items;
     }
 
@@ -250,11 +253,11 @@ export class Oc {
      * @param resourceType the string containing the [TYPE | TYPE/NAME | NONRESOURCEURL] of the kubernetes object
      * @returns true if the current user is authorized to get a kubernates objects on the cluster, and false otherwise
      */
-    public async canGetKubernetesObjects(resourceType: string): Promise<boolean> {
+    public async canGetKubernetesObjects(resourceType: string, executionContext: ExecutionContext): Promise<boolean> {
         try {
             const result = await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `auth can-i get ${resourceType}`),
-            );
+                undefined, true, executionContext);
             if (result.stdout === 'yes' && result.stderr.indexOf('not namespace scoped') < 0) {
                 return true;
             }
@@ -405,25 +408,6 @@ export class Oc {
     }
 
     /**
-     * Returns true if the current cluster is an OpenShift cluster, and false otherwise
-     *
-     * @returns true if the current cluster is an OpenShift cluster, and false otherwise
-     */
-    public async isOpenShiftCluster(): Promise<boolean> {
-        const find = Platform.OS !== 'win32' ? 'grep' : 'FINDSTR';
-        try {
-            const result = await CliChannel.getInstance().executeTool(new CommandText(`oc api-resources | ${find} openshift`));
-            if (result.stdout.length === 0) {
-                return false;
-            }
-            return true;
-        } catch (e) {
-            // probably no
-            return false;
-        }
-    }
-
-    /**
      * Returns true if the current user can access CRDs and false otherwise.
      *
      * @returns true if the current user can access CRDs and false otherwise
@@ -486,23 +470,23 @@ export class Oc {
         return result.stdout;
     }
 
-    public async deleteProject(projectName: string): Promise<string> {
-        const obj = await this.isOpenShiftCluster() ? 'project' : 'namespace';
+    public async deleteProject(projectName: string, executionContext?: ExecutionContext): Promise<string> {
+        const obj = await isOpenShiftCluster(executionContext) ? 'project' : 'namespace';
         return await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `delete ${obj} ${projectName}`)
             )
             .then((result) => result.stdout);
     }
 
-    public async createProject(projectName: string):  Promise<string> {
-        const cmd = await this.isOpenShiftCluster() ? 'new-project' : 'create namespace';
+    public async createProject(projectName: string, executionContext?: ExecutionContext):  Promise<string> {
+        const cmd = await isOpenShiftCluster(executionContext) ? 'new-project' : 'create namespace';
 
         return await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `${cmd} ${projectName}`)
             )
             .then(async (result) => {
                 // oc doesn't handle switching to the newly created namespace/project
-                await this.setProject(projectName);
+                await this.setProject(projectName, executionContext);
                 return result.stdout;
             });
     }
@@ -546,8 +530,8 @@ export class Oc {
      *
      * @param projectName the new project to use
      */
-    public async setProject(projectName: string): Promise<void> {
-        if(await this.isOpenShiftCluster()) {
+    public async setProject(projectName: string, executionContext?: ExecutionContext): Promise<void> {
+        if(await isOpenShiftCluster(executionContext)) {
             await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `project ${projectName}`),
             );
@@ -561,9 +545,9 @@ export class Oc {
         }
     }
 
-    public async getProjects(onlyFromCluster: boolean = false): Promise<Project[]> {
-        return this._listProjects()
-            .then((projects) => onlyFromCluster ? projects : this.fixActiveProject(projects));
+    public async getProjects(onlyFromCluster: boolean = false, executionContext?: ExecutionContext): Promise<Project[]> {
+        return this._listProjects(executionContext)
+            .then((projects) => onlyFromCluster ? projects : this.fixActiveProject(projects, executionContext));
     }
 
     /**
@@ -571,10 +555,10 @@ export class Oc {
      *
      * @returns the active project or null if no project is active
      */
-    public async getActiveProject(): Promise<string> {
-        return this._listProjects()
+    public async getActiveProject(executionContext?: ExecutionContext): Promise<string> {
+        return this._listProjects(executionContext)
             .then((projects) => {
-                const fixedProjects = this.fixActiveProject(projects);
+                const fixedProjects = this.fixActiveProject(projects, executionContext);
                 const activeProject = fixedProjects.find((project) => project.active);
                 return activeProject ? activeProject.name : null;
             });
@@ -594,7 +578,7 @@ export class Oc {
      *
      * @returns The array of Projects with at least one project marked as an active
      */
-    public fixActiveProject(projects: Project[]): Project[] {
+    public fixActiveProject(projects: Project[], executionContext?: ExecutionContext): Project[] {
         const kcu = new KubeConfigUtils();
         const currentContext = kcu.findContext(kcu.currentContext);
 
@@ -620,7 +604,7 @@ export class Oc {
                     activeProject = fixedProjects.find((project) => project.name.includes(projectPrefix));
                     if (activeProject) {
                         activeProject.active = true;
-                        void Oc.Instance.setProject(activeProject.name);
+                        void Oc.Instance.setProject(activeProject.name, executionContext);
                         return fixedProjects;
                     }
                 }
@@ -637,7 +621,7 @@ export class Oc {
                     },
                     ...projects
                 ]
-                void Oc.Instance.setProject(currentContext.namespace);
+                void Oc.Instance.setProject(currentContext.namespace, executionContext);
                 return fixedProjects;
             }
         }
@@ -652,16 +636,16 @@ export class Oc {
         // Set the first available project as active
         if (fixedProjects.length > 0) {
             fixedProjects[0].active = true;
-            void Oc.Instance.setProject(fixedProjects[0].name);
+            void Oc.Instance.setProject(fixedProjects[0].name, executionContext);
         }
 
         return fixedProjects;
     }
 
-    private async _listProjects(): Promise<Project[]> {
+    private async _listProjects(executionContext: ExecutionContext): Promise<Project[]> {
         const namespaces: Project[] = [];
         return await CliChannel.getInstance().executeTool(
-                new CommandText('oc', 'projects -q')
+                new CommandText('oc', 'projects -q'), undefined, true, executionContext
             )
             .then( (result) => {
                 const lines = result.stdout && result.stdout.split(/\r?\n/g);
@@ -675,16 +659,26 @@ export class Oc {
             .catch((error) => namespaces);
     }
 
+    public async hasImageInfo(url: string): Promise<boolean> {
+        const imageURL = url.lastIndexOf(':') < 0 ? `${url}:latest` : url;
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `image info ${imageURL} --show-multiarch=true`), undefined, false
+        );
+        return result.error && result.stderr.length > 0 ? false : true;
+    }
+
     /**
      * Returns the oc command to list all resources of the given type in the given (or current) namespace
      *
      * @param resourceType the resource type to get
      * @param namespace the namespace from which to get all the stateful sets
+     * @param appName the name of the application
      * @returns the oc command to list all resources of the given type in the given (or current) namespace
      */
     private static getKubernetesObjectCommand(
         resourceType: string,
         namespace?: string,
+        appName?: string
     ): CommandText {
         if (!resourceType) {
             throw new Error('Must pass the resource type to get');
@@ -692,6 +686,9 @@ export class Oc {
         const args = [new CommandOption('-o', 'json')];
         if (namespace) {
             args.push(new CommandOption('--namespace', namespace));
+        }
+        if (appName) {
+            args.push(new CommandOption('-l', `app=${appName}`));
         }
         return new CommandText('oc',  `get ${resourceType}`, args);
     }

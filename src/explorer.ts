@@ -23,13 +23,15 @@ import {
     workspace
 } from 'vscode';
 import { CommandOption, CommandText } from './base/command';
+import { ExecutionContext } from './cli';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
+import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.virtualfs';
 import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs, getServices } from './openshift/serviceHelpers';
 import { PortForward } from './port-forward';
-import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind } from './util/kubeUtils';
+import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind, isOpenShiftCluster } from './util/kubeUtils';
 import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
@@ -37,7 +39,6 @@ import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
-import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.virtualfs';
 
 type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
 
@@ -67,8 +68,8 @@ type PackageJSON = {
     bugs: string;
 };
 
-async function createOrSetProjectItem(projectName: string): Promise<ExplorerItem> {
-    const kind = await getNamespaceKind();
+async function createOrSetProjectItem(projectName: string, executionContext?: ExecutionContext): Promise<ExplorerItem> {
+    const kind = await getNamespaceKind(executionContext);
     return {
         label: `${projectName}`,
         description: `Missing ${kind}. Create new or set active ${kind}`,
@@ -96,6 +97,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     private kubeConfigWatchers: FileContentChangeNotifier[];
     private kubeContext: Context;
     private kubeConfig: KubeConfigUtils;
+
+    private executionContext: ExecutionContext = new ExecutionContext();
 
     private eventEmitter: EventEmitter<ExplorerItem | undefined> =
         new EventEmitter<ExplorerItem | undefined>();
@@ -148,13 +151,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return OpenShiftExplorer.instance;
     }
 
-    private static generateOpenshiftProjectContextValue(namespace: string): Thenable<string> {
+    private generateOpenshiftProjectContextValue(namespace: string): Thenable<string> {
         const contextValue = `openshift.project.${namespace}`;
         const allTrue = arr => arr.every(Boolean);
 
         return Promise.all([
                 Oc.Instance.canDeleteNamespace(namespace),
-                Oc.Instance.getProjects(true)
+                Oc.Instance.getProjects(true, this.executionContext)
                     .then((clusterProjects) => {
                         const existing = clusterProjects.find((project) => project.name === namespace);
                         return existing !== undefined;
@@ -229,7 +232,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         // otherwise it is a KubernetesObject instance
         if ('kind' in element) {
             if (element.kind === 'project') {
-                return OpenShiftExplorer.generateOpenshiftProjectContextValue(element.metadata.name)
+                return this.generateOpenshiftProjectContextValue(element.metadata.name)
                     .then(namespace => {
                         return {
                             contextValue: namespace,
@@ -428,7 +431,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         // don't show Open In Developer Dashboard if not openshift cluster
-        const isOpenshiftCluster = await Oc.Instance.isOpenShiftCluster();
+        const isOpenshiftCluster = await isOpenShiftCluster(this.executionContext);
         if (!element) {
             try {
                 if (!await LoginUtil.Instance.requireLogin()) {
@@ -455,7 +458,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             //   * example is sandbox context created when login to sandbox first time
             // (3) there is namespace set in context and namespace exists in the cluster
             // (4) there is namespace set in context and namespace does not exist in the cluster
-            const namespaces = await Oc.Instance.getProjects();
+            const namespaces = await Oc.Instance.getProjects(false, this.executionContext);
             // Actually 'Oc.Instance.getProjects()' takes care of setting up at least one project as
             // an active project, so here after it's enough just to search the array for it.
             // The only case where there could be no active project set is empty projects array.
@@ -472,14 +475,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 } as KubernetesObject]
             } else {
                 const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
-                result = [await createOrSetProjectItem(projectName)];
+                result = [await createOrSetProjectItem(projectName, this.executionContext)];
             }
 
             // The 'Create Service' menu visibility
             let serviceKinds: CustomResourceDefinitionStub[] = [];
             try {
-                if (await Oc.Instance.canGetKubernetesObjects('csv')) {
-                    serviceKinds = await getServiceKindStubs();
+                if (await Oc.Instance.canGetKubernetesObjects('csv', this.executionContext)) {
+                    serviceKinds = await getServiceKindStubs(this.executionContext);
                 }
             } catch (_) {
                 // operator framework is not installed on cluster; do nothing
@@ -489,7 +492,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             // The 'Create Route' menu visibility
             let services: K8sResourceKind[] = [];
             try {
-                services = await getServices();
+                services = await getServices(this.executionContext);
             }
             catch (_) {
                 // operator framework is not installed on cluster; do nothing
@@ -519,8 +522,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             }
         } else if ('kind' in element && element.kind === 'Deployment') {
             try {
-                const pods = await Oc.Instance.getKubernetesObjects('pods');
-                return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+                return this.getPods(element);
             } catch {
                 return [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
             }
@@ -618,7 +620,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     break;
                 default:
                     try {
-                        collections = await Oc.Instance.getKubernetesObjects(element.kind);
+                        collections = await Oc.Instance.getKubernetesObjects(element.kind, undefined, undefined, this.executionContext);
                     } catch {
                         collections = [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
                     }
@@ -627,7 +629,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             const toCollect = [
                 collections,
                 ...collectableServices
-                    .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name))
+                    .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name, undefined, undefined, this.executionContext))
             ];
             result = await Promise.all(toCollect).then(listOfLists => listOfLists.flatMap(a => a as ExplorerItem[]));
         }
@@ -642,8 +644,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     private async getServiceKinds() {
         let serviceKinds: CustomResourceDefinitionStub[] = [];
         try {
-            if (await Oc.Instance.canGetKubernetesObjects('csv')) {
-                serviceKinds = await getServiceKindStubs();
+            if (await Oc.Instance.canGetKubernetesObjects('csv', this.executionContext)) {
+                serviceKinds = await getServiceKindStubs(this.executionContext);
             }
         } catch (_) {
             // operator framework is not installed on cluster; do nothing
@@ -651,7 +653,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         const collectableServices: CustomResourceDefinitionStub[] = [];
         await Promise.all(serviceKinds.map(async (serviceKind) => {
-            if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name)) {
+            if (await Oc.Instance.canGetKubernetesObjects(serviceKind.name, this.executionContext)) {
                 collectableServices.push(serviceKind);
             }
         }));
@@ -659,11 +661,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     public async getPods(element: KubernetesObject | OpenShiftObject) {
-        const pods = await Oc.Instance.getKubernetesObjects('pods');
-        return pods.filter((pod) => pod.metadata.name.indexOf(element.metadata.name) !== -1);
+        return await Oc.Instance.getKubernetesObjects('pods', undefined, element.metadata.name, this.executionContext);
     }
 
     refresh(target?: ExplorerItem): void {
+        // Create new Execution Context before refreshing
+        if (this.executionContext) {
+            this.executionContext.clear();
+        }
+        this.executionContext = new ExecutionContext();
+
         this.eventEmitter.fire(target);
     }
 
