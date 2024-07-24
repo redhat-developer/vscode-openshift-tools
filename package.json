@@ -123,6 +123,7 @@
 		"@types/react-copy-to-clipboard": "^5.0.7",
 		"@types/react-dom": "^17.0.25",
 		"@types/react-syntax-highlighter": "^15.5.13",
+		"@types/semver": "^7.5.8",
 		"@types/shelljs": "^0.8.15",
 		"@types/sinon": "^17.0.3",
 		"@types/sinon-chai": "^3.2.12",
@@ -815,6 +816,11 @@
 			{
 				"command": "openshift.deployment.create.fromImageUrl",
 				"title": "Create Deployment from Container Image URL",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.deployment.create.buildConfig",
+				"title": "Create Deployment using BuildConfig",
 				"category": "OpenShift"
 			},
 			{
@@ -1638,6 +1644,11 @@
 				},
 				{
 					"command": "openshift.deployment.create.fromImageUrl",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
+					"group": "c2"
+				},
+				{
+					"command": "openshift.deployment.create.buildConfig",
 					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
 					"group": "c2"
 				}

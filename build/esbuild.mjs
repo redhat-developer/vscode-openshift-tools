@@ -13,6 +13,7 @@ const webviews = [
     'create-service',
     'create-route',
     'create-component',
+    'create-deployment',
     'devfile-registry',
     'helm-chart',
     'helm-manage-repository',
