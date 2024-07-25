@@ -22,7 +22,7 @@ import {
     validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
-import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
+import { getDevfileContent, getLanguages, loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 
 interface CloneProcess {
     status: boolean;
@@ -174,6 +174,14 @@ export default class CreateDeploymentLoader {
                     });
                 } else {
                     // Use recommended BuilderImage
+                    const languages = getDevfileContent(tmpFolder);
+                    // eslint-disable-next-line no-console
+                    console.log(languages);
+
+                    const languages1 = await getLanguages(message.data.url);
+                    // eslint-disable-next-line no-console
+                    console.log(languages1);
+
                     void CreateDeploymentLoader.getRecommendedBuilderImage(tmpFolder);
                 }
                 break;
