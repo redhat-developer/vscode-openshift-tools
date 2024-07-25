@@ -7,7 +7,7 @@ from `OpenShift: Application Explorer` view title.
 ![ addcluster ](https://raw.githubusercontent.com/redhat-developer/vscode-openshift-tools/main/images/add-cluster.gif)
 
 The view provides a guided workflow to create and start OpenShift 4 single node cluster on your workstation
-using OpenShift Local (formerly Red Hat CodeReady Containers):
+using OpenShift Local:
 
    * Download & Install OpenShift Local
    * Set Virtual Machine parameters: number of CPUs and memory limit
