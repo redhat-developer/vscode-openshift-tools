@@ -135,7 +135,7 @@
 		"@typescript-eslint/parser": "^7.17.0",
 		"@vscode/test-electron": "^2.4.1",
 		"bootstrap": "^5.3.3",
-		"chai": "^4.4.1",
+		"chai": "^4.5.0",
 		"chokidar": "^3.6.0",
 		"clipboardy": "^2.3.0",
 		"codecov": "^3.8.2",
