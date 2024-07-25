@@ -181,7 +181,6 @@ export default (theme: Theme) =>
         cardBody: {
             maxHeight: '15em',
             overflow: 'hidden',
-            overflowY: 'scroll',
             '&::-webkit-scrollbar': {
                 width: 0,
             }

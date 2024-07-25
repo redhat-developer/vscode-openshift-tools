@@ -79,7 +79,7 @@ use
 
 # Running local OpenShift Cluster
 
-## OpenShift Local (formerly Red Hat CodeReady Containers)
+## OpenShift Local
 
 1. Downloads are available at: https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc/
 2. To use these binaries follow the instructions at https://console.redhat.com/openshift/install/crc/installer-provisioned to obtain the needed pull-secret.

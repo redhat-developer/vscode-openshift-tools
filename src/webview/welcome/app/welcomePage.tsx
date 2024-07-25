@@ -16,7 +16,7 @@ import OpenShiftLogo from '../../../../images/title/logo.svg';
 import OpenShiftBranding from '../../../../images/welcome/OpenShift-Branding-box.png';
 import CloudBranding from '../../../../images/welcome/cloud.svg';
 import ComponentBranding from '../../../../images/welcome/component.png';
-import DevfileBranding from '../../../../images/welcome/devfile.png';
+import OpenShhiftLocal from '../../../../images/openshift-local.png';
 import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
 import OdoLogo from '../../../../images/welcome/odo.png';
 import { VSCodeMessage } from './vsCodeMessage';
@@ -363,7 +363,7 @@ export class Welcome extends React.Component<DefaultProps, {
                         </div>
                         <div className='section__brand__preview'
                             style={{ margin: '0rem' }}>
-                            <img className='content__image__preview' src={DevfileBranding} />
+                            <img className='content__image__preview' src={OpenShhiftLocal} />
                         </div>
                     </section>
                     <Stack direction='row' width='100%' alignItems='stretch' justifyContent='center' gap='1em 2em' margin='1em' padding='1em' flexWrap='wrap'>

@@ -12,15 +12,16 @@ import clusterStyle, { ClusterTheme } from './cluster.style';
 import AddClusterView from './clusterView';
 import OpenShiftLogo from './images/logo.png';
 import AddSandboxView from './sandboxView';
+import OpenShiftLocal from '../../../../images/openshift-local.png';
 
 const useStyles = makeStyles(clusterStyle);
 
 const clusterTypes = [
     {
         heading: 'Deploy it locally on your laptop',
-        description: 'Install on Laptop: Red Hat OpenShift Local (formerly Red Hat CodeReady Containers)',
+        description: 'Install on Laptop: Red Hat OpenShift Local',
         smallInfo: 'Create a minimal OpenShift 4 cluster on your desktop/laptop for local development and testing.',
-        imageUrl: ['https://www.openshift.com/hubfs/images/icons/Icon-Red_Hat-Hardware-Laptop-A-Black-RGB.svg'],
+        imageUrl: [OpenShiftLocal],
         urlAlt: 'crc',
         redirectLink: '',
         buttonText: 'Create/Refresh cluster',
@@ -30,7 +31,7 @@ const clusterTypes = [
         heading: 'Launch Developer Sandbox',
         description: 'Free access to the Developer Sandbox for Red Hat OpenShift',
         smallInfo: 'If you are exploring how to run your code as containers in OpenShift, our free Developer Sandbox instantly gives you a way to try it out.',
-        imageUrl: ['https://assets.openshift.com/hubfs/images/logos/osh/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
+        imageUrl: ['https://www.redhat.com/rhdc/managed-files/Logo-Red_Hat-OpenShift-A-Standard-RGB.svg'],
         urlAlt: 'dev sandbox',
         redirectLink: '',
         buttonText: 'Start your OpenShift experience',
