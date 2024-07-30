@@ -100,12 +100,12 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('analyze()', async function () {
-            const analysis1 = await Odo.Instance.analyze(tmpFolder1.fsPath);
+            const analysis1 = await Odo.Instance.alizerAnalyze(tmpFolder1);
             expect(analysis1).to.exist;
-            expect(analysis1[0].devfile).to.equal('nodejs');
-            const analysis2 = await Odo.Instance.analyze(tmpFolder2.fsPath);
+            expect(analysis1[0].Name).to.equal('nodejs');
+            const analysis2 = await Odo.Instance.alizerAnalyze(tmpFolder2);
             expect(analysis2).to.exist;
-            expect(analysis2[0].devfile).to.equal('go');
+            expect(analysis2[0].Name).to.equal('go');
         });
     });
 
@@ -208,9 +208,8 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('analyze()', async function() {
-            const [analysis] = await Odo.Instance.analyze(tmpFolder);
-            expect(analysis.name).to.equal(path.basename(tmpFolder).toLocaleLowerCase());
-            expect(analysis.devfile).to.equal(COMPONENT_TYPE);
+            const [analysis] = await Odo.Instance.alizerAnalyze(Uri.file(tmpFolder));
+            expect(analysis.Name).to.equal(COMPONENT_TYPE);
         });
 
         test('deleteComponentConfiguration()', async function() {

@@ -92,6 +92,20 @@ export interface AnalyzeResponse {
     ports: number[];
 }
 
+interface Version {
+    SchemaVersion: number;
+    Default: boolean;
+    Version: string;
+}
+
+export interface AlizerAnalyzeResponse {
+    Name: string;
+    Language: string;
+    ProjectType: string;
+    Tags: string[];
+    Versions: Version[];
+}
+
 export type ComponentTypeDescription = DevfileComponentType & DevfileData;
 
 export class ComponentTypeAdapter implements ComponentType {
