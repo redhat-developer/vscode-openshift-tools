@@ -56,7 +56,7 @@ export class Oc {
                 commandText
             );
             return result.stdout.length > 0 ? JSON.parse(result.stdout).spec.host : undefined;
-        } catch (err) {
+        } catch {
             return undefined;
         }
     }
@@ -296,7 +296,7 @@ export class Oc {
                 kind: ClusterType.OpenShift,
                 url: consoleUrl,
             };
-        } catch (ignore) {
+        } catch {
             const serverUrl = await CliChannel.getInstance().executeTool(
                 new CommandText('oc', 'whoami --show-server'),
             );
@@ -418,7 +418,7 @@ export class Oc {
                 new CommandText('oc', 'auth can-i get CustomResourceDefinition'),
             );
             return true;
-        } catch (e) {
+        } catch {
             // do nothing
         }
         return false;

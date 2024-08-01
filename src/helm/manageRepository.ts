@@ -102,7 +102,7 @@ export class ManageRepository {
                                     if (repositories?.find((registry) => registry.url !== repoURL && new URL(registry.url).hostname === new URL(value).hostname)) {
                                         return `Repository with entered URL '${value}' already exists`;
                                     }
-                                } catch (Error) {
+                                } catch {
                                     return 'Entered URL is invalid';
                                 }
                             },

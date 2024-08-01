@@ -100,6 +100,7 @@
     "@typescript-eslint/no-unsafe-assignment": 1,
     "@typescript-eslint/no-var-requires": 1,
     "@typescript-eslint/no-unsafe-argument": 1,
+    "@typescript-eslint/no-unused-expressions": 0,
     "no-var": 2,
     "object-shorthand": ["error", "properties"],
     "prefer-const": ["error", { "destructuring": "all" }],

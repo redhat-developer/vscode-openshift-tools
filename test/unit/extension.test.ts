@@ -10,6 +10,7 @@
 
 import * as assert from 'assert';
 import * as chai from 'chai';
+import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
@@ -17,11 +18,10 @@ import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
 import { Odo } from '../../src/odo/odoWrapper';
-import { Progress } from '../../src/util/progress';
-import path = require('path');
-
-import packagejson = require('../../package.json');
 import { getNamespaceKind } from '../../src/util/kubeUtils';
+import { Progress } from '../../src/util/progress';
+
+import * as packagejson from '../../package.json';
 
 const {expect} = chai;
 chai.use(sinonChai);

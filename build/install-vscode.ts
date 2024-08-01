@@ -7,12 +7,12 @@
 import * as testElectron from '@vscode/test-electron';
 import { platform } from 'os';
 
-import cp = require('child_process');
-import path = require('path');
+import * as cp from 'child_process';
+import * as path from 'path';
+import * as packageJson from '../package.json';
 
 void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
     // Install extensions that openshift-toolkit depends on
-    const packageJson = require('../package.json');
     const extensionsToInstall = packageJson.extensionDependencies;
 
     if (extensionsToInstall) {

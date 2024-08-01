@@ -2,12 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as k8s from 'vscode-kubernetes-tools-api';
+import * as path from 'path';
 import * as vscode from 'vscode';
-import { vsCommand } from '../vscommand';
+import * as k8s from 'vscode-kubernetes-tools-api';
 import { createSandboxAPI, SBSignupResponse } from '../openshift/sandbox';
+import { vsCommand } from '../vscommand';
 import ClusterViewLoader from '../webview/cluster/clusterViewLoader';
-import path = require('path');
 
 const sandboxAPI = createSandboxAPI();
 

@@ -24,7 +24,7 @@ async function welcomeViewerMessageListener(event: any): Promise<void> {
                     'action': 'getOpenShiftVersion',
                     'param': data.name
                 });
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             break;

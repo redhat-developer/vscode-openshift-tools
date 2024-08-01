@@ -94,7 +94,7 @@ export function validateGitURL(event: Message): validateURLProps {
         const parse = gitUrlParse(event.data);
         const isGitRepo = isGitURL(parse.host);
         if (!isGitRepo) {
-            throw 'Invalid Git URL';
+            throw new Error('Invalid Git URL');
         }
         if (parse.organization !== '' && parse.name !== '') {
             return {
@@ -109,7 +109,7 @@ export function validateGitURL(event: Message): validateURLProps {
             helpText: 'URL is missing organization or repo name.'
         } as validateURLProps
 
-    } catch (e) {
+    } catch {
         return {
             url: event.data,
             error: true,

@@ -88,10 +88,12 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
          */
         case 'getInitialWokspaceFolder': {
             const initialWorkspaceFolder = getInitialWorkspaceFolder();
-            initialWorkspaceFolder && void panel.webview.postMessage({
-                action: 'initialWorkspaceFolder',
-                data: initialWorkspaceFolder
-            });
+            if (initialWorkspaceFolder) {
+                void panel.webview.postMessage({
+                    action: 'initialWorkspaceFolder',
+                    data: initialWorkspaceFolder
+                });
+            }
             break;
         }
         case 'validateComponentName': {
@@ -115,10 +117,12 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         }
         case 'selectProjectFolderNewProject': {
             const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  event?.data );
-            workspaceUri && void panel.webview.postMessage({
-                action: 'selectedProjectFolder',
-                data: workspaceUri.fsPath,
-            });
+            if (workspaceUri) {
+                void panel.webview.postMessage({
+                    action: 'selectedProjectFolder',
+                    data: workspaceUri.fsPath,
+                });
+            }
             break;
         }
         case 'isValidProjectFolder': {

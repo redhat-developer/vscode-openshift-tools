@@ -330,7 +330,7 @@ export class Cluster extends OpenShiftItem {
                     const prompt = 'Provide new Cluster URL to connect';
                     const validateInput = (value: string) => NameValidator.validateUrl('Invalid URL provided', value);
                     const newURL = await inputValue(prompt, '', false, validateInput, undefined, abortController);
-                    if (newURL === null) reject(null); // Cancel
+                    if (newURL === null) reject(null as Error); // Cancel
                     else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl, abortController)); // Back
                     else resolve(newURL);
                 } else {
@@ -501,7 +501,7 @@ export class Cluster extends OpenShiftItem {
         try {
             await Oc.Instance.setContext(context.name)
             return await LoginUtil.Instance.requireLogin(cluster.server)
-        } catch(error) {
+        } catch {
             // Restore saved `current-context`
             await Oc.Instance.setContext(savedContext)
         }
@@ -511,7 +511,7 @@ export class Cluster extends OpenShiftItem {
     private static isOpenshiftLocalCluster(clusterURL: string): boolean {
         try {
             return new URL(clusterURL).hostname === 'api.crc.testing';
-        } catch (_) {
+        } catch {
             return false;
         }
     }
@@ -519,7 +519,7 @@ export class Cluster extends OpenShiftItem {
     private static isSandboxCluster(clusterURL: string): boolean {
         try {
             return /api\.sandbox-.*openshiftapps\.com/.test(new URL(clusterURL).hostname);
-        } catch (_) {
+        } catch {
             return false;
         }
     }
@@ -548,7 +548,9 @@ export class Cluster extends OpenShiftItem {
             }
 
             // Do cancell here.
-            Cluster.ongoingOperationCanceller && Cluster.ongoingOperationCanceller.abort();
+            if (Cluster.ongoingOperationCanceller) {
+                Cluster.ongoingOperationCanceller.abort();
+            }
         }
 
         return true;
@@ -569,10 +571,10 @@ export class Cluster extends OpenShiftItem {
                 if (response.statusCode < 500) {
                     resolve(true);
                 } else {
-                    reject(`Connect error: ${response.statusMessage}`);
+                    reject(new Error(`Connect error: ${response.statusMessage}`));
                 }
             }).on('error', (e) => {
-                reject(`Connect error: ${e}`);
+                reject(new Error(`Connect error: ${e}`));
             }).on('success', (s) => {
                 resolve(true);
             });
@@ -657,7 +659,7 @@ export class Cluster extends OpenShiftItem {
 
                         try {
                             clusterIsUp  = await Cluster.pingCluster(clusterURL, abortController);
-                        } catch (e) {
+                        } catch {
                             if (abortController?.signal.aborted) {
                                 return null; // Silently exit
                             }
@@ -937,7 +939,7 @@ export class Cluster extends OpenShiftItem {
     static async readFromClipboard(): Promise<string> {
         try {
             return await env.clipboard.readText();
-        } catch (ignore) {
+        } catch {
             return '';
         }
     }

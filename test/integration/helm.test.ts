@@ -28,7 +28,7 @@ suite('helm integration', function () {
         }
         try {
             await oc.deleteProject(HELM_NAMESPACE);
-        } catch (e) {
+        } catch {
             // do nothing
         }
         await oc.createProject(HELM_NAMESPACE);
@@ -37,7 +37,7 @@ suite('helm integration', function () {
     suiteTeardown(async function () {
         try {
             await Helm.unInstallHelmChart(CHART_NAME);
-        } catch (_) {
+        } catch {
             // do nothing
         }
         // this call fails to exit on minikube/kind

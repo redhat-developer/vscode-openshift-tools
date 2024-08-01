@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { V1Pod, V1Container, V1Service, V1Deployment } from '@kubernetes/client-node';
+import { V1Container, V1Deployment, V1Pod, V1Service } from '@kubernetes/client-node';
 import * as portFinder from 'portfinder';
 import { QuickPickOptions, window } from 'vscode';
 import { CommandText } from './base/command';
@@ -152,7 +152,7 @@ export class PortForward {
                     return undefined;
                 }
             });
-        } catch (e) {
+        } catch {
             void window.showErrorMessage('Could not validate on input port');
         }
 

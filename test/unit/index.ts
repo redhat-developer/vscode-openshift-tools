@@ -2,15 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-/* tslint:disable no-require-imports */
+
 import * as fs from 'fs';
 import { sync } from 'glob';
 import * as paths from 'path';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
-require('source-map-support').install();
+import * as sourceMapSupport from 'source-map-support';
 
-import Mocha = require('mocha');
+sourceMapSupport.install();
+
+import * as Mocha from 'mocha';
 
 const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',
@@ -41,7 +43,7 @@ function createTestFinder(testsRoot: string) {
                 const files = sync(pattern, {cwd: testsRoot});
                 resolve(files);
             } catch(error) {
-                reject(error);
+                reject(error as Error);
             }
         }
     )};
@@ -80,19 +82,19 @@ export async function run(): Promise<void> {
                 }
                 coverageReported.then(() => {
                     if (failed > 0) {
-                        reject (`Test failures: ${failed}`);
+                        reject (new Error(`Test failures: ${failed}`));
                     } else {
                         resolve();
                     }
                     resolve();
                 }).catch((e) => {
-                    reject(e);
+                    reject(e as Error);
                 })
             }).on('fail', () => {
                 failed++;
             });
         } catch (e) {
-            reject(e);
+            reject(e as Error);
         }
     });
 }

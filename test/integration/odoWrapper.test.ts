@@ -25,7 +25,7 @@ suite('./odo/odoWrapper.ts', function () {
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
@@ -36,12 +36,12 @@ suite('./odo/odoWrapper.ts', function () {
         // ensure projects are cleaned up
         try {
             await Oc.Instance.deleteProject('my-test-project-1');
-        } catch (e) {
+        } catch {
             // do nothing
         }
         try {
             await Oc.Instance.deleteProject('my-test-project-2');
-        } catch (e) {
+        } catch {
             // do nothing
         }
 
@@ -122,7 +122,7 @@ suite('./odo/odoWrapper.ts', function () {
         suiteTeardown(async function () {
             try {
                 await Odo.Instance.removeRegistry(TEST_REGISTRY);
-            } catch (e) {
+            } catch {
                 // do nothing, it's probably already deleted
             }
         });
@@ -202,7 +202,7 @@ suite('./odo/odoWrapper.ts', function () {
             await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, 'DefaultDevfileRegistry', 'dotnet50-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
-            } catch (_) {
+            } catch {
                 fail('Expected devfile to be created');
             }
         });
@@ -218,7 +218,7 @@ suite('./odo/odoWrapper.ts', function () {
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
                 fail('devfile.yaml should have been deleted')
-            } catch (_e) {
+            } catch {
                 // deleted successfully
             }
         });
@@ -229,7 +229,7 @@ suite('./odo/odoWrapper.ts', function () {
             await Odo.Instance.createComponentFromLocation('dotnet50', 'my-component', 8080, Uri.file(tmpFolder));
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
-            } catch (_) {
+            } catch {
                 fail('Expected devfile to be created');
             }
         });
@@ -279,7 +279,7 @@ suite('./odo/odoWrapper.ts', function () {
             try {
                 await Odo.Instance.addBinding(componentFolder, 'myservice', 'default', 'myservice-binding');
                 fail('creating a binding should have failed, since no bindable services are present');
-            } catch (_e: unknown) {
+            } catch {
                 // do nothing
             }
         });

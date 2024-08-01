@@ -13,10 +13,10 @@ import * as vscode from 'vscode';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
 
-import hasha = require('hasha');
-import pq = require('proxyquire');
-import sinonChai = require('sinon-chai');
-import path = require('path');
+import * as hasha from 'hasha';
+import * as path from 'path';
+import * as pq from 'proxyquire';
+import * as sinonChai from 'sinon-chai';
 
 chai.use(sinonChai);
 

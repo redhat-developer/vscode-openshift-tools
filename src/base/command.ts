@@ -64,10 +64,10 @@ export class CommandText {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function verbose(_: unknown, key: string, descriptor: TypedPropertyDescriptor<Function>): void {
     let fnKey: string | undefined;
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     let fn: Function | undefined;
 
     if (typeof descriptor.value === 'function') {

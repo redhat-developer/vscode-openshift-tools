@@ -30,14 +30,14 @@ suite('./oc/ocWrapper.ts', function () {
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
         }
         try {
             await Oc.Instance.createProject(PROJECT);
-        } catch (e) {
+        } catch {
             // do nothing, it probably already exists
         }
     });
@@ -46,7 +46,7 @@ suite('./oc/ocWrapper.ts', function () {
         // ensure projects are cleaned up
         try {
             await Oc.Instance.deleteProject(PROJECT);
-        } catch (e) {
+        } catch {
             // do nothing
         }
 
@@ -62,12 +62,12 @@ suite('./oc/ocWrapper.ts', function () {
         suiteSetup(async function () {
             try {
                 await Oc.Instance.deleteProject(project1);
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             try {
                 await Oc.Instance.deleteProject(project2);
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.createProject(project1);
@@ -180,12 +180,12 @@ suite('./oc/ocWrapper.ts', function () {
             await fs.writeFile(yamlFile, serviceFileYaml);
             try {
                 await Oc.Instance.deleteProject(projectName);
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             try {
                 await Oc.Instance.createProject(projectName);
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.setProject(projectName);
@@ -281,7 +281,7 @@ suite('./oc/ocWrapper.ts', function () {
             if (isOpenShift) {
                 try {
                     await LoginUtil.Instance.logout();
-                } catch (e) {
+                } catch {
                     // do nothing, probably already logged out
                 }
             }
@@ -298,7 +298,7 @@ suite('./oc/ocWrapper.ts', function () {
             try {
                 const needLogin = await LoginUtil.Instance.requireLogin();
                 expect(needLogin).to.be.true;
-            } catch (_e) {
+            } catch {
                 // do nothing
             }
         });
@@ -357,7 +357,7 @@ suite('./oc/ocWrapper.ts', function () {
                     const logs = await Oc.Instance.getLogs('Deployment', DEPLOYMENT_NAME);
                     expect(logs.length).to.be.greaterThan(0);
                     return;
-                } catch (_) {
+                } catch {
                     // do nothing; the container is probably not ready yet
                 }
                 await new Promise<void>(resolve => void setTimeout(resolve, 200));
@@ -389,7 +389,7 @@ suite('./oc/ocWrapper.ts', function () {
             // alternative method of checking if CRDs are accessible: try to get a crd
             await Oc.Instance.getKubernetesObject('CustomResourceDefinition', 'bindablekinds.binding.operators.coreos.com');
             expected = true;
-        } catch (e) {
+        } catch {
             // do nothing
         }
 

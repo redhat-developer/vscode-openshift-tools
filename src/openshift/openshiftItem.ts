@@ -49,7 +49,7 @@ export default class OpenShiftItem {
                         const existingProjects = await data;
                         const existingProject =  existingProjects.find((item) => item.name === value);
                         validationMessage = existingProject && 'This name is already used, please enter different name.';
-                    } catch (err) {
+                    } catch {
                         //ignore to keep other validation to work
                     }
                 }
@@ -62,7 +62,7 @@ export default class OpenShiftItem {
 export function clusterRequired() {
     return function (_target: any, key: string, descriptor: any): void {
         let fnKey: string | undefined;
-        // eslint-disable-next-line @typescript-eslint/ban-types
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         let fn: Function | undefined;
 
         if (typeof descriptor.value === 'function') {
@@ -94,7 +94,7 @@ export function clusterRequired() {
 export function projectRequired() {
     return function (_target: any, key: string, descriptor: any): void {
         let fnKey: string | undefined;
-        // eslint-disable-next-line @typescript-eslint/ban-types
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         let fn: Function | undefined;
 
         if (typeof descriptor.value === 'function') {

@@ -34,7 +34,7 @@ export async function isValidProjectFolder(
     try {
         const stats = await fs.stat(folder);
         projectFolderExists = stats.isDirectory();
-    } catch (_) {
+    } catch {
         // do nothing
     }
 
@@ -43,7 +43,7 @@ export async function isValidProjectFolder(
         try {
             await fs.access(folder, fs.constants.W_OK);
             projectFolderWritable = true;
-        } catch (_) {
+        } catch {
             // do nothing
         }
     }
@@ -54,7 +54,7 @@ export async function isValidProjectFolder(
         try {
             await fs.access(childFolder);
             childFolderExists = true;
-        } catch (_) {
+        } catch {
             // do nothing
         }
     }
@@ -109,7 +109,7 @@ async function canRecursivelyCreateProjectFolder(
             if (!parentFolderExists) {
                 return false; // Parent exists, but not a directory
             }
-        } catch (_) {
+        } catch {
             // do nothing
         }
 
@@ -117,7 +117,7 @@ async function canRecursivelyCreateProjectFolder(
             try {
                 await fs.access(parentFolder, fs.constants.W_OK);
                 return true; // Parent exists and is writable
-            } catch (_) {
+            } catch {
                 return false; // Parent folder exists, but isn;t writable
             }
         }

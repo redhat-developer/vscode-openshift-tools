@@ -75,10 +75,10 @@ export class ServerlessFunctionView implements TreeDataProvider<ExplorerItem>, D
                 collapsibleState: element.sessions?.length > 0 ? TreeItemCollapsibleState.Expanded : TreeItemCollapsibleState.None
             }
             if (functionObj.context !== FunctionStatus.NONE) {
-                    explorerItem.iconPath = new ThemeIcon('symbol-function'),
-                    explorerItem.description = this.getDescription(functionObj.context),
-                    explorerItem.tooltip = this.getTooltip(functionObj),
-                    explorerItem.contextValue = this.getContext(functionObj),
+                    explorerItem.iconPath = new ThemeIcon('symbol-function');
+                    explorerItem.description = this.getDescription(functionObj.context);
+                    explorerItem.tooltip = this.getTooltip(functionObj);
+                    explorerItem.contextValue = this.getContext(functionObj);
                     explorerItem.command = this.getCommand(functionObj);
             }
             return explorerItem;

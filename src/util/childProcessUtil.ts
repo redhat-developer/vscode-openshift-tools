@@ -70,7 +70,7 @@ class OdoChannel {
         let jsonData: string;
         try {
             jsonData = JSON.stringify(JSON.parse(str), null, 2);
-        } catch (ignore) {
+        } catch {
             const hidePass = Filters.filterToken(str);
             return Filters.filterPassword(hidePass);
         }
