@@ -4,12 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable no-console */
 
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as shell from 'shelljs';
 import { downloadFileAndCreateSha256 } from './downloadUtil/downloadBinaries';
-import configData = require('./tools.json');
-import fs = require('fs-extra');
+import * as configData from './tools.json';
 
 async function installBinary(tool): Promise<void> {
     const openShiftToolsFolder = path.join(os.homedir(), '.local', 'state', 'vs-openshift-tools');

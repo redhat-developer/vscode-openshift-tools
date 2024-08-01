@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Close } from '@mui/icons-material';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Close } from '@mui/icons-material';
-import { useMediaQuery, Paper, IconButton, FormControl, InputLabel, Select, MenuItem, FormHelperText, Stack, TextField, Alert } from '@mui/material';
-import { HelmListItem } from './helmListItem';
+import { Alert, FormControl, FormHelperText, IconButton, InputLabel, MenuItem, Paper, Select, Stack, TextField, useMediaQuery } from '@mui/material';
 import React from 'react';
 import { Chart, ChartResponse } from '../../../helm/helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
+import { HelmListItem } from './helmListItem';
 
 type Message = {
     action: string;
@@ -139,7 +139,7 @@ export const HelmModal = React.forwardRef(
                             setStatus(false);
                             setInstallError(false);
                             setInstallMsg('');
-                            props.closeModal
+                            props.closeModal();
                             VSCodeMessage.postMessage({
                                 action: 'validateName',
                                 data: e.target.value

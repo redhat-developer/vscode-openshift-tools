@@ -4,12 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import * as tmp from 'tmp';
 import { WatchUtil } from '../../../src/util/watch';
-import tmp = require('tmp');
 
 const {expect} = chai;
 chai.use(sinonChai);

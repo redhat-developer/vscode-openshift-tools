@@ -2,11 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+
+import { expect } from 'chai';
 import { ActivityBar, EditorView, InputBox, NotificationType, QuickPickItem, SideBarView, TreeItem, VSBrowser, ViewSection, Workbench } from 'vscode-extension-tester';
-import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
-import { expect } from 'chai';
+import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 
 export function kubernetesContextTest() {

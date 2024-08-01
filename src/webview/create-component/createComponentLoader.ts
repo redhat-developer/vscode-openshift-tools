@@ -193,10 +193,12 @@ export default class CreateComponentLoader {
              */
             case 'getInitialWokspaceFolder': {
                 const initialWorkspaceFolder = getInitialWorkspaceFolder();
-                initialWorkspaceFolder && void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'initialWorkspaceFolder',
-                    data: initialWorkspaceFolder
-                });
+                if (initialWorkspaceFolder) {
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'initialWorkspaceFolder',
+                        data: initialWorkspaceFolder
+                    });
+                }
                 break;
             }
             /**
@@ -253,10 +255,12 @@ export default class CreateComponentLoader {
              */
             case 'selectProjectFolderNewProject': {
                 const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  message.data );
-                workspaceUri && void CreateComponentLoader.panel.webview.postMessage({
-                    action: 'selectedProjectFolder',
-                    data: workspaceUri.fsPath,
-                });
+                if (workspaceUri) {
+                    void CreateComponentLoader.panel.webview.postMessage({
+                        action: 'selectedProjectFolder',
+                        data: workspaceUri.fsPath,
+                    });
+                }
                 break;
             }
             /**
@@ -479,7 +483,7 @@ export default class CreateComponentLoader {
                 supportsDebug = componentDescription.devfileData.supportedOdoFeatures.debug;
                 supportsDeploy = componentDescription.devfileData.supportedOdoFeatures.deploy;
             }
-        } catch (Error) {
+        } catch {
             // Will try reading the raw devfile
         } finally {
             if (!rawDevfile) {
@@ -547,7 +551,7 @@ export default class CreateComponentLoader {
                         await CreateComponentLoader.panel?.webview.postMessage({
                             action: 'devfileRegenerated',
                         });
-                    } catch (e) {
+                    } catch {
                         void vscode.window.showErrorMessage(
                             'Failed to parse devfile v1, Unable to proceed the component creation',
                         );
@@ -634,10 +638,12 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
     // run 'git clone url location' as external process and return location
     return new Promise((resolve, reject) =>
         cp.exec(command, (error: cp.ExecException) => {
-            error
-                ? resolve({ status: false, error: error.message })
-                : resolve({ status: true, error: undefined });
-        }),
+            if (error) {
+                resolve({ status: false, error: error.message });
+            } else {
+                resolve({ status: true, error: undefined });
+            }
+        })
     );
 }
 

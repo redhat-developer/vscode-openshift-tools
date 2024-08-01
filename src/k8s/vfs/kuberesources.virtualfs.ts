@@ -5,17 +5,17 @@
 
 import * as vscode from 'vscode';
 
-import { Uri, FileSystemProvider, FileType, FileStat, FileChangeEvent, Event, EventEmitter, Disposable } from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as querystring from 'querystring';
+import { Disposable, Event, EventEmitter, FileChangeEvent, FileStat, FileSystemProvider, FileType, Uri } from 'vscode';
 
-import { Errorable } from './errorable';
 import { CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
-import { CliExitData } from '../../util/childProcessUtil';
 import { helmSyntaxVersion, HelmSyntaxVersion } from '../../helm/helm';
+import { CliExitData } from '../../util/childProcessUtil';
 import { Progress } from '../../util/progress';
+import { Errorable } from './errorable';
 
 export const K8S_RESOURCE_SCHEME = 'osmsx'; // Changed from 'k8smsx' to 'osmsx' to not make a conflict with k8s extension
 export const K8S_RESOURCE_SCHEME_READONLY = 'osmsxro'; // Changed from 'k8smsxro' to 'osmsxro' to not make a conflict with k8s extension
@@ -125,14 +125,14 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
         const eer = await this.execLoadResource(resourceAuthority, ns, value, revision, outputFormat);
         if (Errorable.failed(eer)) {
             void vscode.window.showErrorMessage(eer.error[0]);
-            throw eer.error[0];
+            throw new Error(eer.error[0]);
         }
 
         const er = eer.result;
         if (CliExitData.failed(er)) {
             const message = `Get command failed: ${CliExitData.getErrorMessage(er)}`;
             void vscode.window.showErrorMessage(message);
-            throw message;
+            throw new Error(message);
         }
 
         return er.stdout;

@@ -5,9 +5,9 @@
 
 import * as vscode from 'vscode';
 
-import {MappingItem, Node, NodeProvider} from './locator-util';
-import { parse, findNodeAtPosition } from 'node-yaml-parser';
 import * as YAML from 'js-yaml';
+import { findNodeAtPosition, parse } from 'node-yaml-parser';
+import { MappingItem, Node, NodeProvider } from './locator-util';
 
 export function isMapping(node: YamlNode): node is YamlMap {
     return node.kind === 'MAPPING';
@@ -117,7 +117,7 @@ export class YamlLocator {
                 this.cache[key].yamlDocs = documents;
                 this.cache[key].lineLengths = lineLengths;
                 this.cache[key].version = textDocument.version;
-            } catch (err) {
+            } catch {
                 delete this.cache[key];
             }
         }

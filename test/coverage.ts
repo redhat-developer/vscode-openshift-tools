@@ -7,11 +7,11 @@
 /* eslint-disable no-console */
 /* eslint-disable global-require */
 
-import paths = require('path');
-import fs = require('fs');
+import * as fs from 'fs';
+import * as istanbul from 'istanbul';
 import { mkdirp } from 'mkdirp';
-const istanbul = require('istanbul');
-const remapIstanbul = require('remap-istanbul');
+import * as paths from 'path';
+import * as remapIstanbul from 'remap-istanbul';
 
 export interface TestRunnerOptions {
     relativeCoverageDir?: string;

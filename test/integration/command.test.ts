@@ -37,7 +37,7 @@ suite('odo commands integration', function () {
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
-            } catch (e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.loginWithUsernamePassword(
@@ -219,7 +219,7 @@ suite('odo commands integration', function () {
             }
             try {
                 await Oc.Instance.createProject(newProjectName);
-            } catch (e) {
+            } catch {
                 // do nothing; already exists
             }
             await Oc.Instance.setProject(newProjectName);

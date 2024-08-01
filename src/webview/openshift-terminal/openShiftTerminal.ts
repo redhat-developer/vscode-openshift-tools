@@ -622,14 +622,14 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         let toolLocation: string | undefined;
         try {
             toolLocation = await ToolsConfig.detect(tool);
-        } catch (_e) {
+        } catch {
             // do nothing
         }
         if (!toolLocation) {
             try {
                 await fs.access(tool);
                 toolLocation = tool;
-            } catch (__e) {
+            } catch {
                 // do nothing
             }
         }

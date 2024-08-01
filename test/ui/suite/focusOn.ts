@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, By, SideBarView, waitForAttributeValue } from 'vscode-extension-tester'
+import { ActivityBar, By, SideBarView, waitForAttributeValue } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { VIEWS } from '../common/constants';
 

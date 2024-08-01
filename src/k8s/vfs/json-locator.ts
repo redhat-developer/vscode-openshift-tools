@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as parse from 'json-to-ast';
 import * as vscode from 'vscode';
 import { MappingItem, Node, NodeProvider } from './locator-util';
-import * as parse from 'json-to-ast';
 
 export interface ASTPosition {
     readonly line: number;
@@ -234,7 +234,7 @@ export class JsonLocator {
                 const ast = parse(textDocument.getText(), {loc: true});
                 this.cache[key].jsonDocs = [new JsonDocument([ast], [])];
                 this.cache[key].version = textDocument.version;
-            } catch (err) {
+            } catch {
                 delete this.cache[key];
             }
         }

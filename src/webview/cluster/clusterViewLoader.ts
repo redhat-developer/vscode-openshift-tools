@@ -84,7 +84,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 } else {
                     telemetryEventSignup.send();
                 }
-            } catch(ex) {
+            } catch {
                 void vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
                 telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox timed out.');
             }
@@ -100,7 +100,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     await panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
                 }
                 telemetryEventLogin.send();
-            } catch (ex) {
+            } catch {
                 await panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
                 telemetryEventLogin.sendError('Request for authentication session failed.');
             }
@@ -138,7 +138,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     }
                 }
                 telemetryEventDetect.send();
-            } catch (ex) {
+            } catch {
                 void vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
                 telemetryEventDetect.sendError('OpenShift Sandbox status request timed out.');
@@ -157,7 +157,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     telemetryEventRequestCode.sendError('Request for verification code failed.');
                 }
-            } catch (ex) {
+            } catch {
                 void vscode.window.showErrorMessage('Request for verification code timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                 telemetryEventRequestCode.sendError('Request for verification code timed out.');
@@ -176,7 +176,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                     telemetryEventValidateCode.sendError('Verification code does not match');
                 }
-            } catch(ex) {
+            } catch {
                 void vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                 telemetryEventValidateCode.sendError('Verification code validation request failed');
@@ -260,7 +260,7 @@ export default class ClusterViewLoader {
             crcOpenShift = json.crc.openshiftVersion;
         } catch (err) {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.openCrcAddClusterPage');
-            crc = '',
+            crc = '';
             crcOpenShift = '';
             void vscode.window.showErrorMessage(err.message);
             telemetryEventLoginToSandbox.sendError('Unable to fetch CRC and OpenshiftCRC version');
@@ -424,7 +424,7 @@ export default class ClusterViewLoader {
         if (!crcCreds.error) {
             try {
                 crcCredArray.push(JSON.parse(crcCreds.stdout).clusterConfig);
-            } catch(err) {
+            } catch {
                 // show error message?
             }
         }

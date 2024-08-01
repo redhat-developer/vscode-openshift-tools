@@ -139,7 +139,7 @@ export class ServerlessFunctionModel implements Disposable {
                 try {
                     fs.accessSync(workspaceFolder.uri.fsPath);
                     folderExists = true;
-                } catch (e) {
+                } catch {
                     // folder doesn't exist
                     void window.showErrorMessage(`Can't keep track of if '${path.basename(workspaceFolder.uri.fsPath)}' contains a serverless function, since it's been deleted.`);
                 }
@@ -164,7 +164,7 @@ export class ServerlessFunctionModel implements Disposable {
         );
         try {
             return JSON.parse(listCliExitData.stdout) as FunctionObject[];
-        } catch (err) {
+        } catch {
             return [];
         }
     }
