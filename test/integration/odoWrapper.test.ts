@@ -14,6 +14,7 @@ import { Uri, workspace } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
+import { Alizer } from '../../src/alizer/alizerWrapper';
 
 suite('./odo/odoWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -100,10 +101,10 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('analyze()', async function () {
-            const analysis1 = await Odo.Instance.alizerAnalyze(tmpFolder1);
+            const analysis1 = await Alizer.Instance.alizerAnalyze(tmpFolder1);
             expect(analysis1).to.exist;
             expect(analysis1[0].Name).to.equal('nodejs');
-            const analysis2 = await Odo.Instance.alizerAnalyze(tmpFolder2);
+            const analysis2 = await Alizer.Instance.alizerAnalyze(tmpFolder2);
             expect(analysis2).to.exist;
             expect(analysis2[0].Name).to.equal('go');
         });
@@ -208,7 +209,7 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('analyze()', async function() {
-            const [analysis] = await Odo.Instance.alizerAnalyze(Uri.file(tmpFolder));
+            const analysis = await Alizer.Instance.alizerAnalyze(Uri.file(tmpFolder));
             expect(analysis.Name).to.equal(COMPONENT_TYPE);
         });
 

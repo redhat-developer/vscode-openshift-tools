@@ -11,7 +11,7 @@ import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
-import { AlizerAnalyzeResponse, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
+import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
 import { ComponentDescription, StarterProject } from './componentTypeDescription';
 import { BindableService } from './odoTypes';
 
@@ -192,14 +192,6 @@ export class Odo {
             ),
             componentPath,
         );
-    }
-
-    public async alizerAnalyze(currentFolderPath: Uri): Promise<AlizerAnalyzeResponse[]> {
-        const cliData: CliExitData = await this.execute(
-            new CommandText('alizer', `devfile ${currentFolderPath.fsPath}`)
-        );
-        const parse = JSON.parse(cliData.stdout) as AlizerAnalyzeResponse[];
-        return [[...parse].shift()];
     }
 
     /**
