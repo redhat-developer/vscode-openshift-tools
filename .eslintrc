@@ -108,7 +108,7 @@
     "no-trailing-spaces": "error",
     "@typescript-eslint/prefer-regexp-exec": 0,
     "quotes": [ "error", "single"],
-    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none" }],
+    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none", "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": 1,
     "jsdoc/check-tag-names": "error",
     "jsdoc/check-param-names": ["error", { "checkDestructured": false }],
