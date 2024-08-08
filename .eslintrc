@@ -108,7 +108,7 @@
     "no-trailing-spaces": "error",
     "@typescript-eslint/prefer-regexp-exec": 0,
     "quotes": [ "error", "single"],
-    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none", "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none" }],
     "@typescript-eslint/no-explicit-any": 1,
     "jsdoc/check-tag-names": "error",
     "jsdoc/check-param-names": ["error", { "checkDestructured": false }],
@@ -126,7 +126,8 @@
         "no-unused-expressions": "off",
         "@typescript-eslint/unbound-method" : "off",
         "max-nested-callbacks" : "off",
-        "@typescript-eslint/no-unsafe-assignment": 1
+        "@typescript-eslint/no-unsafe-assignment": 1,
+        "@typescript-eslint/no-unused-vars": [ "error", { "vars": "local", "args": "none", "argsIgnorePattern": "^_" }],
       }
     },
     {
