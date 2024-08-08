@@ -24,7 +24,7 @@ suite('./alizer/alizerWrapper.ts', function () {
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
-            } catch (e) {
+            } catch (_e) {
                 // do nothing
             }
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
@@ -35,12 +35,12 @@ suite('./alizer/alizerWrapper.ts', function () {
         // ensure projects are cleaned up
         try {
             await Oc.Instance.deleteProject('my-test-project-1');
-        } catch (e) {
+        } catch (_e) {
             // do nothing
         }
         try {
             await Oc.Instance.deleteProject('my-test-project-2');
-        } catch (e) {
+        } catch (_e) {
             // do nothing
         }
 
