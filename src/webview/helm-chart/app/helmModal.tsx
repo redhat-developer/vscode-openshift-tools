@@ -139,7 +139,6 @@ export const HelmModal = React.forwardRef(
                             setStatus(false);
                             setInstallError(false);
                             setInstallMsg('');
-                            props.closeModal();
                             VSCodeMessage.postMessage({
                                 action: 'validateName',
                                 data: e.target.value
