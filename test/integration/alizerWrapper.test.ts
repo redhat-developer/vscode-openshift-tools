@@ -2,11 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
+import { fail } from 'assert';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import { suite, suiteSetup } from 'mocha';
 import * as tmp from 'tmp';
+import * as path from 'path';
 import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
@@ -24,7 +25,7 @@ suite('./alizer/alizerWrapper.ts', function () {
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
-            } catch (_e) {
+            } catch {
                 // do nothing
             }
             await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
@@ -35,12 +36,12 @@ suite('./alizer/alizerWrapper.ts', function () {
         // ensure projects are cleaned up
         try {
             await Oc.Instance.deleteProject('my-test-project-1');
-        } catch (_e) {
+        } catch {
             // do nothing
         }
         try {
             await Oc.Instance.deleteProject('my-test-project-2');
-        } catch (_e) {
+        } catch {
             // do nothing
         }
 
@@ -113,12 +114,30 @@ suite('./alizer/alizerWrapper.ts', function () {
             await fs.rm(tmpFolder, { recursive: true, force: true });
         });
 
+        test('createComponentFromTemplateProject()', async function() {
+            await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080, COMPONENT_TYPE, 'DefaultDevfileRegistry', 'dotnet50-example');
+            try {
+                await fs.access(path.join(tmpFolder, 'devfile.yaml'));
+            } catch {
+                fail('Expected devfile to be created');
+            }
+        });
+
         test('analyze()', async function() {
             const analysis = await Alizer.Instance.alizerAnalyze(Uri.file(tmpFolder));
             expect(analysis.Name).to.equal(COMPONENT_TYPE);
         });
 
+        test('deleteComponentConfiguration()', async function() {
+            await Odo.Instance.deleteComponentConfiguration(tmpFolder);
+            try {
+                await fs.access(path.join(tmpFolder, 'devfile.yaml'));
+                fail('devfile.yaml should have been deleted')
+            } catch {
+                // deleted successfully
+            }
+        });
+
     });
 
-    test('deleteComponentConfiguration');
 });

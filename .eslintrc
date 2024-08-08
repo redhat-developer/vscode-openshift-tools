@@ -126,8 +126,7 @@
         "no-unused-expressions": "off",
         "@typescript-eslint/unbound-method" : "off",
         "max-nested-callbacks" : "off",
-        "@typescript-eslint/no-unsafe-assignment": 1,
-        "@typescript-eslint/no-unused-vars": "off"
+        "@typescript-eslint/no-unsafe-assignment": 1
       }
     },
     {
