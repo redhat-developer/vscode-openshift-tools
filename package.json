@@ -156,7 +156,7 @@
 		"glob": "^11.0.0",
 		"istanbul": "^0.4.5",
 		"leasot": "^14.4.0",
-		"mocha": "^10.7.0",
+		"mocha": "^10.7.3",
 		"mocha-jenkins-reporter": "^0.4.7",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^3.3.3",
