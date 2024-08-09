@@ -98,15 +98,6 @@ suite('./odo/odoWrapper.ts', function () {
             expect(componentDescription2).to.exist;
             expect(componentDescription2.managedBy).to.equal('odo');
         });
-
-        test('analyze()', async function () {
-            const analysis1 = await Odo.Instance.analyze(tmpFolder1.fsPath);
-            expect(analysis1).to.exist;
-            expect(analysis1[0].devfile).to.equal('nodejs');
-            const analysis2 = await Odo.Instance.analyze(tmpFolder2.fsPath);
-            expect(analysis2).to.exist;
-            expect(analysis2[0].devfile).to.equal('go');
-        });
     });
 
     suite('registries', function () {
@@ -205,12 +196,6 @@ suite('./odo/odoWrapper.ts', function () {
             } catch {
                 fail('Expected devfile to be created');
             }
-        });
-
-        test('analyze()', async function() {
-            const [analysis] = await Odo.Instance.analyze(tmpFolder);
-            expect(analysis.name).to.equal(path.basename(tmpFolder).toLocaleLowerCase());
-            expect(analysis.devfile).to.equal(COMPONENT_TYPE);
         });
 
         test('deleteComponentConfiguration()', async function() {

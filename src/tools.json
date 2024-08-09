@@ -173,6 +173,43 @@
             }
         }
     },
+    "alizer": {
+        "description": "Alizer CLI tool",
+        "vendor": "The Devfile Project",
+        "name": "alizer",
+        "version": "1.6.0",
+        "versionRange": "^1.6.0",
+        "versionRangeLabel": "version >= 1.6.0",
+        "dlFileName": "alizer",
+        "filePrefix": "",
+        "platform": {
+            "win32": {
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-windows-amd64.exe",
+                "dlFileName": "alizer_windows_amd64.exe",
+                "cmdFileName": "alizer.exe"
+            },
+            "darwin": {
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-darwin-amd64",
+                "dlFileName": "alizer_darwin_amd64",
+                "cmdFileName": "alizer"
+            },
+            "darwin-arm64": {
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-darwin-arm64",
+                "dlFileName": "alizer_darwin_arm64",
+                "cmdFileName": "alizer"
+            },
+            "linux": {
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-linux-amd64",
+                "dlFileName": "alizer_linux_amd64",
+                "cmdFileName": "alizer"
+            },
+            "linux-arm64": {
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-linux-arm64",
+                "dlFileName": "alizer_linux_arm64",
+                "cmdFileName": "alizer"
+            }
+        }
+    },
     "crc": {
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
