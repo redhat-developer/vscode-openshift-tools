@@ -591,8 +591,10 @@ async function getCompDescription(devfile: AlizerAnalyzeResponse): Promise<Compo
         return Array.from(compDescriptions);
     }
     return Array.from(compDescriptions).filter(({ name, version }) => {
-        devfile.Name === name;
-        devfile.Versions[0].Version === version
+        if (devfile.Name === name && devfile.Versions[0].Version === version) {
+            return true;
+        }
+        return false;
     }
     );
 }
