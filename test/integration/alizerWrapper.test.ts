@@ -140,4 +140,5 @@ suite('./alizer/alizerWrapper.ts', function () {
 
     });
 
+    test('deleteComponentConfiguration');
 });
