@@ -230,7 +230,7 @@ export class Component extends OpenShiftItem {
                 if (resultObj.length === 1 && resultObj[0].Running) {
                     return true;
                 }
-            } catch (e) {
+            } catch {
                 // do nothing; something is wrong with the podman setup
             }
             const SETUP_INSTRUCTIONS = 'Open setup instructions';
@@ -293,12 +293,12 @@ export class Component extends OpenShiftItem {
                     ).then(view => {
                         if (!view) {
                             // the view was already created
-                            reject();
+                            reject(undefined as Error);
                         }
                     });
                 },
             );
-        } catch (e) {
+        } catch {
             // The form was closed without submitting,
             // or the form already exists for this component.
             // stop the command.
@@ -342,7 +342,7 @@ export class Component extends OpenShiftItem {
         if (!runOn) {
             try {
                 await Oc.Instance.deleteDeploymentByComponentLabel(component.component.devfileData.devfile.metadata.name);
-            } catch (e) {
+            } catch {
                 // do nothing, it probably was already deleted
             }
         }
@@ -476,7 +476,7 @@ export class Component extends OpenShiftItem {
             await fs.access(devFileLocation);
             await window.showErrorMessage('The selected folder already contains a devfile.');
             return;
-        } catch (e) {
+        } catch {
             // do nothing
         }
         await CreateComponentLoader.loadView('Create Component', context.fsPath);
@@ -507,7 +507,7 @@ export class Component extends OpenShiftItem {
         try {
             await fs.access(devFileLocation);
             useExistingDevfile = true;
-        } catch (_e) {
+        } catch {
             // do not use existing devfile
         }
 

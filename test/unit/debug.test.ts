@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
+import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { DebugSession, Disposable, debug } from 'vscode';
 import { DebugSessionsView } from '../../src/debug';
-import sinon = require('sinon');
 
 const {expect} = chai;
 chai.use(sinonChai);

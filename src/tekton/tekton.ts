@@ -17,7 +17,7 @@ export async function isTektonAware(executionContext?: ExecutionContext): Promis
             new CommandText('oc', 'api-versions'), { timeout: 5000 },
             executionContext);
         return stdout.includes('tekton.dev/v1beta1');
-    } catch(error) {
+    } catch {
         return false;
     }
 }

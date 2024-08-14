@@ -10,25 +10,20 @@ import { checkOpenshiftView } from './suite/openshift';
 import { loginTest } from './suite/login';
 import { projectTest } from './suite/project';
 import { kubernetesContextTest } from './suite/kubernetesContext';
+import { backupKubeConfig, loadKubeConfigFromBackup } from './common/kubeConfigUtils';
 
 describe('Extension cluster-dependant UI tests', function () {
-    const kubeConfig = path.join(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.kube', 'config');
-    const kubeBackup = `${kubeConfig}.backup`;
     const contextFolder = path.join(__dirname, 'context');
 
     // test with an empty kube config, make a backup, wipe the context folder
     before(async function () {
-        if (fs.existsSync(kubeConfig)) {
-            await fs.move(kubeConfig, kubeBackup, { overwrite: true });
-        }
+        await backupKubeConfig();
         await fs.emptyDir(contextFolder);
     });
 
     // restore the kube config backup after test
     after(async function () {
-        if (fs.existsSync(kubeBackup)) {
-            await fs.move(kubeBackup, kubeConfig, { overwrite: true });
-        }
+        await loadKubeConfigFromBackup();
     });
 
     checkExtension();

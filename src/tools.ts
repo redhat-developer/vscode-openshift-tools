@@ -6,13 +6,13 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import { which } from 'shelljs';
 import * as vscode from 'vscode';
+import * as configData from './tools.json';
 import { ChildProcessUtil } from './util/childProcessUtil';
-import { Platform } from './util/platform';
-import semver = require('semver');
 
-import configData = require('./tools.json');
+import { Platform } from './util/platform';
 
 export class ToolsConfig {
 

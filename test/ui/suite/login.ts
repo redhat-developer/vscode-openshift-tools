@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ActivityBar, InputBox, SideBarView, VSBrowser, ViewSection } from 'vscode-extension-tester';
-import { INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { expect } from 'chai';
-import { notificationExists, itemExists } from '../common/conditions';
+import { ActivityBar, InputBox, SideBarView, VSBrowser, ViewSection } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
+import { itemExists, notificationExists } from '../common/conditions';
+import { INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 
 export function loginTest() {

@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as fs from 'fs-extra';
+import * as path from 'path';
 import { commands, Disposable, QuickPickItem, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import { Platform } from './platform';
-import path = require('path');
-import fs = require('fs-extra');
 
 interface WorkspaceFolderItem extends QuickPickItem {
     uri: Uri;
@@ -20,7 +20,7 @@ export const AddWorkspaceFolder: QuickPickItem = {
 function isFile(path: string) {
     try {
         return fs.statSync(path).isFile()
-    } catch (ignore) {
+    } catch {
         return false;
     }
 }
@@ -102,7 +102,9 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
 
 export function getInitialWorkspaceFolder(): string | undefined {
     const wsFolders: path.ParsedPath[] = [];
-    workspace.rootPath && wsFolders.push(path.parse(workspace.rootPath));
+    if (workspace.rootPath) {
+        wsFolders.push(path.parse(workspace.rootPath));
+    }
     workspace?.workspaceFolders?.forEach((f) => wsFolders.push(path.parse(f.uri.fsPath)));
 
     if (wsFolders.length > 0) {
@@ -113,7 +115,7 @@ export function getInitialWorkspaceFolder(): string | undefined {
                     try {
                         const diff = path.relative(prefix, path.join(f.dir, f.name));
                         return diff.length >= 0 && !diff.startsWith('..');
-                    } catch(Error) {
+                    } catch {
                         return false;
                     }
                 }).length;

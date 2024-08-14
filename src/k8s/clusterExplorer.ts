@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { CommandText } from '../base/command';
@@ -11,7 +12,6 @@ import { isOpenShiftCluster } from '../util/kubeUtils';
 import { Build } from './build';
 import { ClusterServiceVersion } from './csv';
 import { DeploymentConfig } from './deploymentConfig';
-import path = require('path');
 
 let clusterExplorer: k8s.ClusterExplorerV1 | undefined;
 

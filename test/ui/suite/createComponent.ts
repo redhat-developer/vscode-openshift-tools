@@ -2,9 +2,11 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as fs from 'fs-extra';
-import * as pth from 'path';
+
 import { expect } from 'chai';
+import * as fs from 'fs-extra';
+import { afterEach } from 'mocha';
+import * as pth from 'path';
 import {
     ActivityBar,
     EditorView,
@@ -15,7 +17,8 @@ import {
     WelcomeContentButton,
     Workbench,
 } from 'vscode-extension-tester';
-import { VIEWS, BUTTONS } from '../common/constants';
+import { BUTTONS, VIEWS } from '../common/constants';
+import { collapse } from '../common/overdrives';
 import {
     CreateComponentWebView,
     GitProjectPage,
@@ -26,8 +29,6 @@ import {
     RegistryWebViewDevfileWindow,
     RegistryWebViewEditor,
 } from '../common/ui/webview/registryWebViewEditor';
-import { afterEach } from 'mocha';
-import { collapse } from '../common/overdrives';
 
 //TODO: Add more checks for different elements
 export function testCreateComponent(path: string) {

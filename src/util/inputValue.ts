@@ -2,8 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { env, InputBox, QuickInputButton, QuickInputButtons, ThemeIcon, Uri, window } from 'vscode';
 import * as path from 'path';
+import { env, InputBox, QuickInputButton, QuickInputButtons, ThemeIcon, Uri, window } from 'vscode';
 
 export class quickBtn implements QuickInputButton {
     constructor(public iconPath:  Uri | { light: Uri; dark: Uri } | ThemeIcon, public tooltip: string) { }
@@ -61,7 +61,7 @@ export function inputValue(prompt: string, initialValue: string, password: boole
                     input.value = clipboard;
                     input.validationMessage = validate(clipboard);
                 }
-            } catch (ignore) {
+            } catch {
                 // Do nothing
             }
         });

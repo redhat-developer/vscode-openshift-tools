@@ -16,7 +16,7 @@ function fileExists(file: string): boolean {
     try {
         fs.accessSync(file);
         return true;
-    } catch ( _ ) {
+    } catch {
         return false;
     }
 }
@@ -28,7 +28,7 @@ export class KubeConfigUtils extends KubeConfig {
         super();
         try {
             this.loadFromDefault();
-        } catch (error) {
+        } catch {
             throw new Error('Kubernetes configuration cannot be loaded. Please check configuration files for errors and fix them to continue.');
         }
         // k8s nodejs-client ignores all unknown properties,
@@ -178,7 +178,7 @@ export async function setKubeConfig(): Promise<void> {
                 if (potentialSelection) {
                     selectedFile = potentialSelection;
                 }
-            } catch (_) {
+            } catch {
                 // do nothing
             }
         }
@@ -190,7 +190,7 @@ export async function isOpenShiftCluster(executionContext?: ExecutionContext): P
     try {
         const stdout = await CliChannel.getInstance().executeSyncTool(new CommandText('oc', 'api-versions'), { timeout: 5000 }, executionContext);
         return stdout.includes('apps.openshift.io/v1');
-    } catch(error) {
+    } catch {
         return false;
     }
   }

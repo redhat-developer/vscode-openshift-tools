@@ -2,10 +2,13 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as chai from 'chai';
+import * as fs from 'fs-extra';
 import * as fsp from 'fs/promises';
 import * as path from 'path';
+import * as pq from 'proxyquire';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
@@ -21,8 +24,6 @@ import * as openShiftComponent from '../../../src/openshift/component';
 import * as Util from '../../../src/util/async';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-import pq = require('proxyquire');
-import fs = require('fs-extra');
 
 const { expect } = chai;
 chai.use(sinonChai);

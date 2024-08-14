@@ -3,27 +3,49 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
+import { backupKubeConfig, loadKubeConfigFromBackup } from './common/kubeConfigUtils';
+import { testAddCluster } from './suite/addCluster';
 import { checkAboutCommand } from './suite/command-about';
-import path = require('path');
 import { testCreateComponent } from './suite/createComponent';
 import { testDevfileRegistries } from './suite/devfileRegistries';
 import { checkExtension } from './suite/extension';
 import { checkFocusOnCommands } from './suite/focusOn';
 import { checkOpenshiftView } from './suite/openshift';
 import { testCreateServerlessFunction } from './suite/serverlessFunction';
-import { testAddCluster } from './suite/addCluster';
 
-require('source-map-support').install();
+import * as sourceMapSupport from 'source-map-support';
 
-describe('Extension public-facing UI tests', function() {
+sourceMapSupport.install();
+
+describe('Extension public-facing UI tests', function () {
     const contextFolder = path.join(__dirname, 'context');
+    let clusterIsSet = false;
 
-    checkExtension();
-    checkOpenshiftView();
-    testAddCluster();
-    checkAboutCommand();
-    testDevfileRegistries();
-    checkFocusOnCommands();
-    testCreateComponent(contextFolder);
-    testCreateServerlessFunction(contextFolder);
+    describe('Non-cluster tests', function () {
+        before(async function () {
+            await backupKubeConfig();
+        });
+
+        checkExtension();
+        checkOpenshiftView();
+        testAddCluster();
+        checkAboutCommand(clusterIsSet);
+        testDevfileRegistries();
+        checkFocusOnCommands();
+        testCreateComponent(contextFolder);
+        testCreateServerlessFunction(contextFolder);
+    });
+
+    describe('Extension public-facing UI tests with Kind cluster', function () {
+        clusterIsSet = true;
+
+        before(async function () {
+            await loadKubeConfigFromBackup();
+        });
+
+        checkAboutCommand(clusterIsSet);
+
+        //tests requiring clusters incoming
+    });
 });

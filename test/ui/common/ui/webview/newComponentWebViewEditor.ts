@@ -171,7 +171,7 @@ export class GitProjectPage extends Page {
                 if (button) {
                     return button;
                 }
-            } catch (err) {
+            } catch {
                 return null;
             }
         }, timeout);
@@ -228,7 +228,7 @@ export class LocalCodeBasePage extends Page {
                 if (button) {
                     return button;
                 }
-            } catch (err) {
+            } catch {
                 return null;
             }
         }, timeout);

@@ -10,8 +10,8 @@ import { throttleTime } from 'rxjs/operators';
 import { promisify } from 'util';
 
 // need to use `require`, since we replace these imports in the unit tests
-import got = require('got');
-import stream = require('stream');
+import * as got from 'got';
+import * as stream from 'stream';
 
 export class DownloadUtil {
     static async downloadFile(

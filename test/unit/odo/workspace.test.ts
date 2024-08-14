@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
+import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
@@ -11,7 +12,6 @@ import { ComponentDescription } from '../../../src/odo/componentTypeDescription'
 import { Odo } from '../../../src/odo/odoWrapper';
 import { OdoWorkspace } from '../../../src/odo/workspace';
 import * as fixtures from '../../fixtures';
-import path = require('path');
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -91,7 +91,7 @@ suite('Odo/Workspace', () => {
                     expect(onDidChangeComponentsStub).not.called;
                     resolve();
                 } catch (err) {
-                    reject(err);
+                    reject(err as Error);
                 }
             });
             const added = [{
@@ -113,7 +113,7 @@ suite('Odo/Workspace', () => {
                     expect(event.added.length).equals(2)
                     resolve();
                 } catch (err) {
-                    reject(err);
+                    reject(err as Error);
                 }
             });
             const added = [{
@@ -143,7 +143,7 @@ suite('Odo/Workspace', () => {
                     expect(event.removed.length).equals(2)
                     resolve();
                 } catch (err) {
-                    reject(err);
+                    reject(err as Error);
                 }
             });
             const removed = [{

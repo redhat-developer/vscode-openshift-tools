@@ -38,7 +38,7 @@ export async function getChildrenNode(command: CommandText, kind: string, abbrev
             .filter((value) => value !== '')
             .map<Node>((item: string) => new Node(item.split(',')[0], item.split(',')[1], Number.parseInt(item.split(',')[2], 10), kind, abbreviation));
         return builds;
-    } catch (error) {
+    } catch {
         return [];
     }
 }
