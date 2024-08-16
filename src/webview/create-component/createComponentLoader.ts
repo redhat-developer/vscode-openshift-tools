@@ -30,7 +30,7 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
-import { AlizerDevfileResponse } from '../../alizer/types';
+import { AlizerDevfileResponse, Version } from '../../alizer/types';
 import { Alizer } from '../../alizer/alizerWrapper';
 
 interface CloneProcess {
@@ -594,11 +594,19 @@ async function getCompDescription(devfile: AlizerDevfileResponse): Promise<Compo
     if (!devfile) {
         return Array.from(compDescriptions);
     }
-    return Array.from(compDescriptions).filter(({ name, version }) => {
-        if (devfile.Name === name && devfile.Versions[0].Version === version) {
-            return true;
+    return Array.from(compDescriptions).filter((compDesc) => {
+        if (devfile.Name === compDesc.name && getVersion(devfile.Versions, compDesc.version)) {
+            return compDesc;
         }
-        return false;
+    }
+    );
+}
+
+function getVersion(devfileVersions: Version[], matchedVersion: string): Version {
+    return devfileVersions.find((devfileVersion) => {
+        if (devfileVersion.Version === matchedVersion) {
+            return devfileVersion;
+        }
     }
     );
 }
