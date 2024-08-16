@@ -6,11 +6,11 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs-extra';
+import * as hasha from 'hasha';
 import * as mkdirp from 'mkdirp';
 import * as path from 'path';
 import { Archive } from './archive';
 import { DownloadUtil } from './download';
-import hasha = require('hasha');
 
 export interface PlatformData {
     url: string;

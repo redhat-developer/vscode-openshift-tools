@@ -37,7 +37,7 @@ class YamlCodeLensProvider implements vscode.CodeLensProvider {
                 }
             }
 
-        } catch (e) {
+        } catch {
             return [];
         }
 

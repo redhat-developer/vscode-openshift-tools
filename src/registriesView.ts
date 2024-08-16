@@ -101,7 +101,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
             if (!this.registries) {
                 this.registries = await this.odo.getRegistries();
             }
-        } catch (err) {
+        } catch {
             this.registries = [];
         }
         return this.registries;
@@ -133,7 +133,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                 }
             }));
             this.subject.next();
-        } catch (_) {
+        } catch {
             this.subject.next();
         }
     }
@@ -302,7 +302,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                                 if (registries?.find((registry) => registry.name !== registryContext?.name && new URL(registry.url).hostname === new URL(value).hostname)) {
                                     return `Registry with entered URL '${value}' already exists`;
                                 }
-                            } catch (Error) {
+                            } catch {
                                 return 'Entered URL is invalid';
                             }
                         },
@@ -357,7 +357,7 @@ export class ComponentTypesView implements TreeDataProvider<ComponentType> {
                                 ComponentTypesView.instance.refresh(false);
                             })
                         }
-                    } catch (error: unknown) {
+                    } catch {
                         void vscode.window.showErrorMessage(`Invalid registry URL ${regURL}`);
                     }
                     return;

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as Dockerode from 'dockerode';
 import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
 import { CliChannel, ExecutionContext } from '../cli';
@@ -18,7 +19,6 @@ import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitSta
 import { isKnativeServingAware } from './knative';
 import { multiStep } from './multiStepInput';
 import { FunctionContent, FunctionObject, FunctionSession } from './types';
-import Dockerode = require('dockerode');
 
 interface DockerStatus {
     error: boolean;
@@ -411,7 +411,7 @@ export class Functions {
                         message: ''
                     });
                 });
-            } catch (e) {
+            } catch {
                 resolve({
                     error: true,
                     message: 'Docker not installed, Please install and start the docker process'
@@ -440,7 +440,7 @@ export class Functions {
                 error: false,
                 message: ''
             })
-        } catch (e) {
+        } catch {
             return ({
                 error: true,
                 message: 'Docker not installed, Please install and start the docker process'

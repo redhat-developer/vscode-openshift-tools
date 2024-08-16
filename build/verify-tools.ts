@@ -9,15 +9,15 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
+import * as cp from 'child_process';
+import * as fs from 'fs-extra';
+import * as hasha from 'hasha';
+import * as mkdirp from 'mkdirp';
+import * as os from 'os';
+import * as path from 'path';
 import { exit } from 'shelljs';
 import { DownloadUtil } from '../src/downloadUtil/download';
-import hasha = require('hasha');
-import mkdirp = require('mkdirp');
-import fs = require('fs-extra');
-import path = require('path');
-import cp = require('child_process');
-import os = require('os');
-import configData = require('../src/tools.json');
+import * as configData from '../src/tools.json';
 
 /**
  * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
@@ -71,7 +71,7 @@ cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
         console.log('tools.json is changed, starting download verification');
         try {
             await verifyTools();
-        } catch (err) {
+        } catch {
             exit(1);
         }
     } else {

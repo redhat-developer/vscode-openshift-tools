@@ -4,9 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
+import * as path from 'path';
 import * as sinon from 'sinon';
-import path = require('path');
+import * as sinonChai from 'sinon-chai';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 
 const {expect} = chai;

@@ -27,7 +27,7 @@ export async function notificationExists(message: string, driver: WebDriver, tim
                     return item;
                 }
             }
-        } catch (err) {
+        } catch {
             // workaround for reloadin notifications
         }
     }, timeout);
@@ -40,7 +40,7 @@ export async function itemExists(title: string, view: ViewSection, timeout = 100
             if (item) {
                 return item;
             }
-        } catch (err) {
+        } catch {
             return null;
         }
     }, timeout);
@@ -56,7 +56,7 @@ export async function itemHasText(title: string, text: string, view: ViewSection
                     return item;
                 }
             }
-        } catch (err) {
+        } catch {
             return null;
         }
     }, timeout)
@@ -106,7 +106,7 @@ export async function webViewIsOpened(name: string, driver: WebDriver, timeout =
             const editor = new EditorView();
             await editor.openEditor(name)
             return true;
-        } catch(err) {
+        } catch {
             return null;
         }
     }, timeout)

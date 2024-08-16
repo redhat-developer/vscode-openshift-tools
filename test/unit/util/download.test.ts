@@ -11,8 +11,8 @@ import * as sinonChai from 'sinon-chai';
 import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadUtil/download';
 import { wait } from '../../../src/util/async';
 
-import pq = require('proxyquire');
-import os = require('os');
+import * as os from 'os';
+import * as pq from 'proxyquire';
 
 const {expect} = chai;
 chai.use(sinonChai);

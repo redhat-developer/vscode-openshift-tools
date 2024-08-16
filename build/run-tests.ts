@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as etest from '@vscode/test-electron';
+import * as path from 'path';
 
 /**
  * Run mocha tests from project's tests folder.
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
                 '--disable-workspace-trust',
             ],
         });
-    } catch (error) {
+    } catch {
         // eslint-disable-next-line no-console
         console.error('Failed to run tests');
         process.exit(1);

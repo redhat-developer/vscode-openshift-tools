@@ -3,20 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-/* eslint-disable import/no-dynamic-require */
-/* eslint-disable global-require */
-
 import { env, ExtensionContext } from 'vscode';
 
 export function getVscodeModule<T>(moduleName: string): T | undefined {
     try {
+        /* eslint-disable @typescript-eslint/no-require-imports */
         return require(`${env.appRoot}/node_modules.asar/${moduleName}`);
-    } catch (err) {
+    } catch {
         // Not in ASAR.
     }
     try {
+        /* eslint-disable @typescript-eslint/no-require-imports */
         return require(`${env.appRoot}/node_modules/${moduleName}`);
-    } catch (err) {
+    } catch {
         // Not available.
     }
     return undefined;

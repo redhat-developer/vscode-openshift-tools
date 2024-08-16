@@ -19,7 +19,7 @@ export async function isKnativeServingAware(executionContext?: ExecutionContext)
         return stdout.includes('serving.knative.dev/v1') ||
             stdout.includes('serving.knative.dev/v1alpha1') ||
             stdout.includes('serving.knative.dev/v1beta1')
-    } catch(error) {
+    } catch {
         return false;
     }
 }

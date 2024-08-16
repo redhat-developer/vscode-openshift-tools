@@ -19,9 +19,10 @@ export class YamlFileCommands {
         let message: string;
 
         if (!document
-            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
+            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.yml')
+            || document.fileName.endsWith('.json'))) {
             message =
-                '\'OpenShift: Create\' command requires a .yaml or a .json file opened in editor.';
+                '\'OpenShift: Create\' command requires a .yaml, .yml, or .json file opened in editor.';
         }
 
         if (!message && document.isUntitled) {
@@ -62,9 +63,10 @@ export class YamlFileCommands {
         let message: string;
 
         if (!document
-            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.json'))) {
+            || !(document.fileName.endsWith('.yaml') || document.fileName.endsWith('.yml')
+            || document.fileName.endsWith('.json'))) {
             message =
-                '\'OpenShift: Delete\' command requires a .yaml or a .json file opened in editor.';
+                '\'OpenShift: Delete\' command requires a .yaml, .yml, or .json file opened in editor.';
         }
 
         if (!message && document.isUntitled) {

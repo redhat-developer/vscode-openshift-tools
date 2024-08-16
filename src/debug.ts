@@ -4,17 +4,17 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import {
-    TreeDataProvider,
-    TreeItem,
-    Event,
-    ProviderResult,
-    EventEmitter,
-    Disposable,
-    TreeView,
-    window,
-    TreeItemCollapsibleState,
     debug,
     DebugSession,
+    Disposable,
+    Event,
+    EventEmitter,
+    ProviderResult,
+    TreeDataProvider,
+    TreeItem,
+    TreeItemCollapsibleState,
+    TreeView,
+    window,
 } from 'vscode';
 import { ComponentsTreeDataProvider } from './componentsView';
 
@@ -48,13 +48,13 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
                     this.refresh();
                 });
             }
-        }),
+        });
         debug.onDidTerminateDebugSession((session) => {
             if (session.configuration?.contextPath) {
                 DebugSessionsView.sessions.delete(session.configuration.contextPath);
                 this.refresh();
             }
-        })
+        });
     }
 
     createTreeView(id: string): TreeView<string> {

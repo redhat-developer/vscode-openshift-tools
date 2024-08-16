@@ -7,7 +7,7 @@
 import { sync } from 'glob';
 import * as paths from 'path';
 
-import Mocha = require('mocha');
+import * as Mocha from 'mocha';
 
 const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',
@@ -32,7 +32,7 @@ export function run(): Promise<void> {
                 }
             });
         } catch(error) {
-            reject(error);
+            reject(error as Error);
         }
     });
 }

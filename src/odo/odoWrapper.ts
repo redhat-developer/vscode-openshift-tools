@@ -71,7 +71,7 @@ export class Odo {
                 expEnv,
             );
             return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
-        } catch (error) {
+        } catch {
             // ignore and return undefined
         }
     }
@@ -214,7 +214,7 @@ export class Odo {
             if (dfCompType.devfileData.devfile.starterProjects) {
                 return dfCompType.devfileData.devfile.starterProjects as StarterProject[];
             }
-        } catch (ignore) {
+        } catch {
             // ignore parse errors and return empty array
         }
         return [];
@@ -232,7 +232,7 @@ export class Odo {
         let data: I;
         try {
             data = JSON.parse(json);
-        } catch (ignore) {
+        } catch {
             // ignore parse errors and return empty array
         }
         return data;

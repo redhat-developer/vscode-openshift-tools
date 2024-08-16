@@ -112,13 +112,13 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         try {
             this.kubeConfig = new KubeConfigUtils();
             this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
-        } catch (err) {
+        } catch {
             // ignore config loading error and let odo report it on first call
         }
         try {
             const kubeconfigFiles = getKubeConfigFiles();
             this.kubeConfigWatchers = kubeconfigFiles.map(kubeconfigFile => WatchUtil.watchFileForContextChange(path.dirname(kubeconfigFile), path.basename(kubeconfigFile)));
-        } catch (err) {
+        } catch {
             void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
         }
         for (const fsw of this.kubeConfigWatchers) {
@@ -318,21 +318,22 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         // Search for Pod continers' errors
         pods.forEach((pod) => {
-            pod.status?.containerStatuses &&
-            pod.status.containerStatuses.forEach((cs) => {
-                if (cs.state?.waiting) {
-                    const reason = cs.state.waiting.reason;
-                    const message = cs.state.waiting.message;
+            if (pod.status?.containerStatuses) {
+                pod.status.containerStatuses.forEach((cs) => {
+                    if (cs.state?.waiting) {
+                        const reason = cs.state.waiting.reason;
+                        const message = cs.state.waiting.message;
 
-                    inCrashLoopBackOff = inCrashLoopBackOff || reason === 'CrashLoopBackOff';
+                        inCrashLoopBackOff = inCrashLoopBackOff || reason === 'CrashLoopBackOff';
 
-                    const msg = `${reason}: ${message ? message.trim(): 'No valuable message'}`;
-                    // Skip duplicated messages
-                    if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${reason}:`)))) {
-                        messages.push(msg);
+                        const msg = `${reason}: ${message ? message.trim(): 'No valuable message'}`;
+                        // Skip duplicated messages
+                        if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${reason}:`)))) {
+                            messages.push(msg);
+                        }
                     }
-                }
-            });
+                });
+            }
         });
 
         return {
@@ -443,7 +444,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         result.unshift({ label: process.env.KUBECONFIG ? 'Custom KubeConfig' : 'Default KubeConfig', description: config.join(':') })
                     }
                 }
-            } catch (err) {
+            } catch {
                 // ignore because ether server is not accessible or user is logged out
             }
             OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(new KubeConfigUtils().currentContext);
@@ -484,7 +485,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 if (await Oc.Instance.canGetKubernetesObjects('csv', this.executionContext)) {
                     serviceKinds = await getServiceKindStubs(this.executionContext);
                 }
-            } catch (_) {
+            } catch {
                 // operator framework is not installed on cluster; do nothing
             }
             void commands.executeCommand('setContext', 'showCreateService', serviceKinds.length > 0);
@@ -494,7 +495,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             try {
                 services = await getServices(this.executionContext);
             }
-            catch (_) {
+            catch {
                 // operator framework is not installed on cluster; do nothing
             }
             void commands.executeCommand('setContext', 'showCreateRoute', services.length > 0);
@@ -647,7 +648,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             if (await Oc.Instance.canGetKubernetesObjects('csv', this.executionContext)) {
                 serviceKinds = await getServiceKindStubs(this.executionContext);
             }
-        } catch (_) {
+        } catch {
             // operator framework is not installed on cluster; do nothing
         }
 

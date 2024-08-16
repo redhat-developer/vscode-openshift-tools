@@ -7,8 +7,8 @@ import * as fs from 'fs-extra';
 import { load } from 'js-yaml';
 import * as path from 'path';
 import { CommandOption, CommandText } from '../base/command';
-import { FunctionContent, InvokeFunction } from './types';
 import { GitModel } from './git/git';
+import { FunctionContent, InvokeFunction } from './types';
 
 export class Utils {
     static async getFuncYamlContent(dir: string): Promise<FunctionContent> {
@@ -16,7 +16,7 @@ export class Utils {
         try {
             const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
             funcData = load(funcYaml) as FunctionContent;
-        } catch (error) {
+        } catch {
             // ignore
         }
         return funcData;

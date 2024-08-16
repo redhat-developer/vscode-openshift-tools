@@ -8,10 +8,10 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { Archive } from '../../../src/downloadUtil/archive';
 
-import targz = require('targz');
-import fs = require('fs-extra');
-import tmp = require('tmp');
-import path = require('path');
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as targz from 'targz';
+import * as tmp from 'tmp';
 
 const {expect} = chai;
 chai.use(sinonChai);
