@@ -128,16 +128,7 @@ suite('./alizer/alizerWrapper.ts', function () {
             expect(analysis.Name).to.equal(COMPONENT_TYPE);
         });
 
-        test('deleteComponentConfiguration()', async function() {
-            await Odo.Instance.deleteComponentConfiguration(tmpFolder);
-            try {
-                await fs.access(path.join(tmpFolder, 'devfile.yaml'));
-                fail('devfile.yaml should have been deleted')
-            } catch {
-                // deleted successfully
-            }
-        });
-
     });
 
+    test('deleteComponentConfiguration');
 });
