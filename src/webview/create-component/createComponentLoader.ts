@@ -11,7 +11,7 @@ import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import { AnalyzeResponse, ComponentTypeDescription } from '../../odo/componentType';
+import { ComponentTypeDescription } from '../../odo/componentType';
 import { Endpoint } from '../../odo/componentTypeDescription';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
@@ -30,6 +30,8 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
+import { AlizerAnalyzeResponse, Version } from '../../alizer/types';
+import { Alizer } from '../../alizer/alizerWrapper';
 
 interface CloneProcess {
     status: boolean;
@@ -518,14 +520,14 @@ export default class CreateComponentLoader {
     }
 
     static async getRecommendedDevfile(uri: Uri): Promise<void> {
-        let analyzeRes: AnalyzeResponse[] = [];
+        let analyzeRes: AlizerAnalyzeResponse;
         let compDescriptions: ComponentTypeDescription[] = [];
         try {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfileStart'
             });
-            analyzeRes = await Odo.Instance.analyze(uri.fsPath);
-            compDescriptions = await getCompDescription(analyzeRes);
+            const alizerAnalyzeRes: AlizerAnalyzeResponse = await Alizer.Instance.alizerAnalyze(uri);
+            compDescriptions = await getCompDescription(alizerAnalyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
                 const actions: Array<string> = ['Yes', 'Cancel'];
@@ -539,7 +541,7 @@ export default class CreateComponentLoader {
                         const file = await fs.readFile(devFileV1Path, 'utf8');
                         const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
-                        analyzeRes = await Odo.Instance.analyze(uri.fsPath);
+                        analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
                         compDescriptions = await getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
                         const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(
@@ -587,18 +589,25 @@ export default class CreateComponentLoader {
     }
 }
 
-async function getCompDescription(devfiles: AnalyzeResponse[]): Promise<ComponentTypeDescription[]> {
+async function getCompDescription(devfile: AlizerAnalyzeResponse): Promise<ComponentTypeDescription[]> {
     const compDescriptions = await ComponentTypesView.instance.getCompDescriptions();
-    if (devfiles.length === 0) {
+    if (!devfile) {
         return Array.from(compDescriptions);
     }
-    return Array.from(compDescriptions).filter(({ name, version, registry }) =>
-        devfiles.some(
-            (res) =>
-                res.devfile === name &&
-                res.devfileVersion === version &&
-                res.devfileRegistry === registry.name,
-        ),
+    return Array.from(compDescriptions).filter((compDesc) => {
+        if (devfile.Name === compDesc.name && getVersion(devfile.Versions, compDesc.version)) {
+            return compDesc;
+        }
+    }
+    );
+}
+
+function getVersion(devfileVersions: Version[], matchedVersion: string): Version {
+    return devfileVersions.find((devfileVersion) => {
+        if (devfileVersion.Version === matchedVersion) {
+            return devfileVersion;
+        }
+    }
     );
 }
 

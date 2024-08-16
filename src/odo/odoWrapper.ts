@@ -11,7 +11,7 @@ import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
-import { AnalyzeResponse, ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
+import { ComponentTypeAdapter, ComponentTypeDescription, DevfileComponentType, Registry } from './componentType';
 import { ComponentDescription, StarterProject } from './componentTypeDescription';
 import { BindableService } from './odoTypes';
 
@@ -192,15 +192,6 @@ export class Odo {
             ),
             componentPath,
         );
-    }
-
-    public async analyze(currentFolderPath: string): Promise<AnalyzeResponse[]> {
-        const cliData: CliExitData = await this.execute(
-            new CommandText('odo', 'analyze -o json'),
-            currentFolderPath,
-        );
-        const parse = JSON.parse(cliData.stdout) as AnalyzeResponse[];
-        return parse;
     }
 
     /**
