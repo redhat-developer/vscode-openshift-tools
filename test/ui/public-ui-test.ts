@@ -15,6 +15,7 @@ import { checkOpenshiftView } from './suite/openshift';
 import { testCreateServerlessFunction } from './suite/serverlessFunction';
 
 import * as sourceMapSupport from 'source-map-support';
+import { testComponentContextMenu } from './suite/componentContextMenu';
 
 sourceMapSupport.install();
 
@@ -45,6 +46,7 @@ describe('Extension public-facing UI tests', function() {
         });
 
         checkAboutCommand(clusterIsSet);
+        testComponentContextMenu();
 
         //tests requiring clusters incoming
     });

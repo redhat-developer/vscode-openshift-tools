@@ -43,6 +43,7 @@ export const MENUS = {
     deleteProject: 'Delete Project',
     bindService: 'Bind Service',
     startDev: 'Start Dev',
+    stopDev: 'Stop Dev',
 };
 
 export const COMPONENTS = {

@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { By, EditorView, Key, WebElement, WebviewView, Workbench } from 'vscode-extension-tester';
+import { By, EditorView, WebviewView, Workbench } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { expect } from 'chai';
+import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function checkAboutCommand(clusterIsSet: boolean) {
     describe('About Command', () => {
@@ -15,14 +16,18 @@ export function checkAboutCommand(clusterIsSet: boolean) {
         const clusterServer = 'https://127.0.0.1';
 
         let webviewView: WebviewView;
-        let terminalInstance: WebElement;
+        let openshiftTerminal: OpenshiftTerminalWebviewView;
 
         before(async () => {
             await new EditorView().closeAllEditors();
             await activateCommand(command);
         });
 
-        it('New terminal opens', async function () {
+        after(async () => {
+            await openshiftTerminal.closeTab('Show odo Version');
+        });
+
+        it('New terminal opens', async function() {
             this.timeout(60_000);
             await new Promise((res) => setTimeout(res, 3_000));
             await new Workbench().executeCommand(
@@ -30,26 +35,23 @@ export function checkAboutCommand(clusterIsSet: boolean) {
             );
             webviewView = new WebviewView();
             await webviewView.switchToFrame(6_500);
-            terminalInstance = await webviewView.findWebElement(
+            await webviewView.findWebElement(
                 By.xpath('//textarea[@aria-label = "Terminal input"]'),
             );
+            await webviewView.switchBack();
         });
 
-        it('Terminal shows according information', async function () {
+        it('Terminal shows according information', async function() {
             this.timeout(60_000);
-            await terminalInstance.click();
+            openshiftTerminal = new OpenshiftTerminalWebviewView();
 
-            await terminalInstance.sendKeys(`${Key.CONTROL}${Key.SHIFT}a`);
-            await terminalInstance.sendKeys(`${Key.CONTROL}${Key.SHIFT}c`);
-            await webviewView.switchBack();
+            const terminalText = await openshiftTerminal.getTerminalText();
 
-            const cb = await import('clipboardy');
-            const clipboard = await cb.read();
-            expect(clipboard).to.contain(odoVersion);
+            expect(terminalText).to.contain(odoVersion)
             if (!clusterIsSet) {
-                expect(clipboard).to.contain(noClusterMessage);
+                expect(terminalText).to.contain(noClusterMessage);
             } else {
-                expect(clipboard).to.contain(clusterServer);
+                expect(terminalText).to.contain(clusterServer);
             }
         });
     });
