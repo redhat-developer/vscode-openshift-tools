@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import * as React from 'react';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
-import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { BuilderImage } from '../../common/buildImage';
 import { BuilderImageListItem } from '../../common/builderImageListItem';
 import { BuilderConfiguration } from './builderConfig';
@@ -316,7 +316,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                             </>
                         ) : recommendedBuilderImage.noRecommendation && !selectedBuilderImage ? (
                             <>
-                                <NoSuitableDevfile />
+                                <NoSuitableWarning isComponent={false} />
                                 <Stack
                                     direction="row"
                                     justifyContent="flex-end"

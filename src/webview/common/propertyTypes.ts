@@ -39,6 +39,10 @@ export interface ErrorProps extends DefaultProps {
     message: string;
 }
 
+export interface WarningProp extends DefaultProps {
+    isComponent?: boolean;
+}
+
 export interface CompTypeDesc extends ComponentTypeDescription {
     priority: number;
 }

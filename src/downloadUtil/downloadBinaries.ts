@@ -57,10 +57,12 @@ export async function downloadFileAndCreateSha256(
             console.log(`${current}%`),
         );
         const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
-        if (currentSHA256 === platform.sha256sum) {
-            console.log(`Download of ${currentFile} has finished and SHA256 is correct`);
-        } else {
-            throw Error(`${currentFile} is downloaded and SHA256 is not correct`);
+        if (platform.sha256sum) {
+            if (currentSHA256 === platform.sha256sum) {
+                console.log(`Download of ${currentFile} has finished and SHA256 is correct`);
+            } else {
+                throw Error(`${currentFile} is downloaded and SHA256 is not correct`);
+            }
         }
         if (process.env.REMOTE_CONTAINERS === 'true') {
             await extractTool(toolsFolder, platform, currentFile);

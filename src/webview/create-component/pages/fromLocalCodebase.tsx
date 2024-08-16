@@ -24,7 +24,7 @@ import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
-import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { PortNumberInput } from '../../common/portNumberInput';
 import { buildSanitizedComponentName } from '../../common/sanitize';
 
@@ -381,7 +381,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                 <>
                                     <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                     <Stack direction="column">
-                                        <NoSuitableDevfile />
+                                        <NoSuitableWarning />
                                         <Stack
                                             direction="row"
                                             justifyContent="flex-end"

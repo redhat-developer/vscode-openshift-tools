@@ -84,14 +84,6 @@ export interface DevfileData {
     }
 }
 
-export interface AnalyzeResponse {
-    name: string;
-    devfile: string;
-    devfileRegistry: string;
-    devfileVersion: string;
-    ports: number[];
-}
-
 export type ComponentTypeDescription = DevfileComponentType & DevfileData;
 
 export class ComponentTypeAdapter implements ComponentType {

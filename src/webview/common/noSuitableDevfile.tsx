@@ -4,11 +4,15 @@
  *-----------------------------------------------------------------------------------------------*/
 import { Alert } from '@mui/material';
 import React from 'react';
+import {  WarningProp } from './propertyTypes';
 
-export function NoSuitableDevfile() {
+export const NoSuitableWarning: React.FC<WarningProp> = ({
+    isComponent = true
+}) => {
+    const value = isComponent ? 'devfile' : 'builder image';
     return (
         <Alert severity="warning">
-            Unable to detect a suitable devfile. Please try again or manually select a devfile.
+            {`Unable to detect a suitable ${value}. Please try again or manually select a ${value}.`}
         </Alert>
     );
 }

@@ -9,9 +9,8 @@ import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
-import { AnalyzeResponse } from '../../odo/componentType';
-import { Odo } from '../../odo/odoWrapper';
-import { BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
+import { Alizer } from '../../alizer/alizerWrapper';
+import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
@@ -23,6 +22,7 @@ import {
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { getDevfileContent, getLanguages, loadWebviewHtml, validateGitURL } from '../common-ext/utils';
+import { AlizerAnalyzeResponse } from '../../alizer/types';
 
 interface CloneProcess {
     status: boolean;
@@ -328,27 +328,29 @@ export default class CreateDeploymentLoader {
     }
 
     static async getRecommendedBuilderImage(uri: Uri): Promise<void> {
-        let analyzeRes: AnalyzeResponse[] = [];
+        let analyzeRes: AlizerAnalyzeResponse[] = [];
         let builderImages: NormalizedBuilderImages;
+        let receommendedBuilderImage: BuilderImage;
         try {
             void CreateDeploymentLoader.panel.webview.postMessage({
                 action: 'getRecommendedBuilderImageStart'
             });
-            analyzeRes = await Odo.Instance.analyze(uri.fsPath);
+            analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
             builderImages = await BuilderImageWrapper.Instance.getBuilder();
-        } catch (error) {
+
+        } catch {
             void vscode.window.showErrorMessage(
                 'Unable to analyze the builder Image',
             );
         } finally {
-            let language = analyzeRes[0].devfile.indexOf('-') !== -1 ? analyzeRes[0].devfile.split('-')[0] : analyzeRes[0].devfile;
-            const defaultLanguage = 'java'
-            let receommendedBuilderImage = builderImages[language]
-            if (!receommendedBuilderImage) {
-                language = defaultLanguage;
-                receommendedBuilderImage = builderImages[language];
+            for (const res of analyzeRes) {
+                const language = res.Name.toLowerCase();
+                if (builderImages[language]) {
+                    receommendedBuilderImage = builderImages[language];
+                    receommendedBuilderImage.iconClass = `icon-${language}`;
+                    break;
+                }
             }
-            receommendedBuilderImage.iconClass = `icon-${language}`;
             void CreateDeploymentLoader.panel.webview.postMessage({
                 action: 'recommendedBuilderImage',
                 data: {
