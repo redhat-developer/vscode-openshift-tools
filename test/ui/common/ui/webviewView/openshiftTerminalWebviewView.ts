@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { By, Key, WebElement, WebviewView } from 'vscode-extension-tester';
+import { By, Key, VSBrowser, WebElement, WebviewView } from 'vscode-extension-tester';
 import { WebviewViewForm } from './webviewViewForm';
 
 export class OpenshiftTerminalWebviewView extends WebviewViewForm {
@@ -13,9 +13,15 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
 
     public async getTerminalText(): Promise<string> {
         const copyKeys = [`${Key.CONTROL}${Key.SHIFT}a`,`${Key.CONTROL}${Key.SHIFT}c`]
-        await this.sendKeysToTerminal(copyKeys);
-        const cb = await import('clipboardy');
-        return await cb.read();
+        return await VSBrowser.instance.driver.wait(async () => {
+            try {
+                await this.sendKeysToTerminal(copyKeys);
+                const cb = await import('clipboardy');
+                return await cb.read();
+            } catch {
+                return null;
+            }
+        }, 10_000);
     }
 
     public async getActiveTabName(): Promise<string> {
@@ -92,7 +98,4 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
     private async getTerminalInstance(webviewView: WebviewView): Promise<WebElement> {
         return await webviewView.findWebElement(By.xpath('//textarea[@aria-label = "Terminal input"]'));
     }
-
-
-
 }
