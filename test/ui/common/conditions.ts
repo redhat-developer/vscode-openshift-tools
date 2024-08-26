@@ -3,9 +3,24 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { BottomBarPanel, EditorView, InputBox, Notification, NotificationType, ViewItem, ViewSection, WebDriver, WelcomeContentSection, Workbench } from 'vscode-extension-tester';
+import {
+    BottomBarPanel,
+    EditorView,
+    InputBox,
+    Notification,
+    NotificationType,
+    ViewItem,
+    ViewSection,
+    WebDriver,
+    WelcomeContentSection,
+    Workbench,
+} from 'vscode-extension-tester';
 
-export async function waitForInputUpdate(input: InputBox, originalText: string, timeout = 5000): Promise<string> {
+export async function waitForInputUpdate(
+    input: InputBox,
+    originalText: string,
+    timeout = 5000,
+): Promise<string> {
     return input.getDriver().wait(async () => {
         const text = await input.getMessage();
         if (text !== originalText) {
@@ -17,13 +32,17 @@ export async function waitForInputUpdate(input: InputBox, originalText: string, 
     }, timeout);
 }
 
-export async function notificationExists(message: string, driver: WebDriver, timeout = 10000): Promise<Notification> {
+export async function notificationExists(
+    message: string,
+    driver: WebDriver,
+    timeout = 10000,
+): Promise<Notification> {
     const center = await new Workbench().openNotificationsCenter();
     return driver.wait(async () => {
         try {
             const notifications = await center.getNotifications(NotificationType.Any);
             for (const item of notifications) {
-                if (await item.getMessage() === message) {
+                if ((await item.getMessage()) === message) {
                     return item;
                 }
             }
@@ -33,7 +52,33 @@ export async function notificationExists(message: string, driver: WebDriver, tim
     }, timeout);
 }
 
-export async function itemExists(title: string, view: ViewSection, timeout = 10000): Promise<ViewItem> {
+export async function notificationDoesNotExist(
+    message: string,
+    driver: WebDriver,
+    timeout = 10_000,
+): Promise<boolean> {
+    const center = await new Workbench().openNotificationsCenter();
+    return driver.wait(async () => {
+        try {
+            const notifications = await center.getNotifications(NotificationType.Any);
+            const notificationText = [];
+            notifications.forEach((item) => (async () => notificationText.push(await item.getMessage())));
+
+            if (!notificationText.includes(message)) {
+                await center.close();
+                return true;
+            }
+        } catch {
+            // tbd
+        }
+    }, timeout);
+}
+
+export async function itemExists(
+    title: string,
+    view: ViewSection,
+    timeout = 10000,
+): Promise<ViewItem> {
     return view.getDriver().wait(async () => {
         try {
             const item = await view.findItem(title);
@@ -46,7 +91,29 @@ export async function itemExists(title: string, view: ViewSection, timeout = 100
     }, timeout);
 }
 
-export async function itemHasText(title: string, text: string, view: ViewSection, timeout = 10_000 ): Promise<ViewItem> {
+export async function itemDoesNotExist(
+    title: string,
+    view: ViewSection,
+    timeout = 10000,
+): Promise<boolean> {
+    return view.getDriver().wait(async () => {
+        try {
+            const item = await view.findItem(title);
+            if (!item) {
+                return true;
+            }
+        } catch {
+            return true;
+        }
+    }, timeout);
+}
+
+export async function itemHasText(
+    title: string,
+    text: string,
+    view: ViewSection,
+    timeout = 10_000,
+): Promise<ViewItem> {
     return view.getDriver().wait(async () => {
         try {
             const item = await view.findItem(title);
@@ -59,7 +126,7 @@ export async function itemHasText(title: string, text: string, view: ViewSection
         } catch {
             return null;
         }
-    }, timeout)
+    }, timeout);
 }
 
 export async function waitForInputProgress(input: InputBox, shouldExist: boolean, timeout = 5000) {
@@ -78,15 +145,18 @@ export async function terminalHasText(text: string, timeout = 60000, period = 50
         if (currentText.includes(text)) {
             return true;
         }
-        await new Promise(res => setTimeout(res, period));
+        await new Promise((res) => setTimeout(res, period));
     }, timeout);
 }
 
-export async function welcomeContentButtonsAreLoaded(welcomeContentSection: WelcomeContentSection, timeout = 60_000) {
+export async function welcomeContentButtonsAreLoaded(
+    welcomeContentSection: WelcomeContentSection,
+    timeout = 60_000,
+) {
     return welcomeContentSection.getDriver().wait(async () => {
         const buttons = await welcomeContentSection.getButtons();
-        if(buttons.length > 0) {
-            return buttons
+        if (buttons.length > 0) {
+            return buttons;
         }
     }, timeout);
 }
@@ -94,8 +164,8 @@ export async function welcomeContentButtonsAreLoaded(welcomeContentSection: Welc
 export async function welcomeContentIsLoaded(viewSection: ViewSection, timeout = 60_000) {
     return viewSection.getDriver().wait(async () => {
         const welcomeContent = await viewSection.findWelcomeContent();
-        if(welcomeContent) {
-            return welcomeContent
+        if (welcomeContent) {
+            return welcomeContent;
         }
     }, timeout);
 }
@@ -104,10 +174,10 @@ export async function webViewIsOpened(name: string, driver: WebDriver, timeout =
     return driver.wait(async () => {
         try {
             const editor = new EditorView();
-            await editor.openEditor(name)
+            await editor.openEditor(name);
             return true;
         } catch {
             return null;
         }
-    }, timeout)
+    }, timeout);
 }
