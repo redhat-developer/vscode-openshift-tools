@@ -46,10 +46,12 @@ export function testComponentCommands(path: string) {
             const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
             const parsedDevfile = yml.load(devfile) as { [key: string]: any };
             const expectedCommands = [];
-            for(const command of parsedDevfile.commands) {
-                console.log(command.id);
+
+            parsedDevfile.commands.forEach((command) => {expectedCommands.push(command)});
+
+            /*for(const command of parsedDevfile.commands) {
                 expectedCommands.push(command.id);
-            }
+            }*/
 
             //get component
             const components = await section.getVisibleItems();
