@@ -14,10 +14,11 @@ import {
     NotificationType,
     SideBarView,
     ViewSection,
+    VSBrowser,
     WelcomeContentButton,
     Workbench,
 } from 'vscode-extension-tester';
-import { BUTTONS, VIEWS } from '../common/constants';
+import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 import {
     CreateComponentWebView,
@@ -29,6 +30,7 @@ import {
     RegistryWebViewDevfileWindow,
     RegistryWebViewEditor,
 } from '../common/ui/webview/registryWebViewEditor';
+import { notificationExists } from '../common/conditions';
 
 //TODO: Add more checks for different elements
 export function testCreateComponent(path: string) {
@@ -88,7 +90,19 @@ export function testCreateComponent(path: string) {
 
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
-            fs.rmSync(pth.join(path, componentName, 'devfile.yaml'), { force: true });
+            const component = await section.findItem(componentName);
+            const contextMenu = await component.openContextMenu();
+            await contextMenu.select(MENUS.deleteConfiguration);
+
+            const notification = await notificationExists(NOTIFICATIONS.deleteConfig(pth.join(path, componentName)), VSBrowser.instance.driver);
+            await notification.takeAction(INPUTS.deleteConfiguration);
+
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if (notifications.length > 0) {
+                await notificationCenter.close();
+            }
+
             await refreshView();
             await loadCreateComponentButton();
             await clickCreateComponent();
@@ -155,7 +169,12 @@ export function testCreateComponent(path: string) {
         afterEach(async function context() {
             this.timeout(30_000);
             if (componentName && dlt) {
-                fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
+                const component = await section.findItem(componentName);
+                const contextMenu = await component.openContextMenu();
+                await contextMenu.select(MENUS.deleteSourceCodeFolder);
+                const notification = await notificationExists(NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)), VSBrowser.instance.driver);
+                await notification.takeAction(INPUTS.deleteSourceFolder);
+                //fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
                 componentName = undefined;
                 await refreshView();
                 await loadCreateComponentButton();
