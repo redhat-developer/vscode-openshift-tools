@@ -23,6 +23,7 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { getDevfileContent, getLanguages, loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { AlizerAnalyzeResponse } from '../../alizer/types';
+import { Oc } from '../../oc/ocWrapper';
 
 interface CloneProcess {
     status: boolean;
@@ -188,101 +189,41 @@ export default class CreateDeploymentLoader {
             }
 
             /**
-             * The panel requested to create component from local codebase or git repo.
+             * The panel requested to create deployment from git repo.
              */
-            /*case 'createComponent': {
-                const componentName: string = message.data.componentName;
-                const portNumber: number = message.data.portNumber;
-                let componentFolder: string = '';
+            case 'createDeployment': {
+                //const appName: string = message.data.appName;
+                const name: string = message.data.name;
+                const gitURL: string = message.data.gitURL;
+                const builderImage: BuilderImage = message.data.builderImage;
                 try {
-                    if (message.data.isFromTemplateProject) {
-                        // from template project
-                        const { projectFolder } = message.data;
-                        const templateProject: TemplateProjectIdentifier =
-                            message.data.templateProject;
-                        componentFolder = path.join(projectFolder, componentName);
-                        await fs.mkdir(componentFolder, { recursive: true });
-                        await Odo.Instance.createComponentFromTemplateProject(
-                            componentFolder,
-                            componentName,
-                            portNumber,
-                            templateProject.devfileId,
-                            templateProject.registryName,
-                            templateProject.templateProjectName,
-                        );
-                        await sendTelemetry('newComponentCreated', {
-                            strategy: 'fromTemplateProject',
-                            // eslint-disable-next-line camelcase
-                            component_type: templateProject.devfileId,
-                            // eslint-disable-next-line camelcase
-                            starter_project: templateProject.templateProjectName,
+                    const result = await Oc.Instance.createDeploymentFromGit(name, builderImage.tags[0]?.from?.name, gitURL);
+                    if (result.error) {
+                        await sendTelemetry('newDeploymentCreationFailed', {
+                            error: JSON.stringify(result.stderr),
                         });
+                        void vscode.window.showErrorMessage(result.stderr);
                     } else {
-                        let strategy: string;
-                        // from local codebase or existing git repo
-                        if (message.data.path) {
-                            // path of project in local codebase
-                            strategy = 'fromLocalCodebase';
-                            componentFolder = message.data.path;
-                        } else if (message.data.gitDestinationPath) {
-                            // move the cloned git repo to selected project path
-                            strategy = 'fromGitRepo';
-                            componentFolder = path.join(
-                                message.data.gitDestinationPath,
-                                componentName,
-                            );
-                            await fs.mkdir(componentFolder, { recursive: true });
-                            await fse.copy(tmpFolder.fsPath, componentFolder);
-                        }
-                        const devfileType = await getDevfileType(message.data.devfileDisplayName);
-                        const componentFolderUri = Uri.file(componentFolder);
-                        if (!await isDevfileExists(componentFolderUri)) {
-                            await Odo.Instance.createComponentFromLocation(
-                                devfileType,
-                                componentName,
-                                portNumber,
-                                Uri.file(componentFolder),
-                            );
-                        } else {
-                            // Update component devfile with component's selected name
-                            await CreateDeploymentLoader.updateDevfileWithComponentName(componentFolderUri, componentName);
-                        }
-
-                        await sendTelemetry('newComponentCreated', {
-                            strategy,
-                            // eslint-disable-next-line camelcase
-                            component_type: devfileType,
+                        await sendTelemetry('newDeploymentCreated', {
+                            deploymentName: name,
                         });
+                        CreateDeploymentLoader.panel.dispose();
+                        void vscode.commands.executeCommand('openshift.explorer.refresh');
+                        void vscode.window.showInformationMessage('Deployment Config has been successfully created.');
                     }
-                    CreateDeploymentLoader.panel.dispose();
-                    if (
-                        message.data.addToWorkspace &&
-                        !vscode.workspace.workspaceFolders?.some(
-                            (workspaceFolder) => workspaceFolder.uri.fsPath === componentFolder,
-                        )
-                    ) {
-                        vscode.workspace.updateWorkspaceFolders(
-                            vscode.workspace.workspaceFolders
-                                ? vscode.workspace.workspaceFolders.length
-                                : 0,
-                            null,
-                            { uri: Uri.file(componentFolder) },
-                        );
-                    }
-                    void vscode.commands.executeCommand('openshift.componentsView.refresh');
-                    void vscode.window.showInformationMessage('Component has been successfully created. You can now run `Start Dev` from the components view.');
                 } catch (err) {
-                    await sendTelemetry('newComponentCreationFailed', {
+                    await sendTelemetry('newDeploymentCreationFailed', {
                         error: JSON.stringify(err),
                     });
                     void vscode.window.showErrorMessage(err);
                     void CreateDeploymentLoader.panel.webview.postMessage({
-                        action: 'createComponentFailed',
+                        action: 'createDeploymentFailed',
                         data: err.message,
                     });
                 }
                 break;
             }
+
             /**
              * The panel requested to validate the git repository URL.
              */

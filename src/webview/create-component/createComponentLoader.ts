@@ -591,7 +591,7 @@ export default class CreateComponentLoader {
 
 async function getCompDescription(devfile: AlizerDevfileResponse): Promise<ComponentTypeDescription[]> {
     const compDescriptions = await ComponentTypesView.instance.getCompDescriptions();
-    if (!devfile) {
+    if (!devfile.Name) {
         return Array.from(compDescriptions);
     }
     return Array.from(compDescriptions).filter((compDesc) => {

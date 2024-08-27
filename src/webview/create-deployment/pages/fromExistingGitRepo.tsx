@@ -455,6 +455,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     }}
                     appName={`${getName()}-app`}
                     name={getName()}
+                    gitURL={gitURL.url}
                     //createComponent={createComponentFromGitRepo}
                     builderImage={getEffectiveBuilderImage()}
 

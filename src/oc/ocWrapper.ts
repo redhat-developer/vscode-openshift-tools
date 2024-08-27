@@ -12,6 +12,7 @@ import { CliChannel, ExecutionContext } from '../cli';
 import { isOpenShiftCluster, KubeConfigUtils } from '../util/kubeUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
+import { CliExitData } from '../util/childProcessUtil';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -344,7 +345,7 @@ export class Oc {
      * @param abortController if provided, allows cancelling the operation
      */
     public async loginWithToken(clusterURL: string, token: string,
-            abortController?: AbortController): Promise<void> {
+        abortController?: AbortController): Promise<void> {
         const options = abortController ? { signal: abortController.signal } : undefined;
         const result = await CliChannel.getInstance().executeTool(
             new CommandText('oc', `login ${clusterURL}`, [
@@ -436,6 +437,17 @@ export class Oc {
         );
     }
 
+    public async createDeploymentFromGit(name: string, image: string, gitURL: string): Promise<CliExitData> {
+        const args: CommandOption[] = [];
+        if (name && !validator.isEmpty(name)) {
+            args.push(new CommandOption('--name', name));
+        }
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', `new-app ${image}~${gitURL}`, args), undefined, false
+        )
+        return result;
+    }
+
     /**
      * Scale replicas count
      *
@@ -473,17 +485,17 @@ export class Oc {
     public async deleteProject(projectName: string, executionContext?: ExecutionContext): Promise<string> {
         const obj = await isOpenShiftCluster(executionContext) ? 'project' : 'namespace';
         return await CliChannel.getInstance().executeTool(
-                new CommandText('oc', `delete ${obj} ${projectName}`)
-            )
+            new CommandText('oc', `delete ${obj} ${projectName}`)
+        )
             .then((result) => result.stdout);
     }
 
-    public async createProject(projectName: string, executionContext?: ExecutionContext):  Promise<string> {
+    public async createProject(projectName: string, executionContext?: ExecutionContext): Promise<string> {
         const cmd = await isOpenShiftCluster(executionContext) ? 'new-project' : 'create namespace';
 
         return await CliChannel.getInstance().executeTool(
-                new CommandText('oc', `${cmd} ${projectName}`)
-            )
+            new CommandText('oc', `${cmd} ${projectName}`)
+        )
             .then(async (result) => {
                 // oc doesn't handle switching to the newly created namespace/project
                 await this.setProject(projectName, executionContext);
@@ -531,7 +543,7 @@ export class Oc {
      * @param projectName the new project to use
      */
     public async setProject(projectName: string, executionContext?: ExecutionContext): Promise<void> {
-        if(await isOpenShiftCluster(executionContext)) {
+        if (await isOpenShiftCluster(executionContext)) {
             await CliChannel.getInstance().executeTool(
                 new CommandText('oc', `project ${projectName}`),
             );
@@ -645,14 +657,14 @@ export class Oc {
     private async _listProjects(executionContext: ExecutionContext): Promise<Project[]> {
         const namespaces: Project[] = [];
         return await CliChannel.getInstance().executeTool(
-                new CommandText('oc', 'projects -q'), undefined, true, executionContext
-            )
-            .then( (result) => {
+            new CommandText('oc', 'projects -q'), undefined, true, executionContext
+        )
+            .then((result) => {
                 const lines = result.stdout && result.stdout.split(/\r?\n/g);
                 for (let line of lines) {
                     line = line.trim();
                     if (line === '') continue;
-                    namespaces.push( {name: line, active: false });
+                    namespaces.push({ name: line, active: false });
                 }
                 return namespaces;
             })
@@ -690,7 +702,7 @@ export class Oc {
         if (appName) {
             args.push(new CommandOption('-l', `app=${appName}`));
         }
-        return new CommandText('oc',  `get ${resourceType}`, args);
+        return new CommandText('oc', `get ${resourceType}`, args);
     }
 
     private static getSingleKubernetesObjectCommand(

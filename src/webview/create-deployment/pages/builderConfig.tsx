@@ -29,7 +29,27 @@ type BuilderConfigurationProps = {
     builderImage: BuilderImage;
     appName: string;
     name: string;
+    gitURL: string;
 };
+
+function createDeployment(
+    appName: string,
+    name: string,
+    portNumber: string,
+    gitURL: string,
+    builderImage: BuilderImage
+) {
+    window.vscodeApi.postMessage({
+        action: 'createDeployment',
+        data: {
+            appName,
+            name,
+            portNumber,
+            gitURL,
+            builderImage
+        },
+    });
+}
 
 export function BuilderConfiguration(props: BuilderConfigurationProps) {
     const [appName, setAppName] = React.useState(props.appName);
@@ -288,6 +308,7 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                         variant="contained"
                         onClick={() => {
                             setLoading(true);
+                            createDeployment(appName, configName, targetPort, props.gitURL, props.builderImage);
                         }}
                         disabled={!configName}
                         loading={isLoading}

@@ -47,6 +47,9 @@ interface ImageTag {
         [key: string]: string;
     };
     generation: number;
+    from: {
+        [key: string]: string;
+    }
     [key: string]: unknown;
 }
 

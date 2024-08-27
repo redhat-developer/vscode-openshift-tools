@@ -27,7 +27,13 @@ export class Alizer {
             new CommandText('alizer', `devfile ${currentFolderPath.fsPath}`), undefined, false
         );
         if (cliData.error || cliData.stderr.length > 0) {
-            return undefined;
+            return {
+                Name: '',
+                Language: '',
+                ProjectType: '',
+                Tags: [],
+                Versions: []
+            };
         }
         const parse = JSON.parse(cliData.stdout) as AlizerDevfileResponse[];
         return parse[0];
