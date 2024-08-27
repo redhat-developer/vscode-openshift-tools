@@ -19,6 +19,7 @@ import { MENUS, VIEWS } from '../common/constants';
 import { itemDoesNotExist, itemExists, notificationDoesNotExist } from '../common/conditions';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 import { expect } from 'chai';
+import { collapse } from '../common/overdrives';
 
 export function testComponentContextMenu() {
     describe('Component Context Menu', function () {
@@ -241,7 +242,7 @@ export function testComponentContextMenu() {
 
             //refresh section
             await debugSession.expand();
-            await debugSession.collapse();
+            await collapse(debugSession);
             await debugSession.expand();
 
             //click on item
