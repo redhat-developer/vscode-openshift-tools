@@ -47,7 +47,7 @@ export function testComponentCommands(path: string) {
             const parsedDevfile = yml.load(devfile) as { [key: string]: any };
             const expectedCommands = [];
 
-            parsedDevfile.commands.forEach((command) => {expectedCommands.push(command)});
+            parsedDevfile.commands.forEach((command) => {expectedCommands.push(command.id)});
 
             /*for(const command of parsedDevfile.commands) {
                 expectedCommands.push(command.id);
