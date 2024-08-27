@@ -47,6 +47,7 @@ export function testComponentCommands(path: string) {
             const parsedDevfile = yml.load(devfile) as { [key: string]: any };
             const expectedCommands = [];
             for(const command of parsedDevfile.commands) {
+                console.log(command);
                 expectedCommands.push(command);
             }
 
@@ -65,7 +66,7 @@ export function testComponentCommands(path: string) {
             for (const command of commands) {
                 actualCommands.push(await command.getLabel());
             }
-            expect(actualCommands).to.include(expectedCommands);
+            expect(actualCommands).to.have.members(expectedCommands);
         });
 
         it('Command can be ran', async function () {
