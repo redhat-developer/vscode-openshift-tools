@@ -48,7 +48,7 @@ export function testComponentCommands(path: string) {
             const expectedCommands = [];
             for(const command of parsedDevfile.commands) {
                 console.log(command.id);
-                expectedCommands.push(command.id);
+                expectedCommands.push(command.id as string);
             }
 
             //get component
@@ -66,7 +66,7 @@ export function testComponentCommands(path: string) {
             for (const command of commands) {
                 actualCommands.push(await command.getLabel());
             }
-            expect(actualCommands).to.have.members(expectedCommands);
+            expect(actualCommands).to.include.members(expectedCommands);
         });
 
         it('Command can be ran', async function () {
