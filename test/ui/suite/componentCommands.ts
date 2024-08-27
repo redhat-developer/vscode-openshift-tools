@@ -49,10 +49,6 @@ export function testComponentCommands(path: string) {
 
             parsedDevfile.commands.forEach((command) => {expectedCommands.push(command.id)});
 
-            /*for(const command of parsedDevfile.commands) {
-                expectedCommands.push(command.id);
-            }*/
-
             //get component
             const components = await section.getVisibleItems();
             const component = components[0] as TreeItem;
