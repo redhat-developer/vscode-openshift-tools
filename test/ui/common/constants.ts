@@ -35,6 +35,8 @@ export const INPUTS = {
     yes: 'Yes',
     no: 'No',
     logout: 'Logout',
+    deleteConfiguration: 'Delete Configuration',
+    deleteSourceFolder: 'Delete Source Folder',
 };
 
 export const MENUS = {
@@ -50,6 +52,8 @@ export const MENUS = {
     showLog: 'Show Log',
     followLog: 'Follow Log',
     debug: 'Debug',
+    deleteConfiguration: 'Delete Component Configuration',
+    deleteSourceCodeFolder: 'Delete Source Code Folder',
 };
 
 export const COMPONENTS = {
@@ -65,5 +69,7 @@ export const NOTIFICATIONS = {
     savePasswordPrompt: 'Do you want to save username and password?',
     loginSuccess: (cluster: string) => `Successfully logged in to '${cluster}'`,
     doYouWantLogOut: 'Do you want to logout of cluster?',
-    logoutSuccess: 'Successfully logged out. Do you want to login to a new cluster'
+    logoutSuccess: 'Successfully logged out. Do you want to login to a new cluster',
+    deleteConfig: (path: string) => `Are you sure you want to delete the configuration for the component ${path}? OpenShift Toolkit will no longer recognize the project as a component.`,
+    deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
 };
