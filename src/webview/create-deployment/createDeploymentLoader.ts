@@ -285,11 +285,16 @@ export default class CreateDeploymentLoader {
             );
         } finally {
             for (const res of analyzeRes) {
-                const language = res.Name.toLowerCase();
-                if (builderImages[language]) {
-                    receommendedBuilderImage = builderImages[language];
-                    receommendedBuilderImage.iconClass = `icon-${language}`;
-                    break;
+                const languages: string[] = [];
+                languages.push(res.Name);
+                languages.push(...res.Tools);
+                for (const lang of languages) {
+                    const language = lang.toLowerCase();
+                    if (builderImages[language]) {
+                        receommendedBuilderImage = builderImages[language];
+                        receommendedBuilderImage.iconClass = `icon-${language}`;
+                        break;
+                    }
                 }
             }
             void CreateDeploymentLoader.panel.webview.postMessage({

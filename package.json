@@ -1654,7 +1654,7 @@
 				},
 				{
 					"command": "openshift.deployment.create.buildConfig",
-					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i",
+					"when": "view == openshiftProjectExplorer && isLoggedIn && viewItem =~ /openshift.project.*/i && isOpenshiftCluster",
 					"group": "c2"
 				}
 			],
