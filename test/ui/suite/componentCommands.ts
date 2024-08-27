@@ -42,11 +42,14 @@ export function testComponentCommands(path: string) {
         });
 
         it('Commands are listed', async function () {
-            const fileContent = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
-            const parsed = yml.load(fileContent) as { [key: string]: any };
-            for(const command of parsed.commands) {
-                console.log(command.id);
+            //get expected commands
+            const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
+            const parsedDevfile = yml.load(devfile) as { [key: string]: any };
+            const expectedCommands = [];
+            for(const command of parsedDevfile.commands) {
+                expectedCommands.push(command);
             }
+
             //get component
             const components = await section.getVisibleItems();
             const component = components[0] as TreeItem;
@@ -58,7 +61,11 @@ export function testComponentCommands(path: string) {
 
             //check Commands has children
             commands = await commandsItem.getChildren();
-            expect(commands.length >= 0);
+            const actualCommands = []
+            for (const command of commands) {
+                actualCommands.push(await command.getLabel());
+            }
+            expect(actualCommands).to.include(expectedCommands);
         });
 
         it('Command can be ran', async function () {
