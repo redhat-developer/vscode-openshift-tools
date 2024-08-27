@@ -13,8 +13,11 @@ import {
 import { VIEWS } from '../common/constants';
 import { expect } from 'chai';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
+import * as yml from 'js-yaml';
+import * as fs from 'fs';
+import * as pth from 'path';
 
-export function testComponentCommands() {
+export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
         let view: SideBarView;
         let section: ViewSection;
@@ -39,6 +42,11 @@ export function testComponentCommands() {
         });
 
         it('Commands are listed', async function () {
+            const fileContent = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
+            const parsed = yml.load(fileContent) as { [key: string]: any };
+            for(const command of parsed.commands) {
+                console.log(command.id);
+            }
             //get component
             const components = await section.getVisibleItems();
             const component = components[0] as TreeItem;
