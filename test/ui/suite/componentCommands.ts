@@ -13,8 +13,11 @@ import {
 import { VIEWS } from '../common/constants';
 import { expect } from 'chai';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
+import * as yml from 'js-yaml';
+import * as fs from 'fs';
+import * as pth from 'path';
 
-export function testComponentCommands() {
+export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
         let view: SideBarView;
         let section: ViewSection;
@@ -39,6 +42,13 @@ export function testComponentCommands() {
         });
 
         it('Commands are listed', async function () {
+            //get expected commands
+            const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
+            const parsedDevfile = yml.load(devfile) as { [key: string]: any };
+            const expectedCommands = [];
+
+            parsedDevfile.commands.forEach((command) => {expectedCommands.push(command.id)});
+
             //get component
             const components = await section.getVisibleItems();
             const component = components[0] as TreeItem;
@@ -50,7 +60,11 @@ export function testComponentCommands() {
 
             //check Commands has children
             commands = await commandsItem.getChildren();
-            expect(commands.length >= 0);
+            const actualCommands = []
+            for (const command of commands) {
+                actualCommands.push(await command.getLabel());
+            }
+            expect(actualCommands).to.include.members(expectedCommands);
         });
 
         it('Command can be ran', async function () {
