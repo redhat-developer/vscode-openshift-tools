@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 export interface Version {
-    SchemaVersion: number;
+    SchemaVersion: string;
     Default: boolean;
     Version: string;
 }
