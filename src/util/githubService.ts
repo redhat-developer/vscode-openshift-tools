@@ -146,7 +146,7 @@ export class GithubService {
                 return r.name;
             });
             return { branches: list };
-        } catch (e) {
+        } catch {
             return { branches: [] };
         }
     };
@@ -166,7 +166,7 @@ export class GithubService {
                 files = resp.data.map((t) => t.name);
             }
             return { files };
-        } catch (e) {
+        } catch {
             return { files: [] };
         }
     };
@@ -181,7 +181,7 @@ export class GithubService {
                 return { languages: Object.keys(resp.data) };
             }
             return { languages: [] };
-        } catch (e) {
+        } catch {
             return { languages: [] };
         }
     };
@@ -195,7 +195,7 @@ export class GithubService {
                 ...(this.metadata.defaultBranch ? { ref: this.metadata.defaultBranch } : {}),
             });
             return resp.status === 200;
-        } catch (e) {
+        } catch {
             return false;
         }
     };
@@ -213,7 +213,7 @@ export class GithubService {
                 return Buffer.from(resp.data['content'], 'base64').toString();
             }
             return null;
-        } catch (e) {
+        } catch {
             return null;
         }
     };
