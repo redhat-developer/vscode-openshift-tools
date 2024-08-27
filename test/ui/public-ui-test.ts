@@ -48,6 +48,6 @@ describe('Extension public-facing UI tests', function() {
 
         checkAboutCommand(clusterIsSet);
         testComponentContextMenu();
-        testComponentCommands();
+        testComponentCommands(contextFolder);
     });
 });
