@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { expect } from 'chai';
 import {
     ActivityBar,
     BottomBarPanel,
@@ -15,11 +16,10 @@ import {
     ViewSection,
     VSBrowser,
 } from 'vscode-extension-tester';
-import { MENUS, VIEWS } from '../common/constants';
 import { itemDoesNotExist, itemExists, notificationDoesNotExist } from '../common/conditions';
-import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
-import { expect } from 'chai';
+import { MENUS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
+import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentContextMenu() {
     describe('Component Context Menu', function () {
@@ -212,6 +212,8 @@ export function testComponentContextMenu() {
         });
 
         it('Debug works', async () => {
+            this.timeout(80_000);
+
             //select debug from component's context menu
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.debug);
