@@ -223,15 +223,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     <>
                                         <Stack direction="row" spacing={2} marginTop={2}>
                                             <Button
-                                                variant="text"
-                                                onClick={() => {
-                                                    setCurrentView('home');
-                                                }}
-                                                disabled={recommendedBuilderImage.isLoading}
-                                            >
-                                                BACK
-                                            </Button>
-                                            <Button
                                                 variant="contained"
                                                 onClick={handleNext}
                                                 disabled={
@@ -346,7 +337,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     </Button>
                                     <Button
                                         variant="contained"
-                                        disabled={cloneFailed}
+                                        disabled={cloneFailed || true}
                                         onClick={() => {
                                             setCloneFailed(false);
                                             setRecommendedBuilderImage((prevState) => ({
