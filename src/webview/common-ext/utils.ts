@@ -86,7 +86,7 @@ export function validateURL(event: Message | { command: string; data: object }, 
     } as validateURLProps
 }
 
-function searchBuilderImages(directory: Uri) {
+async function searchBuilderImages(directory: Uri) {
     const filesToCheck = [
         'Dockerfile',
         '.github/workflows/**/*.yml',
@@ -98,30 +98,27 @@ function searchBuilderImages(directory: Uri) {
         'pom.xml'
     ];
 
-    const builderImages:{file: string, matches: RegExpMatchArray}[] = [];
+    const builderImages: { file: string, matches: RegExpMatchArray }[] = [];
 
-    filesToCheck.forEach((pattern) => {
+    await Promise.all(filesToCheck.map(async (pattern) => {
         const files = glob.sync(path.join(directory.fsPath, pattern).replace(/\\/g, '/'));
-
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        files.forEach(async (file) => {
+        await Promise.all(files.map(async (file) => {
             const content = await fs.readFile(file, 'utf8');
             const regex = /(FROM\|image\|docker)/i;
             const matches = content.match(regex);
-
             if (matches) {
                 builderImages.push({ file, matches });
             }
-        });
-    });
+        }));
+    }));
 
     return builderImages;
 }
 
-export function getDevfileContent(folderPath: Uri) {
+export async function getDevfileContent(folderPath: Uri) {
     try {
         // Search for builder image references
-        const builderImages = searchBuilderImages(folderPath);
+        const builderImages = await searchBuilderImages(folderPath);
 
         if (builderImages.length > 0) {
             // eslint-disable-next-line no-console
