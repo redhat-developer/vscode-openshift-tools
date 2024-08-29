@@ -39,6 +39,8 @@ function createDeployment(
     gitURL: string,
     builderImage: BuilderImage
 ) {
+    // eslint-disable-next-line no-console
+    console.log('createDeployment called');
     window.vscodeApi.postMessage({
         action: 'createDeployment',
         data: {

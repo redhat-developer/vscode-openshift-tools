@@ -18,9 +18,10 @@ import {
 import * as React from 'react';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { NoSuitableWarning } from '../../common/noSuitableDevfile';
-import { BuilderImage } from '../../common/buildImage';
+import { BuilderImage, NormalizedBuilderImages } from '../../common/buildImage';
 import { BuilderImageListItem } from '../../common/builderImageListItem';
 import { BuilderConfiguration } from './builderConfig';
+import { SelectBuilderImage } from './selectBuilderImage';
 
 type Message = {
     action: string;
@@ -62,12 +63,16 @@ export function FromExistingGitRepo({ setCurrentView }) {
         isBuilderImageExistsInRepo: false,
         noRecommendation: false,
     });
+    const [builderImages, setBuilderImages] = React.useState<BuilderImage[]>([]);
     const [selectedBuilderImage, setSelectedBuilderImage] = React.useState<BuilderImage>(undefined);
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
         switch (message.action) {
             case 'recommendedBuilderImage': {
+                if(message.data.builderImages) {
+                    setBuilderImages(message.data.builderImages);
+                }
                 if (!message.data.receommendedBuilderImage) {
                     setRecommendedBuilderImage((prevState) => ({
                         ...prevState,
@@ -251,7 +256,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     <Stack direction="column" spacing={2} marginTop={2}>
                                         <Alert severity="error">
                                             Failed to clone project. Please try again or manually
-                                            select a BuilderImage.
+                                            select a Builder Image.
                                         </Alert>
                                         <Stack
                                             direction="row"
@@ -316,7 +321,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     </Button>
                                     <Button
                                         variant="contained"
-                                        disabled={cloneFailed || true}
+                                        disabled={cloneFailed}
                                         onClick={() => {
                                             setCloneFailed(false);
                                             setRecommendedBuilderImage((prevState) => ({
@@ -326,7 +331,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             setCurrentPage('selectDifferentBuilderImage');
                                         }}
                                     >
-                                        SELECT A BuilderImage
+                                        SELECT A Builder Image
                                     </Button>
                                 </Stack>
                             </>
@@ -397,7 +402,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     setSelectedBuilderImage(undefined);
                                                     setCurrentPage('selectDifferentBuilderImage');
                                                 }}
-                                                disabled
                                             >
                                                 SELECT A DIFFERENT Builder Image
                                             </Button>
@@ -429,6 +433,23 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     builderImage={getEffectiveBuilderImage()}
 
                 />
+            );
+        case 'selectDifferentBuilderImage':
+            return (
+                <>
+                    {!selectedBuilderImage ? (
+                        <SelectBuilderImage
+                            titleText="Select Different Builder Image"
+                            goBack={() => {
+                                setCurrentPage('fromGitRepo');
+                            }}
+                            setSelectedBuilderImage={setSelectedBuilderImage}
+                            setBuilderImages={builderImages}
+                        />
+                    ) : (
+                        setCurrentPage('fromGitRepo')
+                    )}
+                </>
             );
         default:
             break;

@@ -11,13 +11,9 @@ import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { Alizer } from '../../alizer/alizerWrapper';
 import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
-import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import {
-    getDevfileCapabilities,
-    getDevfileRegistries,
-    getDevfileTags,
     validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
@@ -71,23 +67,8 @@ export default class CreateDeploymentLoader {
             await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
         });
 
-        const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            void sendUpdatedRegistries();
-        });
-
-        const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            sendUpdatedCapabilities();
-        });
-
-        const tagsSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-            void sendUpdatedTags();
-        });
-
         panel.onDidDispose(() => {
-            void sendTelemetry('newComponentClosed');
-            tagsSubscription.unsubscribe();
-            capabiliiesySubscription.unsubscribe();
-            registriesSubscription.unsubscribe();
+            void sendTelemetry('newDeploymentClosed');
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
             CreateDeploymentLoader.panel = undefined;
@@ -230,13 +211,6 @@ export default class CreateDeploymentLoader {
                 break;
             }
             /**
-             * The panel requested to validate a folder path.
-             */
-            case 'validateFolderPath': {
-                await validateFolderPath(message.data);
-                break;
-            }
-            /**
              * The git import workflow was cancelled, delete the cloned git repo in the temp directory.
              */
             case 'deleteClonedRepo': {
@@ -261,15 +235,18 @@ export default class CreateDeploymentLoader {
 
     static async getRecommendedBuilderImage(uri: Uri): Promise<void> {
         let analyzeRes: AlizerAnalyzeResponse[] = [];
-        let builderImages: NormalizedBuilderImages;
+        let normalizedBuilderImages: NormalizedBuilderImages;
         let receommendedBuilderImage: BuilderImage;
+        let builderImages: BuilderImage[] = [];
         try {
             void CreateDeploymentLoader.panel.webview.postMessage({
                 action: 'getRecommendedBuilderImageStart'
             });
             analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
-            builderImages = await BuilderImageWrapper.Instance.getBuilder();
-
+            normalizedBuilderImages = await BuilderImageWrapper.Instance.getBuilder();
+            for (const key in normalizedBuilderImages) {
+                builderImages.push(normalizedBuilderImages[key]);
+            }
         } catch {
             void vscode.window.showErrorMessage(
                 'Unable to analyze the builder Image',
@@ -281,8 +258,8 @@ export default class CreateDeploymentLoader {
                 languages.push(...res.Tools);
                 for (const lang of languages) {
                     const language = lang.toLowerCase();
-                    if (builderImages[language]) {
-                        receommendedBuilderImage = builderImages[language];
+                    if (normalizedBuilderImages[language]) {
+                        receommendedBuilderImage = normalizedBuilderImages[language];
                         receommendedBuilderImage.iconClass = `icon-${language}`;
                         break;
                     }
@@ -292,6 +269,7 @@ export default class CreateDeploymentLoader {
                 action: 'recommendedBuilderImage',
                 data: {
                     receommendedBuilderImage,
+                    builderImages
                 },
             });
         }
@@ -314,51 +292,4 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
                 : resolve({ status: true, error: undefined });
         }),
     );
-}
-
-async function validateFolderPath(path: string) {
-    let isValid = true;
-    let helpText = '';
-    if ((await fs.stat(path)).isDirectory()) {
-        try {
-            await fs.access(path);
-        } catch {
-            isValid = false;
-            helpText = 'Please enter a valid directory path.';
-        }
-        await CreateDeploymentLoader.panel?.webview.postMessage({
-            action: 'validatedFolderPath',
-            data: {
-                isValid,
-                helpText,
-            },
-        });
-    }
-}
-
-async function sendUpdatedRegistries() {
-    if (CreateDeploymentLoader.panel) {
-        void CreateDeploymentLoader.panel.webview.postMessage({
-            action: 'devfileRegistries',
-            data: await getDevfileRegistries(),
-        });
-    }
-}
-
-function sendUpdatedCapabilities() {
-    if (CreateDeploymentLoader.panel) {
-        void CreateDeploymentLoader.panel.webview.postMessage({
-            action: 'devfileCapabilities',
-            data: getDevfileCapabilities(),
-        });
-    }
-}
-
-async function sendUpdatedTags() {
-    if (CreateDeploymentLoader.panel) {
-        void CreateDeploymentLoader.panel.webview.postMessage({
-            action: 'devfileTags',
-            data: await getDevfileTags(),
-        });
-    }
 }
