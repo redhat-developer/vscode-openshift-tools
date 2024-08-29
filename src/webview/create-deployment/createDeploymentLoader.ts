@@ -245,7 +245,7 @@ export default class CreateDeploymentLoader {
             analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
             normalizedBuilderImages = await BuilderImageWrapper.Instance.getBuilder();
             for (const key in normalizedBuilderImages) {
-                if (normalizedBuilderImages.hasOwnProperty(key)) {
+                if (Object.prototype.hasOwnProperty.call(normalizedBuilderImages, key)) {
                     builderImages.push(normalizedBuilderImages[key]);
                 }
             }
