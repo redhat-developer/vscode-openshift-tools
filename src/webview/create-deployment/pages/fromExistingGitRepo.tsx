@@ -18,7 +18,7 @@ import {
 import * as React from 'react';
 import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { NoSuitableWarning } from '../../common/noSuitableDevfile';
-import { BuilderImage, NormalizedBuilderImages } from '../../common/buildImage';
+import { BuilderImage } from '../../common/buildImage';
 import { BuilderImageListItem } from '../../common/builderImageListItem';
 import { BuilderConfiguration } from './builderConfig';
 import { SelectBuilderImage } from './selectBuilderImage';

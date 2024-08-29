@@ -237,7 +237,7 @@ export default class CreateDeploymentLoader {
         let analyzeRes: AlizerAnalyzeResponse[] = [];
         let normalizedBuilderImages: NormalizedBuilderImages;
         let receommendedBuilderImage: BuilderImage;
-        let builderImages: BuilderImage[] = [];
+        const builderImages: BuilderImage[] = [];
         try {
             void CreateDeploymentLoader.panel.webview.postMessage({
                 action: 'getRecommendedBuilderImageStart'
@@ -245,7 +245,9 @@ export default class CreateDeploymentLoader {
             analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
             normalizedBuilderImages = await BuilderImageWrapper.Instance.getBuilder();
             for (const key in normalizedBuilderImages) {
-                builderImages.push(normalizedBuilderImages[key]);
+                if (normalizedBuilderImages.hasOwnProperty(key)) {
+                    builderImages.push(normalizedBuilderImages[key]);
+                }
             }
         } catch {
             void vscode.window.showErrorMessage(
