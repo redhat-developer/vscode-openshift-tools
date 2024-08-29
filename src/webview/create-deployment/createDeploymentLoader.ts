@@ -21,7 +21,7 @@ import {
     validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
-import { getDevfileContent, getLanguages, loadWebviewHtml, validateGitURL } from '../common-ext/utils';
+import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { AlizerAnalyzeResponse } from '../../alizer/types';
 import { Oc } from '../../oc/ocWrapper';
 
@@ -174,15 +174,6 @@ export default class CreateDeploymentLoader {
                         action: 'cloneFailed',
                     });
                 } else {
-                    // Use recommended BuilderImage
-                    const languages = getDevfileContent(tmpFolder);
-                    // eslint-disable-next-line no-console
-                    console.log(languages);
-
-                    const languages1 = await getLanguages(message.data.url);
-                    // eslint-disable-next-line no-console
-                    console.log(languages1);
-
                     void CreateDeploymentLoader.getRecommendedBuilderImage(tmpFolder);
                 }
                 break;

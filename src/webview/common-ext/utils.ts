@@ -5,15 +5,12 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as glob from 'glob';
 import validator from 'validator';
 import { extensions, Uri, WebviewPanel, WebviewView } from 'vscode';
 import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateURLProps } from '../common/propertyTypes';
-import { getGitService } from '../../util/getGitService';
-import { GitProvider, RepoLanguageList } from '../../util/githubService';
 
 export type Message = {
     action: string;
@@ -84,64 +81,6 @@ export function validateURL(event: Message | { command: string; data: object }, 
         error: false,
         helpText: !isRequired ? '' : 'URL is valid'
     } as validateURLProps
-}
-
-async function searchBuilderImages(directory: Uri) {
-    const filesToCheck = [
-        'Dockerfile',
-        '.github/workflows/**/*.yml',
-        '.gitlab-ci.yml',
-        'Jenkinsfile',
-        'docker-compose.yml',
-        'build.sh',
-        'build.gradle',
-        'pom.xml'
-    ];
-
-    const builderImages: { file: string, matches: RegExpMatchArray }[] = [];
-
-    await Promise.all(filesToCheck.map(async (pattern) => {
-        const files = glob.sync(path.join(directory.fsPath, pattern).replace(/\\/g, '/'));
-        await Promise.all(files.map(async (file) => {
-            const content = await fs.readFile(file, 'utf8');
-            const regex = /(FROM\|image\|docker)/i;
-            const matches = content.match(regex);
-            if (matches) {
-                builderImages.push({ file, matches });
-            }
-        }));
-    }));
-
-    return builderImages;
-}
-
-export async function getDevfileContent(folderPath: Uri) {
-    try {
-        // Search for builder image references
-        const builderImages = await searchBuilderImages(folderPath);
-
-        if (builderImages.length > 0) {
-            // eslint-disable-next-line no-console
-            console.log('Builder images found:');
-            builderImages.forEach(({ file, matches }) => {
-                // eslint-disable-next-line no-console
-                console.log(`File: ${file}`);
-                // eslint-disable-next-line no-console
-                console.log(`Matches: ${matches.join(', ')}`);
-            });
-        } else {
-            // eslint-disable-next-line no-console
-            console.log('No builder images found.');
-        }
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error:', error);
-    }
-}
-
-export async function getLanguages(url: string): Promise<RepoLanguageList>{
-    const gitSource = getGitService(url, GitProvider.GITHUB);
-    return await gitSource.getRepoLanguageList();
 }
 
 export function validateGitURL(event: Message): validateURLProps {
