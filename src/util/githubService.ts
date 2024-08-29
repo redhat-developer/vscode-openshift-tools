@@ -2,7 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as kit from '@octokit/rest';
+import { OctokitOptions } from '@octokit/core';
+import { Octokit } from '@octokit/rest';
 import * as GitUrlParse from 'git-url-parse';
 import { Base64 } from 'js-base64';
 
@@ -68,7 +69,7 @@ export enum GitProvider {
 }
 
 export class GithubService {
-    private readonly client: kit.Octokit;
+    private readonly client: Octokit;
 
     private readonly metadata: RepoMetadata;
     private readonly gitsource: GitSource;
@@ -79,17 +80,17 @@ export class GithubService {
         this.metadata = this.getRepoMetadata();
         const baseUrl =
             this.metadata.host === 'github.com' ? null : `https://${this.metadata.host}/api/v3`;
-        this.client = new kit.Octokit({ ...authOpts, baseUrl });
+        this.client = new Octokit({ ...authOpts, baseUrl } as OctokitOptions);
     }
 
-    protected getAuthProvider = (): kit.Octokit.Options => {
+    protected getAuthProvider = (): OctokitOptions => {
         switch (this.gitsource.secretType) {
             case SecretType.PERSONAL_ACCESS_TOKEN:
             case SecretType.BASIC_AUTH:
             case SecretType.OAUTH:
                 return { auth: Base64.decode(this.gitsource.secretContent.password) };
             default:
-                return null;
+                return {};
         }
     };
 
@@ -153,7 +154,7 @@ export class GithubService {
 
     getRepoFileList = async (params?: { specificPath?: string }): Promise<RepoFileList> => {
         try {
-            const resp = await this.client.repos.getContents({
+            const resp = await this.client.repos.getContent({
                 owner: this.metadata.owner,
                 repo: this.metadata.repoName,
                 ...(params && params?.specificPath
@@ -188,7 +189,7 @@ export class GithubService {
 
     isFilePresent = async (path: string): Promise<boolean> => {
         try {
-            const resp = await this.client.repos.getContents({
+            const resp = await this.client.repos.getContent({
                 owner: this.metadata.owner,
                 repo: this.metadata.repoName,
                 path,
@@ -202,7 +203,7 @@ export class GithubService {
 
     getFileContent = async (path: string): Promise<string | null> => {
         try {
-            const resp = await this.client.repos.getContents({
+            const resp = await this.client.repos.getContent({
                 owner: this.metadata.owner,
                 repo: this.metadata.repoName,
                 path,
