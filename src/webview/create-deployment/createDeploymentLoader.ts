@@ -209,7 +209,7 @@ export default class CreateDeploymentLoader {
                         });
                         CreateDeploymentLoader.panel.dispose();
                         void vscode.commands.executeCommand('openshift.explorer.refresh');
-                        void vscode.window.showInformationMessage('Deployment Config has been successfully created.');
+                        void vscode.window.showInformationMessage('Build Config has been successfully created.');
                     }
                 } catch (err) {
                     await sendTelemetry('newDeploymentCreationFailed', {

@@ -74,7 +74,7 @@ export class BuilderImageWrapper {
 
     @vsCommand('openshift.deployment.create.buildConfig')
     static async createComponent(): Promise<void> {
-        await CreateDeploymentLoader.loadView('Create Deployment');
+        await CreateDeploymentLoader.loadView('Create build Config');
     }
 
     public async getBuilder(): Promise<NormalizedBuilderImages> {

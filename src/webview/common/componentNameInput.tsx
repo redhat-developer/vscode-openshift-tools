@@ -17,7 +17,7 @@ export type ComponentNameInputProps = {
 export function ComponentNameInput(props: ComponentNameInputProps) {
     return (
         <TextField fullWidth
-            id={`componentName-${Math.random()}`}
+            id={`componentName-${props.componentName}`}
             variant='outlined'
             label= {props.label ||'Component Name'}
             value={props.componentName}

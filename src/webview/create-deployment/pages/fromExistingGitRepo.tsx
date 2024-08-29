@@ -148,27 +148,6 @@ export function FromExistingGitRepo({ setCurrentView }) {
         return gitURL.url.substring(gitURL.url.lastIndexOf('/') + 1);
     }
 
-    /*function createComponentFromGitRepo(
-        projectFolder: string,
-        componentName: string,
-        addToWorkspace: boolean,
-        portNumber: number
-    ) {
-        window.vscodeApi.postMessage({
-            action: 'createComponent',
-            data: {
-                BuilderImageDisplayName: selectedBuilderImage
-                    ? selectedBuilderImage.name
-                    : recommendedBuilderImage.builderImage.name,
-                componentName,
-                gitDestinationPath: projectFolder,
-                isFromTemplateProject: false,
-                portNumber,
-                addToWorkspace,
-            },
-        });
-    }*/
-
     switch (currentPage) {
         case 'fromGitRepo':
             return (
@@ -447,27 +426,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     appName={`${getName()}-app`}
                     name={getName()}
                     gitURL={gitURL.url}
-                    //createComponent={createComponentFromGitRepo}
                     builderImage={getEffectiveBuilderImage()}
 
                 />
             );
-        /*case 'selectDifferentBuilderImage':
-            return (
-                <>
-                    {!selectedBuilderImage ? (
-                        <DevfileSearch
-                            titleText="Select Different Devfile"
-                            goBack={() => {
-                                setCurrentPage('fromGitRepo');
-                            }}
-                            setSelectedDevfile={setSelectedBuilderImage}
-                        />
-                    ) : (
-                        setCurrentPage('fromGitRepo')
-                    )}
-                </>
-            );*/
         default:
             break;
     }
