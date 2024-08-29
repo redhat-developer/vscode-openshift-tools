@@ -9,10 +9,20 @@ export interface Version {
     Version: string;
 }
 
-export interface AlizerAnalyzeResponse {
+export interface AlizerDevfileResponse {
     Name: string;
     Language: string;
     ProjectType: string;
     Tags: string[];
     Versions: Version[];
+}
+
+export interface AlizerAnalyzeResponse {
+    Name: string;
+    Aliases: string[];
+    Weight: number;
+    Frameworks: string;
+    Tools: string[];
+    CanBeComponent: boolean;
+    CanBeContainerComponent: boolean;
 }

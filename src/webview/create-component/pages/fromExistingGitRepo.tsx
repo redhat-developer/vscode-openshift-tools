@@ -18,9 +18,9 @@ import {
 import * as React from 'react';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
-import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
+import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
-import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { SetNameAndFolder } from '../../common/setNameAndFolder';
 import { buildSanitizedComponentName } from '../../common/sanitize';
 
@@ -338,7 +338,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                             </>
                         ) : recommendedDevfile.noRecommendation && !selectedDevfile ? (
                             <>
-                                <NoSuitableDevfile />
+                                <NoSuitableWarning />
                                 <Stack
                                     direction="row"
                                     justifyContent="flex-end"
@@ -397,7 +397,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                 : 'Recommended Devfile'}
                                         </Typography>
                                         {!recommendedDevfile.isDevfileExistsInRepo && (
-                                            <DevfileRecommendationInfo />
+                                            <RecommendationInfo infoMessage='Recommended based on a scan of languages and structure of the project.'/>
                                         )}
                                     </Stack>
                                     {recommendedDevfile.isDevfileExistsInRepo ? (

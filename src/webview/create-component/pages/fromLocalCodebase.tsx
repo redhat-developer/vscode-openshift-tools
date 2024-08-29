@@ -18,13 +18,13 @@ import * as React from 'react';
 import { ComponentNameInput } from '../../common/componentNameInput';
 import {
     CreateComponentButton,
-    CreateComponentErrorAlert
+    ErrorAlert
 } from '../../common/createComponentButton';
 import { Devfile } from '../../common/devfile';
 import { DevfileListItem } from '../../common/devfileListItem';
-import { DevfileRecommendationInfo } from '../../common/devfileRecommendationInfo';
+import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
 import { DevfileSearch } from '../../common/devfileSearch';
-import { NoSuitableDevfile } from '../../common/noSuitableDevfile';
+import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { PortNumberInput } from '../../common/portNumberInput';
 import { buildSanitizedComponentName } from '../../common/sanitize';
 
@@ -318,7 +318,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                                         ? 'Selected Devfile'
                                                         : 'Recommended Devfile'}
                                                 </Typography>
-                                                {!selectedDevfile && <DevfileRecommendationInfo />}
+                                                {!selectedDevfile && <RecommendationInfo infoMessage='Recommended based on a scan of languages and structure of the project.'/>}
                                             </Stack>
                                             <DevfileListItem
                                                 devfile={
@@ -372,8 +372,8 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                                         isPortNumberFieldValid={isPortNumberFieldValid} />
                                                 )}
                                         </Stack>
-                                        <CreateComponentErrorAlert
-                                            createComponentErrorMessage={createComponentErrorMessage}
+                                        <ErrorAlert
+                                            errorMessage={createComponentErrorMessage}
                                         />
                                     </Stack>
                                 </>
@@ -381,7 +381,7 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                 <>
                                     <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                     <Stack direction="column">
-                                        <NoSuitableDevfile />
+                                        <NoSuitableWarning />
                                         <Stack
                                             direction="row"
                                             justifyContent="flex-end"

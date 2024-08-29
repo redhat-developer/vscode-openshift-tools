@@ -11,6 +11,7 @@ import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateURLProps } from '../common/propertyTypes';
+
 export type Message = {
     action: string;
     data: any;

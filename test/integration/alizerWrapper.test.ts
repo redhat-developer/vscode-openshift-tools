@@ -91,11 +91,11 @@ suite('./alizer/alizerWrapper.ts', function () {
         });
 
         test('analyze()', async function () {
-            const analysis1 = await Alizer.Instance.alizerAnalyze(tmpFolder1);
-            expect(analysis1).to.exist;
+            const analysis1 = await Alizer.Instance.alizerDevfile(tmpFolder1);
+            expect(analysis1.Name).to.exist;
             expect(analysis1.Name).to.equal('nodejs');
-            const analysis2 = await Alizer.Instance.alizerAnalyze(tmpFolder2);
-            expect(analysis2).to.exist;
+            const analysis2 = await Alizer.Instance.alizerDevfile(tmpFolder2);
+            expect(analysis2.Name).to.exist;
             expect(analysis2.Name).to.equal('go');
         });
     });
@@ -124,7 +124,8 @@ suite('./alizer/alizerWrapper.ts', function () {
         });
 
         test('analyze()', async function() {
-            const analysis = await Alizer.Instance.alizerAnalyze(Uri.file(tmpFolder));
+            const analysis = await Alizer.Instance.alizerDevfile(Uri.file(tmpFolder));
+            expect(analysis).to.exist;
             expect(analysis.Name).to.equal(COMPONENT_TYPE);
         });
 

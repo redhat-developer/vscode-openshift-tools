@@ -7,7 +7,7 @@ import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Uri } from 'vscode';
 import { CliExitData } from '../util/childProcessUtil';
-import { AlizerAnalyzeResponse } from './types';
+import { AlizerAnalyzeResponse, AlizerDevfileResponse } from './types';
 
 /**
  * A wrapper around the `alizer` CLI tool.
@@ -22,14 +22,31 @@ export class Alizer {
         return Alizer.INSTANCE;
     }
 
-    public async alizerAnalyze(currentFolderPath: Uri): Promise<AlizerAnalyzeResponse> {
+    public async alizerDevfile(currentFolderPath: Uri): Promise<AlizerDevfileResponse> {
         const cliData: CliExitData = await CliChannel.getInstance().executeTool(
             new CommandText('alizer', `devfile ${currentFolderPath.fsPath}`), undefined, false
+        );
+        if (cliData.error || cliData.stderr.length > 0) {
+            return {
+                Name: '',
+                Language: '',
+                ProjectType: '',
+                Tags: [],
+                Versions: []
+            };
+        }
+        const parse = JSON.parse(cliData.stdout) as AlizerDevfileResponse[];
+        return parse[0];
+    }
+
+    public async alizerAnalyze(currentFolderPath: Uri): Promise<AlizerAnalyzeResponse[]> {
+        const cliData: CliExitData = await CliChannel.getInstance().executeTool(
+            new CommandText('alizer', `analyze ${currentFolderPath.fsPath}`), undefined, false
         );
         if (cliData.error || cliData.stderr.length > 0) {
             return undefined;
         }
         const parse = JSON.parse(cliData.stdout) as AlizerAnalyzeResponse[];
-        return parse[0];
+        return parse;
     }
 }

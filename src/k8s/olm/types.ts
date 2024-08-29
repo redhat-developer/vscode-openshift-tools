@@ -53,6 +53,12 @@ export type K8sResourceCommon = {
   metadata?: ObjectMetadata;
 };
 
+export type SecretKind = {
+    data?: { [key: string]: string };
+    stringData?: { [key: string]: string };
+    type?: string;
+  } & K8sResourceCommon;
+
 export type MatchExpression = {
   key: string;
   operator: 'Exists' | 'DoesNotExist' | 'In' | 'NotIn' | 'Equals' | 'NotEqual';

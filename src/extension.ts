@@ -94,6 +94,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
                 './yamlFileCommands',
                 './registriesView',
                 './componentsView',
+            './odo/builderImage',
                 './webview/devfile-registry/registryViewLoader',
                 './webview/helm-chart/helmChartLoader',
                 './webview/helm-manage-repository/manageRepositoryLoader',

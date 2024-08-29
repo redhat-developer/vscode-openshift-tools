@@ -30,7 +30,7 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
-import { AlizerAnalyzeResponse, Version } from '../../alizer/types';
+import { AlizerDevfileResponse, Version } from '../../alizer/types';
 import { Alizer } from '../../alizer/alizerWrapper';
 
 interface CloneProcess {
@@ -520,13 +520,13 @@ export default class CreateComponentLoader {
     }
 
     static async getRecommendedDevfile(uri: Uri): Promise<void> {
-        let analyzeRes: AlizerAnalyzeResponse;
+        let analyzeRes: AlizerDevfileResponse;
         let compDescriptions: ComponentTypeDescription[] = [];
         try {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfileStart'
             });
-            const alizerAnalyzeRes: AlizerAnalyzeResponse = await Alizer.Instance.alizerAnalyze(uri);
+            const alizerAnalyzeRes: AlizerDevfileResponse = await Alizer.Instance.alizerDevfile(uri);
             compDescriptions = await getCompDescription(alizerAnalyzeRes);
         } catch (error) {
             if (error.message.toLowerCase().indexOf('failed to parse the devfile') !== -1) {
@@ -541,7 +541,7 @@ export default class CreateComponentLoader {
                         const file = await fs.readFile(devFileV1Path, 'utf8');
                         const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
-                        analyzeRes = await Alizer.Instance.alizerAnalyze(uri);
+                        analyzeRes = await Alizer.Instance.alizerDevfile(uri);
                         compDescriptions = await getCompDescription(analyzeRes);
                         const endPoints = getEndPoints(compDescriptions[0]);
                         const devfileV2 = DevfileConverter.getInstance().devfileV1toDevfileV2(
@@ -589,9 +589,9 @@ export default class CreateComponentLoader {
     }
 }
 
-async function getCompDescription(devfile: AlizerAnalyzeResponse): Promise<ComponentTypeDescription[]> {
+async function getCompDescription(devfile: AlizerDevfileResponse): Promise<ComponentTypeDescription[]> {
     const compDescriptions = await ComponentTypesView.instance.getCompDescriptions();
-    if (!devfile) {
+    if (!devfile.Name) {
         return Array.from(compDescriptions);
     }
     return Array.from(compDescriptions).filter((compDesc) => {
