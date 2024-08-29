@@ -106,7 +106,7 @@
 		"@mui/lab": "^5.0.0-alpha.173",
 		"@mui/material": "^5.16.7",
 		"@mui/styles": "^5.16.7",
-		"@octokit/rest": "^16.30.1",
+		"@octokit/rest": "^21.0.2",
 		"@rjsf/core": "^5.20.1",
 		"@rjsf/mui": "^5.20.1",
 		"@rjsf/utils": "^5.20.1",
