@@ -1,8 +1,23 @@
 # Change Log
 
+## 1.16.0 (September 3, 2024)
+
+ * [#4151](https://github.com/redhat-developer/vscode-openshift-tools/issues/4151) Added support for creating deployments using a BuildConfig
+ * [#4297](https://github.com/redhat-developer/vscode-openshift-tools/issues/4297) Added the UI for changing the selection of builder image
+ * [#2883](https://github.com/redhat-developer/vscode-openshift-tools/issues/2883) Allow options to configure Helm Chart with a build image and other details
+ * [#4108](https://github.com/redhat-developer/vscode-openshift-tools/issues/4108) Introduced support for the devfile for .NET 9
+ * [#4357](https://github.com/redhat-developer/vscode-openshift-tools/pull/4357) Enabled command compatibility with files using the `.yml` extension
+ * [#3898](https://github.com/redhat-developer/vscode-openshift-tools/issues/3898) Added an informational message to the Openshift terminal when there were no operations performed yet
+ * [#4344](https://github.com/redhat-developer/vscode-openshift-tools/issues/4344) Replaced the `odo analyze` command with the new Alizer tool
+ * [#3911](https://github.com/redhat-developer/vscode-openshift-tools/issues/3911) Enhanced the workflow for entering a container image URL
+ * [#4289](https://github.com/redhat-developer/vscode-openshift-tools/issues/4289) Resolved the slow tree loading issue in the Application Explorer
+ * [#4349](https://github.com/redhat-developer/vscode-openshift-tools/issues/4349) Fixed the broken Helm Chart installation view
+ * [#4298](https://github.com/redhat-developer/vscode-openshift-tools/issues/4298) Fixed the issue with duplicate deployment names displaying in the tree view
+ * [#4253](https://github.com/redhat-developer/vscode-openshift-tools/issues/4253) Fixed the issue of missing images on the "Add OpenShift Cluster" page
+
 ## 1.15.0 (July 16, 2024)
 
- * [#4291](https://github.com/redhat-developer/vscode-openshift-tools/pull/4291) Fix issue opening Routes node in OpenShift explorer
+ * [#4291](https://github.com/redhat-developer/vscode-openshift-tools/pull/4291) Fixed the issue preventing the opening of the Routes node in the OpenShift Explorer
  * [#4283](https://github.com/redhat-developer/vscode-openshift-tools/pull/4283) Added validation for container image to be deployed from an image URL
  * [#4255](https://github.com/redhat-developer/vscode-openshift-tools/issues/4255) Remove outdated method from the extension activation
  * [#4247](https://github.com/redhat-developer/vscode-openshift-tools/pull/4247) Remove dependency to 'make-fetch-happen' NPM module
