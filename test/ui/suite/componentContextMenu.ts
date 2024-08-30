@@ -245,6 +245,7 @@ export function testComponentContextMenu() {
             //refresh section
             await debugSession.expand();
             await collapse(debugSession);
+            await new Promise((res) => { setTimeout(res, 500) });
             await debugSession.expand();
 
             //click on item
