@@ -42,7 +42,7 @@ export const HelmModal = React.forwardRef(
 
         const [selectedVersion, setSelectedVersion] = React.useState<Chart>(props.helmChart.chartVersions[0]);
         const [isInteracted, setInteracted] = React.useState(false);
-        const [yamlValues, setYAMLValues] = React.useState<string>(undefined);
+        const [yamlValues, setYAMLValues] = React.useState<string>('');
 
         function respondToMessage(messageEvent: MessageEvent) {
             const message = messageEvent.data as Message;
@@ -188,35 +188,40 @@ export const HelmModal = React.forwardRef(
                         </Select>
                         <FormHelperText error={isError}>{helperText}</FormHelperText>
                     </FormControl>
-                    <Stack direction='column' spacing={1} justifyContent='space-between'>
-                        <InputLabel id='values'>Values:</InputLabel>
-                        {
-                            !yamlValues ?
-                                <>
-                                    <Box sx={{ color: '#EE0000' }}>
-                                        <LinearProgress color='inherit' sx={{ height: '1rem' }}/>
-                                    </Box>
-                                    <Typography
-                                        variant='caption'
-                                        component='div'
-                                        color='inherit'
-                                        style={{ marginTop: '3px', marginLeft: '5px', fontSize: '1em' }}
-                                    >Retrieving helm values</Typography>
-                                </>
-                                :
-                                <CodeMirror
-                                    value={yamlValues}
-                                    height='300px'
-                                    extensions={[yaml()]}
-                                    theme={props.theme?.palette.mode === 'light' ? githubLight : githubDark}
-                                    onChange={handleChange}
-                                    basicSetup={{
-                                        lineNumbers: true,
-                                        highlightActiveLine: true,
-                                    }}
-                                />
-                        }
-                    </Stack>
+                    {
+                        yamlValues.length <= 0 ?
+                            <>
+                                <Box sx={{ color: '#EE0000' }}>
+                                    <LinearProgress color='inherit' sx={{ height: '1rem' }} />
+                                </Box>
+                                <Typography
+                                    variant='caption'
+                                    component='div'
+                                    color='inherit'
+                                    style={{ marginTop: '3px', marginLeft: '5px', fontSize: '1em' }}
+                                >Retrieving helm values</Typography>
+                            </>
+                            :
+                            <>
+                                {
+                                    yamlValues !== 'noVal' &&
+                                    <Stack direction='column' spacing={1} justifyContent='space-between'>
+                                        <InputLabel id='values'>Values:</InputLabel>
+                                        <CodeMirror
+                                            value={yamlValues}
+                                            height='300px'
+                                            extensions={[yaml()]}
+                                            theme={props.theme?.palette.mode === 'light' ? githubLight : githubDark}
+                                            onChange={handleChange}
+                                            basicSetup={{
+                                                lineNumbers: true,
+                                                highlightActiveLine: true,
+                                            }} />
+
+                                    </Stack>
+                                }
+                            </>
+                    }
                     <Stack direction='row' marginTop={1} spacing={2}>
                         <LoadingButton
                             variant='contained'
@@ -231,7 +236,7 @@ export const HelmModal = React.forwardRef(
                                         version: selectedVersion.version,
                                         yamlValues
                                     }
-                                })
+                                });
                             }}
                             disabled={!isInstallNameFieldValid || installName.length === 0}
                             loading={installLoading}

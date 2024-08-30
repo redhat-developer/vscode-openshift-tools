@@ -113,7 +113,7 @@ async function helmChartMessageListener(event: any): Promise<void> {
                     action: 'getYAMLValues',
                     data: {
                         helmChart: event.data,
-                        yamlValues: yamlValues.stdout
+                        yamlValues: yamlValues.stdout.length > 0 ? yamlValues.stdout : 'noVal'
                     },
                 });
             }
