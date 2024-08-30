@@ -75,10 +75,11 @@ export async function installHelmChart(
     repoName: string,
     chartName: string,
     version: string,
+    yamlFilePath: string
 ): Promise<CliExitData> {
     await syncHelmRepo(repoName);
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.installHelmChart(name, repoName, chartName, version)
+        HelmCommands.installHelmChart(name, repoName, chartName, version, yamlFilePath)
     );
 }
 
@@ -140,4 +141,10 @@ export async function helmSyntaxVersion(): Promise<HelmSyntaxVersion> {
         }
     }
     return cachedVersion;
+}
+
+export async function getYAMLValues(repoName: string, chartName: string) {
+    return await CliChannel.getInstance().executeTool(
+        HelmCommands.getYAMLValues(repoName, chartName)
+    );
 }

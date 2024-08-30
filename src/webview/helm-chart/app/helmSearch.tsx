@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import React from 'react';
-import { Alert, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Theme, Tooltip, Typography } from '@mui/material';
 import { Close, Search } from '@mui/icons-material';
 import { HelmListItem } from './helmListItem';
 import { ChartResponse, HelmRepo } from '../../../helm/helmChartType';
@@ -161,7 +161,11 @@ function SearchBar(props: {
     );
 }
 
-export function HelmSearch() {
+type HelmSearchProps = {
+    theme: Theme;
+};
+
+export function HelmSearch(props: HelmSearchProps) {
     const ITEMS_PER_PAGE = 18;
     const [isSomeHelmChartsRetrieved, setSomeHelmChartsRetrieved] = React.useState(false);
     const [helmRepos, setHelmRepos] = React.useState<HelmRepo[]>([]);
@@ -374,6 +378,7 @@ export function HelmSearch() {
                     closeModal={() => {
                         setselectedHelmChart((_) => undefined);
                     }}
+                    theme={props.theme}
                 />
             </Modal>
         </>

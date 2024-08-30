@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 
 export function addHelmRepo(repoName: string, url: string): CommandText {
@@ -23,8 +24,13 @@ export function getRepos(): CommandText {
     return commandText;
 }
 
-export function installHelmChart(name: string, repoName: string, chartName: string, version: string): CommandText {
-    return new CommandText('helm', `install ${name} ${repoName}/${chartName}`, [new CommandOption('--version', version)]);
+export function installHelmChart(name: string, repoName: string, chartName: string, version: string, yamlFilePath: string): CommandText {
+    const commandText = new CommandText('helm', `install ${name} ${repoName}/${chartName}`)
+    commandText.addOption(new CommandOption('--version', version));
+    if(yamlFilePath && !validator.isEmpty(yamlFilePath)) {
+        commandText.addOption(new CommandOption('-f', yamlFilePath));
+    }
+    return commandText;
 }
 
 export function unInstallHelmChart(name: string): CommandText {
@@ -33,4 +39,8 @@ export function unInstallHelmChart(name: string): CommandText {
 
 export function listHelmReleases(): CommandText {
     return new CommandText('helm', 'list', [new CommandOption('-o', 'json')]);
+}
+
+export function getYAMLValues(repoName: string, chartName: string): CommandText {
+    return new CommandText('helm', `show values ${repoName}/${chartName}`);
 }

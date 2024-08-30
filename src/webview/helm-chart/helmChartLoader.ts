@@ -5,6 +5,8 @@
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as tmp from 'tmp';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
 import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
@@ -14,6 +16,7 @@ import { Progress } from '../../util/progress';
 import { vsCommand } from '../../vscommand';
 import { validateName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
+import { promisify } from 'util';
 
 let panel: vscode.WebviewPanel;
 const helmCharts: ChartResponse[] = [];
@@ -38,8 +41,14 @@ export class HelmCommand {
                 message: 'Installing'
             }
         });
+
+        //write temp yaml file for values
+        const tmpFolder = vscode.Uri.parse(await promisify(tmp.dir)());
+        const tempFilePath = path.join(tmpFolder.fsPath, `helmValues-${Date.now()}.yaml`);
+        fs.writeFileSync(tempFilePath, event.data.yamlValues, 'utf8');
+
         void Progress.execFunctionWithProgress(`Installing the chart ${event.data.name}`, async () => {
-            await Helm.installHelmChart(event.data.name, event.data.repoName, event.data.chartName, event.data.version);
+            await Helm.installHelmChart(event.data.name, event.data.repoName, event.data.chartName, event.data.version, tempFilePath);
         }).then(() => {
             void panel.webview.postMessage({
                 action: 'installStatus',
@@ -59,6 +68,8 @@ export class HelmCommand {
                     message: message.substring(message.indexOf('INSTALLATION FAILED:') + 'INSTALLATION FAILED:'.length)
                 }
             });
+        }).finally(() => {
+            fs.rm(tmpFolder.fsPath, { force: true, recursive: true }, undefined);
         });
     }
 
@@ -70,7 +81,7 @@ export class HelmCommand {
     }
 }
 
-function helmChartMessageListener(event: any): void {
+async function helmChartMessageListener(event: any): Promise<void> {
     switch (event?.action) {
         case 'init':
             void panel.webview.postMessage({
@@ -93,6 +104,19 @@ function helmChartMessageListener(event: any): void {
                 action: 'validatedName',
                 data: validationMessage,
             });
+            break;
+        }
+        case 'getYAMLValues': {
+            const yamlValues = await Helm.getYAMLValues(event.data.repoName as string, event.data.chartName as string);
+            if (yamlValues) {
+                void panel.webview.postMessage({
+                    action: 'getYAMLValues',
+                    data: {
+                        helmChart: event.data,
+                        yamlValues: yamlValues.stdout
+                    },
+                });
+            }
             break;
         }
         case 'getProviderTypes': {
