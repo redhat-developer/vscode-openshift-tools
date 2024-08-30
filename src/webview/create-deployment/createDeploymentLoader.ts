@@ -254,16 +254,18 @@ export default class CreateDeploymentLoader {
                 'Unable to analyze the builder Image',
             );
         } finally {
-            for (const res of analyzeRes) {
-                const languages: string[] = [];
-                languages.push(res.Name);
-                languages.push(...res.Tools);
-                for (const lang of languages) {
-                    const language = lang.toLowerCase();
-                    if (normalizedBuilderImages[language]) {
-                        receommendedBuilderImage = normalizedBuilderImages[language];
-                        receommendedBuilderImage.iconClass = `icon-${language}`;
-                        break;
+            if (analyzeRes) {
+                for (const res of analyzeRes) {
+                    const languages: string[] = [];
+                    languages.push(res.Name);
+                    languages.push(...res.Tools);
+                    for (const lang of languages) {
+                        const language = lang.toLowerCase();
+                        if (normalizedBuilderImages[language]) {
+                            receommendedBuilderImage = normalizedBuilderImages[language];
+                            receommendedBuilderImage.iconClass = `icon-${language}`;
+                            break;
+                        }
                     }
                 }
             }
