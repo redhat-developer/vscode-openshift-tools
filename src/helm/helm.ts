@@ -145,6 +145,6 @@ export async function helmSyntaxVersion(): Promise<HelmSyntaxVersion> {
 
 export async function getYAMLValues(repoName: string, chartName: string) {
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.getYAMLValues(repoName, chartName)
+        HelmCommands.getYAMLValues(repoName, chartName), undefined, false
     );
 }

@@ -125,7 +125,7 @@ export const HelmModal = React.forwardRef(
                     top: '50%',
                     left: '50%',
                     width: isWideEnough ? '900px' : 'calc(100vw - 48px)',
-                    maxHeight: 'calc(100vh - 48px)',
+                    height: 'auto',
                     transform: 'translate(-50%, -50%)',
                     padding: 2,
                 }}
