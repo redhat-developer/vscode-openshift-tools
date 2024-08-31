@@ -214,7 +214,7 @@
         "description": "crc openshift container",
         "vendor": "Red Hat, Inc.",
         "name": "crc",
-        "crcVersion": "2.40.0",
-        "openshiftVersion": "4.16.4"
+        "crcVersion": "2.41.0",
+        "openshiftVersion": "4.16.7"
     }
 }
