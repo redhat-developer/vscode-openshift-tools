@@ -57,6 +57,7 @@ export function testComponentContextMenu() {
             //start dev
             await startDev(true);
 
+            //workaround for failed start dev due to undefined contextPath error
             const notificationCenter = await new Workbench().openNotificationsCenter();
             const notifications = await notificationCenter.getNotifications(NotificationType.Any);
             if (notifications.length > 0) {
