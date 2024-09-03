@@ -201,7 +201,7 @@ export const TerminalMultiplexer = () => {
 
     if (!terminals.length) {
         return (
-            <Stack justifyContent="center" width="100%">
+            <Stack justifyContent="center" width="100%" direction="column">
                 <Stack direction="row" justifyContent="center" alignItems="center">
                     <SvgIcon
                         component={OpenShiftIcon}
@@ -214,6 +214,9 @@ export const TerminalMultiplexer = () => {
                         }}
                     />
                     <Typography>No terminals opened.</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="center" alignItems="center">
+                    <Typography variant='caption'>Terminals related to operations performed on the OpenShift cluster will appear here</Typography>
                 </Stack>
             </Stack>
         );
