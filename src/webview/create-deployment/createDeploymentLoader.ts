@@ -259,6 +259,7 @@ export default class CreateDeploymentLoader {
                     const languages: string[] = [];
                     languages.push(res.Name);
                     languages.push(...res.Tools);
+                    languages.push(...res.Aliases);
                     for (const lang of languages) {
                         const language = lang.toLowerCase();
                         if (normalizedBuilderImages[language]) {
