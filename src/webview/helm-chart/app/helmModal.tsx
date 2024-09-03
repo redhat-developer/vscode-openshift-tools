@@ -14,6 +14,7 @@ import { HelmListItem } from './helmListItem';
 import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
 import { githubLight, githubDark } from '@uiw/codemirror-theme-github';
+import jsyaml from 'js-yaml';
 
 type Message = {
     action: string;
@@ -43,6 +44,7 @@ export const HelmModal = React.forwardRef(
         const [selectedVersion, setSelectedVersion] = React.useState<Chart>(props.helmChart.chartVersions[0]);
         const [isInteracted, setInteracted] = React.useState(false);
         const [yamlValues, setYAMLValues] = React.useState<string>('');
+        const [yamlError, setYAMLError] = React.useState<string>(undefined);
 
         function respondToMessage(messageEvent: MessageEvent) {
             const message = messageEvent.data as Message;
@@ -85,7 +87,7 @@ export const HelmModal = React.forwardRef(
 
         React.useEffect(() => {
             VSCodeMessage.postMessage({ action: 'getYAMLValues', data: props.helmChart });
-        }, [yamlValues]);
+        }, []);
 
         const isWideEnough = useMediaQuery('(min-width: 900px)');
 
@@ -114,7 +116,13 @@ export const HelmModal = React.forwardRef(
         const isError = !versions.length || !selectedVersion;
 
         const handleChange = (newValue: string) => {
-            setYAMLValues(newValue);
+            setYAMLError(undefined);
+            try {
+                jsyaml.load(newValue);
+                setYAMLValues(newValue);
+            } catch(e) {
+                setYAMLError(e.message);
+            }
         };
 
         return (
@@ -215,9 +223,9 @@ export const HelmModal = React.forwardRef(
                                             onChange={handleChange}
                                             basicSetup={{
                                                 lineNumbers: true,
-                                                highlightActiveLine: true,
+                                                highlightActiveLine: true
                                             }} />
-
+                                        {yamlError && <div style={{ color: '#EE0000' }}>Error: {yamlError}</div>}
                                     </Stack>
                                 }
                             </>
