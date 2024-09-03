@@ -55,7 +55,7 @@ suite('helm integration', function () {
     });
 
     test('installs a chart as a release', async function () {
-        await Helm.installHelmChart(RELEASE_NAME, REPO_NAME, CHART_NAME, CHART_VERSION);
+        await Helm.installHelmChart(RELEASE_NAME, REPO_NAME, CHART_NAME, CHART_VERSION, undefined);
         const releases = await Helm.getHelmReleases();
         const sampleChartRelease = releases.find((release) => release.name === RELEASE_NAME);
         expect(sampleChartRelease).to.exist;
