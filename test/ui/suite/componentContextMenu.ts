@@ -11,10 +11,12 @@ import {
     DebugView,
     EditorView,
     Key,
+    NotificationType,
     SideBarView,
     ViewItem,
     ViewSection,
     VSBrowser,
+    Workbench,
 } from 'vscode-extension-tester';
 import { itemDoesNotExist, itemExists, notificationDoesNotExist } from '../common/conditions';
 import { MENUS, VIEWS } from '../common/constants';
@@ -36,6 +38,7 @@ export function testComponentContextMenu() {
             this.timeout(10_000);
             await new EditorView().closeAllEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             for (const item of [
                 VIEWS.appExplorer,
                 VIEWS.compRegistries,
@@ -53,6 +56,13 @@ export function testComponentContextMenu() {
 
             //start dev
             await startDev(true);
+
+            //workaround for failed start dev due to undefined contextPath error
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if (notifications.length > 0) {
+                await startDev(true);
+            }
 
             //check openshift terminal for tab name
             openshiftTerminal = new OpenshiftTerminalWebviewView();
@@ -245,6 +255,7 @@ export function testComponentContextMenu() {
             //refresh section
             await debugSession.expand();
             await collapse(debugSession);
+            await new Promise((res) => { setTimeout(res, 500) });
             await debugSession.expand();
 
             //click on item
