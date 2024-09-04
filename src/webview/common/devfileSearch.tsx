@@ -31,12 +31,13 @@ import {
 import { every } from 'lodash';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { monokai, qtcreatorLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { Devfile, DevfileRegistry, TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
 import { LoadScreen } from './loading';
+import CodeMirror from '@uiw/react-codemirror';
+import { yaml } from '@codemirror/lang-yaml';
+import { vscodeDarkInit, vscodeLightInit } from '@uiw/codemirror-theme-vscode';
 
 // in order to add custom named colours for use in Material UI's `color` prop,
 // you need to use module augmentation.
@@ -73,6 +74,36 @@ function LinkButton(props: { href: string; disabled: boolean; onClick: () => voi
         </Link>
     );
 }
+
+const vsDark = vscodeDarkInit({
+    settings: {
+        background: 'var(--vscode-editor-background)',
+        foreground: 'var(--vscode-editor-foreground)',
+        caret: 'var(--vscode-editorCursor-foreground)',
+        selection: 'var(--vscode-editor-selectionBackground)',
+        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
+        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
+        gutterBackground: 'var(--vscode-editorGutter-background)',
+        gutterForeground: 'var(--vscode-editorHint-foreground)',
+        fontFamily: 'var(--vscode-editor-font-family)',
+        fontSize: 'var(--vscode-editor-font-size)'
+    }
+});
+
+const vsLight = vscodeLightInit({
+    settings: {
+        background: 'var(--vscode-editor-background)',
+        foreground: 'var(--vscode-editor-foreground)',
+        caret: 'var(--vscode-editorCursor-foreground)',
+        selection: 'var(--vscode-editor-selectionBackground)',
+        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
+        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
+        gutterBackground: 'var(--vscode-editorGutter-background)',
+        gutterForeground: 'var(--vscode-editorHint-foreground)',
+        fontFamily: 'var(--vscode-editor-font-family)',
+        fontSize: 'var(--vscode-editor-font-size)'
+    }
+});
 
 function SearchBar(props: {
     searchText: string;
@@ -394,14 +425,8 @@ const SelectTemplateProject = React.forwardRef(
                             </Stack>
                         </Stack>
                     </FormControl>
-                    <Box
-                        maxHeight="400px"
-                        width="100%"
-                        overflow="scroll"
-                        style={{ background: 'rgba(127, 127, 127, 8%)', borderRadius: '4px' }}
-                    >
-                        {/* paddingRight is x4 to account for the padding on the parent absolutely positioned paper and the width of the scroll bar */}
-                        <Box position="absolute" paddingTop={1} paddingRight={4} right="0px">
+                    <Box justifyContent='space-between'>
+                        <Box paddingTop={1} style={{ float: 'right' }}>
                             <CopyToClipboard
                                 text={props.devfile.yaml}
                                 onCopy={() => {
@@ -421,7 +446,7 @@ const SelectTemplateProject = React.forwardRef(
                                 }}
                             >
                                 <Tooltip
-                                    title={isYamlCopied ? 'Copied!' : 'Copy to clipboard'}
+                                    title={isYamlCopied ? 'Copied!' : 'Copy YAML'}
                                     onMouseLeave={() => {
                                         setTimeout(() => setYamlCopied((_) => false), 200);
                                     }}
@@ -433,23 +458,18 @@ const SelectTemplateProject = React.forwardRef(
                                 </Tooltip>
                             </CopyToClipboard>
                         </Box>
-                        <SyntaxHighlighter
-                            language="yaml"
-                            style={props.theme?.palette.mode === 'light' ? qtcreatorLight : monokai}
-                            useInlineStyles
-                            wrapLines
-                            customStyle={{ background: 'inherit !important' }}
-                            showLineNumbers
-                            codeTagProps={{
-                                style: {
-                                    fontFamily: 'inherit',
-                                    fontStyle: 'inherit',
-                                    fontWeight: 'inherit',
-                                },
-                            }}
-                        >
-                            {props.devfile.yaml}
-                        </SyntaxHighlighter>
+                        <CodeMirror
+                            value={props.devfile.yaml}
+                            height='400px'
+                            width='fullWidth'
+                            extensions={[yaml()]}
+                            readOnly
+                            theme={props.theme?.palette.mode === 'light' ? vsLight : vsDark}
+                            basicSetup={{
+                                lineNumbers: true,
+                                highlightActiveLine: true,
+                                syntaxHighlighting: true
+                            }} />
                     </Box>
                 </Stack>
             </Paper>
