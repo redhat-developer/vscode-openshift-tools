@@ -39,7 +39,6 @@ import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
 import { vscodeDarkInit, vscodeLightInit } from '@uiw/codemirror-theme-vscode';
 
-
 // in order to add custom named colours for use in Material UI's `color` prop,
 // you need to use module augmentation.
 // see https://mui.com/material-ui/customization/palette/#typescript
@@ -76,35 +75,7 @@ function LinkButton(props: { href: string; disabled: boolean; onClick: () => voi
     );
 }
 
-/*const vscodeTheme = createTheme({
-    theme: 'dark', // or 'light' for a light theme
-    settings: {
-        background: 'var(--vscode-editor-background)',
-        foreground: 'var(--vscode-editor-foreground)',
-        caret: 'var(--vscode-editorCursor-foreground)',
-        selection: 'var(--vscode-editor-selectionBackground)',
-        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
-        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
-        gutterBackground: 'var(--vscode-editorGutter-background)',
-        gutterForeground: 'var(--vscode-editorHint-foreground)',
-        fontFamily: 'var(--vscode-editor-font-family)',
-        fontSize: 'var(--vscode-editor-font-size)'
-    },
-    styles: [
-        { tag: tags.comment, color: 'var(--vscode-editorGutter-commentRangeForeground)' },
-        { tag: tags.variableName, color: '#e06c75' },
-        { tag: tags.string, color: '#98c379' },
-        { tag: tags.number, color: '#d19a66' },
-        { tag: tags.bool, color: '#56b6c2' },
-        { tag: tags.null, color: '#c678dd' },
-        { tag: tags.keyword, color: '#c678dd' },
-        { tag: tags.operator, color: '#56b6c2' },
-        { tag: tags.className, color: '#e5c07b' },
-        { tag: tags.function(tags.variableName), color: '#61afef' }
-    ],
-});*/
-
-const csDark = vscodeDarkInit({
+const vsDark = vscodeDarkInit({
     settings: {
         background: 'var(--vscode-editor-background)',
         foreground: 'var(--vscode-editor-foreground)',
@@ -119,7 +90,7 @@ const csDark = vscodeDarkInit({
     }
 });
 
-const csLight = vscodeLightInit({
+const vsLight = vscodeLightInit({
     settings: {
         background: 'var(--vscode-editor-background)',
         foreground: 'var(--vscode-editor-foreground)',
@@ -493,7 +464,7 @@ const SelectTemplateProject = React.forwardRef(
                             width='fullWidth'
                             extensions={[yaml()]}
                             readOnly
-                            theme={props.theme?.palette.mode === 'light' ? csLight : csDark}
+                            theme={props.theme?.palette.mode === 'light' ? vsLight : vsDark}
                             basicSetup={{
                                 lineNumbers: true,
                                 highlightActiveLine: true,
