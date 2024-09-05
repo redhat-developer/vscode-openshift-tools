@@ -74,7 +74,7 @@
 		"@codemirror/lang-yaml": "^6.1.1",
 		"@kubernetes/client-node": "^0.21.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.8.0",
-		"@uiw/codemirror-theme-github": "^4.23.0",
+		"@uiw/codemirror-theme-github": "^4.23.1",
 		"@uiw/react-codemirror": "^4.23.0",
 		"clsx": "^2.1.1",
 		"codemirror": "^6.0.1",
