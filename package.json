@@ -138,7 +138,7 @@
 		"@types/vscode": "1.82.0",
 		"@typescript-eslint/eslint-plugin": "^8.4.0",
 		"@typescript-eslint/parser": "^8.4.0",
-		"@uiw/codemirror-theme-vscode": "^4.23.0",
+		"@uiw/codemirror-theme-vscode": "^4.23.1",
 		"@vscode/test-electron": "^2.4.1",
 		"bootstrap": "^5.3.3",
 		"chai": "^4.5.0",
