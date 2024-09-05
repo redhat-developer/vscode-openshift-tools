@@ -368,13 +368,32 @@ export default class ClusterViewLoader {
         }
     }
 
+    /**
+     * Cleans up the CRC configuration settings.
+     *
+     * This is a workarount to https://github.com/redhat-developer/vscode-openshift-tools/issues/4411
+     * After the CRC setting values are removed, if the 'openshiftToolkit' object exists in 'settings.json',
+     * containing the same settings as the CRC ones, the new values will be written AFTER the mensioned object,
+     * so their values will override the ones defined in the object.
+     */
+    static async clearCrcSettings() {
+        const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
+        await cfg.update('crcBinaryLocation', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcPullSecretPath', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcCpuCores', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcMemoryAllocated', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcNameserver', undefined); // Previously it was saved as `Workspace`
+        await cfg.update('crcNameserver', undefined, vscode.ConfigurationTarget.Global);
+    }
+
     static async crcSaveSettings(event) {
+        await ClusterViewLoader.clearCrcSettings();
         const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
         await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
         await cfg.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
         await cfg.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
         await cfg.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
-        await cfg.update('crcNameserver', event.nameserver);
+        await cfg.update('crcNameserver', event.nameserver, vscode.ConfigurationTarget.Global);
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {
