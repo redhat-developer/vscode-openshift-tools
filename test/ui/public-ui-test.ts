@@ -17,6 +17,7 @@ import { testCreateServerlessFunction } from './suite/serverlessFunction';
 import * as sourceMapSupport from 'source-map-support';
 import { testComponentContextMenu } from './suite/componentContextMenu';
 import { testComponentCommands } from './suite/componentCommands';
+import { projectTest } from './suite/project';
 
 sourceMapSupport.install();
 
@@ -49,5 +50,6 @@ describe('Extension public-facing UI tests', function() {
         checkAboutCommand(clusterIsSet);
         testComponentContextMenu();
         testComponentCommands(contextFolder);
+        projectTest(false)
     });
 });
