@@ -29,6 +29,6 @@ describe('Extension cluster-dependant UI tests', function () {
     checkExtension();
     checkOpenshiftView();
     loginTest();
-    projectTest();
+    projectTest(true);
     kubernetesContextTest();
 });
