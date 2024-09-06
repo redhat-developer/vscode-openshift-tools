@@ -30,5 +30,5 @@ describe('Extension cluster-dependant UI tests', function () {
     checkOpenshiftView();
     loginTest();
     projectTest(true);
-    kubernetesContextTest();
+    kubernetesContextTest(true);
 });

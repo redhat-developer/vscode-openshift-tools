@@ -6,7 +6,7 @@
 import { SideBarView, ViewSection, EditorView, InputBox, ActivityBar, NotificationType, Workbench, TreeItem, VSBrowser } from 'vscode-extension-tester';
 import { itemExists, notificationExists } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
-//import { expect } from 'chai';
+import { activateCommand } from '../common/command-activator';
 
 export function projectTest(isOpenshiftCluster: boolean) {
     describe('Work with project', function () {
@@ -40,6 +40,19 @@ export function projectTest(isOpenshiftCluster: boolean) {
                 await notificationCenter.close();
             }
             await new EditorView().closeAllEditors();
+        });
+
+        //Switch back to existing project/namespace
+        after(async () => {
+            const option = isOpenshiftCluster ? 'Set Active Project' : 'Set Active Namespace';
+            const command = `>OpenShift: ${option}`;
+            await activateCommand(command);
+
+            const input = await InputBox.create();
+            await input.setText(anotherProjectName);
+            await input.confirm();
+
+            await itemExists(anotherProjectName, explorer) as TreeItem;
         });
 
         it('Create a new project', async function () {
@@ -89,6 +102,8 @@ export function projectTest(isOpenshiftCluster: boolean) {
             this.timeout(30_000);
             const projectItem = await explorer.findItem(projectName);
             const contextMenu = await projectItem.openContextMenu();
+
+            await contextMenu.select(deleteProject);
 
             await contextMenu.select(deleteProject);
 

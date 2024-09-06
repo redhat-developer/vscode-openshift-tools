@@ -17,6 +17,7 @@ import { testCreateServerlessFunction } from './suite/serverlessFunction';
 import * as sourceMapSupport from 'source-map-support';
 import { testComponentContextMenu } from './suite/componentContextMenu';
 import { testComponentCommands } from './suite/componentCommands';
+import { kubernetesContextTest } from './suite/kubernetesContext';
 import { projectTest } from './suite/project';
 
 sourceMapSupport.install();
@@ -51,5 +52,6 @@ describe('Extension public-facing UI tests', function() {
         testComponentContextMenu();
         testComponentCommands(contextFolder);
         projectTest(false)
+        kubernetesContextTest(false);
     });
 });
