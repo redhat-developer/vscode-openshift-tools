@@ -56,8 +56,10 @@ export default function addSandboxView(): JSX.Element {
     const [currentState, setCurrentState] = React.useState({
         action: 'sandboxPageDetectAuthSession',
         statusInfo: '',
+        usePipelineToken: false,
         consoleDashboard: '',
         apiEndpoint: '',
+        apiEndpointProxy: '',
         oauthTokenEndpoint: '',
         errorCode: undefined
     });
@@ -149,7 +151,9 @@ export default function addSandboxView(): JSX.Element {
                 action: currentState.action,
                 consoleDashboard: currentState.consoleDashboard,
                 statusInfo: currentState.statusInfo,
+                usePipelineToken: false,
                 apiEndpoint: '',
+                apiEndpointProxy: '',
                 oauthTokenEndpoint: '',
                 errorCode: undefined
             });
@@ -299,8 +303,10 @@ export default function addSandboxView(): JSX.Element {
             setCurrentState({
                 action: 'sandboxPageRequestVerificationCode',
                 statusInfo: '',
+                usePipelineToken: false,
                 consoleDashboard: '',
                 apiEndpoint: '',
+                apiEndpointProxy: '',
                 oauthTokenEndpoint: '',
                 errorCode: undefined
             });
@@ -379,11 +385,27 @@ export default function addSandboxView(): JSX.Element {
     const Provisioned = () => {
 
         const handleLoginButton = () => {
-            postMessage('sandboxLoginUsingDataInClipboard', {apiEndpointUrl: currentState.apiEndpoint, oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`});
+            if (!currentState.usePipelineToken) { // Try loging in using a token from the Clipboard
+                postMessage('sandboxLoginUsingDataInClipboard', {
+                        apiEndpointUrl: currentState.apiEndpoint,
+                        oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`
+                    });
+            } else { // Try loging in using a Pipeline Token
+                postMessage('sandboxLoginUsingPipelineToken', {
+                    apiEndpointUrl: currentState.apiEndpoint,
+                    oauthRequestTokenUrl: `${currentState.oauthTokenEndpoint}/request`,
+                    username: currentState.statusInfo,
+                    apiEndpointProxy: currentState.apiEndpointProxy,
+                });
+            }
         };
 
         const invalidToken = currentState.errorCode === 'invalidToken';
-        const loginSandboxTitle = !invalidToken ? 'Login to DevSandbox OpenShift cluster with token from clipboard' : 'Token in clipboard is invalid. Select the Get Token option and copy to clipboard';
+        const loginSandboxTitle = !invalidToken ?
+                currentState.usePipelineToken ?
+                    'Login to DevSandbox OpenShift cluster using a service account provided token' :
+                    'Login to DevSandbox OpenShift cluster with token from clipboard' :
+                'Token in clipboard is invalid. Select the Get Token option and copy to clipboard';
 
         return (
             <>
@@ -403,19 +425,29 @@ export default function addSandboxView(): JSX.Element {
                                 </Tooltip>
                             Your sandbox account has been provisioned and is ready to use.
                         </Typography>
-                        <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
-                            Next steps to connect with Developer Sandbox:<br></br>
-                            1. Click on <strong>Get token</strong> button. In the browser, login using <strong>DevSandbox</strong> button.<br></br>
-                            2. Click on <strong>Display token</strong> link and copy token to clipboard.<br></br>
-                            3. Switch back to IDE and press <strong>'Login To DevSandbox'</strong> button. This will login you to DevSandbox with token from clipboard.<br></br>
-                            4. Once successfully logged in, start creating applications and deploy on cluster.
-                        </Typography>
+                        {( !currentState.usePipelineToken ) ? (
+                            <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
+                                Next steps to connect with Developer Sandbox:<br></br>
+                                1. Click on <strong>Get token</strong> button. In the browser, login using <strong>DevSandbox</strong> button.<br></br>
+                                2. Click on <strong>Display token</strong> link and copy token to clipboard.<br></br>
+                                3. Switch back to IDE and press <strong>'Login To DevSandbox'</strong> button. This will login you to DevSandbox with token from clipboard.<br></br>
+                                4. Once successfully logged in, start creating applications and deploy on cluster.
+                            </Typography>
+                        ) : (
+                            <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
+                                Next steps to connect with Developer Sandbox:<br></br>
+                                1. Press <strong>'Login To DevSandbox'</strong> button. This will login you to DevSandbox using a service account provided token.<br></br>
+                                2. Once successfully logged in, start creating applications and deploy on cluster.
+                            </Typography>
+                        )}
                         <Tooltip title='Launch your DevSandbox console in browser' placement='bottom'>
                             <Button variant='contained' className='button' href={currentState.consoleDashboard}>Open Dashboard</Button>
                         </Tooltip>
-                        <Tooltip title='Open the DevSandbox console page and copy the login token' placement='bottom'>
-                            <Button variant='contained' className='button' href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
-                        </Tooltip>
+                        {( !currentState.usePipelineToken ) && (
+                            <Tooltip title='Open the DevSandbox console page and copy the login token' placement='bottom'>
+                                <Button variant='contained' className='button' href={`${currentState.oauthTokenEndpoint}/request`}>Get token</Button>
+                            </Tooltip>
+                        )}
                         <Tooltip title={loginSandboxTitle} placement='bottom'>
                             <div style={{ display: 'inline-block', margin: '8px 0px 8px 0px' }}><Button variant='contained' className='buttonRed' disabled={invalidToken} onClick={handleLoginButton}>Login to DevSandbox</Button></div>
                         </Tooltip>

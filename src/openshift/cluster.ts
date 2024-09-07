@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubernetesObject } from '@kubernetes/client-node';
+import { CoreV1Api, KubeConfig, KubernetesObject, V1Secret, V1ServiceAccount } from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import * as https from 'https';
 import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
@@ -1069,5 +1069,83 @@ export class Cluster extends OpenShiftItem {
     static isOpenShiftSandbox(url :string): boolean {
         const asUrl = new URL(url);
         return asUrl.hostname.endsWith('openshiftapps.com');
+    }
+
+    static prepareSSOInKubeConfig(proxy: string, username: string, accessToken: string): KubeConfig {
+        const kcu = new KubeConfig();
+        const clusterProxy = {
+            name: 'sandbox-proxy',
+            server: proxy,
+        };
+        const user = {
+            name: 'sso-user',
+            token: accessToken,
+        };
+        const context = {
+            cluster: clusterProxy.name,
+            name: 'sandbox-proxy-context',
+            user: user.name,
+            namespace: `${username}-dev`,
+        };
+        kcu.addCluster(clusterProxy);
+        kcu.addUser(user)
+        kcu.addContext(context);
+        kcu.setCurrentContext(context.name);
+        return kcu;
+    }
+
+    static async installPipelineSecretToken(k8sApi: CoreV1Api, pipelineServiceAccount: V1ServiceAccount, username: string): Promise<V1Secret> {
+        const v1Secret = {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            metadata: {
+                name: `pipeline-secret-${username}-dev`,
+                annotations: {
+                    'kubernetes.io/service-account.name': pipelineServiceAccount.metadata.name,
+                    'kubernetes.io/service-account.uid': pipelineServiceAccount.metadata.uid
+                }
+            },
+            type: 'kubernetes.io/service-account-token'
+        } as V1Secret
+
+        try {
+            await k8sApi.createNamespacedSecret(`${username}-dev`, v1Secret);
+        } catch {
+            // Ignore
+        }
+        const newSecrets = await k8sApi.listNamespacedSecret(`${username}-dev`);
+        return newSecrets?.body.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
+    }
+
+    static async getPipelineServiceAccountToken(k8sApi: CoreV1Api, username: string): Promise<string> {
+        try {
+            const serviceAccounts = await k8sApi.listNamespacedServiceAccount(`${username}-dev`);
+            const pipelineServiceAccount = serviceAccounts.body.items.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
+            if (!pipelineServiceAccount) {
+                return;
+            }
+
+            const secrets = await k8sApi.listNamespacedSecret(`${username}-dev`);
+            let pipelineTokenSecret = secrets?.body.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
+            if (!pipelineTokenSecret) {
+                pipelineTokenSecret = await Cluster.installPipelineSecretToken(k8sApi, pipelineServiceAccount, username);
+                if (!pipelineTokenSecret) {
+                    return;
+                }
+            }
+            return Buffer.from(pipelineTokenSecret.data.token, 'base64').toString();
+         } catch {
+            // Ignore
+        }
+    }
+
+    static async loginUsingPipelineServiceAccountToken(server: string, proxy: string, username: string, accessToken: string): Promise<string> {
+        const kcu = Cluster.prepareSSOInKubeConfig(proxy, username, accessToken);
+        const k8sApi = kcu.makeApiClient(CoreV1Api);
+        const pipelineToken =  await this.getPipelineServiceAccountToken(k8sApi, username);
+        if (!pipelineToken) {
+            return;
+        }
+        return Cluster.tokenLogin(server, true, pipelineToken);
     }
 }
