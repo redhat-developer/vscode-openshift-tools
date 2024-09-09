@@ -19,7 +19,7 @@ export class Command {
         return command;
     }
 
-    static dev(debug: boolean, runOn?: undefined | 'podman', manualRebuild: boolean = false): CommandText {
+    static dev(debug: boolean, runOn?: 'podman', manualRebuild: boolean = false): CommandText {
         const command = new CommandText('odo', 'dev');
         if (debug) {
             command.addOption(new CommandOption('--debug'));
