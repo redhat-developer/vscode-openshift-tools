@@ -74,6 +74,8 @@ export function getOutputFormat(): string {
 }
 
 export class KubernetesResourceVirtualFileSystemProvider implements FileSystemProvider {
+    private encoder = new TextEncoder();
+
     constructor() { }
 
     private readonly onDidChangeFileEmitter: EventEmitter<FileChangeEvent[]> = new EventEmitter<FileChangeEvent[]>();
@@ -110,7 +112,7 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
 
     async readFileAsync(uri: Uri): Promise<Uint8Array> {
         const content = await this.loadResource(uri);
-        return new Buffer(content, 'utf8');
+        return Uint8Array.from(this.encoder.encode(content));
     }
 
     async loadResource(uri: Uri): Promise<string> {
