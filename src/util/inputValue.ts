@@ -70,7 +70,7 @@ export function inputValue(prompt: string, initialValue: string, password: boole
             input.validationMessage = validationMessage;
         }
         const acceptInput = async () => {
-            const value = input.value;
+            const value = input.value.trim();
             input.enabled = false;
             input.busy = true;
             if (!(await validate(value))) {
@@ -82,7 +82,7 @@ export function inputValue(prompt: string, initialValue: string, password: boole
         };
         input.onDidAccept(acceptInput);
         input.onDidChangeValue(async text => {
-            const current = validate(text);
+            const current = validate(text.trim());
             const validating = current;
             const validationMessage = await current;
             if (current === validating) {
