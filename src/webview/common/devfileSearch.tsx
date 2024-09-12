@@ -37,7 +37,7 @@ import { DevfileListItem } from './devfileListItem';
 import { LoadScreen } from './loading';
 import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
-import { vscodeDarkInit, vscodeLightInit } from '@uiw/codemirror-theme-vscode';
+import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from './vscode-theme';
 
 // in order to add custom named colours for use in Material UI's `color` prop,
 // you need to use module augmentation.
@@ -74,36 +74,6 @@ function LinkButton(props: { href: string; disabled: boolean; onClick: () => voi
         </Link>
     );
 }
-
-const vsDark = vscodeDarkInit({
-    settings: {
-        background: 'var(--vscode-editor-background)',
-        foreground: 'var(--vscode-editor-foreground)',
-        caret: 'var(--vscode-editorCursor-foreground)',
-        selection: 'var(--vscode-editor-selectionBackground)',
-        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
-        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
-        gutterBackground: 'var(--vscode-editorGutter-background)',
-        gutterForeground: 'var(--vscode-editorHint-foreground)',
-        fontFamily: 'var(--vscode-editor-font-family)',
-        fontSize: 'var(--vscode-editor-font-size)'
-    }
-});
-
-const vsLight = vscodeLightInit({
-    settings: {
-        background: 'var(--vscode-editor-background)',
-        foreground: 'var(--vscode-editor-foreground)',
-        caret: 'var(--vscode-editorCursor-foreground)',
-        selection: 'var(--vscode-editor-selectionBackground)',
-        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
-        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
-        gutterBackground: 'var(--vscode-editorGutter-background)',
-        gutterForeground: 'var(--vscode-editorHint-foreground)',
-        fontFamily: 'var(--vscode-editor-font-family)',
-        fontSize: 'var(--vscode-editor-font-size)'
-    }
-});
 
 function SearchBar(props: {
     searchText: string;
@@ -464,7 +434,7 @@ const SelectTemplateProject = React.forwardRef(
                             width='fullWidth'
                             extensions={[yaml()]}
                             readOnly
-                            theme={props.theme?.palette.mode === 'light' ? vsLight : vsDark}
+                            theme={props.theme?.palette.mode === 'light' ? vsLightCodeMirrorTheme : vsDarkCodeMirrorTheme}
                             basicSetup={{
                                 lineNumbers: true,
                                 highlightActiveLine: true,

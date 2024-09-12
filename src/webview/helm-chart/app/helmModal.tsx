@@ -13,7 +13,7 @@ import { VSCodeMessage } from '../vsCodeMessage';
 import { HelmListItem } from './helmListItem';
 import CodeMirror from '@uiw/react-codemirror';
 import { yaml } from '@codemirror/lang-yaml';
-import { githubLight, githubDark } from '@uiw/codemirror-theme-github';
+import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from '../../common/vscode-theme';
 import jsyaml from 'js-yaml';
 
 type Message = {
@@ -219,11 +219,12 @@ export const HelmModal = React.forwardRef(
                                             value={yamlValues}
                                             height='300px'
                                             extensions={[yaml()]}
-                                            theme={props.theme?.palette.mode === 'light' ? githubLight : githubDark}
+                                            theme={props.theme?.palette.mode === 'light' ? vsLightCodeMirrorTheme : vsDarkCodeMirrorTheme}
                                             onChange={handleChange}
                                             basicSetup={{
                                                 lineNumbers: true,
-                                                highlightActiveLine: true
+                                                highlightActiveLine: true,
+                                                syntaxHighlighting: true
                                             }} />
                                         {yamlError && <div style={{ color: '#EE0000' }}>Error: {yamlError}</div>}
                                     </Stack>
