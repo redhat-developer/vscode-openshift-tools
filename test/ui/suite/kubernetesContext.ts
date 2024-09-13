@@ -2,21 +2,29 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-
 import { expect } from 'chai';
-import { ActivityBar, EditorView, InputBox, NotificationType, QuickPickItem, SideBarView, TreeItem, VSBrowser, ViewSection, Workbench } from 'vscode-extension-tester';
+import {
+    ActivityBar,
+    EditorView,
+    InputBox,
+    NotificationType,
+    QuickPickItem,
+    SideBarView,
+    TreeItem,
+    VSBrowser,
+    ViewSection,
+    Workbench,
+} from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
 import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 import { addKubeContext, getKubeConfigContent, getKubeConfigPath } from '../common/kubeConfigUtils';
-
 import * as fs from 'fs-extra';
 import * as yml from 'js-yaml';
 
 export function kubernetesContextTest(isOpenshiftCluster: boolean) {
     describe('Kubernetes Context', function () {
-
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
         const clusterName = cluster;
 
@@ -26,9 +34,9 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         let quickPicks: QuickPickItem[];
         const allQuickPicksTexts: string[] = [];
 
-        const kubeCopy = `${getKubeConfigPath()}-cp`
+        const kubeCopy = `${getKubeConfigPath()}-cp`;
 
-        before(async function() {
+        before(async function () {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
 
@@ -37,23 +45,35 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
 
             await activateCommand('>OpenShift: Log out');
 
-
-            let notification = await notificationExists(NOTIFICATIONS.doYouWantLogOut, VSBrowser.instance.driver);
+            let notification = await notificationExists(
+                NOTIFICATIONS.doYouWantLogOut,
+                VSBrowser.instance.driver,
+            );
             await notification.takeAction(INPUTS.logout);
-            notification = await notificationExists(NOTIFICATIONS.logoutSuccess, VSBrowser.instance.driver);
+            notification = await notificationExists(
+                NOTIFICATIONS.logoutSuccess,
+                VSBrowser.instance.driver,
+            );
             await notification.takeAction(INPUTS.no);
-            await new Promise((res) => { setTimeout(res, 1_500); });
+            await new Promise((res) => {
+                setTimeout(res, 1_500);
+            });
 
             //add kube context for test
             const kubeContent = getKubeConfigContent();
             const kubeYaml = yml.load(kubeContent) as { [key: string]: any };
-            addKubeContext(kubeYaml.contexts[0].context.cluster, 'test-namespace', kubeYaml.contexts[0].context.user, 'test-name');
+            addKubeContext(
+                kubeYaml.contexts[0].context.cluster,
+                'test-namespace',
+                kubeYaml.contexts[0].context.user,
+                'test-name',
+            );
         });
 
         //put original kubeconfig back
         after(() => {
-            fs.moveSync(kubeCopy, getKubeConfigPath(), {overwrite: true});
-        })
+            fs.moveSync(kubeCopy, getKubeConfigPath(), { overwrite: true });
+        });
 
         beforeEach(async function () {
             const notificationCenter = await new Workbench().openNotificationsCenter();
@@ -64,7 +84,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             await new EditorView().closeAllEditors();
         });
 
-        it('Select kubernetes context', async function() {
+        it('Select kubernetes context', async function () {
             this.timeout(20_000);
 
             await explorer.expand();
@@ -80,7 +100,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
 
             expect(quickPicks).is.not.empty;
 
-            for(let i = 0; i < quickPicks.length; i++) {
+            for (let i = 0; i < quickPicks.length; i++) {
                 allQuickPicksTexts[i] = await quickPicks[i].getText();
             }
 
@@ -96,12 +116,12 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
                 await inputBox.confirm();
             }
 
-            const clusterNode = await itemExists(clusterName, explorer) as TreeItem;
+            const clusterNode = (await itemExists(clusterName, explorer)) as TreeItem;
             await clusterNode.expand();
             await itemExists(projectName, explorer);
         });
 
-        it('Switch context', async function() {
+        it('Switch context', async function () {
             this.timeout(20_000);
 
             const quickPickText = allQuickPicksTexts[1];
@@ -119,5 +139,4 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             await itemExists(projectName, explorer);
         });
     });
-
 }

@@ -3,19 +3,30 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { SideBarView, ViewSection, EditorView, InputBox, ActivityBar, NotificationType, Workbench, TreeItem, VSBrowser } from 'vscode-extension-tester';
+import {
+    SideBarView,
+    ViewSection,
+    EditorView,
+    InputBox,
+    ActivityBar,
+    NotificationType,
+    Workbench,
+    TreeItem,
+    VSBrowser,
+} from 'vscode-extension-tester';
 import { itemExists, notificationExists } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { activateCommand } from '../common/command-activator';
 
 export function projectTest(isOpenshiftCluster: boolean) {
     describe('Work with project', function () {
-
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
         const clusterName = cluster;
 
         const newProject = isOpenshiftCluster ? MENUS.newProject : MENUS.newNamespace;
-        const changeProject = isOpenshiftCluster ? 'Change Active Project' : 'Change Active Namespace';
+        const changeProject = isOpenshiftCluster
+            ? 'Change Active Project'
+            : 'Change Active Namespace';
         const deleteProject = isOpenshiftCluster ? MENUS.deleteProject : MENUS.deleteNamespace;
 
         let view: SideBarView;
@@ -52,17 +63,19 @@ export function projectTest(isOpenshiftCluster: boolean) {
             await input.setText(anotherProjectName);
             await input.confirm();
 
-            await itemExists(anotherProjectName, explorer) as TreeItem;
+            (await itemExists(anotherProjectName, explorer)) as TreeItem;
         });
 
         it('Create a new project', async function () {
             this.timeout(30_000);
-            const clusterItem = await explorer.findItem(clusterName) as TreeItem;
+            const clusterItem = (await explorer.findItem(clusterName)) as TreeItem;
             await clusterItem.expand();
             const contextMenu = await clusterItem.openContextMenu();
             await contextMenu.select(newProject);
 
-            await new Promise((res) => { setTimeout(res, 500) });
+            await new Promise((res) => {
+                setTimeout(res, 500);
+            });
 
             projectName = getProjectName();
             const input = await InputBox.create();
@@ -76,7 +89,7 @@ export function projectTest(isOpenshiftCluster: boolean) {
             this.timeout(30_000);
             anotherProjectName = getProjectName();
 
-            const clusterItem = await explorer.findItem(clusterName) as TreeItem;
+            const clusterItem = (await explorer.findItem(clusterName)) as TreeItem;
             await clusterItem.expand();
             const contextMenu = await clusterItem.openContextMenu();
             await contextMenu.select(newProject);
@@ -85,13 +98,15 @@ export function projectTest(isOpenshiftCluster: boolean) {
             await input.setText(anotherProjectName);
             await input.confirm();
 
-            const item = await itemExists(anotherProjectName, explorer) as TreeItem;
+            const item = (await itemExists(anotherProjectName, explorer)) as TreeItem;
 
             const changeActiveProjectButton = await item.getActionButton(changeProject);
             await changeActiveProjectButton.click();
 
             input = await InputBox.create();
-            await new Promise((res) => {setTimeout(res, 1_000)});
+            await new Promise((res) => {
+                setTimeout(res, 1_000);
+            });
             await input.setText(projectName);
             await input.confirm();
 
@@ -110,23 +125,34 @@ export function projectTest(isOpenshiftCluster: boolean) {
             let notif;
 
             if (isOpenshiftCluster) {
-                notif = await notificationExists(NOTIFICATIONS.deleteProjectWarning(projectName), VSBrowser.instance.driver)
+                notif = await notificationExists(
+                    NOTIFICATIONS.deleteProjectWarning(projectName),
+                    VSBrowser.instance.driver,
+                );
             } else {
-                notif = await notificationExists(NOTIFICATIONS.deleteNamespaceWarning(projectName), VSBrowser.instance.driver);
+                notif = await notificationExists(
+                    NOTIFICATIONS.deleteNamespaceWarning(projectName),
+                    VSBrowser.instance.driver,
+                );
             }
 
             await notif.takeAction(INPUTS.yes);
 
             if (isOpenshiftCluster) {
-                await notificationExists(NOTIFICATIONS.projectDeleteSuccess(projectName), VSBrowser.instance.driver);
+                await notificationExists(
+                    NOTIFICATIONS.projectDeleteSuccess(projectName),
+                    VSBrowser.instance.driver,
+                );
             } else {
-                await notificationExists(NOTIFICATIONS.namespaceDeleteSuccess(projectName), VSBrowser.instance.driver);
+                await notificationExists(
+                    NOTIFICATIONS.namespaceDeleteSuccess(projectName),
+                    VSBrowser.instance.driver,
+                );
             }
         });
 
-
         function getProjectName() {
-            return `project${Math.floor(Math.random() * 100)}`
+            return `project${Math.floor(Math.random() * 100)}`;
         }
-    })
+    });
 }
