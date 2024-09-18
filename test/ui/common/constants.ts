@@ -56,6 +56,8 @@ export const MENUS = {
     debug: 'Debug',
     deleteConfiguration: 'Delete Component Configuration',
     deleteSourceCodeFolder: 'Delete Source Code Folder',
+    create: 'Create...',
+    createOperatorBackedService: 'Create Operator-Backed Service'
 };
 
 export const COMPONENTS = {
@@ -77,4 +79,5 @@ export const NOTIFICATIONS = {
     logoutSuccess: 'Successfully logged out. Do you want to login to a new cluster',
     deleteConfig: (path: string) => `Are you sure you want to delete the configuration for the component ${path}? OpenShift Toolkit will no longer recognize the project as a component.`,
     deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
+    serviceCreated: (name: string) => `Service ${name} successfully created.`,
 };

@@ -19,6 +19,7 @@ import { testComponentContextMenu } from './suite/componentContextMenu';
 import { testComponentCommands } from './suite/componentCommands';
 import { kubernetesContextTest } from './suite/kubernetesContext';
 import { projectTest } from './suite/project';
+import { operatorBackedServiceTest } from './suite/operatorBackedService';
 
 sourceMapSupport.install();
 
@@ -53,5 +54,6 @@ describe('Extension public-facing UI tests', function() {
         testComponentCommands(contextFolder);
         projectTest(false)
         kubernetesContextTest(false);
+        operatorBackedServiceTest();
     });
 });
