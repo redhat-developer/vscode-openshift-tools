@@ -80,4 +80,5 @@ export const NOTIFICATIONS = {
     deleteConfig: (path: string) => `Are you sure you want to delete the configuration for the component ${path}? OpenShift Toolkit will no longer recognize the project as a component.`,
     deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
     serviceCreated: (name: string) => `Service ${name} successfully created.`,
+    lookingForBindableServices: 'Looking for bindable services',
 };
