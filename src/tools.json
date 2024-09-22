@@ -10,34 +10,34 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-windows-amd64-b4853e1fa.zip",
-                "sha256sum": "c807d9a023ef831b78b98c15ad70bf50827a42e66aa144e313b863a2f5242e4a",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-windows-amd64-e0cbb4b63.zip",
+                "sha256sum": "c565771ef47cd32f0ad5828c851eccdd08f978932a45b2ada28b5a92417c4981",
                 "dlFileName": "odo-windows-amd64.zip",
-                "cmdFileName": "odo-windows-amd64-b4853e1fa.exe"
+                "cmdFileName": "odo-windows-amd64-e0cbb4b63.exe"
             },
             "darwin": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-amd64-b4853e1fa.tar.gz",
-                "sha256sum": "14b13bb071ecac5b0234419ea7ca65a069660c3246025cbaf03f01d5fc89ef92",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-amd64-e0cbb4b63.tar.gz",
+                "sha256sum": "f5c2843f95ff61ebb51c11d37715638889933c317513f89c32af4e30e607440d",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
-                "cmdFileName": "odo-darwin-amd64-b4853e1fa"
+                "cmdFileName": "odo-darwin-amd64-e0cbb4b63"
             },
             "darwin-arm64": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-arm64-b4853e1fa.tar.gz",
-                "sha256sum": "27dd296441dbc5c0c7b81bb01d88a16ca781dbb5e10236506e6743cc1c9739a9",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-arm64-e0cbb4b63.tar.gz",
+                "sha256sum": "5c20bbe9f87e9cfd67ac13e7b54bd94259569576d75e00c4e6a36394ed8dece6",
                 "dlFileName": "odo-darwin-arm64.tar.gz",
-                "cmdFileName": "odo-darwin-arm64-b4853e1fa"
+                "cmdFileName": "odo-darwin-arm64-e0cbb4b63"
             },
             "linux": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-amd64-b4853e1fa.tar.gz",
-                "sha256sum": "b0f66d9290d642a18d0de533610273bf2876f2b021edd56a4cb6da26e81bb628",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-amd64-e0cbb4b63.tar.gz",
+                "sha256sum": "f48c815454a0b365382cdd73706e08e93d91553847f2ffc20ec7ff027fc30e24",
                 "dlFileName": "odo-linux-amd64.tar.gz",
-                "cmdFileName": "odo-linux-amd64-b4853e1fa"
+                "cmdFileName": "odo-linux-amd64-e0cbb4b63"
             },
             "linux-arm64": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-b4853e1fa.tar.gz",
-                "sha256sum": "a78b8f3b1d82b741cf51ced436d68578d4d63238bed192cdc927b67c2c911ac6",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-e0cbb4b63.tar.gz",
+                "sha256sum": "7fa03579cfe155835f0bb2ebf634a5e7ce61b138880fd725808cd0411830a1ca",
                 "dlFileName": "odo-linux-arm64.tar.gz",
-                "cmdFileName": "odo-linux-arm64-b4853e1fa"
+                "cmdFileName": "odo-linux-arm64-e0cbb4b63"
             }
         }
     },
