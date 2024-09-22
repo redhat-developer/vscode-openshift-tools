@@ -188,6 +188,9 @@
 		"xterm-addon-web-links": "^0.9.0",
 		"xterm-addon-webgl": "^0.16.0"
 	},
+	"overrides": {
+		"tough-cookie": "^5.0.0"
+	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
 		"onView:extension.vsKubernetesExplorer",
