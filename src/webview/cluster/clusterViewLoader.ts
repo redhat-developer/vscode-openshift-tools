@@ -2,19 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { CoreV1Api } from '@kubernetes/client-node';
 import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { clearInterval } from 'timers';
 import * as vscode from 'vscode';
 import { CommandText } from '../../base/command';
-import { Oc } from '../../oc/ocWrapper';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
 import { ExtCommandTelemetryEvent } from '../../telemetry';
 import { ChildProcessUtil } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
-import { KubeConfigUtils } from '../../util/kubeUtils';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
@@ -116,12 +114,35 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 } else {
                     if (signupStatus.status.ready) {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+                        const makeCoreV1ApiClient = ((proxy: string, username: string, accessToken: string): CoreV1Api => {
+                            const kcu = Cluster.prepareSSOInKubeConfig(proxy, username, accessToken);
+                            const apiClient = new CoreV1Api(proxy);
+                                apiClient.setDefaultAuthentication(kcu);
+                                return apiClient;
+                            });
+                        const pipelineAccountToken = await Cluster.getPipelineServiceAccountToken(
+                                makeCoreV1ApiClient(signupStatus.proxyURL, signupStatus.compliantUsername,
+                                    (sessionCheck as any).idToken),
+                                signupStatus.compliantUsername);
                         let errCode = '';
-                        if (!Cluster.validateLoginToken((await vscode.env.clipboard.readText()).trim())) {
-                            errCode = 'invalidToken';
+                        if (!pipelineAccountToken) { // Try loging in using a token from the Clipboard
+                            if (!Cluster.validateLoginToken((await vscode.env.clipboard.readText()).trim())) {
+                                errCode = 'invalidToken';
+                            }
                         }
-                        await panel.webview.postMessage({ action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode });
-                        await pollClipboard(signupStatus);
+                        await panel.webview.postMessage({
+                            action: 'sandboxPageProvisioned',
+                            statusInfo: signupStatus.compliantUsername,
+                            usePipelineToken: (pipelineAccountToken),
+                            consoleDashboard: signupStatus.consoleURL,
+                            apiEndpoint: signupStatus.apiEndpoint,
+                            apiEndpointProxy: signupStatus.proxyURL,
+                            oauthTokenEndpoint: oauthInfo.token_endpoint,
+                            errorCode: errCode
+                        });
+                        if (!pipelineAccountToken) { // Try loging in using a token from the Clipboard
+                            await pollClipboard(signupStatus);
+                        }
                     } else {
                         // cluster is not ready and the reason is
                         if (signupStatus.status.verificationRequired) {
@@ -189,22 +210,23 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
                 if (result) void vscode.window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
-                const timeout = setInterval(() => {
-                    const currentUser = new KubeConfigUtils().getCurrentUser();
-                    if (currentUser) {
-                        clearInterval(timeout);
-                        const projectPrefix = currentUser.name.substring(
-                            0,
-                            currentUser.name.indexOf('/'),
-                        );
-                        void Oc.Instance.getProjects().then((projects) => {
-                            const userProject = projects.find((project) =>
-                                project.name.includes(projectPrefix),
-                            );
-                            void Oc.Instance.setProject(userProject.name);
-                        });
-                    }
-                }, 1000);
+            } catch (err) {
+                void vscode.window.showErrorMessage(err.message);
+                telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
+            }
+            break;
+        }
+        case 'sandboxLoginUsingPipelineToken': {
+            const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingPipelineToken');
+            try {
+                const result = await Cluster.loginUsingPipelineServiceAccountToken(
+                    event.payload.apiEndpointUrl,
+                    event.payload.apiEndpointProxy,
+                    event.payload.username,
+                    (sessionCheck as any).idToken
+                );
+                if (result) void vscode.window.showInformationMessage(`${result}`);
+                telemetryEventLoginToSandbox.send();
             } catch (err) {
                 void vscode.window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
@@ -219,16 +241,27 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
 
 async function pollClipboard(signupStatus) {
     const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
+    let firstPoll = true;
     while (panel) {
         const previousContent = (await vscode.env.clipboard.readText()).trim();
         await new Promise(r => setTimeout(r, 500));
         const currentContent = (await vscode.env.clipboard.readText()).trim();
-        if (previousContent && previousContent !== currentContent) {
+        if (firstPoll || (previousContent && previousContent !== currentContent)) {
+            firstPoll = false;
             let errCode = '';
             if (!Cluster.validateLoginToken(currentContent)){
                 errCode = 'invalidToken';
             }
-            void panel.webview.postMessage({action: 'sandboxPageProvisioned', statusInfo: signupStatus.username, consoleDashboard: signupStatus.consoleURL, apiEndpoint: signupStatus.apiEndpoint, oauthTokenEndpoint: oauthInfo.token_endpoint, errorCode: errCode});
+            void panel.webview.postMessage({
+                    action: 'sandboxPageProvisioned',
+                    statusInfo: signupStatus.username,
+                    usePipelineToken: false,
+                    consoleDashboard: signupStatus.consoleURL,
+                    apiEndpoint: signupStatus.apiEndpoint,
+                    apiEndpointProxy: signupStatus.proxyURL,
+                    oauthTokenEndpoint: oauthInfo.token_endpoint,
+                    errorCode: errCode
+                });
         }
     }
 }
@@ -368,13 +401,32 @@ export default class ClusterViewLoader {
         }
     }
 
+    /**
+     * Cleans up the CRC configuration settings.
+     *
+     * This is a workarount to https://github.com/redhat-developer/vscode-openshift-tools/issues/4411
+     * After the CRC setting values are removed, if the 'openshiftToolkit' object exists in 'settings.json',
+     * containing the same settings as the CRC ones, the new values will be written AFTER the mensioned object,
+     * so their values will override the ones defined in the object.
+     */
+    static async clearCrcSettings() {
+        const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
+        await cfg.update('crcBinaryLocation', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcPullSecretPath', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcCpuCores', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcMemoryAllocated', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcNameserver', undefined); // Previously it was saved as `Workspace`
+        await cfg.update('crcNameserver', undefined, vscode.ConfigurationTarget.Global);
+    }
+
     static async crcSaveSettings(event) {
+        await ClusterViewLoader.clearCrcSettings();
         const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
         await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
         await cfg.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
         await cfg.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
         await cfg.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
-        await cfg.update('crcNameserver', event.nameserver);
+        await cfg.update('crcNameserver', event.nameserver, vscode.ConfigurationTarget.Global);
     }
 
     static async loadView(title: string): Promise<vscode.WebviewPanel> {

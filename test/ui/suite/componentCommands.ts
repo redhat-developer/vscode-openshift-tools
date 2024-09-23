@@ -16,6 +16,8 @@ import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshift
 import * as yml from 'js-yaml';
 import * as fs from 'fs';
 import * as pth from 'path';
+import { reloadWindow } from '../common/overdrives';
+import { itemExists } from '../common/conditions';
 
 export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
@@ -38,7 +40,15 @@ export function testComponentCommands(path: string) {
                 await (await view.getContent().getSection(item)).collapse();
             }
 
+            //expect component is running
             section = await view.getContent().getSection(VIEWS.components);
+            const item = await itemExists(`${componentName} (dev running)`, section);
+            expect(item).is.not.undefined;
+        });
+
+        after(async function () {
+            //close openshift terminal
+            await reloadWindow();
         });
 
         it('Commands are listed', async function () {

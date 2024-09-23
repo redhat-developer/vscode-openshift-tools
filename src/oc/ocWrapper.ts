@@ -9,10 +9,10 @@ import * as tmp from 'tmp';
 import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel, ExecutionContext } from '../cli';
+import { CliExitData } from '../util/childProcessUtil';
 import { isOpenShiftCluster, KubeConfigUtils } from '../util/kubeUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
-import { CliExitData } from '../util/childProcessUtil';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -612,8 +612,10 @@ export class Oc {
             const currentUser = kcu.getCurrentUser();
             if (currentUser) {
                 const projectPrefix = currentUser.name.substring(0, currentUser.name.indexOf('/'));
-                if (projectPrefix.length > 0) {
-                    activeProject = fixedProjects.find((project) => project.name.includes(projectPrefix));
+                const matches = projectPrefix.match(/^system:serviceaccount:([a-zA-Z-_.]+-dev):pipeline$/);
+                const projectName = matches ? matches[1] : projectPrefix;
+                if (projectName.length > 0) {
+                    activeProject = fixedProjects.find((project) => project.name.includes(projectName));
                     if (activeProject) {
                         activeProject.active = true;
                         void Oc.Instance.setProject(activeProject.name, executionContext);

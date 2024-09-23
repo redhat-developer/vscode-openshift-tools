@@ -334,7 +334,7 @@ export class Component extends OpenShiftItem {
         await Component.devRunOn(component, undefined, true);
     }
 
-    static async devRunOn(component: ComponentWorkspaceFolder, runOn?: undefined | 'podman', manualRebuild: boolean = false) {
+    static async devRunOn(component: ComponentWorkspaceFolder, runOn?: 'podman', manualRebuild: boolean = false) {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;

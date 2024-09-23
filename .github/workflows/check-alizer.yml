@@ -1,0 +1,75 @@
+name: check-alizer
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+jobs:
+  check-alizer-repo:
+    runs-on: ubuntu-latest
+    env:
+        TOOL_REPO: devfile/alizer
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Get latest Alizer version
+        run: |
+          echo "REPO_ALIZER_VERSION=$(cat src/tools.json | jq -r .alizer.version)" >> $GITHUB_ENV
+          LATEST_TOOL_RELEASE_RESP=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName,url)
+          echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName)" >> $GITHUB_ENV
+          echo "LATEST_TOOL_VERSION=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
+          echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
+      - name: Find existing PR for Alizer version
+        if: ${{ (env.LATEST_TOOL_VERSION != '') }}
+        run: |
+          if [[ "${{ env.LATEST_TOOL_VERSION != env.REPO_HELM_VERSION }}" == "true" ]]; then
+            prFound=$(gh pr --repo ${{ github.repository }} list --state all --search "update alizer cli to ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length)
+            if [[ $prFound == 0 ]]; then
+              echo SHOULD_UPDATE=true >> $GITHUB_ENV
+            fi
+          fi
+      - name: Update src/tools.json with latest Alizer version
+        if: ${{ env.SHOULD_UPDATE == 'true' }}
+        run: |
+          jq --indent 4 '.alizer.description = "Alizer CLI tool"' src/tools.json \
+            | jq --indent 4 '.alizer.vendor = "The Devfile Project"' \
+            | jq --indent 4 '.alizer.name = "alizer"' \
+            | jq --indent 4 '.alizer.version = "${{ env.LATEST_TOOL_VERSION }}"' \
+            | jq --indent 4 '.alizer.versionRange = "^${{ env.LATEST_TOOL_VERSION }}"' \
+            | jq --indent 4 '.alizer.versionRangeLabel = "version >= ${{ env.LATEST_TOOL_VERSION }}"' > src/tools.json.new
+          mv src/tools.json.new src/tools.json
+          for platform in win32 darwin darwin-arm64 linux linux-arm64; do
+            pltfrm="$platform"
+            ext=""
+            exeExt=""
+            if [[ "$platform" == "win"* ]]; then
+              pltfrm="windows"
+              ext=".exe"
+              exeExt=".exe"
+            fi
+            arch="-amd64"
+            if [[ $platform == *"-a"* ]]; then
+              arch="" # already in platform string
+            fi
+
+            new_url="https://github.com/devfile/alizer/releases/download/${{ env.LATEST_TOOL_RELEASE }}/alizer-${{ env.LATEST_TOOL_RELEASE }}-${pltfrm}${arch}${ext}"
+            checksum=`curl -s -L ${new_url}.sha256 | sed -e 's/\s.*$//'`
+            dlFileName="alizer-${pltfrm}${arch}${ext}"
+            cmdFileName="alizer${exeExt}"
+
+            jq --indent 4 ".alizer.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json \
+              | jq --indent 4 ".alizer.platform[\"${platform}\"].sha256sum = \"${checksum}\"" \
+              | jq --indent 4 ".alizer.platform[\"${platform}\"].dlFileName = \"${dlFileName}\"" \
+              | jq --indent 4 ".alizer.platform[\"${platform}\"].cmdFileName = \"${cmdFileName}\"" > src/tools.json.new > src/tools.json.new
+            mv src/tools.json.new src/tools.json
+          done
+      - name: Create pull request
+        if: ${{ env.SHOULD_UPDATE == 'true' }}
+        run: |
+          git config --global user.email "openshifttools-bot@users.noreply.github.com"
+          git config --global user.name "openshifttools-bot"
+          git checkout -b "bump-alizer-${{ env.LATEST_TOOL_RELEASE }}"
+          git commit -am "Update Alizer CLI to ${{ env.LATEST_TOOL_RELEASE }}"
+          git push origin "bump-alizer-${{ env.LATEST_TOOL_RELEASE }}"
+          gh pr create --title "Update Alizer CLI to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"

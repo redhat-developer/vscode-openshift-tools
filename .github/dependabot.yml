@@ -24,3 +24,6 @@ updates:
       patterns:
       - "survey-core"
       - "survey-react-ui"
+    uiw:
+      patterns:
+      - "@uiw/*"

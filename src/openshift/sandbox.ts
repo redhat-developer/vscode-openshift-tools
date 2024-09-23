@@ -28,6 +28,7 @@ export interface SBSignupResponse {
   givenName: string;
   status: SBStatus;
   username: string;
+  proxyURL: string;
 }
 
 export interface SBResponseData {

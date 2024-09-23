@@ -98,9 +98,11 @@ class OpenShiftTerminal {
 
     private _terminalRendering = false;
 
-    private _buffer: Buffer;
+    private _buffer: Uint8Array;
 
     private _isKnative: boolean;
+
+    private _encoder = new TextEncoder();
 
     /**
      * Creates a new OpenShiftTerminal
@@ -151,7 +153,7 @@ class OpenShiftTerminal {
         this._headlessTerm = new Terminal({ allowProposedApi: true });
         this._termSerializer = new SerializeAddon();
         this._headlessTerm.loadAddon(this._termSerializer);
-        this._buffer = Buffer.from('');
+        this._buffer = Uint8Array.from(this._encoder.encode(''));
 
         this._disposables.push(this._headlessTerm);
         this._disposables.push(this._termSerializer);
@@ -187,7 +189,7 @@ class OpenShiftTerminal {
                     this._headlessTerm.write(data);
                     this._onTextListener(data);
                 } else {
-                    this._buffer = Buffer.concat([this._buffer, Buffer.from(data)]);
+                    this._buffer = Uint8Array.from([...this._buffer, ...Uint8Array.from(this._encoder.encode(data))]);
                     this._onTextListener(data);
                 }
             }),
@@ -274,7 +276,7 @@ class OpenShiftTerminal {
             this._headlessTerm.write(this._buffer, () => {
                 resolve(this._termSerializer.serialize());
             });
-            this._buffer = Buffer.from('');
+            this._buffer = Uint8Array.from(this._encoder.encode(''));
         });
     }
 

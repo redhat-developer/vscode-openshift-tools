@@ -10,34 +10,34 @@
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-windows-amd64-b4853e1fa.zip",
-                "sha256sum": "c807d9a023ef831b78b98c15ad70bf50827a42e66aa144e313b863a2f5242e4a",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-windows-amd64-e0cbb4b63.zip",
+                "sha256sum": "c565771ef47cd32f0ad5828c851eccdd08f978932a45b2ada28b5a92417c4981",
                 "dlFileName": "odo-windows-amd64.zip",
-                "cmdFileName": "odo-windows-amd64-b4853e1fa.exe"
+                "cmdFileName": "odo-windows-amd64-e0cbb4b63.exe"
             },
             "darwin": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-amd64-b4853e1fa.tar.gz",
-                "sha256sum": "14b13bb071ecac5b0234419ea7ca65a069660c3246025cbaf03f01d5fc89ef92",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-amd64-e0cbb4b63.tar.gz",
+                "sha256sum": "f5c2843f95ff61ebb51c11d37715638889933c317513f89c32af4e30e607440d",
                 "dlFileName": "odo-darwin-amd64.tar.gz",
-                "cmdFileName": "odo-darwin-amd64-b4853e1fa"
+                "cmdFileName": "odo-darwin-amd64-e0cbb4b63"
             },
             "darwin-arm64": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-arm64-b4853e1fa.tar.gz",
-                "sha256sum": "27dd296441dbc5c0c7b81bb01d88a16ca781dbb5e10236506e6743cc1c9739a9",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-darwin-arm64-e0cbb4b63.tar.gz",
+                "sha256sum": "5c20bbe9f87e9cfd67ac13e7b54bd94259569576d75e00c4e6a36394ed8dece6",
                 "dlFileName": "odo-darwin-arm64.tar.gz",
-                "cmdFileName": "odo-darwin-arm64-b4853e1fa"
+                "cmdFileName": "odo-darwin-arm64-e0cbb4b63"
             },
             "linux": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-amd64-b4853e1fa.tar.gz",
-                "sha256sum": "b0f66d9290d642a18d0de533610273bf2876f2b021edd56a4cb6da26e81bb628",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-amd64-e0cbb4b63.tar.gz",
+                "sha256sum": "f48c815454a0b365382cdd73706e08e93d91553847f2ffc20ec7ff027fc30e24",
                 "dlFileName": "odo-linux-amd64.tar.gz",
-                "cmdFileName": "odo-linux-amd64-b4853e1fa"
+                "cmdFileName": "odo-linux-amd64-e0cbb4b63"
             },
             "linux-arm64": {
-                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-b4853e1fa.tar.gz",
-                "sha256sum": "a78b8f3b1d82b741cf51ced436d68578d4d63238bed192cdc927b67c2c911ac6",
+                "url": "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-e0cbb4b63.tar.gz",
+                "sha256sum": "7fa03579cfe155835f0bb2ebf634a5e7ce61b138880fd725808cd0411830a1ca",
                 "dlFileName": "odo-linux-arm64.tar.gz",
-                "cmdFileName": "odo-linux-arm64-b4853e1fa"
+                "cmdFileName": "odo-linux-arm64-e0cbb4b63"
             }
         }
     },
@@ -46,39 +46,39 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.16.8",
-        "versionRange": "^4.16.8",
-        "versionRangeLabel": "version >= 4.16.8 and < 5.0.0",
+        "version": "4.16.11",
+        "versionRange": "^4.16.11",
+        "versionRangeLabel": "version >= 4.16.11 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.8/openshift-client-windows-4.16.8.zip",
-                "sha256sum": "2678eed7f689edd1990bb6d9887b4fd36ed1d0354a1737f1bdc95d270e1eabfb",
-                "dlFileName": "openshift-client-windows-4.16.8.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.11/openshift-client-windows-4.16.11.zip",
+                "sha256sum": "345261cce3507011d1eaeb0dc2fedbfdbb6d7156894aa924a50134cd0c1a2cf9",
+                "dlFileName": "openshift-client-windows-4.16.11.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.8/openshift-client-mac-4.16.8.tar.gz",
-                "sha256sum": "c70aa3adcc3bcef79d1e713f2b76126d71fd244376a8af46c81501f299961920",
-                "dlFileName": "openshift-client-mac-4.16.8.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.11/openshift-client-mac-4.16.11.tar.gz",
+                "sha256sum": "cd010fa688a82584f77777086190c64cb9934a1254e29acca98272df8c072cd4",
+                "dlFileName": "openshift-client-mac-4.16.11.tar.gz",
                 "cmdFileName": "oc"
             },
             "darwin-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.8/openshift-client-mac-arm64-4.16.8.tar.gz",
-                "sha256sum": "75d751095111d5114a9b2daabafffb09e434373b80b1b844dc12f8a854606890",
-                "dlFileName": "openshift-client-mac-arm64-4.16.8.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.11/openshift-client-mac-arm64-4.16.11.tar.gz",
+                "sha256sum": "2ca6cca8ccb568a1569f56e06c4f9a532570df044a9160785d8d4a0a75e95613",
+                "dlFileName": "openshift-client-mac-arm64-4.16.11.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.8/openshift-client-linux-4.16.8.tar.gz",
-                "sha256sum": "81705325ff295ac5676cad19b347758fb8dde77bae5c96472fd0f7431ff42335",
-                "dlFileName": "openshift-client-linux-4.16.8.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.11/openshift-client-linux-4.16.11.tar.gz",
+                "sha256sum": "410edc337c2f158ec1ff6fa4ce188e84a2b9fbccd73c3d12a05170988fa79ce3",
+                "dlFileName": "openshift-client-linux-4.16.11.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.8/openshift-client-linux-arm64-4.16.8.tar.gz",
-                "sha256sum": "8e5f7ab0506e46cb2b5b6d9c7b767a38292baef9917b3a169a4004f1c3c67935",
-                "dlFileName": "openshift-client-linux-arm64-4.16.8.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.11/openshift-client-linux-arm64-4.16.11.tar.gz",
+                "sha256sum": "d908daffd60e6099f422377fd4571441e3ee2f64f26350700ce1dcde41dc5f1c",
+                "dlFileName": "openshift-client-linux-arm64-4.16.11.tar.gz",
                 "cmdFileName": "oc"
             }
         }
@@ -87,40 +87,40 @@
         "description": "Function CLI tool",
         "vendor": "Red Hat, Inc.",
         "name": "func",
-        "version": "1.15.0",
-        "versionRange": "^1.15.0",
-        "versionRangeLabel": "version >= 1.15.0",
+        "version": "1.15.1",
+        "versionRange": "^1.15.1",
+        "versionRangeLabel": "version >= 1.15.1",
         "dlFileName": "func",
         "cmdFileName": "func",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.15.0/func_windows_amd64.exe",
-                "sha256sum": "9c8f16d7edeb5e486b77c25226e11b344790d5571587f21095913464127f8f7f",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.15.1/func_windows_amd64.exe",
+                "sha256sum": "732c7becb67cb907331964e02b0b54048f50a8739d2983701d0b73d6e8ab4173",
                 "dlFileName": "func_windows_amd64.exe",
                 "cmdFileName": "func.exe"
             },
             "darwin": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.15.0/func_darwin_amd64",
-                "sha256sum": "74df62ba963a75cee38004e6c7ba734bd6b2038452ab943c9ff7ec53d139c17c",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.15.1/func_darwin_amd64",
+                "sha256sum": "c7f48263c9ec083edd60d2e63c924230576d99126f8ed4f674e707bf4e8054b1",
                 "dlFileName": "func_darwin_amd64",
                 "cmdFileName": "func"
             },
             "darwin-arm64": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.15.0/func_darwin_arm64",
-                "sha256sum": "857b437e93f0124e4b646e937281dc6a10dd6c05b64861e1482af0184fd7faa1",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.15.1/func_darwin_arm64",
+                "sha256sum": "e3805e39470b33c649a11f85b756a166badc134cc88bd7870882732c06cbd1d6",
                 "dlFileName": "func_darwin_arm64",
                 "cmdFileName": "func"
             },
             "linux": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.15.0/func_linux_amd64",
-                "sha256sum": "4860015dbd83c582d9ed5751ebfd814e68cd19639fb82ca65fa2f003b0aecdfc",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.15.1/func_linux_amd64",
+                "sha256sum": "a7821788741358b8dfb565ddaa584298d92c1126c3eb459104263dafe8a3ef3d",
                 "dlFileName": "func_linux_amd64",
                 "cmdFileName": "func"
             },
             "linux-arm64": {
-                "url": "https://github.com/knative/func/releases/download/knative-v1.15.0/func_linux_arm64",
-                "sha256sum": "3e189118c864d6e23ff162d0a840d28032cba9eb7b3cf3b7fa33afce84696454",
+                "url": "https://github.com/knative/func/releases/download/knative-v1.15.1/func_linux_arm64",
+                "sha256sum": "fdcbdc5673532d89e2441e2d3566c077acea776ab011149965b6895c0a7323ee",
                 "dlFileName": "func_linux_arm64",
                 "cmdFileName": "func"
             }
@@ -130,43 +130,43 @@
         "description": "Helm CLI tool",
         "vendor": "The Helm Project",
         "name": "helm",
-        "version": "3.15.4",
-        "versionRange": "^3.15.4",
-        "versionRangeLabel": "version >= 3.15.4",
+        "version": "3.16.1",
+        "versionRange": "^3.16.1",
+        "versionRangeLabel": "version >= 3.16.1",
         "dlFileName": "helm",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://get.helm.sh/helm-v3.15.4-windows-amd64.zip",
-                "sha256sum": "023b96f02e812cda1a1d5c950cb321834a56f4a50ca90146ff447a81be0ae5b6",
+                "url": "https://get.helm.sh/helm-v3.16.1-windows-amd64.zip",
+                "sha256sum": "89952ea1bace0a9498053606296ea03cf743c48294969dfc731e7f78d1dc809a",
                 "dlFileName": "helm-windows-amd64.zip",
                 "cmdFileName": "helm.exe",
                 "filePrefix": "windows-amd64/"
             },
             "darwin": {
-                "url": "https://get.helm.sh/helm-v3.15.4-darwin-amd64.tar.gz",
-                "sha256sum": "1bc3f354f7ce4d7fd9cfa5bcc701c1f32c88d27076d96c2792d5b5226062aee5",
+                "url": "https://get.helm.sh/helm-v3.16.1-darwin-amd64.tar.gz",
+                "sha256sum": "1b194824e36da3e3889920960a93868b541c7888c905a06757e88666cfb562c9",
                 "dlFileName": "helm-darwin-amd64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "darwin-amd64/"
             },
             "darwin-arm64": {
-                "url": "https://get.helm.sh/helm-v3.15.4-darwin-arm64.tar.gz",
-                "sha256sum": "88115846a1fb58f8eb8f64fec5c343d95ca394f1be811602fa54a887c98730ac",
+                "url": "https://get.helm.sh/helm-v3.16.1-darwin-arm64.tar.gz",
+                "sha256sum": "405a3b13f0e194180f7b84010dfe86689d7703e80612729882ad71e2a4ef3504",
                 "dlFileName": "helm-darwin-arm64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "darwin-arm64/"
             },
             "linux": {
-                "url": "https://get.helm.sh/helm-v3.15.4-linux-amd64.tar.gz",
-                "sha256sum": "11400fecfc07fd6f034863e4e0c4c4445594673fd2a129e701fe41f31170cfa9",
+                "url": "https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz",
+                "sha256sum": "e57e826410269d72be3113333dbfaac0d8dfdd1b0cc4e9cb08bdf97722731ca9",
                 "dlFileName": "helm-linux-amd64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "linux-amd64/"
             },
             "linux-arm64": {
-                "url": "https://get.helm.sh/helm-v3.15.4-linux-arm64.tar.gz",
-                "sha256sum": "fa419ecb139442e8a594c242343fafb7a46af3af34041c4eac1efcc49d74e626",
+                "url": "https://get.helm.sh/helm-v3.16.1-linux-arm64.tar.gz",
+                "sha256sum": "780b5b86f0db5546769b3e9f0204713bbdd2f6696dfdaac122fbe7f2f31541d2",
                 "dlFileName": "helm-linux-arm64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "linux-arm64/"
@@ -177,36 +177,41 @@
         "description": "Alizer CLI tool",
         "vendor": "The Devfile Project",
         "name": "alizer",
-        "version": "1.6.0",
-        "versionRange": "^1.6.0",
-        "versionRangeLabel": "version >= 1.6.0",
+        "version": "1.6.2",
+        "versionRange": "^1.6.2",
+        "versionRangeLabel": "version >= 1.6.2",
         "dlFileName": "alizer",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-windows-amd64.exe",
-                "dlFileName": "alizer_windows_amd64.exe",
-                "cmdFileName": "alizer.exe"
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.2/alizer-v1.6.2-windows-amd64.exe",
+                "dlFileName": "alizer-windows-amd64.exe",
+                "cmdFileName": "alizer.exe",
+                "sha256sum": "0ea37abd36de00119789980b68852ba48fa547611d313005a94061af7ad461c8"
             },
             "darwin": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-darwin-amd64",
-                "dlFileName": "alizer_darwin_amd64",
-                "cmdFileName": "alizer"
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.2/alizer-v1.6.2-darwin-amd64",
+                "dlFileName": "alizer-darwin-amd64",
+                "cmdFileName": "alizer",
+                "sha256sum": "abc9c7d091ca2caccc20af25951de089bfe3d911c7b3c0be6f3e887860d64424"
             },
             "darwin-arm64": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-darwin-arm64",
-                "dlFileName": "alizer_darwin_arm64",
-                "cmdFileName": "alizer"
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.2/alizer-v1.6.2-darwin-arm64",
+                "dlFileName": "alizer-darwin-arm64",
+                "cmdFileName": "alizer",
+                "sha256sum": "589f110134b9672a8358680227882e801dd698eae2491c9c4e4b86b752bd9e58"
             },
             "linux": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-linux-amd64",
-                "dlFileName": "alizer_linux_amd64",
-                "cmdFileName": "alizer"
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.2/alizer-v1.6.2-linux-amd64",
+                "dlFileName": "alizer-linux-amd64",
+                "cmdFileName": "alizer",
+                "sha256sum": "9f9b36951f2c5852e8ef00f46a9878de1f0115bd866f178bfe916b02dc368e5e"
             },
             "linux-arm64": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.6.0/alizer-v1.6.0-linux-arm64",
-                "dlFileName": "alizer_linux_arm64",
-                "cmdFileName": "alizer"
+                "url": "https://github.com/devfile/alizer/releases/download/v1.6.2/alizer-v1.6.2-linux-arm64",
+                "dlFileName": "alizer-linux-arm64",
+                "cmdFileName": "alizer",
+                "sha256sum": "7d45411bfc58e55a1ae9fa2bca2936faf8170da5ab564a513005e2e749097a39"
             }
         }
     },

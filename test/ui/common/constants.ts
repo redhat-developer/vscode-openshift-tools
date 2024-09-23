@@ -41,8 +41,10 @@ export const INPUTS = {
 
 export const MENUS = {
     newProject: 'New Project',
+    newNamespace: 'New Namespace',
     delete: 'Delete',
     deleteProject: 'Delete Project',
+    deleteNamespace: 'Delete Namespace',
     bindService: 'Bind Service',
     startDev: 'Start Dev',
     startDevPodman: 'Start Dev on Podman',
@@ -54,6 +56,8 @@ export const MENUS = {
     debug: 'Debug',
     deleteConfiguration: 'Delete Component Configuration',
     deleteSourceCodeFolder: 'Delete Source Code Folder',
+    create: 'Create...',
+    createOperatorBackedService: 'Create Operator-Backed Service'
 };
 
 export const COMPONENTS = {
@@ -65,11 +69,16 @@ export const COMPONENTS = {
 export const NOTIFICATIONS = {
     deleteProjectWarning: (projectName: string) =>
         `Do you want to delete Project '${projectName}'?`,
+    deleteNamespaceWarning: (namespaceName: string) =>
+        `Do you want to delete Namespace '${namespaceName}'?`,
     projectDeleteSuccess: (projectName: string) => `Project '${projectName}' successfully deleted`,
+    namespaceDeleteSuccess: (projectName: string) => `Namespace '${projectName}' successfully deleted`,
     savePasswordPrompt: 'Do you want to save username and password?',
     loginSuccess: (cluster: string) => `Successfully logged in to '${cluster}'`,
     doYouWantLogOut: 'Do you want to logout of cluster?',
     logoutSuccess: 'Successfully logged out. Do you want to login to a new cluster',
     deleteConfig: (path: string) => `Are you sure you want to delete the configuration for the component ${path}? OpenShift Toolkit will no longer recognize the project as a component.`,
     deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
+    serviceCreated: (name: string) => `Service ${name} successfully created.`,
+    lookingForBindableServices: 'Looking for bindable services',
 };
