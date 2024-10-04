@@ -293,23 +293,19 @@ export function HelmSearch(props: HelmSearchProps) {
 
     React.useEffect(() => {
         // Wait for the component to mount
-        const selectFirstNode = () => {
-            if (!isOtherTreeElementSelected) {
-                // Programmatically focus and click the first item when the component mounts
-                const api = treeViewRef.current;
-                if (api) {
-                    // Focus the first node manually by using the nodeId of the first item
-                    const firstNodeId = treeViewItems[0].id; // Accessing the first item's id
-                    api.focusItem(undefined, firstNodeId); // Focus the first node
-                    api.selectItem({
-                        event: undefined, itemId: firstNodeId,
-                        keepExistingSelection: false, shouldBeSelected: true
-                    }); //select the first node
-                }
+        if (!isOtherTreeElementSelected) {
+            // Programmatically focus and click the first item when the component mounts
+            const api = treeViewRef.current;
+            if (api) {
+                // Focus the first node manually by using the nodeId of the first item
+                const firstNodeId = treeViewItems[0].id; // Accessing the first item's id
+                api.focusItem(undefined, firstNodeId); // Focus the first node
+                api.selectItem({
+                    event: undefined, itemId: firstNodeId,
+                    keepExistingSelection: false, shouldBeSelected: true
+                }); //select the first node
             }
-        };
-
-        selectFirstNode();
+        }
     }, [treeViewItems, isOtherTreeElementSelected]);
 
     const activeProviderTypes = providerTypeEnabled //
