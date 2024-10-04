@@ -4,6 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { createTheme, PaletteMode, Theme } from '@mui/material';
+import { vscodeDarkInit, vscodeLightInit } from '@uiw/codemirror-theme-vscode';
 
 // in order to add custom named colours for use in Material UI's `color` prop,
 // you need to use module augmentation.
@@ -175,3 +176,33 @@ export function createVSCodeTheme(paletteMode: PaletteMode): Theme {
         },
     });
 }
+
+export const vsDarkCodeMirrorTheme = vscodeDarkInit({
+    settings: {
+        background: 'var(--vscode-editor-background)',
+        foreground: 'var(--vscode-editor-foreground)',
+        caret: 'var(--vscode-editorCursor-foreground)',
+        selection: 'var(--vscode-editor-selectionBackground)',
+        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
+        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
+        gutterBackground: 'var(--vscode-editorGutter-background)',
+        gutterForeground: 'var(--vscode-editorHint-foreground)',
+        fontFamily: 'var(--vscode-editor-font-family)',
+        fontSize: 'var(--vscode-editor-font-size)'
+    }
+});
+
+export const vsLightCodeMirrorTheme = vscodeLightInit({
+    settings: {
+        background: 'var(--vscode-editor-background)',
+        foreground: 'var(--vscode-editor-foreground)',
+        caret: 'var(--vscode-editorCursor-foreground)',
+        selection: 'var(--vscode-editor-selectionBackground)',
+        selectionMatch: 'var(--vscode-editor-findMatchBackground)',
+        lineHighlight: 'var(--vscode-editor-lineHighlightBackground)',
+        gutterBackground: 'var(--vscode-editorGutter-background)',
+        gutterForeground: 'var(--vscode-editorHint-foreground)',
+        fontFamily: 'var(--vscode-editor-font-family)',
+        fontSize: 'var(--vscode-editor-font-size)'
+    }
+});
