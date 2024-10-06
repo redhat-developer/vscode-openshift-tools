@@ -190,7 +190,8 @@
 		"xterm-addon-webgl": "^0.16.0"
 	},
 	"overrides": {
-		"tough-cookie": "^5.0.0"
+		"tough-cookie": "^5.0.0",
+		"cookie": "0.7.1"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
