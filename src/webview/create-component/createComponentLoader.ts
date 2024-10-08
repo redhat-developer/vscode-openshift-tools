@@ -87,7 +87,7 @@ export default class CreateComponentLoader {
             void sendUpdatedRegistries(CreateComponentLoader.panel);
         });
 
-        const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
+        const capabilitiesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
             sendUpdatedCapabilities(CreateComponentLoader.panel);
         });
 
@@ -98,7 +98,7 @@ export default class CreateComponentLoader {
         panel.onDidDispose(() => {
             void sendTelemetry('newComponentClosed');
             tagsSubscription.unsubscribe();
-            capabiliiesySubscription.unsubscribe();
+            capabilitiesSubscription.unsubscribe();
             registriesSubscription.unsubscribe();
             colorThemeDisposable.dispose();
             messageHandlerDisposable.dispose();
