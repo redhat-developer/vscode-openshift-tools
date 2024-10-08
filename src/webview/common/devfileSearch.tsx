@@ -37,6 +37,7 @@ import { DevfileData, DevfileInfo, DevfileRegistryInfo } from '../../devfile-reg
 import { TemplateProjectIdentifier } from '../common/devfile';
 import { DevfileExplanation } from './devfileExplanation';
 import { DevfileListItem } from './devfileListItem';
+import { ErrorPage } from './errorPage';
 import { LoadScreen } from './loading';
 import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from './vscode-theme';
 
@@ -648,6 +649,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
     const [searchText, setSearchText] = React.useState('');
 
     const [showMore, setShowMore] = React.useState(false);
+    const [createComponentErrorMessage, setCreateComponentErrorMessage] = React.useState('');
 
     function respondToMessage(messageEvent: MessageEvent) {
         const message = messageEvent.data as Message;
@@ -655,6 +657,7 @@ export function DevfileSearch(props: DevfileSearchProps) {
             case 'devfileRegistries': {
                 setDevfileRegistries((_devfileRegistries) => message.data);
                 setDevfileInfos((_devfileInfos) => []);
+                setSelectedDevfileInfo((_unused) => undefined);
                 setSomeDevfileInfoRetrieved(_unused => false);
                 window.vscodeApi.postMessage({ action: 'getDevfileInfos' });
                 break;
@@ -670,6 +673,11 @@ export function DevfileSearch(props: DevfileSearchProps) {
             }
             case 'devfileTags': {
                 setDevfileTags((_devfileTags) => message.data);
+                break;
+            }
+            case 'createComponentFailed': {
+                setSomeDevfileInfoRetrieved(_unused => true);
+                setCreateComponentErrorMessage(message.data);
                 break;
             }
             default:
@@ -756,6 +764,18 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     if (!devfileTags) {
         return <LoadScreen title="Retrieving list of Devfile Tags..." />;
+    }
+
+    if (createComponentErrorMessage) {
+        return (
+            <>
+                <Stack direction="column" height="100%" spacing={0.5}>
+                    <ErrorPage
+                        message={`${createComponentErrorMessage}`}
+                    />
+                </Stack>
+            </>
+        );
     }
 
     const activeRegistries = registryEnabled //

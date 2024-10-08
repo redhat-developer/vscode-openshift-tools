@@ -166,11 +166,39 @@ export default class RegistryViewLoader {
         return vscode.extensions.getExtension(ExtensionID).extensionPath
     }
 
+    private static doUpdateRegistries() {
+        void sendUpdatedRegistries(RegistryViewLoader.panel).then((registries) => {
+            if (RegistryViewLoader.url) { // Update title if registry name for the URL provided has changed
+                const registryName = registries.find((registry) => registry.url === RegistryViewLoader.url)?.name;
+                if (registryName) {
+                    RegistryViewLoader.panel.title = `Devfile Registry - ${registryName}`;
+                } else {
+                    void RegistryViewLoader.panel.webview.postMessage({
+                        action: 'createComponentFailed',
+                        data: `No Devfile registries available for ${RegistryViewLoader.url}`
+                    });
+                    void vscode.window.showErrorMessage(
+                            `
+                            No Devfile registry available.
+                            Do you want to close the '${RegistryViewLoader.panel.title}' view?
+                            `,
+                            'Yes', 'No')
+                        .then((answer) => {
+                            if (answer === 'Yes') {
+                                void RegistryViewLoader.closeRegistryInWebview();
+                            }
+                        });
+                }
+            }
+        })
+    }
+
     static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfile-registry', 'app'));
         if (RegistryViewLoader.panel) {
             if (RegistryViewLoader.url !== url) {
                 RegistryViewLoader.url = url;
+                RegistryViewLoader.doUpdateRegistries();
             }
             // If we already have a panel, show it in the target column
             RegistryViewLoader.panel.reveal(vscode.ViewColumn.One);
@@ -187,14 +215,7 @@ export default class RegistryViewLoader {
             const messageDisposable = RegistryViewLoader.panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
 
             const registriesSubscription = ComponentTypesView.instance.subject.subscribe(() => {
-                void sendUpdatedRegistries(RegistryViewLoader.panel).then((registries) => {
-                        if (RegistryViewLoader.url) { // Update title if registry name for the URL provided has changed
-                            const registryName = registries.find((registry) => registry.url === RegistryViewLoader.url)?.name;
-                            if (registryName) {
-                                RegistryViewLoader.panel.title = `Devfile Registry - ${registryName}`;
-                            }
-                        }
-                    })
+                RegistryViewLoader.doUpdateRegistries();
             });
 
             const capabiliiesySubscription = ComponentTypesView.instance.subject.subscribe(() => {
