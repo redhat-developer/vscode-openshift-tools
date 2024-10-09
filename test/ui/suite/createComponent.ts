@@ -5,7 +5,6 @@
 
 import { expect } from 'chai';
 import * as fs from 'fs-extra';
-import { afterEach } from 'mocha';
 import * as pth from 'path';
 import {
     ActivityBar,
@@ -17,6 +16,7 @@ import {
     VSBrowser,
     WelcomeContentButton,
     Workbench,
+    afterEach
 } from 'vscode-extension-tester';
 import { notificationExists } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
@@ -231,12 +231,15 @@ export function testCreateComponent(path: string) {
 
         async function loadCreateComponentButton() {
             section = await view.getContent().getSection(VIEWS.components);
-            const buttons = await (await section.findWelcomeContent()).getButtons();
-            for (const btn of buttons) {
-                if ((await btn.getTitle()) === BUTTONS.newComponent) {
-                    button = btn;
+            await VSBrowser.instance.driver.wait( async () => {
+                const buttons = await (await section.findWelcomeContent()).getButtons();
+                for (const btn of buttons) {
+                    if ((await btn.getTitle()) === BUTTONS.newComponent) {
+                        button = btn;
+                        return true
+                    }
                 }
-            }
+            }, 10_000);
         }
     });
 }
