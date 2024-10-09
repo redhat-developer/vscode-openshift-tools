@@ -16,9 +16,16 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
         return await VSBrowser.instance.driver.wait(async () => {
             try {
                 await this.sendKeysToTerminal(copyKeys);
-                const cb = await import('clipboardy');
-                return await cb.read();
-            } catch {
+                const cb = (await import('clipboardy')).default;
+                /* eslint-disable no-console */
+                const cbText = cb.readSync();
+                console.log(`CB: ${cbText}`);
+                /* eslint-disable no-console */
+                // return cb.readSync();
+            } catch(err) {
+                /* eslint-disable no-console */
+                console.log(`CB ERROR: ${err}`);
+                /* eslint-disable no-console */
                 return null;
             }
         }, 10_000);
