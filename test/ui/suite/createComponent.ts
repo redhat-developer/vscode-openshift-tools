@@ -147,7 +147,7 @@ export function testCreateComponent(path: string) {
             await devfileView.initializeEditor();
             await devfileView.selectRegistryStack('Node.js Runtime');
             await new Promise((res) => {
-                setTimeout(res, 1_000);
+                setTimeout(res, 1_500);
             });
 
             //Initialize stack window and click Use Devfile
