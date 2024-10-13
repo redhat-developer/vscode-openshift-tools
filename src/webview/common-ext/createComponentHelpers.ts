@@ -160,7 +160,7 @@ export function validateName(name: string, isComponentBasedValidation = true): s
  */
 export function validatePortNumber(portNumber: number): string {
     let validationMessage: string | null;
-    const port = portNumber.toString();
+    const port = portNumber ? portNumber.toString() : '';
     if (NameValidator.emptyName('Empty', port) === null) {
         validationMessage = NameValidator.lengthName(
             'Port number length should be between 1-5 digits',
