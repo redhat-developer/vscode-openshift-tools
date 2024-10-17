@@ -230,10 +230,6 @@
 		"onCommand:openshift.component.describe",
 		"onCommand:openshift.component.openInBrowser",
 		"onCommand:openshift.component.describe.palette",
-		"onCommand:openshift.component.log",
-		"onCommand:openshift.component.log.palette",
-		"onCommand:openshift.component.followLog",
-		"onCommand:openshift.component.followLog.palette",
 		"onCommand:openshift.componentTypesView.registry.closeView",
 		"onCommand:openshift.component.debug",
 		"onCommand:openshift.component.debug.palette",
@@ -561,26 +557,6 @@
 			{
 				"command": "openshift.component.describe.palette",
 				"title": "Describe Component",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.log",
-				"title": "Show Log",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.log.palette",
-				"title": "Show Component Log",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.followLog",
-				"title": "Follow Log",
-				"category": "OpenShift"
-			},
-			{
-				"command": "openshift.component.followLog.palette",
-				"title": "Follow Component Log",
 				"category": "OpenShift"
 			},
 			{
@@ -1182,14 +1158,6 @@
 					"when": "view == openshiftComponentsView"
 				},
 				{
-					"command": "openshift.component.log",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
-					"command": "openshift.component.followLog",
-					"when": "view == openshiftProjectExplorer"
-				},
-				{
 					"command": "openshift.component.commands.command.run",
 					"when": "view == openshiftComponentsView"
 				},
@@ -1283,14 +1251,6 @@
 				},
 				{
 					"command": "openshift.component.describe.palette",
-					"when": "false"
-				},
-				{
-					"command": "openshift.component.followLog.palette",
-					"when": "false"
-				},
-				{
-					"command": "openshift.component.log.palette",
 					"when": "false"
 				},
 				{
@@ -1814,16 +1774,6 @@
 					"group": "c3@1"
 				},
 				{
-					"command": "openshift.component.log",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-					"group": "c3@2"
-				},
-				{
-					"command": "openshift.component.followLog",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
-					"group": "c3@3"
-				},
-				{
 					"command": "openshift.component.deleteConfigurationFiles",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
 					"group": "c3@4"
@@ -1959,7 +1909,7 @@
 				},
 				{
 					"command": "openshift.resource.watchLogs",
-					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm|pod)/"
+					"when": "view == openshiftProjectExplorer && viewItem =~ /^openshift\\.k8sObject\\.(?!helm)/"
 				},
 				{
 					"command": "openshift.deployment.shell",
