@@ -231,12 +231,15 @@ export function testCreateComponent(path: string) {
 
         async function loadCreateComponentButton() {
             section = await view.getContent().getSection(VIEWS.components);
-            const buttons = await (await section.findWelcomeContent()).getButtons();
-            for (const btn of buttons) {
-                if ((await btn.getTitle()) === BUTTONS.newComponent) {
-                    button = btn;
+            await VSBrowser.instance.driver.wait( async () => {
+                const buttons = await (await section.findWelcomeContent()).getButtons();
+                for (const btn of buttons) {
+                    if ((await btn.getTitle()) === BUTTONS.newComponent) {
+                        button = btn;
+                        return true
+                    }
                 }
-            }
+            }, 10_000);
         }
     });
 }
