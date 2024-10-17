@@ -30,7 +30,6 @@ const { expect } = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Component', function () {
-    let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub; let execStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
@@ -299,39 +298,6 @@ suite('OpenShift/Component', function () {
                 const commandProvider = componentCommandsCommandNode as unknown as CommandProvider;
                 expect(commandProvider.getCommand).not.null;
             }
-        });
-    });
-
-    suite.skip('log', function () {
-
-        test('log calls the correct odo command', async function () {
-            await Component.log(componentItem1);
-            expect(termStub).calledOnceWith(Command.showLog());
-        });
-
-        test('works with no context', async () => {
-            await Component.log(null);
-            expect(termStub).calledOnceWith(Command.showLog());
-        });
-    });
-
-    suite.skip('followLog', function() {
-
-        test('returns null when cancelled', async function () {
-            quickPickStub.onFirstCall().resolves();
-            const result = await Component.followLog(null);
-
-            expect(result).null;
-        });
-
-        test('followLog calls the correct odo command', async function () {
-            await Component.followLog(componentItem1);
-            expect(termStub).calledOnceWith(Command.showLogAndFollow());
-        });
-
-        test('works with no context', async function () {
-            await Component.followLog(null);
-            expect(termStub).calledOnceWith(Command.showLogAndFollow());
         });
     });
 

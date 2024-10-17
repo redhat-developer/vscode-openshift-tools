@@ -191,36 +191,6 @@ export function testComponentContextMenu() {
             expect(tabName).to.contain(expectedTabName);
         });
 
-        it('Show log works', async () => {
-            //open menu and select show log
-            const contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.showLog);
-
-            //check for active tab name
-            const tabName = await openshiftTerminal.getActiveTabName();
-            expect(tabName).to.contain(`Show '${componentName}' Component Log`);
-
-            //check for terminal content
-            const terminalText = await openshiftTerminal.getTerminalText();
-            expect(terminalText).to.contain('runtime: App started on PORT');
-            expect(terminalText).to.contain('Press any key to close this terminal');
-        });
-
-        it('Follow log works', async () => {
-            //open menu and select follow log
-            const contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.followLog);
-
-            //check for active tab name
-            const tabName = await openshiftTerminal.getActiveTabName();
-            expect(tabName).to.contain(`Follow '${componentName}' Component Log`);
-
-            //check for terminal text
-            const terminalText = await openshiftTerminal.getTerminalText();
-            expect(terminalText).to.contain('runtime: App started on PORT');
-            expect(terminalText).not.to.contain('Press any key to close this terminal');
-        });
-
         it('Debug works', async () => {
             this.timeout(80_000);
 

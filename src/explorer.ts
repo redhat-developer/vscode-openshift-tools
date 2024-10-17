@@ -773,7 +773,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
 
                 function checkForPod() {
-                    void Oc.Instance.getLogs('Deployment', component.metadata.name, namespace).then((logs) => {
+                    void Oc.Instance.getLogs(`${component.kind}`, component.metadata.name, namespace).then((logs) => {
                         clearInterval(intervalId);
                         resolve();
                     }).catch(_e => { });
