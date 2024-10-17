@@ -23,7 +23,7 @@ jobs:
       - name: Find existing PR for Alizer version
         if: ${{ (env.LATEST_TOOL_VERSION != '') }}
         run: |
-          if [[ "${{ env.LATEST_TOOL_VERSION != env.REPO_HELM_VERSION }}" == "true" ]]; then
+          if [[ "${{ env.LATEST_TOOL_VERSION != env.REPO_ALIZER_VERSION }}" == "true" ]]; then
             prFound=$(gh pr --repo ${{ github.repository }} list --state all --search "update alizer cli to ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length)
             if [[ $prFound == 0 ]]; then
               echo SHOULD_UPDATE=true >> $GITHUB_ENV
