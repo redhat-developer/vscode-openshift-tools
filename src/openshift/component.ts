@@ -430,26 +430,6 @@ export class Component extends OpenShiftItem {
             `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
     }
 
-    @vsCommand('openshift.component.log', true)
-    static async log(componentFolder: ComponentWorkspaceFolder): Promise<void> {
-        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
-        const showLogCmd = Command.showLog(Component.getDevPlatform(componentFolder));
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(
-            showLogCmd,
-            componentFolder.contextPath,
-            `Show '${componentName}' Component Log`);
-    }
-
-    @vsCommand('openshift.component.followLog', true)
-    static async followLog(componentFolder: ComponentWorkspaceFolder): Promise<void> {
-        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
-        const showLogCmd = Command.showLogAndFollow(Component.getDevPlatform(componentFolder));
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(
-            showLogCmd,
-            componentFolder.contextPath,
-            `Follow '${componentName}' Component Log`);
-    }
-
     @vsCommand('openshift.component.openCreateComponent')
     static async createComponent(): Promise<void> {
         await CreateComponentLoader.loadView('Create Component');

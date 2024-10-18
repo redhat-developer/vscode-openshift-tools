@@ -46,20 +46,6 @@ export class Command {
         return Command.describeComponent().addOption(new CommandOption('-o', 'json', false));
     }
 
-    static showLog(platform?: string): CommandText {
-        const result = new CommandText('odo', 'logs', [
-            new CommandOption('--dev'),
-        ]);
-        if (platform) {
-            result.addOption(new CommandOption('--platform', platform));
-        }
-        return result;
-    }
-
-    static showLogAndFollow(platform?: string): CommandText {
-        return Command.showLog(platform).addOption(new CommandOption('--follow'));
-    }
-
     @verbose
     static createLocalComponent(
         devfileType = '', // will use empty string in case of undefined devfileType passed in

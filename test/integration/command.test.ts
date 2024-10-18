@@ -165,48 +165,6 @@ suite('odo commands integration', function () {
             term.dispose();
         });
 
-        test('showLog()', async function () {
-            await ODO.execute(Command.showLog(), componentLocation);
-        });
-
-        test('showLogAndFollow()', async function() {
-            const outputEmitter = new EventEmitter<string>();
-            let devProcess: ChildProcess;
-            function failListener(_error) {
-                assert.fail('showLogAndFollow() errored before it was closed');
-            }
-            const term = window.createTerminal({
-                name: 'test terminal',
-                pty: {
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(Command.showLogAndFollow()) //
-                            .then(childProcess => {
-                                devProcess = childProcess
-                                devProcess.on('error', failListener);
-                            });
-                    },
-                    close: () => {
-                        if (devProcess) {
-                            devProcess.removeListener('error', failListener);
-                            devProcess.kill('SIGINT');
-                        }
-                    },
-                    handleInput: (data: string) => {
-                        if (data.length) {
-                            if (devProcess) {
-                                devProcess.removeListener('error', failListener);
-                                devProcess.kill('SIGINT');
-                            }
-                        }
-                    },
-                    onDidWrite: outputEmitter.event
-                }
-            });
-            await new Promise<void>(resolve => setTimeout(resolve, 1000));
-            // we instruct the pseudo terminal to close the dev session when any text is sent
-            term.sendText('a');
-            term.dispose();
-        });
     });
 
     suite('component dev', function() {
