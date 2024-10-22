@@ -48,7 +48,7 @@ jobs:
         with:
           run: npm run test:coverage --silent
 
-      - uses: engineerd/setup-kind@aa272fe2a7309878ffc2a81c56cfe3ef108ae7d0 #v0.5.0
+      - uses: engineerd/setup-kind@dfca6572a7497bbd1bb14e5ad473f8a1ba864ca6 #v0.6.0
         if: (success() || failure()) && runner.os == 'Linux'
         name: Start cluster
         with:
