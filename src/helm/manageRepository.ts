@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import validator from 'validator';
-import * as vscode from 'vscode';
+import { commands, Disposable, window } from 'vscode';
 import * as Helm from '../../src/helm/helm';
 import { ascRepoName } from '../../src/helm/helm';
 import { OpenShiftExplorer } from '../explorer';
@@ -16,16 +16,17 @@ import HelmChartLoader from '../webview/helm-chart/helmChartLoader';
 import ManageRepositoryViewLoader from '../webview/helm-manage-repository/manageRepositoryLoader';
 import { HelmRepo } from './helmChartType';
 
-export class ManageRepository {
-
+export class ManageRepository implements Disposable {
     private static instance: ManageRepository;
 
-    static getInstance(): ManageRepository {
+    public static getInstance(): ManageRepository {
         if (!ManageRepository.instance) {
             ManageRepository.instance = new ManageRepository();
         }
         return ManageRepository.instance;
     }
+
+    dispose() { }
 
     /**
      * sync the repository
@@ -44,7 +45,7 @@ export class ManageRepository {
 
     @vsCommand('openshift.helm.add')
     public async add(_repo = undefined, newName: string, newURL: string, isWebview = false): Promise<boolean> {
-        return await vscode.commands.executeCommand('openshift.helm.edit', undefined, newName, newURL, true, isWebview);
+        return await commands.executeCommand('openshift.helm.edit', undefined, newName, newURL, true, isWebview);
     }
 
     /**
@@ -61,7 +62,7 @@ export class ManageRepository {
         let step: listOfStep = listOfStep.enterRepositoryName;
         let repoName: string = repo?.name;
         let repoURL: string = repo?.url;
-        const repositories = (await ManageRepository.getInstance().list()).sort(ascRepoName);
+        const repositories = (await Helm.list()).sort(ascRepoName);
         if (!isWebview) {
             while (step !== undefined) {
                 switch (step) {
@@ -136,7 +137,7 @@ export class ManageRepository {
         if (flag) {
             await ManageRepository.getInstance().refresh();
             const message = isAdd ? 'added' : 'updated';
-            void vscode.window.showInformationMessage(`Helm Repository ${repoName} ${message} successfully`);
+            void window.showInformationMessage(`Helm Repository ${repoName} ${message} successfully`);
         }
         return flag;
     }
@@ -149,7 +150,7 @@ export class ManageRepository {
      */
     @vsCommand('openshift.helm.delete')
     public async delete(repo: HelmRepo, isWebview = false): Promise<void> {
-        const yesNo = isWebview ? 'Yes' : await vscode.window.showInformationMessage(
+        const yesNo = isWebview ? 'Yes' : await window.showInformationMessage(
             `Are you sure want to delete ${repo.name} helm repository'?`,
             'Yes',
             'No',
@@ -158,32 +159,14 @@ export class ManageRepository {
             const flag = await ManageRepository.getInstance().deleteRepo(repo);
             if (flag) {
                 await ManageRepository.getInstance().refresh();
-                void vscode.window.showInformationMessage(`Helm Repository ${repo.name} deleted successfully`);
+                void window.showInformationMessage(`Helm Repository ${repo.name} deleted successfully`);
             }
         }
     }
 
-    public async list(): Promise<HelmRepo[]> {
-        await sendTelemetry('openshift.helm.manageRepo.list');
-        const result = await Helm.getHelmRepos();
-        if (result.stderr || result.error) {
-            const error = result.stderr || result.error?.message;
-            await sendTelemetry('openshift.helm.manageRepo.list.error', {
-                error
-            });
-            void vscode.window.showErrorMessage(error);
-            return [];
-        }
-        const helmRepos = JSON.parse(result.stdout) as HelmRepo[];
-        await sendTelemetry('openshift.helm.manageRepo.list.success', {
-            helmRepos
-        });
-        return helmRepos;
-    }
-
     private async refresh() {
         OpenShiftExplorer.getInstance().refresh();
-        const repositories = (await ManageRepository.getInstance().list()).sort(ascRepoName);
+        const repositories = (await Helm.list()).sort(ascRepoName);
         void ManageRepositoryViewLoader.panel?.webview.postMessage({
             action: 'getRepositoryList',
             repositories
@@ -201,10 +184,10 @@ export class ManageRepository {
             await sendTelemetry('openshift.helm.manageRepo.sync.error', {
                 error
             });
-            void vscode.window.showErrorMessage(error);
+            void window.showErrorMessage(error);
             return false;
         }
-        void vscode.window.showInformationMessage(result.stdout.substring(result.stdout.toLowerCase().lastIndexOf('successfully')));
+        void window.showInformationMessage(result.stdout.substring(result.stdout.toLowerCase().lastIndexOf('successfully')));
         return true;
     }
 
@@ -219,7 +202,7 @@ export class ManageRepository {
             await sendTelemetry('openshift.helm.manageRepo.delete.error', {
                 error
             });
-            void vscode.window.showErrorMessage(error);
+            void window.showErrorMessage(error);
             return false;
         }
         return true;
@@ -259,7 +242,7 @@ export class ManageRepository {
             await sendTelemetry('openshift.helm.manageRepo.add.error', {
                 error
             });
-            void vscode.window.showErrorMessage(error);
+            void window.showErrorMessage(error);
             return false;
         }
         await sendTelemetry('openshift.helm.manageRepo.add.success', {

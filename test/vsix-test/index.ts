@@ -5,9 +5,8 @@
 /* tslint:disable no-require-imports */
 
 import { sync } from 'glob';
+import Mocha from 'mocha';
 import * as paths from 'path';
-
-import * as Mocha from 'mocha';
 
 const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',

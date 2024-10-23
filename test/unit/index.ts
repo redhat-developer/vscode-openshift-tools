@@ -5,14 +5,13 @@
 
 import * as fs from 'fs';
 import { sync } from 'glob';
+import Mocha from 'mocha';
 import * as paths from 'path';
-import { CoverageRunner, TestRunnerOptions } from '../coverage';
-
 import * as sourceMapSupport from 'source-map-support';
+import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
 sourceMapSupport.install();
 
-import * as Mocha from 'mocha';
 
 const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',
@@ -57,6 +56,7 @@ export async function run(): Promise<void> {
 
     // add activation test first
     testFiles.push(...await testFinder('activation.js'));
+
     // everything else after
     testFiles.push(...await testFinder('oc.test.js'));
     testFiles.push(...await testFinder('**/extension.test.js'));

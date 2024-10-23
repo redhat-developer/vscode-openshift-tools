@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as parse from 'json-to-ast';
+import parse from 'json-to-ast';
 import * as vscode from 'vscode';
 import { MappingItem, Node, NodeProvider } from './locator-util';
 

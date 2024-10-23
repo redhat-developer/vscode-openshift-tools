@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as childProcess from 'child_process';
+import { ExecException, ExecOptions } from 'child_process';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
+import * as childProcess from '../../../src/util/utils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -18,10 +19,10 @@ suite('ChildProcessUtil', function() {
     let execStub: sinon.SinonStub;
     const childProcessUtil = ChildProcessUtil.Instance;
     const command = 'command';
-    const options: childProcess.ExecOptions = { cwd: 'cwd' };
+    const options: ExecOptions = { cwd: 'cwd' };
     const stdout = 'Standard output';
     const stderr = 'Error output';
-    const error: childProcess.ExecException = {
+    const error: ExecException = {
         message: 'Fatal Error',
         name: 'name'
     };

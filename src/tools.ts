@@ -11,7 +11,6 @@ import { which } from 'shelljs';
 import * as vscode from 'vscode';
 import * as configData from './tools.json';
 import { ChildProcessUtil } from './util/childProcessUtil';
-
 import { Platform } from './util/platform';
 
 export class ToolsConfig {
@@ -38,9 +37,13 @@ export class ToolsConfig {
     }
 
     public static async detect(cmd: string): Promise<string> {
-
         if (ToolsConfig.tools[cmd].location === undefined) {
-            let toolCacheLocation = path.resolve(__dirname, '..', 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
+            // When running tests, Mocha uses sources, so the `__filename` and `__dirname` usually
+            // pont to `out/src` where the transpiled sources got stored, while we always need to
+            // use 'out` directory.
+            const baseDir = path.parse(__dirname).name === 'src' ? path.dirname(__dirname) : __dirname;
+
+            let toolCacheLocation = path.resolve(baseDir, 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
             let toolLocations: string[] = [toolCacheLocation];
             if (process.env.REMOTE_CONTAINERS === 'true') {
                 const openShiftToolsFolder = path.join(os.homedir(), '.local', 'state', 'vs-openshift-tools');
@@ -57,8 +60,14 @@ export class ToolsConfig {
             ToolsConfig.tools[cmd].location =
                 await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange).then(
                     (location) => {
-                        if (location && Platform.OS !== 'win32') fs.chmodSync(location, 0o765);
-                        return location;
+                        try {
+                            if (location && Platform.OS !== 'win32') {
+                                fs.chmodSync(location, 0o765);
+                            }
+                            return location;
+                        } catch {
+                            // Ignore
+                        }
                     }
                 );
         }

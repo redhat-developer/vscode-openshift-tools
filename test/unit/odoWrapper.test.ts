@@ -7,7 +7,7 @@ import * as chai from 'chai';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';

@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as cp from 'child_process';
+import { ExecException, ExecOptions } from 'child_process';
 import * as vscode from 'vscode';
+import * as cp from '../util/utils';
 import { Filters } from './filters';
 
 export interface CliExitData {
-    readonly error: cp.ExecException;
+    readonly error: ExecException;
     readonly stdout: string;
     readonly stderr: string;
     readonly cwd?: string;
@@ -104,12 +105,12 @@ export class ChildProcessUtil {
         return (!isNaN(length) && length > 0 ? length : 4) * 1024 * 1024;
     }
 
-    public execute(cmd: string, opts: cp.ExecOptions = {}): Promise<CliExitData> {
+    public execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = ChildProcessUtil.getExecMaxBufferLength();
             }
-            cp.exec(cmd, opts, (error: cp.ExecException, stdout: string, stderr: string) => {
+            cp.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
                 // filter out info about update
                 this.odoChannel.print(cmd);
                 this.odoChannel.print(stdout);

@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { isOpenShiftCluster } from '../util/kubeUtils';
+import { imagePath } from '../util/utils';
 import { Build } from './build';
 import { ClusterServiceVersion } from './csv';
 import { DeploymentConfig } from './deploymentConfig';
@@ -31,7 +31,7 @@ async function customizeAsync(node: k8s.ClusterExplorerV1.ClusterExplorerResourc
   if ((node as any).nodeType === 'context') {
       lastNamespace = await initNamespaceName(node);
       if (await isOpenShiftCluster()) {
-          treeItem.iconPath = vscode.Uri.file(path.join(__dirname, '../../../images/context/cluster-node.png'));
+          treeItem.iconPath = vscode.Uri.file(imagePath('context/cluster-node.png'));
       }
   }
   if (node.nodeType === 'resource' && node.resourceKind.manifestKind === 'Project') {

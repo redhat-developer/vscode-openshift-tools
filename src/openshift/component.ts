@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs/promises';
 import { platform } from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
@@ -16,6 +15,7 @@ import { ComponentWorkspaceFolder } from '../odo/workspace';
 import sendTelemetry from '../telemetry';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
+import * as fs from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingViewLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';

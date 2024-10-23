@@ -2,11 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as fs from 'fs';
 import * as JSYAML from 'js-yaml';
 import * as path from 'path';
-import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as tmp from 'tmp';
+import { promisify } from 'util';
+import { ColorTheme, ColorThemeKind, commands, Disposable, extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
 import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
@@ -16,13 +17,12 @@ import { Progress } from '../../util/progress';
 import { vsCommand } from '../../vscommand';
 import { validateName } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml } from '../common-ext/utils';
-import { promisify } from 'util';
 
-let panel: vscode.WebviewPanel;
+let panel: WebviewPanel;
 const helmCharts: ChartResponse[] = [];
-let themeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+let themeKind: ColorThemeKind = window.activeColorTheme.kind;
 
-vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
+window.onDidChangeActiveColorTheme((editor: ColorTheme) => {
     if (themeKind !== editor.kind) {
         themeKind = editor.kind;
         if (panel) {
@@ -31,7 +31,18 @@ vscode.window.onDidChangeActiveColorTheme((editor: vscode.ColorTheme) => {
     }
 });
 
-export class HelmCommand {
+export class HelmCommand implements Disposable {
+    private static instance: HelmCommand;
+
+    public static getInstance(): HelmCommand {
+        if (!HelmCommand.instance) {
+            HelmCommand.instance = new HelmCommand();
+        }
+        return HelmCommand.instance;
+    }
+
+    dispose() { }
+
     @vsCommand('openshift.helm.install')
     static async installHelmChart(event: any) {
         await panel.webview.postMessage({
@@ -43,7 +54,7 @@ export class HelmCommand {
         });
 
         //write temp yaml file for values
-        const tmpFolder = vscode.Uri.parse(await promisify(tmp.dir)());
+        const tmpFolder = Uri.parse(await promisify(tmp.dir)());
         const tempFilePath = path.join(tmpFolder.fsPath, `helmValues-${Date.now()}.yaml`);
         fs.writeFileSync(tempFilePath, event.data.yamlValues, 'utf8');
 
@@ -86,16 +97,16 @@ async function helmChartMessageListener(event: any): Promise<void> {
         case 'init':
             void panel.webview.postMessage({
                 action: 'setTheme',
-                themeValue: vscode.window.activeColorTheme.kind,
+                themeValue: window.activeColorTheme.kind,
             });
             void HelmChartLoader.getHelmCharts();
             break;
         case 'install': {
-            void vscode.commands.executeCommand('openshift.helm.install', event);
+            void commands.executeCommand('openshift.helm.install', event);
             break;
         }
         case 'openChart': {
-            void vscode.commands.executeCommand('openshift.helm.open', event.chartName);
+            void commands.executeCommand('openshift.helm.open', event.chartName);
             break;
         }
         case 'validateName': {
@@ -157,25 +168,35 @@ async function helmChartMessageListener(event: any): Promise<void> {
     }
 }
 
-export default class HelmChartLoader {
+export default class HelmChartLoader implements Disposable {
+    private static instance: HelmChartLoader;
 
-    static get extensionPath() {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath
+    public static getInstance(): HelmChartLoader {
+        if (!HelmChartLoader.instance) {
+            HelmChartLoader.instance = new HelmChartLoader();
+        }
+        return HelmChartLoader.instance;
     }
 
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'out', 'helm-chart', 'app'));
+    dispose() { }
+
+    static get extensionPath() {
+        return extensions.getExtension(ExtensionID).extensionPath
+    }
+
+    static async loadView(title: string): Promise<WebviewPanel> {
+        const localResourceRoot = Uri.file(path.join(HelmChartLoader.extensionPath, 'out', 'helm-chart', 'app'));
         if (panel) {
             // If we already have a panel, show it in the target column
-            panel.reveal(vscode.ViewColumn.One);
+            panel.reveal(ViewColumn.One);
             panel.title = title;
         } else {
-            panel = vscode.window.createWebviewPanel('helmChartView', title, vscode.ViewColumn.One, {
+            panel = window.createWebviewPanel('helmChartView', title, ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
+            panel.iconPath = Uri.file(path.join(HelmChartLoader.extensionPath, 'images/helm/helm.svg'));
             panel.webview.html = await loadWebviewHtml('helm-chart', panel);
             const messageDisposable = panel.webview.onDidReceiveMessage(helmChartMessageListener);
             panel.onDidDispose(() => {

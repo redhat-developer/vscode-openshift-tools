@@ -3,14 +3,25 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import { commands, Disposable, Uri, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { ClusterType } from '../oc/types';
 import { KubeConfigUtils } from '../util/kubeUtils';
 import { vsCommand } from '../vscommand';
 
-export class Console {
+export class Console implements Disposable {
+    private static instance: Console;
+
+    public static getInstance(): Console {
+        if (!Console.instance) {
+            Console.instance = new Console();
+        }
+        return Console.instance;
+    }
+
+    dispose() { }
+
     static cli = CliChannel.getInstance()
     static getCurrentProject(): string {
         const k8sConfig = new KubeConfigUtils();
@@ -21,7 +32,7 @@ export class Console {
     @vsCommand('clusters.openshift.build.openConsole')
     static async openBuildConfig(context: { name: string}): Promise<void> {
         if (!context) {
-            void vscode.window.showErrorMessage('Cannot load the build config');
+            void window.showErrorMessage('Cannot load the build config');
             return;
         }
         const consoleInfo = await Oc.Instance.getConsoleInfo();
@@ -40,13 +51,13 @@ export class Console {
             default:
                 throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await commands.executeCommand('vscode.open', Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.deployment.openConsole')
     static async openDeploymentConfig(context: { name: string}): Promise<void> {
         if (!context) {
-            void vscode.window.showErrorMessage('Cannot load the deployment config');
+            void window.showErrorMessage('Cannot load the deployment config');
             return;
         }
         const project = Console.getCurrentProject();
@@ -64,13 +75,13 @@ export class Console {
             default:
                 throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await commands.executeCommand('vscode.open', Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.imagestream.openConsole')
     static async openImageStream(context: { name: string}): Promise<void> {
         if (!context) {
-            void vscode.window.showErrorMessage('Cannot load the image stream');
+            void window.showErrorMessage('Cannot load the image stream');
             return;
         }
         const project = Console.getCurrentProject();
@@ -88,13 +99,13 @@ export class Console {
             default:
                 throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await commands.executeCommand('vscode.open', Uri.parse(url));
     }
 
     @vsCommand('clusters.openshift.project.openConsole')
     static async openProject(context: { name: string}): Promise<void> {
         if (!context) {
-            void vscode.window.showErrorMessage('Cannot load the Project');
+            void window.showErrorMessage('Cannot load the Project');
             return;
         }
         const project = Console.getCurrentProject();
@@ -112,6 +123,6 @@ export class Console {
             default:
                 throw new Error('Should be impossible, since the cluster must be either OpenShift or non-OpenShift');
         }
-        await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+        await commands.executeCommand('vscode.open', Uri.parse(url));
     }
 }

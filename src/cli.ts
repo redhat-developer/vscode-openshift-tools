@@ -5,7 +5,7 @@
 
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
-import * as hasha from 'hasha';
+import hasha from 'hasha';
 import * as vscode from 'vscode';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';

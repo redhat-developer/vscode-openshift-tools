@@ -7,16 +7,15 @@ import * as assert from 'assert';
 import * as chai from 'chai';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
+import * as hasha from 'hasha';
+import * as path from 'path';
+import pq from 'proxyquire';
 import * as shelljs from 'shelljs';
 import * as sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
-
-import * as hasha from 'hasha';
-import * as path from 'path';
-import * as pq from 'proxyquire';
-import * as sinonChai from 'sinon-chai';
 
 chai.use(sinonChai);
 

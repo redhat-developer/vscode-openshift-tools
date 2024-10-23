@@ -4,21 +4,30 @@
  *-----------------------------------------------------------------------------------------------*/
 import { ChildProcess } from 'child_process';
 import * as path from 'path';
-import * as vscode from 'vscode';
-import { ascRepoName } from '../../helm/helm';
-import { ManageRepository } from '../../helm/manageRepository';
+import { commands, Disposable, extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import { ascRepoName, list } from '../../helm/helm';
 import { ExtensionID } from '../../util/constants';
 import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml, Message, validateName, validateURL } from '../common-ext/utils';
 
-export default class ManageRepositoryViewLoader {
+export default class ManageRepositoryViewLoader implements Disposable {
+    private static instance: ManageRepositoryViewLoader;
 
-    static panel: vscode.WebviewPanel;
+    public static getInstance(): ManageRepositoryViewLoader {
+        if (!ManageRepositoryViewLoader.instance) {
+            ManageRepositoryViewLoader.instance = new ManageRepositoryViewLoader();
+        }
+        return ManageRepositoryViewLoader.instance;
+    }
+
+    dispose() { }
+
+    static panel: WebviewPanel;
 
     public static processMap: Map<string, ChildProcess> = new Map();
 
     private static get extensionPath(): string {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath;
+        return extensions.getExtension(ExtensionID).extensionPath;
     }
 
     /**
@@ -28,16 +37,16 @@ export default class ManageRepositoryViewLoader {
      */
     static async loadView(
         title: string
-    ): Promise<vscode.WebviewPanel | null> {
+    ): Promise<WebviewPanel | null> {
         if (ManageRepositoryViewLoader.panel) {
             ManageRepositoryViewLoader.panel.reveal();
             return;
         }
-        const localResourceRoot = vscode.Uri.file(
+        const localResourceRoot = Uri.file(
             path.join(ManageRepositoryViewLoader.extensionPath, 'out', 'helm-manage-repository', 'app'),
         );
 
-        const panel = vscode.window.createWebviewPanel('helmRepositoryView', title, vscode.ViewColumn.One, {
+        const panel = window.createWebviewPanel('helmRepositoryView', title, ViewColumn.One, {
             enableScripts: true,
             localResourceRoots: [localResourceRoot],
             retainContextWhenHidden: true,
@@ -52,7 +61,7 @@ export default class ManageRepositoryViewLoader {
             ManageRepositoryViewLoader.panel = undefined;
         });
 
-        panel.iconPath = vscode.Uri.file(
+        panel.iconPath = Uri.file(
             path.join(ManageRepositoryViewLoader.extensionPath, 'images/context/cluster-node.png'),
         );
 
@@ -69,7 +78,7 @@ export default class ManageRepositoryViewLoader {
             case 'validateNewURL': {
                 const flag = validateURL(message);
                 if (!flag.error) {
-                    const repoUrls = (await ManageRepository.getInstance().list()).map((repo) => repo.url);
+                    const repoUrls = (await list()).map((repo) => repo.url);
                     if (repoUrls.includes(message.data)) {
                         void ManageRepositoryViewLoader.panel?.webview.postMessage({
                             action,
@@ -91,7 +100,7 @@ export default class ManageRepositoryViewLoader {
             case 'validateName':
             case 'validateNewName': {
                 const flag = validateName(message.data);
-                const repoNames = (await ManageRepository.getInstance().list()).map((repo) => repo.name);
+                const repoNames = (await list()).map((repo) => repo.name);
                 if (repoNames.includes(message.data)) {
                     void ManageRepositoryViewLoader.panel?.webview.postMessage({
                         action,
@@ -110,7 +119,7 @@ export default class ManageRepositoryViewLoader {
                 break;
             }
             case 'addRepo': {
-                const status = await vscode.commands.executeCommand('openshift.helm.add', undefined, message.data.repoName, message.data.repoURL, true);
+                const status = await commands.executeCommand('openshift.helm.add', undefined, message.data.repoName, message.data.repoURL, true);
                 void ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action,
                     status
@@ -118,7 +127,7 @@ export default class ManageRepositoryViewLoader {
                 break;
             }
             case 'getRepositoryList': {
-                const repositories = (await ManageRepository.getInstance().list()).sort(ascRepoName);
+                const repositories = (await list()).sort(ascRepoName);
                 void ManageRepositoryViewLoader.panel?.webview.postMessage({
                     action,
                     repositories
@@ -126,15 +135,15 @@ export default class ManageRepositoryViewLoader {
                 break;
             }
             case 'syncRepo': {
-                await vscode.commands.executeCommand('openshift.helm.sync', message.data);
+                await commands.executeCommand('openshift.helm.sync', message.data);
                 break;
             }
             case 'deleteRepo': {
-                await vscode.commands.executeCommand('openshift.helm.delete', message.data.repo, true);
+                await commands.executeCommand('openshift.helm.delete', message.data.repo, true);
                 break;
             }
             case 'editRepo': {
-                await vscode.commands.executeCommand('openshift.helm.edit', message.data.oldRepo, message.data.newName, message.data.newURL, false, true);
+                await commands.executeCommand('openshift.helm.edit', message.data.oldRepo, message.data.newName, message.data.newURL, false, true);
                 break;
             }
             default:

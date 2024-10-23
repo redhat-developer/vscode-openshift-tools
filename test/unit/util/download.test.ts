@@ -7,12 +7,12 @@ import * as chai from 'chai';
 import { EventEmitter } from 'events';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadUtil/download';
 import { wait } from '../../../src/util/async';
 
 import * as os from 'os';
-import * as pq from 'proxyquire';
+import pq from 'proxyquire';
 
 const {expect} = chai;
 chai.use(sinonChai);

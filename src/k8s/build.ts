@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { QuickPickItem, window } from 'vscode';
+import { Disposable, QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
@@ -12,7 +12,18 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import * as common from './common';
 
-export class Build {
+export class Build implements Disposable {
+    private static instance: Build;
+
+    public static getInstance(): Build {
+        if (!Build.instance) {
+            Build.instance = new Build();
+        }
+        return Build.instance;
+    }
+
+    dispose() { }
+
     public static command = {
         getAllBuilds(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {
             return new CommandText('oc', 'get build', [

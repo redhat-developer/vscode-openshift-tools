@@ -35,6 +35,7 @@ import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind, isOpenShiftClust
 import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
+import { imagePath } from './util/utils';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';
@@ -144,7 +145,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         });
     }
 
-    static getInstance(): OpenShiftExplorer {
+    public static getInstance(): OpenShiftExplorer {
         if (!OpenShiftExplorer.instance) {
             OpenShiftExplorer.instance = new OpenShiftExplorer();
         }
@@ -168,7 +169,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     // eslint-disable-next-line class-methods-use-this
     async getTreeItem(element: ExplorerItem): Promise<TreeItem> {
-
         if ('command' in element || ('label' in element && 'iconPath' in element)) {
             return element;
         }
@@ -191,7 +191,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 contextValue: 'openshift.k8sContext',
                 label: this.kubeConfig.getCluster(element.cluster)?.server,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
-                iconPath: path.resolve(__dirname, '../../images/context/cluster-node.png')
+                iconPath: imagePath('context/cluster-node.png')
             };
         }
 
@@ -207,7 +207,6 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
         // It's a Helm installation
         if ('chart' in element) {
-
             if (element.chart === 'noChart') {
                 return {
                     label: 'No charts were installed'
@@ -218,8 +217,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 label: element.name,
                 collapsibleState: TreeItemCollapsibleState.None,
                 description: element.status,
-                iconPath: element.status === 'failed' ? path.resolve(__dirname, '../../images/context/helmFailed.svg') :
-                    path.resolve(__dirname, '../../images/context/helmDeployed.svg'),
+                iconPath: element.status === 'failed' ? imagePath('context/helmFailed.svg') : imagePath('context/helmDeployed.svg'),
                 tooltip: `Chart version: ${element.chart}\nApp version: ${element.app_version}\n`,
                 command: {
                     title: 'Load',
@@ -238,7 +236,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                             contextValue: namespace,
                             label: element.metadata.name,
                             collapsibleState: TreeItemCollapsibleState.Collapsed,
-                            iconPath: path.resolve(__dirname, '../../images/context/project-node.png')
+                            iconPath: imagePath('context/project-node.png')
                         }
                     });
             } else if (element.kind === 'helmContexts') {
@@ -259,8 +257,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     label: contextElement.metadata.name,
                     description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
                     collapsibleState: TreeItemCollapsibleState.None,
-                    iconPath: contextElement.status.phase === 'Running' ? path.resolve(__dirname, '../../images/context/runningPod.svg') :
-                        path.resolve(__dirname, '../../images/context/notReadyPod.svg'),
+                    iconPath: contextElement.status.phase === 'Running' ? imagePath('context/runningPod.svg') : imagePath('context/notReadyPod.svg'),
                     tooltip: `${contextElement.status.phase}\n${contextElement.status.podIP ? contextElement.status.podIP : ''}`,
                     command: {
                         title: 'Load',
@@ -405,8 +402,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         const iconSuffix = !shouldHaveReplicas ? '' :
                 podErrors.inCrashLoopBackOff ? '-red' : this.getDeploymentIconSuffix(pods);
         const iconPath = element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ?
-            path.resolve(__dirname, `../../images/context/component-node${iconSuffix}.png`)
-                : undefined;
+            imagePath(`context/component-node${iconSuffix}.png`) : undefined;
 
         const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
         return {
@@ -752,7 +748,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             await Oc.Instance.deleteKubernetesObject(component.kind, component.metadata.name);
         });
         void window.showInformationMessage(`Deleted the '${component.kind}' named '${component.metadata.name}'`);
-        OpenShiftExplorer.instance.refresh();
+        OpenShiftExplorer.getInstance().refresh();
     }
 
     @vsCommand('openshift.resource.portForward')

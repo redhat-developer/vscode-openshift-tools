@@ -39,10 +39,7 @@ function displayResult(result: string | undefined): void {
     }
 }
 
-export async function registerCommands(...modules: string[]): Promise<Disposable[]> {
-    // this step is required to get all annotations processed and this is drawback,
-    // because it triggers javascript loading when extension is activated
-    await Promise.all(modules.map((module) => import(module)));
+export function registerCommands(): Disposable[] {
     return vsCommands.map((cmd) => {
         return commands.registerCommand(cmd.commandId, async (...params) => {
             let telemetryProps: Partial<CommonCommandProps> = {

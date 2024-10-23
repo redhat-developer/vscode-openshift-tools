@@ -12,11 +12,21 @@ import { DeploymentPodObject, OpenShiftExplorer } from './explorer';
 import { Oc } from './oc/ocWrapper';
 import { validateRFC1123DNSLabel } from './openshift/nameValidator';
 import { inputValue, quickBtn } from './util/inputValue';
+import { Progress } from './util/progress';
 import { vsCommand } from './vscommand';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
-import { Progress } from './util/progress';
 
-export class Deployment {
+export class Deployment implements Disposable {
+    private static instance: Deployment;
+
+    public static getInstance(): Deployment {
+        if (!Deployment.instance) {
+            Deployment.instance = new Deployment();
+        }
+        return Deployment.instance;
+    }
+
+    dispose() { }
 
     @vsCommand('openshift.deployment.create.fromImageUrl')
     static async createFromImageUrl(context: TreeItem): Promise<void> {

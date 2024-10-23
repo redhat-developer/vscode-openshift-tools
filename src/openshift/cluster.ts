@@ -6,7 +6,7 @@
 import { CoreV1Api, KubeConfig, KubernetesObject, V1Secret, V1ServiceAccount } from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import * as https from 'https';
-import { ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
+import { Disposable, ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
@@ -31,7 +31,17 @@ export interface QuickPickItemExt extends QuickPickItem {
     namespace: string
 }
 
-export class Cluster extends OpenShiftItem {
+export class Cluster extends OpenShiftItem implements Disposable {
+    private static instance: Cluster;
+
+    public static getInstance(): Cluster {
+        if (!Cluster.instance) {
+            Cluster.instance = new Cluster();
+        }
+        return Cluster.instance;
+    }
+
+    dispose() { }
 
     public static extensionContext: ExtensionContext;
 
