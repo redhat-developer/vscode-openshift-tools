@@ -1,6 +1,7 @@
 {
 	"folders": [],
 	"settings": {
-		"openshiftToolkit.execMaxBufferLength": 2
+		"openshiftToolkit.execMaxBufferLength": 2,
+		"redhat.telemetry.enabled": false
 	},
 }

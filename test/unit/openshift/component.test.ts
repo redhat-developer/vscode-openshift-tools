@@ -5,12 +5,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as chai from 'chai';
-import * as fs from 'fs-extra';
-import * as fsp from 'fs/promises';
+import { PathLike, RmOptions } from 'fs-extra';
+import * as fsp from '../../../src/util/utils';
+// import * as fsp from 'fs/promises';
 import * as path from 'path';
-import * as pq from 'proxyquire';
+import pq from 'proxyquire';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
 import { DevfileInfo } from '../../../src/devfile-registry/devfileInfo';
@@ -198,9 +199,8 @@ suite('OpenShift/Component', function () {
     });
 
     suite('deleteSourceFolder', function () {
-
         let subSandbox: sinon.SinonSandbox;
-        let rmStub: sinon.SinonStub<[path: fs.PathLike, options?: fs.RmOptions], Promise<void>>;
+        let rmStub: sinon.SinonStub<[path: PathLike, options?: RmOptions], Promise<void>>;
         let showWarningMessageStub: sinon.SinonStub<any[], any> | sinon.SinonStub<unknown[], unknown>;
 
         const onDidFake = (listener): vscode.Disposable => {
@@ -250,7 +250,6 @@ suite('OpenShift/Component', function () {
             } as ComponentWorkspaceFolder);
             expect(rmStub).to.not.be.called;
         });
-
     });
 
     suite('describe', function() {

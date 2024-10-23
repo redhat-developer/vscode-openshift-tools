@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as Dockerode from 'dockerode';
+import Dockerode from 'dockerode';
 import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
 import { CliChannel, ExecutionContext } from '../cli';

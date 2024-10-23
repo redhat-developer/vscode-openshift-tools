@@ -7,14 +7,14 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
-import * as vscode from 'vscode';
-import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import { ColorTheme, commands, Disposable, extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { Alizer } from '../../alizer/alizerWrapper';
 import { AlizerAnalyzeResponse } from '../../alizer/types';
 import { Oc } from '../../oc/ocWrapper';
 import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
+import { vsCommand } from '../../vscommand';
 import {
     validateName,
     validatePortNumber
@@ -33,7 +33,19 @@ type Message = {
 
 let tmpFolder: Uri;
 
-export default class CreateDeploymentLoader {
+export default class CreateDeploymentLoader implements Disposable {
+    private static instance: CreateDeploymentLoader;
+
+    public static getInstance(): CreateDeploymentLoader {
+        if (!CreateDeploymentLoader.instance) {
+            CreateDeploymentLoader.instance = new CreateDeploymentLoader();
+        }
+        return CreateDeploymentLoader.instance;
+    }
+
+    dispose() { }
+
+
     static panel: WebviewPanel;
 
     static initFromRootFolderPath: string;
@@ -61,8 +73,8 @@ export default class CreateDeploymentLoader {
             CreateDeploymentLoader.messageHandler,
         );
 
-        const colorThemeDisposable = vscode.window.onDidChangeActiveColorTheme(async function (
-            colorTheme: vscode.ColorTheme,
+        const colorThemeDisposable = window.onDidChangeActiveColorTheme(async function (
+            colorTheme: ColorTheme,
         ) {
             await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
         });
@@ -99,7 +111,7 @@ export default class CreateDeploymentLoader {
             case 'init': {
                 void CreateDeploymentLoader.panel.webview.postMessage({
                     action: 'setTheme',
-                    themeValue: vscode.window.activeColorTheme.kind,
+                    themeValue: window.activeColorTheme.kind,
                 });
                 break;
             }
@@ -174,20 +186,20 @@ export default class CreateDeploymentLoader {
                         await sendTelemetry('newDeploymentCreationFailed', {
                             error: JSON.stringify(result.stderr),
                         });
-                        void vscode.window.showErrorMessage(result.stderr);
+                        void window.showErrorMessage(result.stderr);
                     } else {
                         await sendTelemetry('newDeploymentCreated', {
                             deploymentName: name,
                         });
                         CreateDeploymentLoader.panel.dispose();
-                        void vscode.commands.executeCommand('openshift.explorer.refresh');
-                        void vscode.window.showInformationMessage('Build Config has been successfully created.');
+                        void commands.executeCommand('openshift.explorer.refresh');
+                        void window.showInformationMessage('Build Config has been successfully created.');
                     }
                 } catch (err) {
                     await sendTelemetry('newDeploymentCreationFailed', {
                         error: JSON.stringify(err),
                     });
-                    void vscode.window.showErrorMessage(err);
+                    void window.showErrorMessage(err);
                     void CreateDeploymentLoader.panel.webview.postMessage({
                         action: 'createDeploymentFailed',
                         data: err.message,
@@ -250,7 +262,7 @@ export default class CreateDeploymentLoader {
                 }
             }
         } catch {
-            void vscode.window.showErrorMessage(
+            void window.showErrorMessage(
                 'Unable to analyze the builder Image',
             );
         } finally {
@@ -283,10 +295,15 @@ export default class CreateDeploymentLoader {
             });
         }
     }
+
+    @vsCommand('openshift.deployment.create.buildConfig')
+    static async createComponent(): Promise<void> {
+        await CreateDeploymentLoader.loadView('Create build Config');
+    }
 }
 
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
-    const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
+    const gitExtension = extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
     let command = `${git} clone ${url} ${location}`;
     command = branch ? `${command} --branch ${branch}` : command;
@@ -302,3 +319,4 @@ function clone(url: string, location: string, branch?: string): Promise<ClonePro
         }),
     );
 }
+

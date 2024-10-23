@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { QuickPickItem, window } from 'vscode';
+import { Disposable, QuickPickItem, window } from 'vscode';
 import { ClusterExplorerV1 } from 'vscode-kubernetes-tools-api';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
@@ -12,7 +12,17 @@ import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import * as common from './common';
 
-export class DeploymentConfig {
+export class DeploymentConfig implements Disposable {
+    private static instance: DeploymentConfig;
+
+    public static getInstance(): DeploymentConfig {
+        if (!DeploymentConfig.instance) {
+            DeploymentConfig.instance = new DeploymentConfig();
+        }
+        return DeploymentConfig.instance;
+    }
+
+    dispose() { }
 
     public static command = {
         getReplicationControllers(parent: ClusterExplorerV1.ClusterExplorerNode): CommandText {

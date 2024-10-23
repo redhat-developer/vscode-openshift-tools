@@ -2,8 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as path from 'path';
 import { env, InputBox, QuickInputButton, QuickInputButtons, ThemeIcon, Uri, window } from 'vscode';
+import { imagePath } from './utils';
 
 export class quickBtn implements QuickInputButton {
     constructor(public iconPath:  Uri | { light: Uri; dark: Uri } | ThemeIcon, public tooltip: string) { }
@@ -33,8 +33,8 @@ export function inputValue(prompt: string, initialValue: string, password: boole
         const enterBtn = new quickBtn(new ThemeIcon('check'), 'Enter');
         const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
         const pasteBtn = new quickBtn({
-                light: Uri.file(path.resolve(__dirname, '../../../images/paste-light.svg')),
-                dark: Uri.file(path.resolve(__dirname, '../../../images/paste-dark.svg'))
+                light: Uri.file(imagePath('paste-light.svg')),
+                dark: Uri.file(imagePath('paste-dark.svg'))
             },
             'Paste from Clipboard');
         const hideBtn = new quickBtn(new ThemeIcon('eye'), 'Hide value');

@@ -3,14 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as semver from 'semver';
 import * as _ from 'lodash';
+import * as semver from 'semver';
 import { CommandText } from '../base/command';
 import { K8sResourceCommon, K8sResourceKind, Service } from '../k8s/olm/types';
 import { CliExitData } from '../util/childProcessUtil';
 import { Odo } from './odoWrapper';
-import { vsCommand } from '../vscommand';
-import CreateDeploymentLoader from '../webview/create-deployment/createDeploymentLoader';
 
 export interface BuilderImage {
     readonly name: string;
@@ -58,7 +56,6 @@ export interface NormalizedBuilderImages {
 }
 
 export class BuilderImageWrapper {
-
     private static instance: BuilderImageWrapper;
 
     public static get Instance(): BuilderImageWrapper {
@@ -70,11 +67,6 @@ export class BuilderImageWrapper {
 
     private constructor() {
         // no state
-    }
-
-    @vsCommand('openshift.deployment.create.buildConfig')
-    static async createComponent(): Promise<void> {
-        await CreateDeploymentLoader.loadView('Create build Config');
     }
 
     public async getBuilder(): Promise<NormalizedBuilderImages> {

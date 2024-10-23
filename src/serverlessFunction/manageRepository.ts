@@ -3,21 +3,22 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import { Disposable, window } from 'vscode';
 import { Odo } from '../odo/odoWrapper';
 import sendTelemetry from '../telemetry';
 import { ServerlessCommand } from './commands';
 
-export class ManageRepository {
-
+export class ManageRepository implements Disposable {
     private static instance: ManageRepository;
 
-    static getInstance(): ManageRepository {
+    public static getInstance(): ManageRepository {
         if (!ManageRepository.instance) {
             ManageRepository.instance = new ManageRepository();
         }
         return ManageRepository.instance;
     }
+
+    dispose() { }
 
     public async deleteRepo(name: string): Promise<boolean> {
         await sendTelemetry('openshift.managerepo.delete', {
@@ -28,7 +29,7 @@ export class ManageRepository {
             await sendTelemetry('openshift.managerepo.delete.error', {
                 error: result.error.message
             });
-            void vscode.window.showErrorMessage(result.error.message);
+            void window.showErrorMessage(result.error.message);
             return false;
         }
         return true;
@@ -44,7 +45,7 @@ export class ManageRepository {
             await sendTelemetry('openshift.managerepo.rename.error', {
                 error: result.error.message
             });
-            void vscode.window.showErrorMessage(result.error.message);
+            void window.showErrorMessage(result.error.message);
             return false;
         }
         await sendTelemetry('openshift.managerepo.rename.success', {
@@ -62,14 +63,14 @@ export class ManageRepository {
             await sendTelemetry('openshift.managerepo.add.error', {
                 error: result.error.message
             });
-            void vscode.window.showErrorMessage(result.error.message);
+            void window.showErrorMessage(result.error.message);
             return false;
         } else if (result.stdout.length === 0 && result.stderr.length === 0) {
             await sendTelemetry('openshift.managerepo.add.success', {
                 name,
                 message: 'Repo added successfully'
             });
-            void vscode.window.showInformationMessage(`Repository ${name} added successfully`);
+            void window.showInformationMessage(`Repository ${name} added successfully`);
             return true;
         }
         await sendTelemetry('openshift.managerepo.add.error', {
@@ -85,7 +86,7 @@ export class ManageRepository {
             await sendTelemetry('openshift.managerepo.list.error', {
                 error: result.error.message
             });
-            void vscode.window.showErrorMessage(result.error.message);
+            void window.showErrorMessage(result.error.message);
             return [];
         }
         await sendTelemetry('openshift.managerepo.list.success', {

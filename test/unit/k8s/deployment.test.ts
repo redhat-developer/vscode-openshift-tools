@@ -5,15 +5,15 @@
 
 import * as chai from 'chai';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { CliChannel } from '../../../src/cli';
 import { DeploymentConfig } from '../../../src/k8s/deploymentConfig';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { Progress } from '../../../src/util/progress';
-import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { VsCommandError } from '../../../src/vscommand';
+import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 
 const {expect} = chai;
 chai.use(sinonChai);

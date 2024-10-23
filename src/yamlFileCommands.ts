@@ -3,12 +3,22 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { window } from 'vscode';
+import { Disposable, window } from 'vscode';
 import { Oc } from './oc/ocWrapper';
 import { clusterRequired, projectRequired } from './openshift/openshiftItem';
 import { vsCommand } from './vscommand';
 
-export class YamlFileCommands {
+export class YamlFileCommands implements Disposable {
+    private static instance: YamlFileCommands;
+
+    public static getInstance(): YamlFileCommands {
+        if (!YamlFileCommands.instance) {
+            YamlFileCommands.instance = new YamlFileCommands();
+        }
+        return YamlFileCommands.instance;
+    }
+
+    dispose() { }
 
     @vsCommand('openshift.create')
     @clusterRequired()

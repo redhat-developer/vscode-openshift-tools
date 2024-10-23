@@ -5,14 +5,12 @@
 
 import * as fs from 'fs';
 import { sync } from 'glob';
+import Mocha from 'mocha';
 import * as paths from 'path';
+import * as sourceMapSupport from 'source-map-support';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
-import * as sourceMapSupport from 'source-map-support';
-
 sourceMapSupport.install();
-
-import * as Mocha from 'mocha';
 
 const config: Mocha.MochaOptions = {
     reporter: 'mocha-jenkins-reporter',

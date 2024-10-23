@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as vsc from 'vscode';
-import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
-import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
-import { Command, CommandProvider, ComponentDescription } from './odo/componentTypeDescription';
-import { Component } from './openshift/component';
-import { vsCommand } from './vscommand';
 import { ThemeIcon } from 'vscode';
+import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
+import { Command, CommandProvider, ComponentDescription } from './odo/componentTypeDescription';
+import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
+import { Component } from './openshift/component';
+import { imagePath } from './util/utils';
+import { vsCommand } from './vscommand';
 
 export class ComponentInfo implements ComponentWorkspaceFolder {
     contextPath: string;
@@ -108,7 +108,7 @@ class ComponentInfoRoot extends ComponentInfo {
             workspaceFolder: this,
             tooltip,
             contextValue: Component.generateContextValue(this),
-            iconPath: vsc.Uri.file(path.join(__dirname, '../../images/component', 'workspace.png')),
+            iconPath: vsc.Uri.file(imagePath('component/workspace.png')),
             collapsibleState: vsc.TreeItemCollapsibleState.Collapsed
         };
     }

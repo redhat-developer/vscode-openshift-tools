@@ -4,14 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
-import { Archive } from '../../../src/downloadUtil/archive';
-
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as targz from 'targz';
+import * as sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
+import { Archive } from '../../../src/downloadUtil/archive';
+import * as targz from '../../../src/util/utils';
 
 const {expect} = chai;
 chai.use(sinonChai);

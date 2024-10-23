@@ -15,12 +15,27 @@ import { extension as k8sExtension } from 'vscode-kubernetes-tools-api';
 import { REDHAT_CLOUD_PROVIDER } from './cloudProvider/redhatCloudProvider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
+import { Deployment } from './deployment';
 import { OpenShiftExplorer } from './explorer';
+import { Feedback } from './feedback';
+import { ManageRepository as HelmManageRepository } from './helm/manageRepository';
 import { verifyBinariesInRemoteContainer } from './installToolsInRemote';
+import { Build as K8sBuild } from './k8s/build';
 import { extendClusterExplorer } from './k8s/clusterExplorer';
+import { Console as K8sConsole } from './k8s/console';
+import { DeploymentConfig as K8sDeploymentConfig } from './k8s/deploymentConfig';
+import { Route as K8sRoute } from './k8s/route';
+import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
+import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
+import { Oc } from './oc/ocWrapper';
+import { OdoPreference } from './odo/odoPreference';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
+import { Project as OpenshiftProject } from './openshift/project';
+import { Route as OpenshiftRoute } from './openshift/route';
+import { Service as OpenshiftService } from './openshift/service';
 import { ComponentTypesView } from './registriesView';
+import { ManageRepository as ServerlessManageRepository } from './serverlessFunction/manageRepository';
 import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
@@ -28,14 +43,15 @@ import { TokenStore } from './util/credentialManager';
 import { getNamespaceKind, KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
+import ClusterViewLoader from './webview/cluster/clusterViewLoader';
+import CreateDeploymentLoader from './webview/create-deployment/createDeploymentLoader';
+import RegistryViewLoader from './webview/devfile-registry/registryViewLoader';
+import HelmChartLoader, { HelmCommand } from './webview/helm-chart/helmChartLoader';
+import ManageRepositoryViewLoader from './webview/helm-manage-repository/manageRepositoryLoader';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 import { WelcomePage } from './welcomePage';
 import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
-
-import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
-import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
-import { Oc } from './oc/ocWrapper';
-import { OdoPreference } from './odo/odoPreference';
+import { YamlFileCommands } from './yamlFileCommands';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
@@ -83,47 +99,52 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     const activeContextStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, 2);
     activeContextStatusBarItem.command = 'openshift.explorer.switchContext';
 
-    const pushSubscriptions = async function(): Promise<void> {
-        const disposable = [
-            ...(await registerCommands(
-                './k8s/route',
-                './openshift/project',
-                './openshift/cluster',
-                './openshift/service',
-                './openshift/route',
-                './k8s/console',
-                './yamlFileCommands',
-                './registriesView',
-                './componentsView',
-            './odo/builderImage',
-                './webview/devfile-registry/registryViewLoader',
-                './webview/helm-chart/helmChartLoader',
-                './webview/helm-manage-repository/manageRepositoryLoader',
-                './feedback',
-                './deployment'
-            )),
-            crcStatusItem,
-            activeNamespaceStatusBarItem,
-            activeContextStatusBarItem,
-            OpenShiftExplorer.getInstance(),
-            new DebugSessionsView().createTreeView('openshiftDebugView'),
-            ...Component.init(),
-            ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
-            ServerlessFunctionView.getInstance(),
-            ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
-            setupWorkspaceDevfileContext(),
-            window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
-            ...registerYamlHandlers(),
-            // Temporarily loaded resource providers
-            workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME, resourceDocProvider, { /* TODO: case sensitive? */ }),
-            workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
+    const disposable = [
+        crcStatusItem,
+        activeNamespaceStatusBarItem,
+        activeContextStatusBarItem,
+        new DebugSessionsView().createTreeView('openshiftDebugView'),
+        ...Component.init(),
+        ComponentTypesView.instance.createTreeView('openshiftComponentTypesView'),
+        ServerlessFunctionView.getInstance(),
+        ComponentsTreeDataProvider.instance.createTreeView('openshiftComponentsView'),
+        setupWorkspaceDevfileContext(),
+        window.registerWebviewViewProvider('openShiftTerminalView', OpenShiftTerminalManager.getInstance(), { webviewOptions: { retainContextWhenHidden: true, } }),
+        ...registerYamlHandlers(),
 
-            // Link from resources to referenced resources
-            languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
-        ];
-        disposable.forEach((value) => extensionContext.subscriptions.push(value));
-    }
-    void pushSubscriptions();
+        // These modules are required to be bundled into the resulting `extension.js`,
+        // so they need to be explicitly referenced before 'registerCommands()' is invoked.
+        K8sBuild.getInstance(),
+        K8sDeploymentConfig.getInstance(),
+        K8sRoute.getInstance(),
+        K8sConsole.getInstance(),
+        OpenshiftProject.getInstance(),
+        OpenshiftService.getInstance(),
+        OpenshiftRoute.getInstance(),
+        OpenShiftExplorer.getInstance(),
+        YamlFileCommands.getInstance(),
+        Cluster.getInstance(),
+        ClusterViewLoader.getInstance(),
+        RegistryViewLoader.getInstance(),
+        HelmCommand.getInstance(),
+        HelmChartLoader.getInstance(),
+        ManageRepositoryViewLoader.getInstance(),
+        CreateDeploymentLoader.getInstance(),
+        HelmManageRepository.getInstance(),
+        ServerlessManageRepository.getInstance(),
+        Feedback.getInstance(),
+        Deployment.getInstance(),
+
+        // Temporarily loaded resource providers
+        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME, resourceDocProvider, { /* TODO: case sensitive? */ }),
+        workspace.registerFileSystemProvider(K8S_RESOURCE_SCHEME_READONLY, resourceDocProvider, { isReadonly: true }),
+
+        // Link from resources to referenced resources
+        languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
+    ];
+
+    disposable.push(...registerCommands());
+    disposable.forEach((value) => extensionContext.subscriptions.push(value));
 
     // activate "Sign in with Red Hat ..."
     void authentication.getSession('redhat-account-auth', ['openid'], { silent: false });

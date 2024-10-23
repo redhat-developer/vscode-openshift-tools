@@ -6,7 +6,7 @@
 import * as chai from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 
 const {expect} = chai;

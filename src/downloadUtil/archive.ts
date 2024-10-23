@@ -6,10 +6,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { Headers } from 'tar-fs';
-import * as targz from 'targz';
 import * as unzipm from 'unzip-stream';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
+import * as targz from '../util/utils';
 
 export class Archive {
     static extract(

@@ -5,7 +5,8 @@
 
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
-import * as fsxt from 'fs-extra';
+import { FSWatcher } from 'fs-extra';
+import * as fsxt from '../util/utils';
 
 export class WatchUtil {
     static watchFileForContextChange(
@@ -15,7 +16,7 @@ export class WatchUtil {
         const emitter: EventEmitter = new EventEmitter();
         let timer: ReturnType<typeof setInterval> | undefined;
         fsxt.ensureDirSync(location);
-        const watcher: fsxt.FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
+        const watcher: FSWatcher = fsxt.watch(location, (eventType, changedFile) => {
             if (filename === changedFile) {
                 if (timer) {
                     clearTimeout(timer);

@@ -12,7 +12,7 @@ import * as assert from 'assert';
 import * as chai from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
@@ -103,10 +103,14 @@ suite('openshift toolkit Extension', () => {
 	});
 
     test('should register all extension commands declared commands in package descriptor', async function() {
+        const notRegisteredCommands = [];
         const commands = await vscode.commands.getCommands(true);
         packagejson.contributes.commands.forEach((value)=> {
-            expect(commands.includes(value.command), `Command '${value.command}' handler is not registered during activation`).true;
+            if (!commands.includes(value.command)) {
+                notRegisteredCommands.push(value.command);
+            }
         });
+        expect(notRegisteredCommands.length).to.equal(0, `The following ${notRegisteredCommands.length} command handlers are not registered during activation: ${notRegisteredCommands}`);
     });
 
     test('async command wrapper shows message returned from command', async () => {

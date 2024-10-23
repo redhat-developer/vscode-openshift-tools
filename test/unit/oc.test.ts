@@ -5,14 +5,14 @@
 
 import * as chai from 'chai';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { window } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
-import { YamlFileCommands } from '../../src/yamlFileCommands';
 import { getNamespaceKind } from '../../src/util/kubeUtils';
+import { YamlFileCommands } from '../../src/yamlFileCommands';
 
 const {expect} = chai;
 chai.use(sinonChai);

@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as vscode from 'vscode';
+import { ColorTheme, Disposable, Uri, ViewColumn, WebviewPanel, commands, extensions, window, workspace } from 'vscode';
 import { Registry } from '../../odo/componentType';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
@@ -16,11 +16,11 @@ import { isValidProjectFolder, sendDevfileForVersion, sendUpdatedCapabilities, s
 import { loadWebviewHtml } from '../common-ext/utils';
 import { TemplateProjectIdentifier } from '../common/devfile';
 
-vscode.window.onDidChangeActiveColorTheme(function (editor: vscode.ColorTheme) {
+window.onDidChangeActiveColorTheme(function (editor: ColorTheme) {
     if (RegistryViewLoader.panel) {
         void RegistryViewLoader.panel.webview.postMessage({
             action: 'setTheme',
-            themeValue: vscode.window.activeColorTheme.kind,
+            themeValue: window.activeColorTheme.kind,
         });
     }
 });
@@ -30,7 +30,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         case 'init':
             void RegistryViewLoader.panel.webview.postMessage({
                     action: 'setTheme',
-                    themeValue: vscode.window.activeColorTheme.kind,
+                    themeValue: window.activeColorTheme.kind,
                 });
             break;
         case 'getDevfileRegistries':
@@ -69,21 +69,21 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
                 RegistryViewLoader.panel.dispose();
                 if (
                     event.data.addToWorkspace &&
-                    !vscode.workspace.workspaceFolders?.some(
+                    !workspace.workspaceFolders?.some(
                         (workspaceFolder) => workspaceFolder.uri.fsPath === componentFolder,
                     )
                 ) {
-                    vscode.workspace.updateWorkspaceFolders(
-                        vscode.workspace.workspaceFolders
-                            ? vscode.workspace.workspaceFolders.length
+                    workspace.updateWorkspaceFolders(
+                        workspace.workspaceFolders
+                            ? workspace.workspaceFolders.length
                             : 0,
                         null,
-                        { uri: vscode.Uri.file(componentFolder) },
+                        { uri: Uri.file(componentFolder) },
                     );
                 }
-                void vscode.commands.executeCommand('openshift.componentsView.refresh');
+                void commands.executeCommand('openshift.componentsView.refresh');
             } catch (e) {
-                void vscode.window.showErrorMessage(e);
+                void window.showErrorMessage(e);
             }
             break;
         }
@@ -123,7 +123,7 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             break;
         }
         case 'selectProjectFolderNewProject': {
-            const workspaceUri: vscode.Uri = await selectWorkspaceFolder(true, undefined, undefined,  event?.data );
+            const workspaceUri: Uri = await selectWorkspaceFolder(true, undefined, undefined,  event?.data );
             if (workspaceUri) {
                 void RegistryViewLoader.panel.webview.postMessage({
                     action: 'selectedProjectFolder',
@@ -153,17 +153,28 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
         }
 
         default: {
-            void vscode.window.showErrorMessage(`OpenShift: Unexpected message in registry view loader ${event?.action}`);
+            void window.showErrorMessage(`OpenShift: Unexpected message in registry view loader ${event?.action}`);
         }
     }
 }
 
-export default class RegistryViewLoader {
-    static panel: vscode.WebviewPanel;
+export default class RegistryViewLoader implements Disposable {
+    private static instance: RegistryViewLoader;
+
+    public static getInstance(): RegistryViewLoader {
+        if (!RegistryViewLoader.instance) {
+            RegistryViewLoader.instance = new RegistryViewLoader();
+        }
+        return RegistryViewLoader.instance;
+    }
+
+    dispose() { }
+
+    static panel: WebviewPanel;
     static url: string;
 
     static get extensionPath() {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath
+        return extensions.getExtension(ExtensionID).extensionPath
     }
 
     private static doUpdateRegistries() {
@@ -177,7 +188,7 @@ export default class RegistryViewLoader {
                         action: 'createComponentFailed',
                         data: `No Devfile registries available for ${RegistryViewLoader.url}`
                     });
-                    void vscode.window.showErrorMessage(
+                    void window.showErrorMessage(
                             `
                             No Devfile registry available.
                             Do you want to close the '${RegistryViewLoader.panel.title}' view?
@@ -193,24 +204,24 @@ export default class RegistryViewLoader {
         })
     }
 
-    static async loadView(title: string, url?: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfile-registry', 'app'));
+    static async loadView(title: string, url?: string): Promise<WebviewPanel> {
+        const localResourceRoot = Uri.file(path.join(RegistryViewLoader.extensionPath, 'out', 'devfile-registry', 'app'));
         if (RegistryViewLoader.panel) {
             if (RegistryViewLoader.url !== url) {
                 RegistryViewLoader.url = url;
                 RegistryViewLoader.doUpdateRegistries();
             }
             // If we already have a panel, show it in the target column
-            RegistryViewLoader.panel.reveal(vscode.ViewColumn.One);
+            RegistryViewLoader.panel.reveal(ViewColumn.One);
             RegistryViewLoader.panel.title = title;
         } else {
             RegistryViewLoader.url = url;
-            RegistryViewLoader.panel = vscode.window.createWebviewPanel('devFileRegistryView', title, vscode.ViewColumn.One, {
+            RegistryViewLoader.panel = window.createWebviewPanel('devFileRegistryView', title, ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            RegistryViewLoader.panel.iconPath = vscode.Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
+            RegistryViewLoader.panel.iconPath = Uri.file(path.join(RegistryViewLoader.extensionPath, 'images/context/devfile.png'));
             RegistryViewLoader.panel.webview.html = await loadWebviewHtml('devfile-registry', RegistryViewLoader.panel);
             const messageDisposable = RegistryViewLoader.panel.webview.onDidReceiveMessage(devfileRegistryViewerMessageListener);
 

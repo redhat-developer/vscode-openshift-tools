@@ -5,7 +5,7 @@
 
 import * as chai from 'chai';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as NameValidator from '../../../src/openshift/nameValidator';
 import { wait } from '../../../src/util/async';
 

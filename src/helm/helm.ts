@@ -2,8 +2,10 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { window } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import sendTelemetry from '../telemetry';
 import { CliExitData } from '../util/childProcessUtil';
 import { HelmRepo } from './helmChartType';
 import * as HelmCommands from './helmCommands';
@@ -147,4 +149,22 @@ export async function getYAMLValues(repoName: string, chartName: string) {
     return await CliChannel.getInstance().executeTool(
         HelmCommands.getYAMLValues(repoName, chartName), undefined, false
     );
+}
+
+export async function list(): Promise<HelmRepo[]> {
+    await sendTelemetry('openshift.helm.manageRepo.list');
+    const result = await getHelmRepos();
+    if (result.stderr || result.error) {
+        const error = result.stderr || result.error?.message;
+        await sendTelemetry('openshift.helm.manageRepo.list.error', {
+            error
+        });
+        void window.showErrorMessage(error);
+        return [];
+    }
+    const helmRepos = JSON.parse(result.stdout) as HelmRepo[];
+    await sendTelemetry('openshift.helm.manageRepo.list.success', {
+        helmRepos
+    });
+    return helmRepos;
 }

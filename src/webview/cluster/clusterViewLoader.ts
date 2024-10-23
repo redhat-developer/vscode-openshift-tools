@@ -6,7 +6,7 @@ import { CoreV1Api } from '@kubernetes/client-node';
 import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as vscode from 'vscode';
+import { authentication, AuthenticationSession, commands, ConfigurationTarget, Disposable, env, extensions, OutputChannel, Uri, ViewColumn, WebviewPanel, window, workspace } from 'vscode';
 import { CommandText } from '../../base/command';
 import { Cluster } from '../../openshift/cluster';
 import { createSandboxAPI } from '../../openshift/sandbox';
@@ -17,16 +17,16 @@ import { vsCommand } from '../../vscommand';
 import { loadWebviewHtml } from '../common-ext/utils';
 import { OpenShiftTerminalManager } from '../openshift-terminal/openShiftTerminal';
 
-let panel: vscode.WebviewPanel;
+let panel: WebviewPanel;
 
-const channel: vscode.OutputChannel = vscode.window.createOutputChannel('OpenShift Local Logs');
+const channel: OutputChannel = window.createOutputChannel('OpenShift Local Logs');
 const sandboxAPI = createSandboxAPI();
 
 async function clusterEditorMessageListener (event: any ): Promise<any> {
 
-    let sessionCheck: vscode.AuthenticationSession;
+    let sessionCheck: AuthenticationSession;
     if (event.action?.startsWith('sandbox')) {
-        sessionCheck = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
+        sessionCheck = await authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: false });
         if(!sessionCheck && event.action !== 'sandboxLoginRequest') {
             void panel.webview.postMessage({action: 'sandboxPageLoginRequired'});
             return;
@@ -40,7 +40,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'crcSetup':
         case 'crcStart':
         case 'crcStop':
-            await vscode.commands.executeCommand(`openshift.explorer.addCluster.${event.action}`, event);
+            await commands.executeCommand(`openshift.explorer.addCluster.${event.action}`, event);
             break;
 
         case 'crcSaveSettings':
@@ -48,7 +48,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             break;
 
         case 'checksetting': {
-            const binaryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+            const binaryFromSetting: string = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
             if (binaryFromSetting) {
                 await panel.webview.postMessage({action: 'crcsetting'});
                 void ClusterViewLoader.checkCrcStatus(binaryFromSetting, 'crcstatus', panel);
@@ -60,7 +60,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             break;
 
         case 'crcLogin':
-            void vscode.commands.executeCommand(
+            void commands.executeCommand(
                 'openshift.explorer.login.credentialsLogin',
                 true,
                 event.url,
@@ -77,13 +77,13 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 const signupResponse = await sandboxAPI.signUp((sessionCheck as any).idToken);
                 await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                 if (!signupResponse) {
-                    void vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                    void window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
                     telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox failed.');
                 } else {
                     telemetryEventSignup.send();
                 }
             } catch {
-                void vscode.window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
+                void window.showErrorMessage('Sign up request for OpenShift Sandbox failed, please try again.');
                 telemetryEventSignup.sendError('Sign up request for OpenShift Sandbox timed out.');
             }
             break;
@@ -91,7 +91,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
         case 'sandboxLoginRequest': {
             const telemetryEventLogin = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginRequest');
             try {
-                const session: vscode.AuthenticationSession = await vscode.authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
+                const session: AuthenticationSession = await authentication.getSession('redhat-account-auth', ['openid'], { createIfNone: true });
                 if (session) {
                     await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                 } else {
@@ -126,7 +126,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                                 signupStatus.compliantUsername);
                         let errCode = '';
                         if (!pipelineAccountToken) { // Try loging in using a token from the Clipboard
-                            if (!Cluster.validateLoginToken((await vscode.env.clipboard.readText()).trim())) {
+                            if (!Cluster.validateLoginToken((await env.clipboard.readText()).trim())) {
                                 errCode = 'invalidToken';
                             }
                         }
@@ -160,7 +160,7 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                 }
                 telemetryEventDetect.send();
             } catch {
-                void vscode.window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
+                void window.showErrorMessage('OpenShift Sandbox status request timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageDetectStatus', errorCode: 'statusDetectionError'});
                 telemetryEventDetect.sendError('OpenShift Sandbox status request timed out.');
             }
@@ -174,12 +174,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode'});
                     telemetryEventRequestCode.send();
                 } else {
-                    void vscode.window.showErrorMessage(`Request for verification code failed: ${requestStatus.json.details}`);
+                    void window.showErrorMessage(`Request for verification code failed: ${requestStatus.json.details}`);
                     await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                     telemetryEventRequestCode.sendError('Request for verification code failed.');
                 }
             } catch {
-                void vscode.window.showErrorMessage('Request for verification code timed out, please try again.');
+                void window.showErrorMessage('Request for verification code timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageRequestVerificationCode'});
                 telemetryEventRequestCode.sendError('Request for verification code timed out.');
             }
@@ -193,12 +193,12 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     await panel.webview.postMessage({action: 'sandboxPageDetectStatus'});
                     telemetryEventValidateCode.send();
                 } else {
-                    void vscode.window.showErrorMessage('Verification code does not match, please try again.');
+                    void window.showErrorMessage('Verification code does not match, please try again.');
                     await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                     telemetryEventValidateCode.sendError('Verification code does not match');
                 }
             } catch {
-                void vscode.window.showErrorMessage('Verification code validation request timed out, please try again.');
+                void window.showErrorMessage('Verification code validation request timed out, please try again.');
                 await panel.webview.postMessage({action: 'sandboxPageEnterVerificationCode', errorCode: 'verificationFailed'});
                 telemetryEventValidateCode.sendError('Verification code validation request failed');
             }
@@ -208,10 +208,10 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.sandboxLoginUsingDataInClipboard');
             try {
                 const result = await Cluster.loginUsingClipboardToken(event.payload.apiEndpointUrl, event.payload.oauthRequestTokenUrl);
-                if (result) void vscode.window.showInformationMessage(`${result}`);
+                if (result) void window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
-                void vscode.window.showErrorMessage(err.message);
+                void window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
             }
             break;
@@ -225,16 +225,16 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                     event.payload.username,
                     (sessionCheck as any).idToken
                 );
-                if (result) void vscode.window.showInformationMessage(`${result}`);
+                if (result) void window.showInformationMessage(`${result}`);
                 telemetryEventLoginToSandbox.send();
             } catch (err) {
-                void vscode.window.showErrorMessage(err.message);
+                void window.showErrorMessage(err.message);
                 telemetryEventLoginToSandbox.sendError('Login into Sandbox Cluster failed.');
             }
             break;
         }
         default:
-            void vscode.window.showErrorMessage(`Unexpected message from webview: '${event.action}'`);
+            void window.showErrorMessage(`Unexpected message from webview: '${event.action}'`);
             break;
     }
 }
@@ -243,9 +243,9 @@ async function pollClipboard(signupStatus) {
     const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
     let firstPoll = true;
     while (panel) {
-        const previousContent = (await vscode.env.clipboard.readText()).trim();
+        const previousContent = (await env.clipboard.readText()).trim();
         await new Promise(r => setTimeout(r, 500));
-        const currentContent = (await vscode.env.clipboard.readText()).trim();
+        const currentContent = (await env.clipboard.readText()).trim();
         if (firstPoll || (previousContent && previousContent !== currentContent)) {
             firstPoll = false;
             let errCode = '';
@@ -266,10 +266,21 @@ async function pollClipboard(signupStatus) {
     }
 }
 
-export default class ClusterViewLoader {
+export default class ClusterViewLoader implements Disposable {
+    private static instance: ClusterViewLoader;
+
+    public static getInstance(): ClusterViewLoader {
+        if (!ClusterViewLoader.instance) {
+            ClusterViewLoader.instance = new ClusterViewLoader();
+        }
+        return ClusterViewLoader.instance;
+    }
+
+    dispose() { }
+
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static get extensionPath() {
-        return vscode.extensions.getExtension(ExtensionID).extensionPath
+        return extensions.getExtension(ExtensionID).extensionPath
     }
 
     @vsCommand('openshift.explorer.addCluster.openLaunchSandboxPage')
@@ -284,7 +295,7 @@ export default class ClusterViewLoader {
 
     @vsCommand('openshift.explorer.addCluster.openCrcAddClusterPage')
     static async openCrcAddClusterPage() {
-        const toolsJsonPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'src/tools.json'));
+        const toolsJsonPath = Uri.file(path.join(ClusterViewLoader.extensionPath, 'src/tools.json'));
         let crc: string, crcOpenShift: string;
         try {
             const content = fs.readFileSync(toolsJsonPath.fsPath, { encoding: 'utf-8' });
@@ -295,7 +306,7 @@ export default class ClusterViewLoader {
             const telemetryEventLoginToSandbox = new ExtCommandTelemetryEvent('openshift.explorer.addCluster.openCrcAddClusterPage');
             crc = '';
             crcOpenShift = '';
-            void vscode.window.showErrorMessage(err.message);
+            void window.showErrorMessage(err.message);
             telemetryEventLoginToSandbox.sendError('Unable to fetch CRC and OpenshiftCRC version');
         } finally {
             await panel.webview.postMessage(
@@ -319,11 +330,11 @@ export default class ClusterViewLoader {
         let startProcess: ChildProcess;
         channel.show();
         if (event.isSetting) {
-            const binaryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
-            const pullSecretFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcPullSecretPath');
-            const cpuFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcCpuCores');
-            const memoryFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit').get('crcMemoryAllocated');
-            const nameserver = vscode.workspace.getConfiguration('openshiftToolkit').get<string>('crcNameserver');
+            const binaryFromSetting: string = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+            const pullSecretFromSetting: string = workspace.getConfiguration('openshiftToolkit').get('crcPullSecretPath');
+            const cpuFromSetting: string = workspace.getConfiguration('openshiftToolkit').get('crcCpuCores');
+            const memoryFromSetting: string = workspace.getConfiguration('openshiftToolkit').get('crcMemoryAllocated');
+            const nameserver = workspace.getConfiguration('openshiftToolkit').get<string>('crcNameserver');
             const nameserverOption = nameserver ? ['-n', nameserver] : [];
             const crcOptions = ['start', '-p', `${pullSecretFromSetting}`, '-c', `${cpuFromSetting}`, '-m', `${memoryFromSetting}`, ...nameserverOption,  '-o', 'json'];
 
@@ -345,15 +356,15 @@ export default class ClusterViewLoader {
             const message = `'crc start' exited with code ${code}`;
             channel.append(message);
             if (code !== 0) {
-                void vscode.window.showErrorMessage(message);
+                void window.showErrorMessage(message);
             }
-            const binaryLoc = event.isSetting ? vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation'): event.crcLoc;
+            const binaryLoc = event.isSetting ? workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation'): event.crcLoc;
             void ClusterViewLoader.checkCrcStatus(binaryLoc, 'crcstartstatus', panel);
         });
         startProcess.on('error', (err) => {
             const message = `'crc start' execution failed with error: '${err.message}'`;
             channel.append(message);
-            void vscode.window.showErrorMessage(message);
+            void window.showErrorMessage(message);
         });
         return Promise.resolve();
     }
@@ -363,7 +374,7 @@ export default class ClusterViewLoader {
         let filePath: string;
         channel.show();
         if (event.data.tool === '') {
-            filePath = vscode.workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
+            filePath = workspace.getConfiguration('openshiftToolkit').get('crcBinaryLocation');
         } else {
             filePath = event.data.tool;
         }
@@ -381,21 +392,21 @@ export default class ClusterViewLoader {
             const message = `'crc stop' exited with code ${code}`;
             channel.append(message);
             if (code !== 0) {
-                void vscode.window.showErrorMessage(message);
+                void window.showErrorMessage(message);
             }
             void ClusterViewLoader.checkCrcStatus(filePath, 'crcstopstatus', panel);
         });
         stopProcess.on('error', (err) => {
             const message = `'crc stop' execution filed with error: '${err.message}'`;
             channel.append(message);
-            void vscode.window.showErrorMessage(message);
+            void window.showErrorMessage(message);
         });
         return Promise.resolve();
     }
 
     @vsCommand('openshift.explorer.addCluster')
     static async add(value: string): Promise<void> {
-        const webViewPanel: vscode.WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
+        const webViewPanel: WebviewPanel = await ClusterViewLoader.loadView('Add OpenShift Cluster');
         if(value?.length > 0){
             await webViewPanel.webview.postMessage({action: 'cluster', param: value});
         }
@@ -410,37 +421,37 @@ export default class ClusterViewLoader {
      * so their values will override the ones defined in the object.
      */
     static async clearCrcSettings() {
-        const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
-        await cfg.update('crcBinaryLocation', undefined, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcPullSecretPath', undefined, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcCpuCores', undefined, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcMemoryAllocated', undefined, vscode.ConfigurationTarget.Global);
+        const cfg = workspace.getConfiguration('openshiftToolkit');
+        await cfg.update('crcBinaryLocation', undefined, ConfigurationTarget.Global);
+        await cfg.update('crcPullSecretPath', undefined, ConfigurationTarget.Global);
+        await cfg.update('crcCpuCores', undefined, ConfigurationTarget.Global);
+        await cfg.update('crcMemoryAllocated', undefined, ConfigurationTarget.Global);
         await cfg.update('crcNameserver', undefined); // Previously it was saved as `Workspace`
-        await cfg.update('crcNameserver', undefined, vscode.ConfigurationTarget.Global);
+        await cfg.update('crcNameserver', undefined, ConfigurationTarget.Global);
     }
 
     static async crcSaveSettings(event) {
         await ClusterViewLoader.clearCrcSettings();
-        const cfg = vscode.workspace.getConfiguration('openshiftToolkit');
-        await cfg.update('crcBinaryLocation', event.crcLoc, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcPullSecretPath', event.pullSecret, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcCpuCores', event.cpuSize, vscode.ConfigurationTarget.Global);
-        await cfg.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), vscode.ConfigurationTarget.Global);
-        await cfg.update('crcNameserver', event.nameserver, vscode.ConfigurationTarget.Global);
+        const cfg = workspace.getConfiguration('openshiftToolkit');
+        await cfg.update('crcBinaryLocation', event.crcLoc, ConfigurationTarget.Global);
+        await cfg.update('crcPullSecretPath', event.pullSecret, ConfigurationTarget.Global);
+        await cfg.update('crcCpuCores', event.cpuSize, ConfigurationTarget.Global);
+        await cfg.update('crcMemoryAllocated', Number.parseInt(event.memory, 10), ConfigurationTarget.Global);
+        await cfg.update('crcNameserver', event.nameserver, ConfigurationTarget.Global);
     }
 
-    static async loadView(title: string): Promise<vscode.WebviewPanel> {
-        const localResourceRoot = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'out'));
+    static async loadView(title: string): Promise<WebviewPanel> {
+        const localResourceRoot = Uri.file(path.join(ClusterViewLoader.extensionPath, 'out'));
         if (panel) {
             // If we already have a panel, show it in the target column
-            panel.reveal(vscode.ViewColumn.One);
+            panel.reveal(ViewColumn.One);
         } else {
-            panel = vscode.window.createWebviewPanel('clusterView', title, vscode.ViewColumn.One, {
+            panel = window.createWebviewPanel('clusterView', title, ViewColumn.One, {
                 enableScripts: true,
                 localResourceRoots: [localResourceRoot],
                 retainContextWhenHidden: true
             });
-            panel.iconPath = vscode.Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
+            panel.iconPath = Uri.file(path.join(ClusterViewLoader.extensionPath, 'images/context/cluster-node.png'));
             panel.webview.html = await loadWebviewHtml('cluster', panel);
             const messageListenerDisposable = panel.webview.onDidReceiveMessage(clusterEditorMessageListener);
             panel.onDidDispose(()=> {
@@ -453,7 +464,7 @@ export default class ClusterViewLoader {
         return panel;
     }
 
-    public static async checkCrcStatus(filePath: string, postCommand: string, p: vscode.WebviewPanel | undefined = undefined) {
+    public static async checkCrcStatus(filePath: string, postCommand: string, p: WebviewPanel | undefined = undefined) {
         const crcCredArray = [];
         const crcVerInfo = await ChildProcessUtil.Instance.execute(`"${filePath}" version -o json`);
         channel.append(`\n\n"${filePath}" version -o json\n`);

@@ -4,15 +4,25 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { commands, window } from 'vscode';
+import { Disposable, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
+import { KubeConfigUtils, getNamespaceKind } from '../util/kubeUtils';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
-import { KubeConfigUtils, getNamespaceKind } from '../util/kubeUtils';
 
-export class Project extends OpenShiftItem {
+export class Project extends OpenShiftItem implements Disposable {
+    private static instance: Project;
+
+    public static getInstance(): Project {
+        if (!Project.instance) {
+            Project.instance = new Project();
+        }
+        return Project.instance;
+    }
+
+    dispose() { }
 
     @vsCommand('openshift.project.set', true)
     @vsCommand('openshift.namespace.set', true)
@@ -134,5 +144,4 @@ export class Project extends OpenShiftItem {
         }
         return result;
     }
-
 }

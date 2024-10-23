@@ -3,11 +3,21 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { KubeConfig } from '@kubernetes/client-node';
-import { commands, Uri } from 'vscode';
+import { commands, Disposable, Uri } from 'vscode';
 import { Oc } from '../oc/ocWrapper';
 import { vsCommand, VsCommandError } from '../vscommand';
 
-export class Route {
+export class Route implements Disposable {
+    private static instance: Route;
+
+    public static getInstance(): Route {
+        if (!Route.instance) {
+            Route.instance = new Route();
+        }
+        return Route.instance;
+    }
+
+    dispose() { }
 
     public static async getUrl(namespace: string, name: string): Promise<string> {
         const route = await Oc.Instance.getKubernetesObject('route', name, namespace);
