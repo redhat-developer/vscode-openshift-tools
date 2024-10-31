@@ -72,7 +72,7 @@
 	},
 	"dependencies": {
 		"@codemirror/lang-yaml": "^6.1.1",
-		"@kubernetes/client-node": "^0.22.1",
+		"@kubernetes/client-node": "^0.22.2",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.9.0",
 		"@uiw/codemirror-theme-github": "^4.23.6",
 		"@uiw/react-codemirror": "^4.23.6",
