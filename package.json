@@ -109,7 +109,7 @@
 		"@mui/lab": "^6.0.0-beta.14",
 		"@mui/material": "^6.1.0",
 		"@mui/styles": "^6.1.6",
-		"@mui/x-tree-view": "^7.22.0",
+		"@mui/x-tree-view": "^7.22.1",
 		"@rjsf/core": "^5.22.3",
 		"@rjsf/mui": "^5.22.3",
 		"@rjsf/utils": "^5.22.3",
