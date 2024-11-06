@@ -14,6 +14,9 @@ import {
     VSBrowser,
     ViewSection,
     Workbench,
+    before,
+    beforeEach,
+    after,
 } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
@@ -71,8 +74,10 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         });
 
         //put original kubeconfig back
-        after(() => {
+        after(async () => {
             fs.moveSync(kubeCopy, getKubeConfigPath(), { overwrite: true });
+            const actions = await explorer.getActions();
+            await actions[3].click();
         });
 
         beforeEach(async function () {
@@ -105,7 +110,8 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             }
 
             const quickPickText = allQuickPicksTexts[0];
-            const projectName = quickPickText.split('on')[0];
+            const project = quickPickText.match(/\w+/)[0];
+            const projectName = project.split('on')[0];
 
             await inputBox.selectQuickPick(projectName);
 

@@ -62,7 +62,9 @@ export async function notificationDoesNotExist(
         try {
             const notifications = await center.getNotifications(NotificationType.Any);
             const notificationText = [];
-            notifications.forEach((item) => (async () => notificationText.push(await item.getMessage())));
+            notifications.forEach(
+                (item) => async () => notificationText.push(await item.getMessage()),
+            );
 
             if (!notificationText.includes(message)) {
                 await center.close();
@@ -79,16 +81,20 @@ export async function itemExists(
     view: ViewSection,
     timeout = 10000,
 ): Promise<ViewItem> {
-    return view.getDriver().wait(async () => {
-        try {
-            const item = await view.findItem(title);
-            if (item) {
-                return item;
+    return view.getDriver().wait(
+        async () => {
+            try {
+                const item = await view.findItem(title);
+                if (item) {
+                    return item;
+                }
+            } catch {
+                return null;
             }
-        } catch {
-            return null;
-        }
-    }, timeout);
+        },
+        timeout,
+        `Item '${title}' not found.`,
+    );
 }
 
 export async function itemDoesNotExist(
@@ -96,16 +102,20 @@ export async function itemDoesNotExist(
     view: ViewSection,
     timeout = 10000,
 ): Promise<boolean> {
-    return view.getDriver().wait(async () => {
-        try {
-            const item = await view.findItem(title);
-            if (!item) {
+    return view.getDriver().wait(
+        async () => {
+            try {
+                const item = await view.findItem(title);
+                if (!item) {
+                    return true;
+                }
+            } catch {
                 return true;
             }
-        } catch {
-            return true;
-        }
-    }, timeout);
+        },
+        timeout,
+        `Item ${title} should not exists, but does.`,
+    );
 }
 
 export async function itemHasText(

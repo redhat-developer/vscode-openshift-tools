@@ -6,22 +6,25 @@ import { By, Key, VSBrowser, WebElement, WebviewView } from 'vscode-extension-te
 import { WebviewViewForm } from './webviewViewForm';
 
 export class OpenshiftTerminalWebviewView extends WebviewViewForm {
-
     public constructor() {
         super();
     }
 
     public async getTerminalText(): Promise<string> {
-        const copyKeys = [`${Key.CONTROL}${Key.SHIFT}a`,`${Key.CONTROL}${Key.SHIFT}c`]
-        return await VSBrowser.instance.driver.wait(async () => {
-            try {
-                await this.sendKeysToTerminal(copyKeys);
-                const cb = await import('clipboardy');
-                return await cb.read();
-            } catch {
-                return null;
-            }
-        }, 10_000);
+        const copyKeys = [`${Key.CONTROL}${Key.SHIFT}a`, `${Key.CONTROL}${Key.SHIFT}c`];
+        return await VSBrowser.instance.driver.wait(
+            async () => {
+                try {
+                    await this.sendKeysToTerminal(copyKeys);
+                    const cb = await import('clipboardy');
+                    return await cb.read();
+                } catch {
+                    return null;
+                }
+            },
+            10_000,
+            'Could not find any text in terminal in 10 seconds',
+        );
     }
 
     public async getActiveTabName(): Promise<string> {
@@ -29,32 +32,36 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
         await this.enterWebviewView(async (webviewView) => {
             const activeTab = await this.getActiveTab(webviewView);
             text = await activeTab.getText();
-        })
+        });
         return text;
     }
 
     public async closeTab(name: string): Promise<void> {
         await this.enterWebviewView(async (webviewView) => {
-            const closeButton = await webviewView.findWebElement(By.xpath(
-                `//div[div[contains(text(),"${name}")]]//*[@data-testid="CloseIcon"]`
-            ));
+            const closeButton = await webviewView.findWebElement(
+                By.xpath(`//div[div[contains(text(),"${name}")]]//*[@data-testid="CloseIcon"]`),
+            );
             await closeButton.click();
-        })
+        });
     }
 
     public async closeActiveTab(): Promise<void> {
         await this.enterWebviewView(async (webviewView) => {
-            await webviewView.findWebElement(By.xpath('//button[@aria-selected = "true"]//*[@data-testid = "TerminalIcon"]'));
+            await webviewView.findWebElement(
+                By.xpath('//button[@aria-selected = "true"]//*[@data-testid = "TerminalIcon"]'),
+            );
         });
     }
 
     public async closeAllInactiveTabs(): Promise<void> {
         await this.enterWebviewView(async (webviewView) => {
-            const closeButtons = await webviewView.findWebElements(By.xpath('//button[@aria-selected = "false"]//*[@data-testid = "TerminalIcon"]'));
+            const closeButtons = await webviewView.findWebElements(
+                By.xpath('//button[@aria-selected = "false"]//*[@data-testid = "TerminalIcon"]'),
+            );
             for (const button of closeButtons) {
                 await button.click();
             }
-        })
+        });
     }
 
     public async switchToTab(name: string): Promise<void> {
@@ -88,14 +95,18 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
     }
 
     private async getActiveTab(webviewView: WebviewView): Promise<WebElement> {
-        return await webviewView.findWebElement(By.xpath('//button[@aria-selected = "true"]//div[*[name() = "svg"]]/div'))
+        return await webviewView.findWebElement(
+            By.xpath('//button[@aria-selected = "true"]//div[*[name() = "svg"]]/div'),
+        );
     }
 
     private async getTerminalTabs(webviewView: WebviewView): Promise<WebElement[]> {
-        return await webviewView.findWebElements(By.xpath('//div[*[name() = "svg"]]/div'))
+        return await webviewView.findWebElements(By.xpath('//div[*[name() = "svg"]]/div'));
     }
 
     private async getTerminalInstance(webviewView: WebviewView): Promise<WebElement> {
-        return await webviewView.findWebElement(By.xpath('//textarea[@aria-label = "Terminal input"]'));
+        return await webviewView.findWebElement(
+            By.xpath('//textarea[@aria-label = "Terminal input"]'),
+        );
     }
 }
