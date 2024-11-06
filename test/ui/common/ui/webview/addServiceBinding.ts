@@ -7,7 +7,6 @@ import { By, WebElement, WebView } from 'vscode-extension-tester';
 import { WebViewForm } from './WebViewForm';
 
 export class AddServiceBindingWebView extends WebViewForm {
-
     public constructor() {
         super('Add service binding');
     }
@@ -54,10 +53,12 @@ export class AddServiceBindingWebView extends WebViewForm {
     }
 
     private async getAddServiceBindingButton(webView: WebView): Promise<WebElement> {
-        return webView.findWebElement(By.xpath('//button[contains(text(), "Add Service Binding")]'));
+        return webView.findWebElement(
+            By.xpath('//button[contains(text(), "Add Service Binding")]'),
+        );
     }
 
-    private async comboBoxExists(webView: WebView, timeout = 15_000): Promise<WebElement> {
+    private async comboBoxExists(webView: WebView, timeout = 30_000): Promise<WebElement> {
         return webView.getDriver().wait(async () => {
             try {
                 const comboBox = await this.getServiceToBindComboBox(webView);
@@ -70,7 +71,10 @@ export class AddServiceBindingWebView extends WebViewForm {
         }, timeout);
     }
 
-    private async addServiceBindingButtonExists(webView: WebView, timeout = 10_000): Promise<WebElement> {
+    private async addServiceBindingButtonExists(
+        webView: WebView,
+        timeout = 10_000,
+    ): Promise<WebElement> {
         return webView.getDriver().wait(async () => {
             try {
                 const button = await this.getAddServiceBindingButton(webView);

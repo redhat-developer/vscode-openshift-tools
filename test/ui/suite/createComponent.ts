@@ -94,7 +94,10 @@ export function testCreateComponent(path: string) {
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.deleteConfiguration);
 
-            const notification = await notificationExists(NOTIFICATIONS.deleteConfig(pth.join(path, componentName)), VSBrowser.instance.driver);
+            const notification = await notificationExists(
+                NOTIFICATIONS.deleteConfig(pth.join(path, componentName)),
+                VSBrowser.instance.driver,
+            );
             await notification.takeAction(INPUTS.deleteConfiguration);
 
             const notificationCenter = await new Workbench().openNotificationsCenter();
@@ -172,7 +175,10 @@ export function testCreateComponent(path: string) {
                 const component = await section.findItem(componentName);
                 const contextMenu = await component.openContextMenu();
                 await contextMenu.select(MENUS.deleteSourceCodeFolder);
-                const notification = await notificationExists(NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)), VSBrowser.instance.driver);
+                const notification = await notificationExists(
+                    NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)),
+                    VSBrowser.instance.driver,
+                );
                 await notification.takeAction(INPUTS.deleteSourceFolder);
                 //fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
                 componentName = undefined;
@@ -188,11 +194,16 @@ export function testCreateComponent(path: string) {
         });
 
         after(async function context() {
+            this.timeout(15_000);
             const prompt = await new Workbench().openCommandPrompt();
             await prompt.setText('>Workspaces: Remove Folder From Workspace...');
             await prompt.confirm();
             await prompt.setText('node-js-runtime');
             await prompt.confirm();
+
+            if (await prompt.isDisplayed()) {
+                await prompt.cancel();
+            }
         });
 
         async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
@@ -231,12 +242,12 @@ export function testCreateComponent(path: string) {
 
         async function loadCreateComponentButton() {
             section = await view.getContent().getSection(VIEWS.components);
-            await VSBrowser.instance.driver.wait( async () => {
+            await VSBrowser.instance.driver.wait(async () => {
                 const buttons = await (await section.findWelcomeContent()).getButtons();
                 for (const btn of buttons) {
                     if ((await btn.getTitle()) === BUTTONS.newComponent) {
                         button = btn;
-                        return true
+                        return true;
                     }
                 }
             }, 10_000);

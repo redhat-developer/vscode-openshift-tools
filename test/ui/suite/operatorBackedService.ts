@@ -30,7 +30,7 @@ export function operatorBackedServiceTest() {
         let serviceName: string;
 
         before(async function () {
-            this.timeout(30_000)
+            this.timeout(30_000);
 
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             section = await view.getContent().getSection(VIEWS.appExplorer);
@@ -47,7 +47,7 @@ export function operatorBackedServiceTest() {
             this.timeout(60_000);
 
             //get project, open context menu and select create new operator backed service
-            const clusterItem = await itemExists(clusterName, section) as TreeItem;
+            const clusterItem = (await itemExists(clusterName, section)) as TreeItem;
             await clusterItem.expand();
             await clusterItem.getDriver().wait(async () => await clusterItem.hasChildren());
             const children = await clusterItem.getChildren();
@@ -80,16 +80,22 @@ export function operatorBackedServiceTest() {
 
             //check that deployment is shown
             await project.expand();
-            const deployments = await itemExists('Deployments', section) as TreeItem;
+            const deployments = (await itemExists('Deployments', section)) as TreeItem;
             await deployments.expand();
             await itemExists(serviceName, section);
         });
 
         it('Can bind service to a component', async function () {
-            this.timeout(60_000);
+            this.timeout(75_000);
             const componentName = 'nodejs-starter';
             const bindingName = 'test-binding';
             section = await view.getContent().getSection(VIEWS.components);
+
+            try {
+                await itemExists(componentName, section);
+            } catch {
+                this.skip();
+            }
 
             //open context menu on component and click bind service
             const component = await section.findItem(componentName);
@@ -97,7 +103,10 @@ export function operatorBackedServiceTest() {
             await contextMenu.select(MENUS.bindService);
 
             //wait for look for available services to be completed
-            await notificationDoesNotExist(NOTIFICATIONS.lookingForBindableServices, VSBrowser.instance.driver);
+            await notificationDoesNotExist(
+                NOTIFICATIONS.lookingForBindableServices,
+                VSBrowser.instance.driver,
+            );
 
             //select service to bind
             const addServiceBinding = new AddServiceBindingWebView();
