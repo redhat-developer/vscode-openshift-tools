@@ -13,6 +13,9 @@ import {
     Workbench,
     TreeItem,
     VSBrowser,
+    before,
+    beforeEach,
+    after,
 } from 'vscode-extension-tester';
 import { itemExists, notificationExists } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
@@ -36,11 +39,10 @@ export function projectTest(isOpenshiftCluster: boolean) {
         let anotherProjectName: string;
 
         before(async function () {
+            this.timeout(10_000);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
             await explorer.expand();
-            const actions = await explorer.getActions();
-            await actions[3].click();
             await itemExists(clusterName, explorer);
         });
 

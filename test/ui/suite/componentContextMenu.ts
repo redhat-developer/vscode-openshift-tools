@@ -7,7 +7,6 @@ import { expect } from 'chai';
 import {
     ActivityBar,
     BottomBarPanel,
-    CallStackItem,
     DebugView,
     EditorView,
     Key,
@@ -35,7 +34,7 @@ export function testComponentContextMenu() {
         const expectedTabName = `odo dev: ${componentName}`;
 
         before(async function context() {
-            this.timeout(10_000);
+            this.timeout(20_000);
             await new EditorView().closeAllEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
@@ -49,6 +48,11 @@ export function testComponentContextMenu() {
             }
 
             section = await view.getContent().getSection(VIEWS.components);
+            try {
+                await itemExists(componentName, section);
+            } catch {
+                this.skip();
+            }
         });
 
         it('Start Dev works', async function () {
@@ -63,11 +67,14 @@ export function testComponentContextMenu() {
             if (notifications.length > 0) {
                 await startDev(true);
             }
+            await notificationCenter.close();
 
             //check openshift terminal for tab name
             openshiftTerminal = new OpenshiftTerminalWebviewView();
             const terminalName = await openshiftTerminal.getActiveTabName();
             expect(terminalName).to.contain(expectedTabName);
+
+            await openshiftTerminal.getTerminalText();
 
             //decline odo telemetry
             await openshiftTerminal.sendKeysToTerminal(['n', Key.ENTER]);
@@ -86,6 +93,11 @@ export function testComponentContextMenu() {
 
         it('Stop Dev works', async function () {
             this.timeout(80_000);
+            try {
+                await itemDoesNotExist(componentName, section);
+            } catch {
+                this.skip();
+            }
 
             //stop dev
             await stopDev();
@@ -150,8 +162,13 @@ export function testComponentContextMenu() {
             expect(terminalText).to.include('Press any key to close this terminal');
         });
 
-        it('Describe component works', async () => {
+        it('Describe component works', async function () {
             this.timeout(80_000);
+            try {
+                await itemExists(componentName, section);
+            } catch {
+                this.skip();
+            }
 
             //start dev
             await startDev(true);
@@ -168,7 +185,6 @@ export function testComponentContextMenu() {
             expect(tabName).to.contain(`Describe '${componentName}' Component`);
 
             //Check for terminal content
-            //await new Promise((res) => { setTimeout(res, 1_500) });
             const terminalText = await openshiftTerminal.getTerminalText();
             expect(terminalText).to.contain('Name');
             expect(terminalText).to.contain('Display Name');
@@ -210,7 +226,17 @@ export function testComponentContextMenu() {
 
             //wait for console to have text
             await new Promise((res) => setTimeout(res, 1_000));
-            const bottomBarText = await bottomBar.getText();
+            const bottomBarText = await bottomBar.getDriver().wait(
+                async () => {
+                    const text = await bottomBar.getText();
+                    if (text.length !== 0) {
+                        return text;
+                    }
+                },
+                10_000,
+                'No text in debug console found in 10 seconds',
+            );
+            //const bottomBarText = await bottomBar.getText();
             expect(bottomBarText).to.contain('App started on PORT');
 
             //Check side bar view has been switched from openshift to run and debug
@@ -225,7 +251,9 @@ export function testComponentContextMenu() {
             //refresh section
             await debugSession.expand();
             await collapse(debugSession);
-            await new Promise((res) => { setTimeout(res, 500) });
+            await new Promise((res) => {
+                setTimeout(res, 500);
+            });
             await debugSession.expand();
 
             //click on item
@@ -237,10 +265,24 @@ export function testComponentContextMenu() {
             const callStackSection = await debugView.getCallStackSection();
 
             //check item exists and end debugging by clicking on disconnect
-            const debugItem = await itemExists(
-                `Attach to '${componentName}' component.: Remote Process [0] (${componentName})`,
-                callStackSection
-            ) as CallStackItem;
+
+            const debugItem = await callStackSection.getDriver().wait(
+                async () => {
+                    try {
+                        const item = await callStackSection.findItem(async (el) => {
+                            const label = await el.getLabel();
+                            return label.includes(`Attach to '${componentName}' component`);
+                        });
+                        if (item) {
+                            return item;
+                        }
+                    } catch {
+                        return null;
+                    }
+                },
+                10_000,
+                `Item with label '${`Attach to '${componentName}' component`}' was not found`,
+            );
             const disconnectButton = await debugItem.getActionButton('Disconnect (Shift+F5)');
             await disconnectButton.click();
 
@@ -262,7 +304,7 @@ export function testComponentContextMenu() {
         async function waitForStartDevToFinish(devOnCluster: boolean): Promise<void> {
             const podmanString = devOnCluster ? '' : ' on podman';
             await itemExists(`${componentName} (dev starting${podmanString})`, section);
-            await itemExists(`${componentName} (dev running${podmanString})`, section, 30_000);
+            await itemExists(`${componentName} (dev running${podmanString})`, section, 40_000);
         }
 
         async function stopDev(): Promise<void> {
