@@ -105,10 +105,10 @@
 	},
 	"devDependencies": {
 		"@devfile/api": "^2.2.2-1716821574",
-		"@mui/icons-material": "^6.1.6",
-		"@mui/lab": "^6.0.0-beta.14",
+		"@mui/icons-material": "^6.1.7",
+		"@mui/lab": "^6.0.0-beta.15",
 		"@mui/material": "^6.1.0",
-		"@mui/styles": "^6.1.6",
+		"@mui/styles": "^6.1.7",
 		"@mui/x-tree-view": "^7.22.1",
 		"@rjsf/core": "^5.22.4",
 		"@rjsf/mui": "^5.22.4",
