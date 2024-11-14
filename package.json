@@ -191,7 +191,7 @@
 	},
 	"overrides": {
 		"tough-cookie": "^5.0.0",
-		"cookie": "0.7.1"
+		"cookie": "^1.0.1"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
