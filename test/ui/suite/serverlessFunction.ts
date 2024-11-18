@@ -51,46 +51,30 @@ export function testCreateServerlessFunction(path: string) {
             this.timeout(20_000);
             await collapse(section);
             await section.expand();
-            console.log('a');
             const createButton = await section.getAction('Create Function');
-            console.log('b');
             await createButton.click();
-            console.log('c');
             await new Promise((res) => {
                 setTimeout(res, 3_000);
             });
-            console.log('d');
 
             const serverlessFunctionView = new ServerlessFunctionWebView();
-            console.log('e');
             await serverlessFunctionView.initializeEditor();
-            console.log('f');
             await serverlessFunctionView.insertFunctionName(functionName);
-            console.log('g');
             await serverlessFunctionView.selectBuildImage('docker');
-            console.log('h');
             await serverlessFunctionView.selectLanguage('Node');
-            console.log('i');
             await serverlessFunctionView.selectTemplate('http');
-            console.log('j');
             await serverlessFunctionView.selectFolder(pth.join(path, 'function'));
-            console.log('k');
             await serverlessFunctionView.clickCreateButton();
-            console.log('l');
 
             await new Promise((res) => {
                 setTimeout(res, 2_000);
             });
 
             await collapse(section);
-            console.log('m');
             await section.expand();
-            console.log('n');
 
             const refreshButton = await section.getAction('Refresh Serverless Function View');
-            console.log('o');
             await refreshButton.click();
-            console.log('p');
 
             expect(await section.findItem(functionName)).to.be.not.undefined;
         });
