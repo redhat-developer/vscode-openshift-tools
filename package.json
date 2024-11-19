@@ -191,6 +191,7 @@
 	},
 	"overrides": {
 		"tough-cookie": "^5.0.0",
+		"cross-spawn": "^7.0.6",
 		"cookie": "^1.0.1"
 	},
 	"activationEvents": [
