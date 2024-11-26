@@ -74,7 +74,8 @@
 		"public-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max"
 	},
 	"dependencies": {
-		"shelljs": "^0.8.5"
+		"shelljs": "^0.8.5",
+		"dompurify": "^3.2.1"
 	},
 	"devDependencies": {
 		"@codemirror/lang-yaml": "^6.1.1",

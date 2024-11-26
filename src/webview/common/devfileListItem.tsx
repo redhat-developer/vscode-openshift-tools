@@ -6,6 +6,7 @@ import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import validator from 'validator';
+import DOMPurify from 'dompurify';
 import DevfileLogo from '../../../images/context/devfile.png';
 import { DevfileData, DevfileInfo } from '../../devfile-registry/devfileInfo';
 
@@ -18,7 +19,7 @@ export type DevfileListItemProps = {
 
 function checkedDevfileLogoUrl(logoUrl?: string) {
     if (logoUrl && validator.isURL(logoUrl)) {
-        return logoUrl;
+        return DOMPurify.sanitize(logoUrl);
     }
     return DevfileLogo;
 }
