@@ -16,10 +16,10 @@ import {
     Typography
 } from '@mui/material';
 import * as React from 'react';
-import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
-import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { BuilderImage } from '../../common/buildImage';
 import { BuilderImageListItem } from '../../common/builderImageListItem';
+import { RecommendationInfo } from '../../common/devfileRecommendationInfo';
+import { NoSuitableWarning } from '../../common/noSuitableDevfile';
 import { BuilderConfiguration } from './builderConfig';
 import { SelectBuilderImage } from './selectBuilderImage';
 
@@ -435,22 +435,20 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 />
             );
         case 'selectDifferentBuilderImage':
-            return (
-                <>
-                    {!selectedBuilderImage ? (
-                        <SelectBuilderImage
-                            titleText="Select Different Builder Image"
-                            goBack={() => {
-                                setCurrentPage('fromGitRepo');
-                            }}
-                            setSelectedBuilderImage={setSelectedBuilderImage}
-                            setBuilderImages={builderImages}
-                        />
-                    ) : (
-                        setCurrentPage('fromGitRepo')
-                    )}
-                </>
-            );
+            if (!selectedBuilderImage) {
+                return (
+                    <SelectBuilderImage
+                        titleText="Select Different Builder Image"
+                        goBack={() => {
+                            setCurrentPage('fromGitRepo');
+                        }}
+                        setSelectedBuilderImage={setSelectedBuilderImage}
+                        setBuilderImages={builderImages}
+                    />
+                );
+            }
+            setCurrentPage('fromGitRepo');
+            break;
         default:
             break;
     }

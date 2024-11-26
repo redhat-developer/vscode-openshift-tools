@@ -447,23 +447,21 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                 );
             }
         case 'selectDifferentDevfile':
-            return (
-                <>
-                    {!selectedDevfile ? (
-                        <DevfileSearch
-                            titleText="Select Different Devfile"
-                            goBack={() => {
-                                setCurrentPage('fromLocalCodeBase');
-                            }}
-                            setSelectedDevfile={(_df) => {
-                                setSelectedDevfile(_df);
-                            }}
-                        />
-                    ) : (
-                        setCurrentPage('fromLocalCodeBase')
-                    )}
-                </>
-            );
+            if (!selectedDevfile) {
+                return (
+                    <DevfileSearch
+                        titleText="Select Different Devfile"
+                        goBack={() => {
+                            setCurrentPage('fromLocalCodeBase');
+                        }}
+                        setSelectedDevfile={(_df) => {
+                            setSelectedDevfile(_df);
+                        }}
+                    />
+                );
+            }
+            setCurrentPage('fromLocalCodeBase');
+            break;
         default:
             break;
     }
