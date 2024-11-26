@@ -485,21 +485,19 @@ export function FromExistingGitRepo({ setCurrentView }) {
                 />
             );
         case 'selectDifferentDevfile':
-            return (
-                <>
-                    {!selectedDevfile ? (
-                        <DevfileSearch
-                            titleText="Select Different Devfile"
-                            goBack={() => {
-                                setCurrentPage('fromGitRepo');
-                            }}
-                            setSelectedDevfile={setSelectedDevfile}
-                        />
-                    ) : (
-                        setCurrentPage('fromGitRepo')
-                    )}
-                </>
-            );
+            if (!selectedDevfile) {
+                return (
+                    <DevfileSearch
+                        titleText="Select Different Devfile"
+                        goBack={() => {
+                            setCurrentPage('fromGitRepo');
+                        }}
+                        setSelectedDevfile={setSelectedDevfile}
+                    />
+                );
+            }
+            setCurrentPage('fromGitRepo');
+            break;
         default:
             break;
     }
