@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.17.0 (November 27, 2024)
+
+ * [#4226](https://github.com/redhat-developer/vscode-openshift-tools/issues/4226) The extension activation is improved by bundling and removing unnecessary files
+ * [#3850](https://github.com/redhat-developer/vscode-openshift-tools/issues/3850) "Components" sidebar section loading is improved
+ * [#4566](https://github.com/redhat-developer/vscode-openshift-tools/pull/4566) Removed the `odo log` command
+ * [#4552](https://github.com/redhat-developer/vscode-openshift-tools/pull/4552) Port validation is fixed when create a Component from local codebase
+ * [#4536](https://github.com/redhat-developer/vscode-openshift-tools/pull/4536) Fixed the Devfile Registry related views for the cases where the current Devfile Registry is removed
+ * [#4459](https://github.com/redhat-developer/vscode-openshift-tools/issues/4459) Fixed the issue with not trimmed token value used when logging into sandbox using quick pick workflow with token
+ * [#4439](https://github.com/redhat-developer/vscode-openshift-tools/pull/4439) Use SSO account to configure sandbox in one click
+ * [#4426](https://github.com/redhat-developer/vscode-openshift-tools/issues/4426) Moved from `react-syntax-highlighter` to `codemirror` for YAML syntax highlighting
+ * [#4425](https://github.com/redhat-developer/vscode-openshift-tools/issues/4425) The Helm UI Page is added with additional tag based filtering
+ * [#4424](https://github.com/redhat-developer/vscode-openshift-tools/issues/4424) Add and delete helm repository.
+ * [#4411](https://github.com/redhat-developer/vscode-openshift-tools/issues/4411) Fixed the CRC setup preferences reset after the wizard is closed
+ * [#4189](https://github.com/redhat-developer/vscode-openshift-tools/issues/4189) The selection of devfile version is added to the Devfile Registry editor
+
 ## 1.16.0 (September 3, 2024)
 
  * [#4151](https://github.com/redhat-developer/vscode-openshift-tools/issues/4151) Added support for creating deployments using a BuildConfig
