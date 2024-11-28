@@ -233,7 +233,6 @@ function SelectService(props: {
                             props.setSelectedServiceKind((_) => newSelection);
                         }}
                         variant='outlined'
-                        placeholder='Service Kind'
                         error={isServiceKindTouched && props.selectedServiceKind === undefined}
                         required
                     >

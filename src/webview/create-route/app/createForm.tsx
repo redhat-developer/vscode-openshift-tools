@@ -129,7 +129,6 @@ function SelectService(props: {
                             props.setSelectedPort((_) => undefined);
                         }}
                         variant='outlined'
-                        placeholder='Select a service'
                         error={isServiceKindTouched && props.selectedServiceKind === undefined}
                         required
                     >
@@ -161,7 +160,6 @@ function SelectService(props: {
                             props.setSelectedPort((_) => newSelection);
                         }}
                         variant='outlined'
-                        placeholder='Select target port'
                         error={isServiceKindTouched && props.selectedServiceKind === undefined}
                         required
                     >

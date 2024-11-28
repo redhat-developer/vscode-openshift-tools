@@ -132,7 +132,6 @@ export function AddServiceBindingForm() {
                                         setSelectedService(e.target.value);
                                     }}
                                     variant="outlined"
-                                    placeholder="Service Name"
                                     error={selectedServiceTouched && selectedService === ''}
                                     required
                                 >
