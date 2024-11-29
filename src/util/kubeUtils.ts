@@ -162,7 +162,17 @@ export function getKubeConfigFiles(): string[] {
         }
         return filesThatExist;
     }
-    return [path.join(Platform.getUserHomePath(), '.kube', 'config')];
+
+    const defaultKubeConfigFile = path.join(Platform.getUserHomePath(), '.kube', 'config');
+    if (!fs.existsSync(defaultKubeConfigFile)) {
+        try {
+            fs.appendFileSync(defaultKubeConfigFile, 'apiVersion: v1'); // Create Kube Config with minimal content
+        } catch (err) {
+            void window.showErrorMessage(`Kubernetes configuration file cannot be created at '${defaultKubeConfigFile}': ${err}`);
+        }
+    }
+
+    return [defaultKubeConfigFile];
 }
 
 /**
