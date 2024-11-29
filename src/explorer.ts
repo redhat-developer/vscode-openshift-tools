@@ -118,7 +118,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         }
         try {
             const kubeconfigFiles = getKubeConfigFiles();
-            this.kubeConfigWatchers = kubeconfigFiles.map(kubeconfigFile => WatchUtil.watchFileForContextChange(path.dirname(kubeconfigFile), path.basename(kubeconfigFile)));
+            this.kubeConfigWatchers = (!kubeconfigFiles || kubeconfigFiles.length === 0) ? [] :
+                kubeconfigFiles.map(kubeconfigFile => WatchUtil.watchFileForContextChange(path.dirname(kubeconfigFile), path.basename(kubeconfigFile)));
+            if (this.kubeConfigWatchers.length === 0) {
+                void window.showWarningMessage('Kubernetes configuration file(s) not found. Make sure that "${HOME}/.kube/config" file exists or "KUBECONFIG" environment variable is properly configured');
+            }
         } catch {
             void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
         }
