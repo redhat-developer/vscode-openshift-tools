@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubernetesObject } from '@kubernetes/client-node';
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { CommandOption, CommandText } from '../base/command';
 import * as cliInstance from '../cli';
@@ -12,7 +11,6 @@ import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
 import { ComponentDescription } from './componentTypeDescription';
-import { BindableService } from './odoTypes';
 
 /**
  * Wraps the `odo` cli tool.
@@ -188,63 +186,5 @@ export class Odo {
             ]),
             componentPath,
         );
-    }
-
-    /**
-     * Bind a component to a bindable service by modifying the devfile
-     *
-     * Resolves when the binding it created.
-     *
-     * @param contextPath the path to the component
-     * @param serviceNamespace the namespace the the service is in
-     * @param serviceName the name of the service to bind to
-     * @param bindingName the name of the service binding
-     */
-    public async addBinding(
-        contextPath: string,
-        serviceNamespace: string,
-        serviceName: string,
-        bindingName: string,
-    ) {
-        await this.execute(
-            new CommandText('odo', 'add binding', [
-                new CommandOption('--service-namespace', serviceNamespace, false),
-                new CommandOption('--service', serviceName, false),
-                new CommandOption('--name', bindingName, false),
-            ]),
-            contextPath,
-            true,
-        );
-    }
-
-    /**
-     * Returns a list of all the bindable services on the cluster.
-     *
-     * @returns a list of all the bindable services on the cluster
-     */
-    public async getBindableServices(): Promise<KubernetesObject[]> {
-        const data: CliExitData = await this.execute(
-            new CommandText('odo', 'list service', [new CommandOption('-o json')]),
-        );
-        let responseObj;
-        try {
-            responseObj = JSON.parse(data.stdout);
-        } catch {
-            throw new Error(JSON.parse(data.stderr).message);
-        }
-        if (!responseObj.bindableServices) {
-            return [];
-        }
-        return (responseObj.bindableServices as BindableService[]) //
-            .map((obj) => {
-                return {
-                    kind: obj.kind,
-                    apiVersion: obj.apiVersion,
-                    metadata: {
-                        namespace: obj.namespace,
-                        name: obj.name,
-                    },
-                } as KubernetesObject;
-            });
     }
 }
