@@ -86,9 +86,12 @@ export class Oc {
 
     public async getAllKubernetesObjects(namespace?: string, executionContext?: ExecutionContext): Promise<KubernetesObject[]> {
         const result = await CliChannel.getInstance().executeTool(
-            Oc.getKubernetesObjectCommand('all', namespace),
-            undefined, true, executionContext);
-        return JSON.parse(result.stdout).items;
+            Oc.getKubernetesObjectCommand('all', namespace), undefined, true, executionContext);
+        try {
+            return JSON.parse(result.stdout).items;
+        } catch {
+            return [];
+        }
     }
 
     /**

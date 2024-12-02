@@ -27,7 +27,11 @@ export type HelmRelease = {
  */
 export async function getHelmReleases(): Promise<HelmRelease[]> {
     const res = await CliChannel.getInstance().executeTool(HelmCommands.listHelmReleases(), undefined, false);
-    return JSON.parse(res.stdout) as HelmRelease[];
+    try {
+        return JSON.parse(res.stdout) as HelmRelease[];
+    } catch {
+        return [];
+    }
 }
 
 /**

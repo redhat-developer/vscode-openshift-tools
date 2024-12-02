@@ -187,58 +187,6 @@ suite('./odo/odoWrapper.ts', function () {
                 fail('Expected devfile to be created');
             }
         });
-
-        test('addBinding()', async function() {
-            try {
-                await Odo.Instance.addBinding(tmpFolder, 'default', 'my-service', 'my-service-binding');
-                // TODO: set up a service to bind to,
-                // for now check that the correct error message appears
-                fail('The service doesn\'t exist, so binding should have failed');
-            } catch (e) {
-                expect(`${e}`).to.contain('No bindable service instances found in namespace');
-            }
-        })
-
-    });
-
-    suite('service binding', function() {
-        let componentFolder: string;
-
-        setup(async function() {
-            await checkOdoPreference();
-            componentFolder = await promisify(tmp.dir)();
-            await Odo.Instance.createComponentFromFolder(
-                'nodejs',
-                undefined,
-                undefined,
-                'component1',
-                Uri.parse(componentFolder),
-                'nodejs-starter',
-            );
-        });
-
-        teardown(async function() {
-            const newWorkspaceFolders = workspace.workspaceFolders.filter((workspaceFolder) => {
-                const fsPath = workspaceFolder.uri.fsPath;
-                return (fsPath !== componentFolder);
-            });
-            workspace.updateWorkspaceFolders(0, workspace.workspaceFolders.length, ...newWorkspaceFolders);
-            await fs.rm(componentFolder, { recursive: true, force: true });
-        });
-
-        test('getBindableServices()', async function() {
-            const bindableServices = await Odo.Instance.getBindableServices();
-            expect(bindableServices).to.be.empty;
-        });
-
-        test('addBinding()', async function() {
-            try {
-                await Odo.Instance.addBinding(componentFolder, 'myservice', 'default', 'myservice-binding');
-                fail('creating a binding should have failed, since no bindable services are present');
-            } catch {
-                // do nothing
-            }
-        });
     });
 
     test('deleteComponentConfiguration');

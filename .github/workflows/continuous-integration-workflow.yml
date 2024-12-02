@@ -52,14 +52,14 @@ jobs:
         if: (success() || failure()) && runner.os == 'Linux'
         name: Start cluster
         with:
-          version: v0.11.1
+          version: v0.20.0
 
       - name: Configure cluster
         if: (success() || failure()) && runner.os == 'Linux'
         run: |
           curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.19.1/install.sh | bash -s v0.19.1
           kubectl create -f https://operatorhub.io/install/service-binding-operator.yaml
-          kubectl create -f https://operatorhub.io/install/stable/cloud-native-postgresql.yaml
+          kubectl create -f https://operatorhub.io/install/cloudnative-pg.yaml
           nb=0
           echo -n "Waiting for operator to show up "
           while [ "$nb" != "2" ]

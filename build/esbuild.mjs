@@ -28,7 +28,6 @@ const webviews = [
     'feedback',
     'serverless-function',
     'serverless-manage-repository',
-    'add-service-binding',
     'openshift-terminal',
 ];
 

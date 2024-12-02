@@ -13,11 +13,10 @@ import {
     Workbench,
     before,
 } from 'vscode-extension-tester';
+import { itemExists, notificationExists } from '../common/conditions';
 import { MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
-import { itemExists, notificationDoesNotExist, notificationExists } from '../common/conditions';
-import { CreateServiceWebView, ServiceSetupPage } from '../common/ui/webview/createServiceWebView';
-import { AddServiceBindingWebView } from '../common/ui/webview/addServiceBinding';
 import { reloadWindow } from '../common/overdrives';
+import { CreateServiceWebView, ServiceSetupPage } from '../common/ui/webview/createServiceWebView';
 
 export function operatorBackedServiceTest() {
     describe('Operator-Backed Service', function () {
@@ -26,7 +25,6 @@ export function operatorBackedServiceTest() {
 
         let view: SideBarView;
         let section: ViewSection;
-        let projectName: string;
         let serviceName: string;
 
         before(async function () {
@@ -52,7 +50,6 @@ export function operatorBackedServiceTest() {
             await clusterItem.getDriver().wait(async () => await clusterItem.hasChildren());
             const children = await clusterItem.getChildren();
             const project = children[0];
-            projectName = await project.getLabel();
             const contextMenu = await project.openContextMenu();
             await contextMenu.select(MENUS.create, MENUS.createOperatorBackedService);
 
@@ -62,7 +59,7 @@ export function operatorBackedServiceTest() {
             await createServiceWebView.clickComboBox();
             await createServiceWebView.selectItemFromComboBox(
                 'Cluster',
-                'clusters.postgresql.k8s.enterprisedb.io',
+                'clusters.postgresql.cnpg.io',
             );
             await createServiceWebView.clickNext();
 
@@ -83,51 +80,6 @@ export function operatorBackedServiceTest() {
             const deployments = (await itemExists('Deployments', section)) as TreeItem;
             await deployments.expand();
             await itemExists(serviceName, section);
-        });
-
-        it('Can bind service to a component', async function () {
-            this.timeout(75_000);
-            const componentName = 'nodejs-starter';
-            const bindingName = 'test-binding';
-            section = await view.getContent().getSection(VIEWS.components);
-
-            try {
-                await itemExists(componentName, section);
-            } catch {
-                this.skip();
-            }
-
-            //open context menu on component and click bind service
-            const component = await section.findItem(componentName);
-            let contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.bindService);
-
-            //wait for look for available services to be completed
-            await notificationDoesNotExist(
-                NOTIFICATIONS.lookingForBindableServices,
-                VSBrowser.instance.driver,
-            );
-
-            //select service to bind
-            const addServiceBinding = new AddServiceBindingWebView();
-            await addServiceBinding.initializeEditor();
-            await addServiceBinding.clickComboBox();
-            await addServiceBinding.selectItemFromComboBox(`${projectName}/${serviceName}`);
-            await addServiceBinding.setBindingName(bindingName);
-            await addServiceBinding.clickAddServiceBindingButton();
-
-            //start dev on component
-            contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.startDev);
-
-            //wait for start dev to finish
-            await itemExists(`${componentName} (dev starting)`, section);
-            await itemExists(`${componentName} (dev running)`, section, 35_000);
-
-            //check service binding is shown in deployments
-            await section.collapse();
-            section = await view.getContent().getSection(VIEWS.appExplorer);
-            await itemExists(bindingName, section);
         });
     });
 }

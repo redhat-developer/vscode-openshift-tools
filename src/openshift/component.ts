@@ -12,12 +12,10 @@ import { Command } from '../odo/command';
 import { CommandProvider } from '../odo/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import sendTelemetry from '../telemetry';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
 import * as fs from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
-import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingViewLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
@@ -239,75 +237,6 @@ export class Component extends OpenShiftItem {
                 });
         }
         return false;
-    }
-
-    @vsCommand('openshift.component.binding.add')
-    static async addBinding(component: ComponentWorkspaceFolder) {
-
-        const services = await Progress.execFunctionWithProgress('Looking for bindable services', (progress) => {
-            return Odo.Instance.getBindableServices();
-        });
-
-        if (!services || services.length === 0) {
-            void window.showErrorMessage('No bindable services are available', 'Open Service Catalog in OpenShift Console')
-                .then((result) => {
-                    if (result === 'Open Service Catalog in OpenShift Console') {
-                        void commands.executeCommand('openshift.open.operatorBackedServiceCatalog')
-                    }
-                });
-            return;
-        }
-
-        void sendTelemetry('startAddBindingWizard');
-
-        let formResponse: ServiceBindingFormResponse = undefined;
-        try {
-            formResponse = await new Promise<ServiceBindingFormResponse>(
-                (resolve, reject) => {
-                    void AddServiceBindingViewLoader.loadView(
-                        component.contextPath,
-                        services.map(
-                            (service) => `${service.metadata.namespace}/${service.metadata.name}`,
-                        ),
-                        (panel) => {
-                            panel.onDidDispose((_e) => {
-                                reject(new Error('The \'Add Service Binding\' wizard was closed'));
-                            });
-                            return async (eventData) => {
-                                if (eventData.action === 'addServiceBinding') {
-                                    resolve(eventData.params);
-                                    await panel.dispose();
-                                }
-                            };
-                        },
-                    ).then(view => {
-                        if (!view) {
-                            // the view was already created
-                            reject(undefined as Error);
-                        }
-                    });
-                },
-            );
-        } catch {
-            // The form was closed without submitting,
-            // or the form already exists for this component.
-            // stop the command.
-            return;
-        }
-
-        const selectedServiceObject = services.filter(
-            (service) =>
-                `${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
-        )[0];
-
-        void sendTelemetry('finishAddBindingWizard');
-
-        await Odo.Instance.addBinding(
-            component.contextPath,
-            selectedServiceObject.metadata.namespace,
-            selectedServiceObject.metadata.name,
-            formResponse.bindingName,
-        );
     }
 
     @vsCommand('openshift.component.dev')
