@@ -37,7 +37,9 @@ void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
         const extDir = path.join(vsCodeTest, 'extensions');
         for (const extension of extensionsToInstall) {
             console.log('Installing extension: ', extension );
-            cp.execSync(`${vsCodeExecutable} --install-extension ${extension} --user-data-dir ${userDataDir} --extensions-dir ${extDir}`);
+            cp.execFileSync(vsCodeExecutable,
+                ['--install-extension', extension, '--user-data-dir', userDataDir, '--extensions-dir', extDir],
+                { shell: true });
         }
     } else {
         console.log('No extension dependencies found in "package.json"');
