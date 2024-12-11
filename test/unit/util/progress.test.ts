@@ -3,24 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 
-chai.use(sinonChai);
+void Promise.all([ () => import('chai'), () => import('sinon-chai') ]).then( (values: any[]) => {
+    const chai = values[0]; // sinon
+    const sinonChai = values[1]; // sinon-chai
 
-suite('Progress Utility', () => {
-    let sandbox: sinon.SinonSandbox;
+    chai.use(sinonChai);
 
-    setup(() => {
-        sandbox = sinon.createSandbox();
+    suite('Progress Utility', () => {
+        let sandbox: sinon.SinonSandbox;
+
+        setup(() => {
+            sandbox = sinon.createSandbox();
+        });
+
+        teardown(() => {
+            sandbox.restore();
+        });
+
+        test.skip('resolves if function resolves');
+
+        test.skip('fails if function fails');
     });
-
-    teardown(() => {
-        sandbox.restore();
-    });
-
-    test.skip('resolves if function resolves');
-
-    test.skip('fails if function fails');
 });

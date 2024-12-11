@@ -5,54 +5,57 @@
 
 import { By, EditorView, WebviewView, Workbench } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
-import { expect } from 'chai';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function checkAboutCommand(clusterIsSet: boolean) {
-    describe('About Command', () => {
-        const command = '>OpenShift: About';
-        const odoVersion = 'odo v3';
-        const noClusterMessage = 'unable to fetch the cluster server version';
-        const clusterServer = 'https://127.0.0.1';
+    void import('chai').then((chai) => {
+        const expect = chai.expect;
 
-        let webviewView: WebviewView;
-        let openshiftTerminal: OpenshiftTerminalWebviewView;
+        describe('About Command', () => {
+            const command = '>OpenShift: About';
+            const odoVersion = 'odo v3';
+            const noClusterMessage = 'unable to fetch the cluster server version';
+            const clusterServer = 'https://127.0.0.1';
 
-        before(async () => {
-            await new EditorView().closeAllEditors();
-            await activateCommand(command);
-        });
+            let webviewView: WebviewView;
+            let openshiftTerminal: OpenshiftTerminalWebviewView;
 
-        after(async () => {
-            await openshiftTerminal.closeTab('Show odo Version');
-        });
+            before(async () => {
+                await new EditorView().closeAllEditors();
+                await activateCommand(command);
+            });
 
-        it('New terminal opens', async function() {
-            this.timeout(60_000);
-            await new Promise((res) => setTimeout(res, 3_000));
-            await new Workbench().executeCommand(
-                'Openshift Terminal: Focus on OpenShift Terminal View',
-            );
-            webviewView = new WebviewView();
-            await webviewView.switchToFrame(6_500);
-            await webviewView.findWebElement(
-                By.xpath('//textarea[@aria-label = "Terminal input"]'),
-            );
-            await webviewView.switchBack();
-        });
+            after(async () => {
+                await openshiftTerminal.closeTab('Show odo Version');
+            });
 
-        it('Terminal shows according information', async function() {
-            this.timeout(60_000);
-            openshiftTerminal = new OpenshiftTerminalWebviewView();
+            it('New terminal opens', async function() {
+                this.timeout(60_000);
+                await new Promise((res) => setTimeout(res, 3_000));
+                await new Workbench().executeCommand(
+                    'Openshift Terminal: Focus on OpenShift Terminal View',
+                );
+                webviewView = new WebviewView();
+                await webviewView.switchToFrame(6_500);
+                await webviewView.findWebElement(
+                    By.xpath('//textarea[@aria-label = "Terminal input"]'),
+                );
+                await webviewView.switchBack();
+            });
 
-            const terminalText = await openshiftTerminal.getTerminalText();
+            it('Terminal shows according information', async function() {
+                this.timeout(60_000);
+                openshiftTerminal = new OpenshiftTerminalWebviewView();
 
-            expect(terminalText).to.contain(odoVersion)
-            if (!clusterIsSet) {
-                expect(terminalText).to.contain(noClusterMessage);
-            } else {
-                expect(terminalText).to.contain(clusterServer);
-            }
+                const terminalText = await openshiftTerminal.getTerminalText();
+
+                expect(terminalText).to.contain(odoVersion)
+                if (!clusterIsSet) {
+                    expect(terminalText).to.contain(noClusterMessage);
+                } else {
+                    expect(terminalText).to.contain(clusterServer);
+                }
+            });
         });
     });
 }
