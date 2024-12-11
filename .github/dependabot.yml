@@ -27,3 +27,9 @@ updates:
     uiw:
       patterns:
       - "@uiw/*"
+    sinon-chai:
+      patterns:
+        - "chai"
+        - "@types/chai"
+        - "sinon-chai"
+        - "@types/sinon-chai"
