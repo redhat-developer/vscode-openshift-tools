@@ -3,43 +3,46 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as NameValidator from '../../../src/openshift/nameValidator';
 import { wait } from '../../../src/util/async';
 
-const { expect } = chai;
-chai.use(sinonChai);
+void Promise.all([ () => import('chai'), () => import('sinon-chai') ]).then( (values: any[]) => {
+    const chai = values[0]; // sinon
+    const sinonChai = values[1]; // sinon-chai
 
-suite('nameValidator', function () {
-    let sandbox: sinon.SinonSandbox;
+    const { expect } = chai;
+    chai.use(sinonChai);
 
-    setup(function () {
-        sandbox = sinon.createSandbox();
-    });
+    suite('nameValidator', function () {
+        let sandbox: sinon.SinonSandbox;
 
-    teardown(function () {
-        sandbox.restore();
-    });
-
-    test('Wait eventually exits', async function () {
-        return wait();
-    });
-
-    suite('validateMatches', function () {
-        test('returns validation message if provided value is not in lower case alphanumeric characters or "-"', function () {
-            const message =
-                'Not a valid Application name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character';
-            let appNames = NameValidator.validateMatches(message, 'Nodejs-app');
-            expect(appNames).equals(message);
-            appNames = NameValidator.validateMatches(message, '2nodejs-app');
-            expect(appNames).equals(message);
+        setup(function () {
+            sandbox = sinon.createSandbox();
         });
 
-        test('returns undefined if provided value is in lower case alphanumeric characters', function () {
-            const validateMatches = NameValidator.validateMatches(undefined, 'nodejs-app');
-            expect(validateMatches).equals(null);
+        teardown(function () {
+            sandbox.restore();
+        });
+
+        test('Wait eventually exits', async function () {
+            return wait();
+        });
+
+        suite('validateMatches', function () {
+            test('returns validation message if provided value is not in lower case alphanumeric characters or "-"', function () {
+                const message =
+                    'Not a valid Application name. Please use lower case alphanumeric characters or "-", start with an alphabetic character, and end with an alphanumeric character';
+                let appNames = NameValidator.validateMatches(message, 'Nodejs-app');
+                expect(appNames).equals(message);
+                appNames = NameValidator.validateMatches(message, '2nodejs-app');
+                expect(appNames).equals(message);
+            });
+
+            test('returns undefined if provided value is in lower case alphanumeric characters', function () {
+                const validateMatches = NameValidator.validateMatches(undefined, 'nodejs-app');
+                expect(validateMatches).equals(null);
+            });
         });
     });
 });

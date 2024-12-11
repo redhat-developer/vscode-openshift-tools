@@ -5,7 +5,6 @@
 
 import { V222Devfile } from '@devfile/api';
 import { fail } from 'assert';
-import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs/promises';
 import * as JSYAML from 'js-yaml';
@@ -23,398 +22,402 @@ import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 const ODO = Odo.Instance;
-
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
-// tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
-suite('odo commands integration', function () {
+void import('chai').then((chai) => {
+    const assert = chai.assert;
+    const expect = chai.expect;
 
-    const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
-    const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
-    const username = process.env.CLUSTER_USER || 'developer';
-    const password = process.env.CLUSTER_PASSWORD || 'developer';
+    // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
+    suite('odo commands integration', function () {
 
-    suiteSetup(async function() {
-        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
-        if (isOpenShift) {
-            try {
-                await LoginUtil.Instance.logout();
-            } catch {
-                // do nothing
-            }
-            await Oc.Instance.loginWithUsernamePassword(
-                clusterUrl,
-                username,
-                password,
-            );
-        }
-    });
+        const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
+        const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
+        const username = process.env.CLUSTER_USER || 'developer';
+        const password = process.env.CLUSTER_PASSWORD || 'developer';
 
-    test('printOdoVersion()', async function () {
-        await ODO.execute(Command.printOdoVersion());
-    });
-
-    suite('component', function() {
-        const componentName = 'my-test-component';
-        const componentType = 'go';
-        const componentStarterProject = 'go-starter';
-        let componentLocation: string;
-
-        suiteSetup(async function () {
-            await Oc.Instance.createProject(newProjectName);
-            await Oc.Instance.setProject(newProjectName);
-            componentLocation = await promisify(tmp.dir)();
+        suiteSetup(async function() {
+            await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
             if (isOpenShift) {
-                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
-            }
-        });
-
-        suiteTeardown(async function () {
-            let toRemove = -1;
-            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
-                if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
-                    toRemove = i;
-                    break;
+                try {
+                    await LoginUtil.Instance.logout();
+                } catch {
+                    // do nothing
                 }
+                await Oc.Instance.loginWithUsernamePassword(
+                    clusterUrl,
+                    username,
+                    password,
+                );
             }
-            if (toRemove !== -1) {
-                workspace.updateWorkspaceFolders(toRemove, 1);
-            }
-            await fs.rm(componentLocation, { recursive: true, force: true });
-            await Oc.Instance.deleteProject(newProjectName);
         });
 
-        test('createLocalComponent()', async function () {
-            await ODO.execute(
-                Command.createLocalComponent(
-                    componentType,
-                    '2.0.0',
-                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
-                    componentName,
-                    8080,
-                    componentStarterProject,
-                    undefined,
-                    undefined
-                ),
-                componentLocation
-            );
-            await fs.access(path.join(componentLocation, 'devfile.yaml'));
+        test('printOdoVersion()', async function () {
+            await ODO.execute(Command.printOdoVersion());
         });
 
-        test('describeComponent()', async function() {
-            const res = await ODO.execute(Command.describeComponent(), componentLocation);
-            expect(res.stdout).contains(componentName);
-            expect(res.stdout).contains('Go');
-        });
+        suite('component', function() {
+            const componentName = 'my-test-component';
+            const componentType = 'go';
+            const componentStarterProject = 'go-starter';
+            let componentLocation: string;
 
-        test('describeComponentJson()', async function () {
-            const res = await ODO.execute(Command.describeComponentJson(), componentLocation);
-            expect(res.stdout).contains(componentName);
-            expect(res.stdout).contains(componentType);
-        });
-
-        suite('deploying', function() {
-            // FIXME: Deploy depends on pushing container images to a registry.
-            // The default registry it tries to push to is docker.
-            // We shouldn't try to push to Docker Hub from these tests.
-            // OpenShift comes with a registry built in to the cluster,
-            // and there is a way to set this registry as the one that
-            // odo pushes to during deploy.
-            // However, you need cluster-admin access in order to expose
-            // the registry outside of the cluster and figure out its address.
-            test('deploy(): PENDING');
-            test('undeploy(): PENDING');
-        });
-
-        test('dev()', async function() {
-            const outputEmitter = new EventEmitter<string>();
-            let devProcess: ChildProcess;
-            function failListener(_error) {
-                assert.fail('odo dev errored before it was closed');
-            }
-            const term = window.createTerminal({
-                name: 'test terminal',
-                pty: {
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(Command.dev(false)) //
-                            .then(childProcess => {
-                                devProcess = childProcess
-                                devProcess.on('error', failListener);
-                            });
-                    },
-                    close: () => {
-                        if (devProcess) {
-                            devProcess.removeListener('error', failListener);
-                            devProcess.kill('SIGINT');
-                        }
-                    },
-                    handleInput: (data: string) => {
-                        if (data.length) {
-                            if (devProcess) {
-                                devProcess.removeListener('error', failListener);
-                                devProcess.kill('SIGINT');
-                            }
-                        }
-                    },
-                    onDidWrite: outputEmitter.event
-                }
-            });
-            await new Promise<void>(resolve => setTimeout(resolve, 3000));
-            // we instruct the pseudo terminal to close the dev session when any text is sent
-            term.sendText('a');
-            term.dispose();
-        });
-
-    });
-
-    suite('component dev', function() {
-        const componentName = 'my-test-component';
-        const componentType = 'nodejs';
-        const componentStarterProject = 'nodejs-starter';
-        let componentLocation: string;
-
-        suiteSetup(async function () {
-            if (isOpenShift) {
-                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
-            }
-            try {
+            suiteSetup(async function () {
                 await Oc.Instance.createProject(newProjectName);
-            } catch {
-                // do nothing; already exists
-            }
-            await Oc.Instance.setProject(newProjectName);
-            componentLocation = await promisify(tmp.dir)();
-        });
-
-        suiteTeardown(async function () {
-            let toRemove = -1;
-            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
-                if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
-                    toRemove = i;
-                    break;
+                await Oc.Instance.setProject(newProjectName);
+                componentLocation = await promisify(tmp.dir)();
+                if (isOpenShift) {
+                    await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
                 }
-            }
-            if (toRemove !== -1) {
-                workspace.updateWorkspaceFolders(toRemove, 1);
-            }
-            await fs.rm(componentLocation, { recursive: true, force: true });
-            await Oc.Instance.deleteProject(newProjectName);
-        });
-
-        interface TerminalListener {
-            onOutput(data: string): void;
-            onError(data:string): void;
-        }
-
-        function executeCommandInTerminal(commandText: CommandText, cwd: string, listener?: TerminalListener) : Terminal {
-            const outputEmitter = new EventEmitter<string>();
-            outputEmitter.event(data => {
-                if (listener) listener.onOutput(data);
             });
-            let devProcess: ChildProcess;
-            function failListener(_error) {
-                assert.fail('odo dev errored before it was closed');
-            }
-            return window.createTerminal({
-                name: 'test terminal',
-                pty: {
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(Command.dev(true),
-                            {
-                                cwd
-                            })
-                            .then(childProcess => {
-                                devProcess = childProcess
-                                devProcess.on('error', failListener);
-                                devProcess.stdout.on('data', data => {
-                                    if (listener) listener.onOutput(data);
+
+            suiteTeardown(async function () {
+                let toRemove = -1;
+                for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+                    if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
+                        toRemove = i;
+                        break;
+                    }
+                }
+                if (toRemove !== -1) {
+                    workspace.updateWorkspaceFolders(toRemove, 1);
+                }
+                await fs.rm(componentLocation, { recursive: true, force: true });
+                await Oc.Instance.deleteProject(newProjectName);
+            });
+
+            test('createLocalComponent()', async function () {
+                await ODO.execute(
+                    Command.createLocalComponent(
+                        componentType,
+                        '2.0.0',
+                        OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+                        componentName,
+                        8080,
+                        componentStarterProject,
+                        undefined,
+                        undefined
+                    ),
+                    componentLocation
+                );
+                await fs.access(path.join(componentLocation, 'devfile.yaml'));
+            });
+
+            test('describeComponent()', async function() {
+                const res = await ODO.execute(Command.describeComponent(), componentLocation);
+                expect(res.stdout).contains(componentName);
+                expect(res.stdout).contains('Go');
+            });
+
+            test('describeComponentJson()', async function () {
+                const res = await ODO.execute(Command.describeComponentJson(), componentLocation);
+                expect(res.stdout).contains(componentName);
+                expect(res.stdout).contains(componentType);
+            });
+
+            suite('deploying', function() {
+                // FIXME: Deploy depends on pushing container images to a registry.
+                // The default registry it tries to push to is docker.
+                // We shouldn't try to push to Docker Hub from these tests.
+                // OpenShift comes with a registry built in to the cluster,
+                // and there is a way to set this registry as the one that
+                // odo pushes to during deploy.
+                // However, you need cluster-admin access in order to expose
+                // the registry outside of the cluster and figure out its address.
+                test('deploy(): PENDING');
+                test('undeploy(): PENDING');
+            });
+
+            test('dev()', async function() {
+                const outputEmitter = new EventEmitter<string>();
+                let devProcess: ChildProcess;
+                function failListener(_error) {
+                    assert.fail('odo dev errored before it was closed');
+                }
+                const term = window.createTerminal({
+                    name: 'test terminal',
+                    pty: {
+                        open: () => {
+                            void CliChannel.getInstance().spawnTool(Command.dev(false)) //
+                                .then(childProcess => {
+                                    devProcess = childProcess
+                                    devProcess.on('error', failListener);
                                 });
-                                devProcess.stderr.on('data', data => {
-                                    if (listener) listener.onError(data);
-                                });
-                            });
-                    },
-                    close: () => {
-                        if (devProcess) {
-                            devProcess.removeListener('error', failListener);
-                            devProcess.kill('SIGINT');
-                        }
-                    },
-                    handleInput: (data: string) => {
-                        // Close terminal on any input
-                        if (data.length) {
+                        },
+                        close: () => {
                             if (devProcess) {
                                 devProcess.removeListener('error', failListener);
                                 devProcess.kill('SIGINT');
                             }
-                        }
+                        },
+                        handleInput: (data: string) => {
+                            if (data.length) {
+                                if (devProcess) {
+                                    devProcess.removeListener('error', failListener);
+                                    devProcess.kill('SIGINT');
+                                }
+                            }
+                        },
+                        onDidWrite: outputEmitter.event
+                    }
+                });
+                await new Promise<void>(resolve => setTimeout(resolve, 3000));
+                // we instruct the pseudo terminal to close the dev session when any text is sent
+                term.sendText('a');
+                term.dispose();
+            });
+
+        });
+
+        suite('component dev', function() {
+            const componentName = 'my-test-component';
+            const componentType = 'nodejs';
+            const componentStarterProject = 'nodejs-starter';
+            let componentLocation: string;
+
+            suiteSetup(async function () {
+                if (isOpenShift) {
+                    await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
+                }
+                try {
+                    await Oc.Instance.createProject(newProjectName);
+                } catch {
+                    // do nothing; already exists
+                }
+                await Oc.Instance.setProject(newProjectName);
+                componentLocation = await promisify(tmp.dir)();
+            });
+
+            suiteTeardown(async function () {
+                let toRemove = -1;
+                for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+                    if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
+                        toRemove = i;
+                        break;
+                    }
+                }
+                if (toRemove !== -1) {
+                    workspace.updateWorkspaceFolders(toRemove, 1);
+                }
+                await fs.rm(componentLocation, { recursive: true, force: true });
+                await Oc.Instance.deleteProject(newProjectName);
+            });
+
+            interface TerminalListener {
+                onOutput(data: string): void;
+                onError(data:string): void;
+            }
+
+            function executeCommandInTerminal(commandText: CommandText, cwd: string, listener?: TerminalListener) : Terminal {
+                const outputEmitter = new EventEmitter<string>();
+                outputEmitter.event(data => {
+                    if (listener) listener.onOutput(data);
+                });
+                let devProcess: ChildProcess;
+                function failListener(_error) {
+                    assert.fail('odo dev errored before it was closed');
+                }
+                return window.createTerminal({
+                    name: 'test terminal',
+                    pty: {
+                        open: () => {
+                            void CliChannel.getInstance().spawnTool(Command.dev(true),
+                                {
+                                    cwd
+                                })
+                                .then(childProcess => {
+                                    devProcess = childProcess
+                                    devProcess.on('error', failListener);
+                                    devProcess.stdout.on('data', data => {
+                                        if (listener) listener.onOutput(data);
+                                    });
+                                    devProcess.stderr.on('data', data => {
+                                        if (listener) listener.onError(data);
+                                    });
+                                });
+                        },
+                        close: () => {
+                            if (devProcess) {
+                                devProcess.removeListener('error', failListener);
+                                devProcess.kill('SIGINT');
+                            }
+                        },
+                        handleInput: (data: string) => {
+                            // Close terminal on any input
+                            if (data.length) {
+                                if (devProcess) {
+                                    devProcess.removeListener('error', failListener);
+                                    devProcess.kill('SIGINT');
+                                }
+                            }
+                        },
+                        onDidWrite: outputEmitter.event
+                    }
+                });
+            }
+
+            async function startDevInTerminal(cwd?) : Promise<Terminal> {
+                let termOutput = '';
+                let termError = '';
+                const term = executeCommandInTerminal(Command.dev(true), cwd, {
+                    onOutput(data) {
+                        termOutput = termOutput.concat(data);
                     },
-                    onDidWrite: outputEmitter.event
-                }
-            });
-        }
+                    onError(data) {
+                        termError = termError.concat(data);
+                    }
+                });
 
-        async function startDevInTerminal(cwd?) : Promise<Terminal> {
-            let termOutput = '';
-            let termError = '';
-            const term = executeCommandInTerminal(Command.dev(true), cwd, {
-                onOutput(data) {
-                    termOutput = termOutput.concat(data);
-                },
-                onError(data) {
-                    termError = termError.concat(data);
+                let hopesLeft = 30;
+                let devIsRunning = false;
+                do {
+                    hopesLeft--;
+                    await new Promise<void>(resolve => setTimeout(resolve, 2000));
+                    let index = termOutput.indexOf(`Developing using the "${componentName}" Devfile`);
+                    if (index >= 0) index = termOutput.indexOf('✓  Pod is Running', index);
+                    if (index >= 0) index = termOutput.indexOf('↪ Dev mode', index);
+                    devIsRunning = (index >= 0);
+                } while (hopesLeft > 0 && !devIsRunning);
+                if (!devIsRunning) {
+                    if (termError.trim().length > 0) {
+                        fail(`Start Dev failed: ${termError}`);
+                    }
+                    fail('Waiting for pod to start is timed out');
                 }
-            });
-
-            let hopesLeft = 30;
-            let devIsRunning = false;
-            do {
-                hopesLeft--;
-                await new Promise<void>(resolve => setTimeout(resolve, 2000));
-                let index = termOutput.indexOf(`Developing using the "${componentName}" Devfile`);
-                if (index >= 0) index = termOutput.indexOf('✓  Pod is Running', index);
-                if (index >= 0) index = termOutput.indexOf('↪ Dev mode', index);
-                devIsRunning = (index >= 0);
-            } while (hopesLeft > 0 && !devIsRunning);
-            if (!devIsRunning) {
-                if (termError.trim().length > 0) {
-                    fail(`Start Dev failed: ${termError}`);
-                }
-                fail('Waiting for pod to start is timed out');
+                return term;
             }
-            return term;
-        }
 
-        const helloWorldCommandId = 'hello-world';
-        const helloWorldCommandOutput = 'Hello, World!';
-        const helloWorldCommandExecCommandLine = `echo "${helloWorldCommandOutput}"`;
+            const helloWorldCommandId = 'hello-world';
+            const helloWorldCommandOutput = 'Hello, World!';
+            const helloWorldCommandExecCommandLine = `echo "${helloWorldCommandOutput}"`;
 
-        async function runComponentCommandInTerminal(commandId: string, cwd?) : Promise<Terminal> {
-            let termOutput = '';
-            let termError = '';
-            const term = executeCommandInTerminal(Command.runComponentCommand(commandId), cwd, {
-                onOutput(data) {
-                    termOutput = termOutput.concat(data);
-                },
-                onError(data) {
-                    termError = termError.concat(data);
-                }
-            });
-
-            let hopesLeft = 30;
-            let commandIdRunning = false;
-            do {
-                hopesLeft--;
-                await new Promise<void>(resolve => setTimeout(resolve, 2000));
-                commandIdRunning = termOutput.indexOf(helloWorldCommandOutput) >= -1;
-            } while (hopesLeft > 0 && !commandIdRunning);
-            if (!commandIdRunning) {
-                if (termError.trim().length > 0) {
-                    fail(`Run Component Command failed: ${termError}`);
-                }
-                fail('Waiting for command to start executing is timed out');
-            }
-            return term;
-        }
-
-        async function fixupDevFile(devfilePath: string): Promise<void> {
-            // Parse YAML into an Object, add:
-            //
-            // - exec:
-            //     group:
-            //       kind: run
-            //     commandLine: echo "Hello, World!"
-            //     component: runtime
-            //   id: hello-world
-            //
-            // and then save into the same debfile.yaml
-            const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile = JSYAML.load(file.toString()) as V222Devfile;
-            if (!devfile || !devfile.commands) {
-                fail(`DevFile '${devfilePath}' cannot be read`);
-            }
-            const devfileCommands = devfile.commands;
-            let helloWorldCommand;
-            for (let i = 0; i < devfileCommands.length; i++) {
-                if(devfileCommands[i].id === helloWorldCommandId) {
-                    helloWorldCommand = devfileCommands[i];
-                    break;
-                }
-            }
-            if (helloWorldCommand) {
-                helloWorldCommand.exec = {
-                    group:{
-                        kind: 'run'
+            async function runComponentCommandInTerminal(commandId: string, cwd?) : Promise<Terminal> {
+                let termOutput = '';
+                let termError = '';
+                const term = executeCommandInTerminal(Command.runComponentCommand(commandId), cwd, {
+                    onOutput(data) {
+                        termOutput = termOutput.concat(data);
                     },
-                    commandLine: helloWorldCommandExecCommandLine,
-                    component: 'runtime'
+                    onError(data) {
+                        termError = termError.concat(data);
+                    }
+                });
+
+                let hopesLeft = 30;
+                let commandIdRunning = false;
+                do {
+                    hopesLeft--;
+                    await new Promise<void>(resolve => setTimeout(resolve, 2000));
+                    commandIdRunning = termOutput.indexOf(helloWorldCommandOutput) >= -1;
+                } while (hopesLeft > 0 && !commandIdRunning);
+                if (!commandIdRunning) {
+                    if (termError.trim().length > 0) {
+                        fail(`Run Component Command failed: ${termError}`);
+                    }
+                    fail('Waiting for command to start executing is timed out');
                 }
-            } else {
-                devfileCommands.push({
-                    exec: {
+                return term;
+            }
+
+            async function fixupDevFile(devfilePath: string): Promise<void> {
+                // Parse YAML into an Object, add:
+                //
+                // - exec:
+                //     group:
+                //       kind: run
+                //     commandLine: echo "Hello, World!"
+                //     component: runtime
+                //   id: hello-world
+                //
+                // and then save into the same debfile.yaml
+                const file = await fs.readFile(devfilePath, 'utf8');
+                const devfile = JSYAML.load(file.toString()) as V222Devfile;
+                if (!devfile || !devfile.commands) {
+                    fail(`DevFile '${devfilePath}' cannot be read`);
+                }
+                const devfileCommands = devfile.commands;
+                let helloWorldCommand;
+                for (let i = 0; i < devfileCommands.length; i++) {
+                    if(devfileCommands[i].id === helloWorldCommandId) {
+                        helloWorldCommand = devfileCommands[i];
+                        break;
+                    }
+                }
+                if (helloWorldCommand) {
+                    helloWorldCommand.exec = {
                         group:{
                             kind: 'run'
                         },
                         commandLine: helloWorldCommandExecCommandLine,
                         component: 'runtime'
-                    },
-                    id: helloWorldCommandId
-                })
-            }
-            await fs.writeFile(devfilePath, JSYAML.dump(devfile));
-        }
-
-        test('runComponentCommand()', async function () {
-             await ODO.execute(
-                Command.createLocalComponent(
-                    componentType,
-                    '2.1.1',
-                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
-                    componentName,
-                    undefined,
-                    componentStarterProject,
-                    undefined,
-                    undefined
-                ),
-                componentLocation
-            );
-            const devfilePath = path.join(componentLocation, 'devfile.yaml')
-            await fs.access(devfilePath);
-
-            await fixupDevFile(devfilePath);
-
-            const describeCmdResult = await ODO.execute(Command.describeComponentJson(), componentLocation);
-            const componentDescription = JSON.parse(describeCmdResult.stdout) as ComponentDescription;
-            expect(componentDescription.devfileData.devfile.commands[0]?.id).exist;
-
-            const commands = componentDescription.devfileData.devfile.commands
-            let helloCommand: Command;
-            for (let i = 0; i < commands.length; i++) {
-                if (commands[i].id && helloWorldCommandId === commands[i].id) {
-                    helloCommand = commands[i];
-                    break;
+                    }
+                } else {
+                    devfileCommands.push({
+                        exec: {
+                            group:{
+                                kind: 'run'
+                            },
+                            commandLine: helloWorldCommandExecCommandLine,
+                            component: 'runtime'
+                        },
+                        id: helloWorldCommandId
+                    })
                 }
-            }
-            if (!helloCommand) {
-                fail(`Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`);
+                await fs.writeFile(devfilePath, JSYAML.dump(devfile));
             }
 
-            let devTerm : Terminal;
-            let runCommandTerm : Terminal;
-            try {
-                devTerm = await startDevInTerminal(componentLocation);
-                runCommandTerm = await runComponentCommandInTerminal(helloWorldCommandId, componentLocation);
-            } finally {
-                // we instruct the pseudo terminals to close the dev session when any text is sent
-                if (runCommandTerm) {
-                    runCommandTerm.sendText('exit');
-                    runCommandTerm.dispose();
+            test('runComponentCommand()', async function () {
+                await ODO.execute(
+                    Command.createLocalComponent(
+                        componentType,
+                        '2.1.1',
+                        OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+                        componentName,
+                        undefined,
+                        componentStarterProject,
+                        undefined,
+                        undefined
+                    ),
+                    componentLocation
+                );
+                const devfilePath = path.join(componentLocation, 'devfile.yaml')
+                await fs.access(devfilePath);
+
+                await fixupDevFile(devfilePath);
+
+                const describeCmdResult = await ODO.execute(Command.describeComponentJson(), componentLocation);
+                const componentDescription = JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+                expect(componentDescription.devfileData.devfile.commands[0]?.id).exist;
+
+                const commands = componentDescription.devfileData.devfile.commands
+                let helloCommand: Command;
+                for (let i = 0; i < commands.length; i++) {
+                    if (commands[i].id && helloWorldCommandId === commands[i].id) {
+                        helloCommand = commands[i];
+                        break;
+                    }
                 }
-                if (devTerm) {
-                    devTerm.sendText('exit');
-                    devTerm.dispose();
+                if (!helloCommand) {
+                    fail(`Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`);
                 }
-            }
+
+                let devTerm : Terminal;
+                let runCommandTerm : Terminal;
+                try {
+                    devTerm = await startDevInTerminal(componentLocation);
+                    runCommandTerm = await runComponentCommandInTerminal(helloWorldCommandId, componentLocation);
+                } finally {
+                    // we instruct the pseudo terminals to close the dev session when any text is sent
+                    if (runCommandTerm) {
+                        runCommandTerm.sendText('exit');
+                        runCommandTerm.dispose();
+                    }
+                    if (devTerm) {
+                        devTerm.sendText('exit');
+                        devTerm.dispose();
+                    }
+                }
+            });
         });
     });
 });

@@ -3,40 +3,43 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 
-const {expect} = chai;
-chai.use(sinonChai);
+void Promise.all([ () => import('chai'), () => import('sinon-chai') ]).then( (values: any[]) => {
+    const chai = values[0]; // sinon
+    const sinonChai = values[1]; // sinon-chai
 
-suite('K8s Configuration Utility', () => {
-    let sandbox: sinon.SinonSandbox;
-    const homeDir = path.resolve(__dirname, '..', '..', '..', '..', 'test', 'fixtures');
-    const configDir = path.resolve(homeDir,'.kube');
+    const {expect} = chai;
+    chai.use(sinonChai);
 
-    setup(() => {
-        sandbox = sinon.createSandbox();
-    });
+    suite('K8s Configuration Utility', () => {
+        let sandbox: sinon.SinonSandbox;
+        const homeDir = path.resolve(__dirname, '..', '..', '..', '..', 'test', 'fixtures');
+        const configDir = path.resolve(homeDir,'.kube');
 
-    teardown(() => {
-        sandbox.restore();
-    });
-
-    test('loads configs listed in KUBECONFIG evn variable', () => {
-        sandbox.stub(process, 'env').value({
-            'KUBECONFIG': [path.join(configDir, 'config'), path.join(configDir, 'config1')].join(path.delimiter)
+        setup(() => {
+            sandbox = sinon.createSandbox();
         });
-        const kc = new KubeConfigUtils();
-        expect(kc.getProxy('context-cluster5')).is.not.undefined;
-        expect(kc.getProxy('context-cluster4')).is.undefined;
-    });
 
-    test('loads ~/.kube/config', () => {
-        sandbox.stub(KubeConfigUtils.prototype, 'findHomeDir').returns(homeDir);
-        const kc = new KubeConfigUtils();
-        expect(kc.getProxy('context-cluster1')).is.not.undefined;
-    })
+        teardown(() => {
+            sandbox.restore();
+        });
+
+        test('loads configs listed in KUBECONFIG evn variable', () => {
+            sandbox.stub(process, 'env').value({
+                'KUBECONFIG': [path.join(configDir, 'config'), path.join(configDir, 'config1')].join(path.delimiter)
+            });
+            const kc = new KubeConfigUtils();
+            expect(kc.getProxy('context-cluster5')).is.not.undefined;
+            expect(kc.getProxy('context-cluster4')).is.undefined;
+        });
+
+        test('loads ~/.kube/config', () => {
+            sandbox.stub(KubeConfigUtils.prototype, 'findHomeDir').returns(homeDir);
+            const kc = new KubeConfigUtils();
+            expect(kc.getProxy('context-cluster1')).is.not.undefined;
+        })
+    });
 });

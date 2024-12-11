@@ -3,57 +3,60 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { Platform } from '../../../src/util/platform';
 
-const {expect} = chai;
-chai.use(sinonChai);
+void Promise.all([ () => import('chai'), () => import('sinon-chai') ]).then( (values: any[]) => {
+    const chai = values[0]; // sinon
+    const sinonChai = values[1]; // sinon-chai
 
-suite('Platform Utility', () => {
-    let sandbox: sinon.SinonSandbox;
+    const {expect} = chai;
+    chai.use(sinonChai);
 
-    setup(() => {
-        sandbox = sinon.createSandbox();
-    });
+    suite('Platform Utility', () => {
+        let sandbox: sinon.SinonSandbox;
 
-    teardown(() => {
-        sandbox.restore();
-    });
+        setup(() => {
+            sandbox = sinon.createSandbox();
+        });
 
-    test('getOS returns the platform name', () => {
-        const os = Platform.getOS();
-        expect(os).equals(process.platform);
-    });
+        teardown(() => {
+            sandbox.restore();
+        });
 
-    test('OS delegates to getOS', () => {
-        const spy = sandbox.spy(Platform, 'getOS');
-        const os = Platform.OS;
+        test('getOS returns the platform name', () => {
+            const os = Platform.getOS();
+            expect(os).equals(process.platform);
+        });
 
-        expect(spy).calledOnce;
-        expect(os).equals(process.platform);
-    });
+        test('OS delegates to getOS', () => {
+            const spy = sandbox.spy(Platform, 'getOS');
+            const os = Platform.OS;
 
-    test('getEnv returns the platform environment', () => {
-        const env = Platform.getEnv();
-        expect(env).equals(process.env);
-    });
+            expect(spy).calledOnce;
+            expect(os).equals(process.platform);
+        });
 
-    test('ENV delegates to getENV', () => {
-        const spy = sandbox.spy(Platform, 'getEnv');
-        const env = Platform.ENV;
+        test('getEnv returns the platform environment', () => {
+            const env = Platform.getEnv();
+            expect(env).equals(process.env);
+        });
 
-        expect(spy).calledOnce;
-        expect(env).equals(process.env);
-    });
+        test('ENV delegates to getENV', () => {
+            const spy = sandbox.spy(Platform, 'getEnv');
+            const env = Platform.ENV;
 
-    test('getUserHomePath returns the path to user home', () => {
-        const home = Platform.getUserHomePath();
-        if (process.platform === 'win32') {
-            expect(home).equals(process.env.USERPROFILE);
-        } else {
-            expect(home).equals(process.env.HOME);
-        }
+            expect(spy).calledOnce;
+            expect(env).equals(process.env);
+        });
+
+        test('getUserHomePath returns the path to user home', () => {
+            const home = Platform.getUserHomePath();
+            if (process.platform === 'win32') {
+                expect(home).equals(process.env.USERPROFILE);
+            } else {
+                expect(home).equals(process.env.HOME);
+            }
+        });
     });
 });

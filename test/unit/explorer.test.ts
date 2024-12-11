@@ -3,25 +3,28 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { commands, Uri } from 'vscode';
 import { OpenShiftExplorer } from '../../src/explorer';
 
-const {expect} = chai;
-chai.use(sinonChai);
+void Promise.all([ () => import('chai'), () => import('sinon-chai') ]).then( (values: any[]) => {
+    const chai = values[0]; // sinon
+    const sinonChai = values[1]; // sinon-chai
 
-suite('OpenShift Application Explorer', () => {
-    const sandbox = sinon.createSandbox();
+    const {expect} = chai;
+    chai.use(sinonChai);
 
-    teardown(() => {
-        sandbox.restore();
-    });
+    suite('OpenShift Application Explorer', () => {
+        const sandbox = sinon.createSandbox();
 
-    test('reportIssue calls vscode.open with github.com url', async () => {
-        const execCmdStub = sandbox.stub(commands, 'executeCommand');
-        await OpenShiftExplorer.reportIssue();
-        expect(execCmdStub).calledWith('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
+        teardown(() => {
+            sandbox.restore();
+        });
+
+        test('reportIssue calls vscode.open with github.com url', async () => {
+            const execCmdStub = sandbox.stub(commands, 'executeCommand');
+            await OpenShiftExplorer.reportIssue();
+            expect(execCmdStub).calledWith('vscode.open', Uri.parse(OpenShiftExplorer.issueUrl()));
+        });
     });
 });
