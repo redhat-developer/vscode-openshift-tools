@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import { ExecException } from 'child_process';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { window, workspace } from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
@@ -15,16 +14,18 @@ import { Oc } from '../../src/oc/ocWrapper';
 import { Odo } from '../../src/odo/odoWrapper';
 import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../moduleImports';
 
 suite('./odo/odoWrapper.ts', () => {
+    let expect: Chai.ExpectStatic;
+
     const odoCli = Odo.Instance;
     let sandbox: sinon.SinonSandbox;
     const errorMessage = 'Error';
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         sandbox.stub(workspace, 'getConfiguration').returns({
             get<T>(): Promise<T|undefined> {
@@ -36,7 +37,7 @@ suite('./odo/odoWrapper.ts', () => {
             inspect(): {
                 key: string;
             } {
-              return undefined;
+            return undefined;
             },
             has(): boolean {
                 return true;

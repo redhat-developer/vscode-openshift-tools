@@ -4,14 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import { PathLike, RmOptions } from 'fs-extra';
-import * as fsp from '../../../src/util/utils';
-// import * as fsp from 'fs/promises';
 import * as path from 'path';
 import pq from 'proxyquire';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
 import { DevfileInfo } from '../../../src/devfile-registry/devfileInfo';
@@ -24,13 +21,14 @@ import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
 import * as Util from '../../../src/util/async';
+import * as fsp from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-
-const { expect } = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('OpenShift/Component', function () {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let termStub: sinon.SinonStub; let execStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
@@ -126,7 +124,9 @@ suite('OpenShift/Component', function () {
     let Component: typeof openShiftComponent.Component;
     let commandStub: sinon.SinonStub;
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
         Component = pq('../../../src/openshift/component', {}).Component;

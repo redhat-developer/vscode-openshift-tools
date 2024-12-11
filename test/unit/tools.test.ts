@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import * as chai from 'chai';
+import { equal, ok } from 'assert';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import * as hasha from 'hasha';
@@ -12,12 +11,9 @@ import * as path from 'path';
 import pq from 'proxyquire';
 import * as shelljs from 'shelljs';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
-
-chai.use(sinonChai);
 
 suite('tools configuration', () => {
     let sb: sinon.SinonSandbox;
@@ -43,7 +39,7 @@ suite('tools configuration', () => {
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('odo');
-            assert.equal(result, '0.0.13');
+            equal(result, '0.0.13');
         });
 
         test('returns version undefined for unexpected output', async () => {
@@ -52,7 +48,7 @@ suite('tools configuration', () => {
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');
-            assert.equal(result, undefined);
+            equal(result, undefined);
         });
 
         test('returns version undefined for not existing tool', async () => {
@@ -61,7 +57,7 @@ suite('tools configuration', () => {
             sb.stub(fs, 'existsSync').returns(false);
 
             const result: string = await ToolsConfig.getVersion('oc');
-            assert.equal(result, undefined);
+            equal(result, undefined);
         });
 
         test('returns version undefined for tool that does not support version parameter', async () => {
@@ -70,7 +66,7 @@ suite('tools configuration', () => {
             sb.stub(fs, 'existsSync').returns(true);
 
             const result: string = await ToolsConfig.getVersion('oc');
-            assert.equal(result, undefined);
+            equal(result, undefined);
         });
     });
 
@@ -82,9 +78,9 @@ suite('tools configuration', () => {
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
             const toolLocation = await ToolsConfig.detect('odo');
             if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
-                assert.equal(toolLocation, 'odo');
+                equal(toolLocation, 'odo');
             } else {
-                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.odo.cmdFileName));
+                equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.odo.cmdFileName));
             }
         });
 
@@ -106,7 +102,7 @@ suite('tools configuration', () => {
                 const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
                 await ToolsConfig.detect('odo');
-                assert.ok(!chmodSyncStub.called);
+                ok(!chmodSyncStub.called);
             });
         });
 
@@ -122,7 +118,7 @@ suite('tools configuration', () => {
                 sb.stub(shelljs, 'which');
                 sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.version);
                 await ToolsConfig.detect('odo');
-                assert.ok(chmodSyncStub.called);
+                ok(chmodSyncStub.called);
             });
         });
     });
@@ -135,7 +131,7 @@ suite('tools configuration', () => {
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(config.odo);
+            ok(config.odo);
         });
         test('removes tool configuration if platform is not supported', () => {
             let config = {
@@ -149,7 +145,7 @@ suite('tools configuration', () => {
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(!config.odo);
+            ok(!config.odo);
         });
     });
 });

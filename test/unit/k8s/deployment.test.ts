@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import { CliChannel } from '../../../src/cli';
@@ -14,11 +13,11 @@ import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { Progress } from '../../../src/util/progress';
 import { VsCommandError } from '../../../src/vscommand';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('K8s/deployment', () => {
+    let expect: Chai.ExpectStatic;
+
     let termStub: sinon.SinonStub;
     let quickPickStub: sinon.SinonStub;
     let sandbox: sinon.SinonSandbox;
@@ -89,7 +88,9 @@ suite('K8s/deployment', () => {
         nodeType: 'extension'
     };
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         termStub =  sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined});

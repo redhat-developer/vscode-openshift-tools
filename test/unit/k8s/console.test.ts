@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { Console } from '../../../src/k8s/console';
 import { KubeConfigUtils } from '../../../src/util/kubeUtils';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('K8s/console', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let cliExecStub: sinon.SinonStub;
     let commandStub: any;
@@ -32,7 +31,9 @@ suite('K8s/console', () => {
         nodeType: 'resource'
     };
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         cliExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');

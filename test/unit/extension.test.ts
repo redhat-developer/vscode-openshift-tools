@@ -8,11 +8,9 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 
-import * as assert from 'assert';
-import * as chai from 'chai';
+import { fail, ok } from 'assert';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
@@ -20,11 +18,9 @@ import { Project } from '../../src/oc/project';
 import { Odo } from '../../src/odo/odoWrapper';
 import { getNamespaceKind } from '../../src/util/kubeUtils';
 import { Progress } from '../../src/util/progress';
+import { loadChaiImports } from '../moduleImports';
 
 import * as packagejson from '../../package.json';
-
-const {expect} = chai;
-chai.use(sinonChai);
 
 function genComponentJson(p: string, a: string, n: string, c: string ): string {
     return `
@@ -52,6 +48,8 @@ function genComponentJson(p: string, a: string, n: string, c: string ): string {
 }
 
 suite('openshift toolkit Extension', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     const projectItem: Project = {
         name: 'myproject',
@@ -60,7 +58,9 @@ suite('openshift toolkit Extension', () => {
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
             uri: vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1')), index: 0, name: 'comp1'
@@ -86,7 +86,7 @@ suite('openshift toolkit Extension', () => {
                     "metadata": {},
                     "otherComponents": [],
                     "devfileComponents": []
-                  }`, stderr: ''}
+                }`, stderr: ''}
             }
             return { error: undefined, stdout: '', stderr: ''};
         });
@@ -99,8 +99,8 @@ suite('openshift toolkit Extension', () => {
     });
 
     test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
-	});
+        ok(vscode.extensions.getExtension('redhat.vscode-openshift-connector'));
+    });
 
     test('should register all extension commands declared commands in package descriptor', async function() {
         const notRegisteredCommands = [];

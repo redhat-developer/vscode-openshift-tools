@@ -3,17 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { commands, Uri } from 'vscode';
 import { OpenShiftExplorer } from '../../src/explorer';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../moduleImports';
 
 suite('OpenShift Application Explorer', () => {
+    let expect: Chai.ExpectStatic;
+
     const sandbox = sinon.createSandbox();
+
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+    });
 
     teardown(() => {
         sandbox.restore();

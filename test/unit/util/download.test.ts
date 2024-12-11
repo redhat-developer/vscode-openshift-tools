@@ -3,27 +3,27 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import { EventEmitter } from 'events';
+import * as os from 'os';
 import * as path from 'path';
+import pq from 'proxyquire';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import type { DownloadUtil as DownloadUtilType } from '../../../src/downloadUtil/download';
 import { wait } from '../../../src/util/async';
-
-import * as os from 'os';
-import pq from 'proxyquire';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('Download Util', () => {
+    let expect: Chai.ExpectStatic;
+
     let progressMock: typeof DownloadUtilType;
     const sandbox: sinon.SinonSandbox = sinon.createSandbox();
     let requestEmitter: any;
     let streamEmitter: EventEmitter;
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         requestEmitter = new EventEmitter();
         streamEmitter = new EventEmitter();
         requestEmitter.pipe = (): any => streamEmitter;

@@ -3,19 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
 import { Archive } from '../../../src/downloadUtil/archive';
 import * as targz from '../../../src/util/utils';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('Archive Utility', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let tarStub: sinon.SinonStub; let zipStub: sinon.SinonStub;
     const errorMessage = 'FATAL ERROR';
@@ -23,7 +22,9 @@ suite('Archive Utility', () => {
     const tarPath = 'file.tar.gz';
     const gzipPath = 'file.gz';
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         tarStub = sandbox.stub(targz, 'decompress').yields();
         zipStub = sandbox.stub(Archive, 'gunzip').resolves();

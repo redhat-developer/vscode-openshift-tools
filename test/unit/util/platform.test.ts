@@ -3,18 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { Platform } from '../../../src/util/platform';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('Platform Utility', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
     });
 
