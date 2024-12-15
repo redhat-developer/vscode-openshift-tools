@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { OpenShiftExplorer } from '../../../src/explorer';
@@ -17,11 +16,11 @@ import { CliExitData } from '../../../src/util/childProcessUtil';
 import { TokenStore } from '../../../src/util/credentialManager';
 import { LoginUtil } from '../../../src/util/loginUtil';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('Openshift/Cluster', function() {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     let commandStub: sinon.SinonSpy;
@@ -54,7 +53,9 @@ suite('Openshift/Cluster', function() {
     const password = 'password';
     const token = 'token';
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         sandbox.stub(TokenStore.extensionContext.secrets);
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves(testData);

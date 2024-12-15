@@ -3,19 +3,20 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as NameValidator from '../../../src/openshift/nameValidator';
 import { wait } from '../../../src/util/async';
-
-const { expect } = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('nameValidator', function () {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
 
-    setup(function () {
+    setup(async function () {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
     });
 

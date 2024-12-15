@@ -3,20 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as sinon from 'sinon';
-
-suite('Progress Utility', () => {
-    let sandbox: sinon.SinonSandbox;
-
-    setup(() => {
-        sandbox = sinon.createSandbox();
-    });
-
-    teardown(() => {
-        sandbox.restore();
-    });
-
-    test.skip('resolves if function resolves');
-
-    test.skip('fails if function fails');
-});
+export async function loadChaiImports(): Promise<{ expect: Chai.ExpectStatic, assert: Chai.AssertStatic }> {
+    const chai = await import('chai');
+    const sinonChai = await import('sinon-chai');
+    chai.use(sinonChai.default);
+    const { expect, assert } = chai;
+    return { expect, assert };
+}

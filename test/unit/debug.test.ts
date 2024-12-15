@@ -3,16 +3,14 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { DebugSession, Disposable, debug } from 'vscode';
 import { DebugSessionsView } from '../../src/debug';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../moduleImports';
 
 suite('Debug Sessions View', () => {
+    let expect: Chai.ExpectStatic;
 
     const sandbox = sinon.createSandbox();
     let view: DebugSessionsView;
@@ -36,7 +34,9 @@ suite('Debug Sessions View', () => {
         }
     };
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox.stub(debug, 'onDidStartDebugSession').callsFake((cb) => {
             startEmitter = cb;
             return new Disposable(()=> { return; });
@@ -62,8 +62,8 @@ suite('Debug Sessions View', () => {
     test('removes component from view after debugger disconnect command executed', async () => {
         startEmitter(debugSession);
         stopEmitter(debugSession);
-         const children = await view.getChildren();
-         expect(children.length).equals(0);
+        const children = await view.getChildren();
+        expect(children.length).equals(0);
     });
 
 });

@@ -3,24 +3,25 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
 import * as fs from '../../../src/util/utils';
 import { WatchUtil } from '../../../src/util/watch';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('File Watch Utility', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let ensureStub: sinon.SinonStub; let watchStub: sinon.SinonStub;
     const location = 'location';
     const filename = 'file';
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         ensureStub = sandbox.stub(fs, 'ensureDirSync');
         watchStub = sandbox.stub(fs, 'watch');

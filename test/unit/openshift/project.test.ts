@@ -3,20 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CommandText } from '../../../src/base/command';
 import { Oc } from '../../../src/oc/ocWrapper';
 import { Project as OdoProject } from '../../../src/oc/project';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { Project } from '../../../src/openshift/project';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('OpenShift/Project', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     let createProjectStub: sinon.SinonStub;
@@ -25,7 +24,9 @@ suite('OpenShift/Project', () => {
     let projectItem: OdoProject;
     const errorMessage = 'ERROR MESSAGE';
 
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         projectItem = { name: 'project', active: true };
         sandbox = sinon.createSandbox();
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);

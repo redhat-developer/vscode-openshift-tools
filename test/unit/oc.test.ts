@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import { window } from 'vscode';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
@@ -13,11 +12,11 @@ import { ToolsConfig } from '../../src/tools';
 import { ChildProcessUtil } from '../../src/util/childProcessUtil';
 import { getNamespaceKind } from '../../src/util/kubeUtils';
 import { YamlFileCommands } from '../../src/yamlFileCommands';
+import { loadChaiImports } from '../moduleImports';
 
-const {expect} = chai;
-chai.use(sinonChai);
+suite('Oc', function()  {
+    let expect: Chai.ExpectStatic;
 
-suite('Oc', function() {
     let sandbox: sinon.SinonSandbox;
     let detectOrDownloadStub: sinon.SinonStub<[string], Promise<string>>;
     let warnStub: sinon.SinonStub<[string, import('vscode').MessageOptions, ...import('vscode').MessageItem[]], Thenable<import('vscode').MessageItem>>;
@@ -41,7 +40,9 @@ suite('Oc', function() {
         },
     };
 
-    setup(function() {
+    setup(async function() {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         warnStub = sandbox.stub(window, 'showWarningMessage');
         execStub = sandbox.stub(ChildProcessUtil.prototype, 'execute');

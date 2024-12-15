@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "jsx": "react",
-        "module": "commonjs",
+        "module": "CommonJS",
+        "moduleResolution": "node",
         "target": "es6",
         "outDir": "out",
         "lib": [
@@ -14,6 +15,7 @@
         "sourceMap": true,
         "rootDir": ".",
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         /* Strict Type-Checking Option */
         "strict": false,   /* enable all strict type-checking options */
         /* Additional Checks */

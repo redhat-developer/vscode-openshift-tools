@@ -3,22 +3,23 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentDescription } from '../../../src/odo/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { OdoWorkspace } from '../../../src/odo/workspace';
 import * as fixtures from '../../fixtures';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('Odo/Workspace', () => {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
-    setup(() => {
+    setup(async () => {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
     });
 
@@ -36,8 +37,8 @@ suite('Odo/Workspace', () => {
     }
 
     function initWorkspaceFolders() {
-         // setup workspace folders
-         sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
+        // setup workspace folders
+        sandbox.stub(vscode.workspace, 'workspaceFolders').value([{
             uri: vscode.Uri.file(fixtures.comp1Folder), index: 0, name: 'comp1'
         }, {
             uri: vscode.Uri.file(fixtures.comp2Folder), index: 1, name: 'comp2'

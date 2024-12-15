@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as chai from 'chai';
+import { fail } from 'assert';
 import { ExecException, ExecOptions } from 'child_process';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import * as childProcess from '../../../src/util/utils';
-
-const {expect} = chai;
-chai.use(sinonChai);
+import { loadChaiImports } from '../../moduleImports';
 
 suite('ChildProcessUtil', function() {
+    let expect: Chai.ExpectStatic;
+
     let sandbox: sinon.SinonSandbox;
     let execStub: sinon.SinonStub;
     const childProcessUtil = ChildProcessUtil.Instance;
@@ -27,7 +26,9 @@ suite('ChildProcessUtil', function() {
         name: 'name'
     };
 
-    setup(function() {
+    setup(async function() {
+        await loadChaiImports().then((chai) => { expect = chai.expect; }).catch(fail);
+
         sandbox = sinon.createSandbox();
         execStub = sandbox.stub(childProcess, 'exec');
     });
