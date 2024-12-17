@@ -47,4 +47,4 @@ jobs:
           git checkout -b "oc-${{ env.LATEST_TOOL_RELEASE }}"
           git commit -am "Update oc to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "oc-${{ env.LATEST_TOOL_RELEASE }}"
-          gh pr create --title "Update oc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${release_url}"
+          gh pr create --draft --title "Update oc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${release_url}"
