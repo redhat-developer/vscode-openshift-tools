@@ -13,7 +13,7 @@ import { CoverageRunner, TestRunnerOptions } from '../coverage';
 sourceMapSupport.install();
 
 const config: Mocha.MochaOptions = {
-    reporter: 'mocha-jenkins-reporter',
+    reporter: 'xunit',
     ui: 'tdd',
     timeout: 120000,
     color: true,
