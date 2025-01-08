@@ -560,6 +560,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     name: 'routes'
                 },
             } as OpenShiftObject;
+            const pipelines = {
+                kind: 'pipelines',
+                metadata: {
+                    name: 'pipelines'
+                },
+            } as OpenShiftObject;
             const statefulSets = {
                 kind: 'statefulsets',
                 metadata: {
@@ -605,7 +611,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             result.push(pods,
                 statefulSets, daemonSets, jobs, cronJobs);
             if (isOpenshiftCluster) {
-                result.push(deploymentConfigs, imageStreams, buildConfigs, routes);
+                result.push(deploymentConfigs, imageStreams, buildConfigs, routes, pipelines);
             }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
@@ -621,7 +627,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     break;
                 default:
                     try {
-                        collections = await Oc.Instance.getKubernetesObjects(element.kind, undefined, undefined, this.executionContext);
+                        const namespace: string = await Oc.Instance.getActiveProject();
+                        collections = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext);
                     } catch {
                         collections = [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
                     }
