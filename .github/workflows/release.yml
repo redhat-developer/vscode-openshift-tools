@@ -44,9 +44,8 @@ jobs:
           npm install
           echo "EXT_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
       - name: Build And Run Unit Tests
-        uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a #v1.0.1
-        with:
-          run: npm run test
+        run: xvfb-run npm run test
+
       - name: Package
         run: |
           node ./out/build/update-readme.js
