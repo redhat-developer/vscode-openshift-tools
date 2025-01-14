@@ -90,7 +90,7 @@
 		"@rjsf/mui": "^5.24.1",
 		"@rjsf/utils": "^5.23.2",
 		"@rjsf/validator-ajv8": "^5.24.1",
-		"@segment/analytics-next": "^1.76.0",
+		"@segment/analytics-next": "^1.76.1",
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^4.3.20",
 		"@types/dockerode": "^3.3.34",
