@@ -142,7 +142,7 @@
 		"eslint-plugin-prettier": "^5.2.2",
 		"express": "^5.0.1",
 		"file-loader": "^6.2.0",
-		"fs-extra": "^11.2.0",
+		"fs-extra": "^11.3.0",
 		"git-up": "^8.0.0",
 		"glob": "^11.0.1",
 		"got": "^11.8.6",
