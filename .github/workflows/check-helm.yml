@@ -73,4 +73,4 @@ jobs:
           git checkout -b "bump-helm-${{ env.LATEST_TOOL_RELEASE }}"
           git commit -am "Update HELM CLI to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "bump-helm-${{ env.LATEST_TOOL_RELEASE }}"
-          gh pr create --head $(git branch --show-current) --title "Update HELM CLI to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
+          gh pr create --head $(git branch --show-current) --draft --title "Update HELM CLI to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"

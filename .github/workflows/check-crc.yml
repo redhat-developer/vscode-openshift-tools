@@ -37,4 +37,4 @@ jobs:
                   git checkout -b "crc-${{ env.LATEST_TOOL_RELEASE }}"
                   git commit -am "Update crc to ${{ env.LATEST_TOOL_RELEASE }}"
                   git push origin "crc-${{ env.LATEST_TOOL_RELEASE }}"
-                  gh pr create --head $(git branch --show-current) --title "Update crc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
+                  gh pr create --head $(git branch --show-current) --draft --title "Update crc to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
