@@ -72,4 +72,4 @@ jobs:
           git checkout -b "bump-alizer-${{ env.LATEST_TOOL_RELEASE }}"
           git commit -am "Update Alizer CLI to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "bump-alizer-${{ env.LATEST_TOOL_RELEASE }}"
-          gh pr create --title "Update Alizer CLI to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
+          gh pr create --head $(git branch --show-current) --title "Update Alizer CLI to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
