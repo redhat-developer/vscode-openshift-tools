@@ -44,4 +44,4 @@ jobs:
           git checkout -b "func-${{ env.LATEST_TOOL_RELEASE }}"
           git commit -am "Update func to ${{ env.LATEST_TOOL_RELEASE }}"
           git push origin "func-${{ env.LATEST_TOOL_RELEASE }}"
-          gh pr create --head $(git branch --show-current) --title "Update func to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
+          gh pr create --head $(git branch --show-current) --draft --title "Update func to ${{ env.LATEST_TOOL_RELEASE }}" --body "See ${{ env.LATEST_TOOL_URL }}"
