@@ -110,5 +110,5 @@ jobs:
           git checkout -b "bump-odo-${{ needs.check-odo.outputs.last-release-version }}-${{ needs.check-odo.outputs.last-commit-id }}"
           git commit -am "Update ODO CLI to ${{ needs.check-odo.outputs.nightly-build-version }}"
           git push -f origin "bump-odo-${{ needs.check-odo.outputs.last-release-version }}-${{ needs.check-odo.outputs.last-commit-id }}"
-          gh pr create --title "Update ODO CLI to ${{ needs.check-odo.outputs.nightly-build-version }}" \
+          gh pr create --head $(git branch --show-current) --title "Update ODO CLI to ${{ needs.check-odo.outputs.nightly-build-version }}" \
             --body "See the commit history between release ${{needs.check-odo.outputs.last-release-version}} and the latest nightly version ${{ needs.check-odo.outputs.nightly-build-version }} at: https://github.com/redhat-developer/odo/compare/${{needs.check-odo.outputs.last-release-tag}}...${{ needs.check-odo.outputs.last-commit-id }}"
