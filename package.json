@@ -2226,6 +2226,11 @@
 					"openshiftToolkit.disable-namespace-info-status-bar": {
 						"type": "boolean",
 						"description": "Disable displaying the active namespace in VS Code's status bar."
+					},
+					"openshiftToolkit.failOnBrokenKubeConfigEntry": {
+						"type": "boolean",
+						"default": false,
+						"description": "Fail on broken Kube config entry"
 					}
 				}
 			},

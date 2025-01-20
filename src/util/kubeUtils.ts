@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig, findHomeDir, loadYaml } from '@kubernetes/client-node';
-import { Cluster, Context, User } from '@kubernetes/client-node/dist/config_types';
+import { ActionOnInvalid, Cluster, Context, User } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
 import * as path from 'path';
-import { QuickPickItem, window } from 'vscode';
+import { QuickPickItem, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel, ExecutionContext } from '../cli';
 import { Platform } from './platform';
@@ -27,8 +27,11 @@ export class KubeConfigUtils extends KubeConfig {
     constructor() {
         super();
         try {
-            this.loadFromDefault();
-        } catch {
+            const failOnBrokenEntry: boolean = workspace.getConfiguration('openshiftToolkit')
+                .get('failOnBrokenKubeConfigEntry');
+            const onInvalidEntry = failOnBrokenEntry ? ActionOnInvalid.THROW : ActionOnInvalid.FILTER;
+            this.loadFromDefault({onInvalidEntry});
+         } catch {
             throw new Error('Kubernetes configuration cannot be loaded. Please check configuration files for errors and fix them to continue.');
         }
         // k8s nodejs-client ignores all unknown properties,
