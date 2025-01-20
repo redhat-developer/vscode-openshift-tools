@@ -9,7 +9,7 @@ import { createVSCodeTheme } from '../../common/vscode-theme';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { HelmSearch } from './helmSearch';
 
-type VSCodeMessage = {
+type Message = {
     action: string;
     themeValue?: number;
 }
@@ -18,7 +18,7 @@ export const Home = () => {
 
     const [theme, setTheme] = React.useState<Theme>(createVSCodeTheme('light'));
 
-    const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
+    const respondToMessage = function (message: MessageEvent<Message>) {
         if (message.data.action === 'setTheme') {
             setTheme(createVSCodeTheme(message.data.themeValue === 1 ? 'light' : 'dark'));
         }

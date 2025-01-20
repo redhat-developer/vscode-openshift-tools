@@ -5,11 +5,11 @@
 import { Alert } from '@mui/material';
 import * as React from 'react';
 
-export type RecommendationInfo = {
+export type RecommendationInfoProps = {
     infoMessage: string;
 };
 
-export function RecommendationInfo(props: RecommendationInfo) {
+export function RecommendationInfo(props: RecommendationInfoProps) {
     return (
         <Alert severity="info">
             {props.infoMessage}
