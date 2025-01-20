@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import React from 'react';
 import apacheImg from '../../../images/logos/apache.svg';
 import dotnetImg from '../../../images/logos/dotnet.svg';
 import eapImg from '../../../images/logos/eap.svg';

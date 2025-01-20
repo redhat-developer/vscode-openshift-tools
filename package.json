@@ -57,9 +57,9 @@
 		"compile:build-production": "node ./build/esbuild.mjs --production",
 		"watch": "node ./build/esbuild-watch.mjs",
 		"clean": "shx rm -rf out/build out/src out/webview out/test out/tools out/test-resources out/**.tsbuildinfo",
-		"lint": "eslint . --ext .ts --ext .tsx --quiet",
-		"lint-fix": "eslint . --ext .ts --ext .tsx --fix",
-		"lint-nic": "eslint . --ext .ts --ext .tsx --no-inline-config",
+		"lint": "eslint . --quiet",
+		"lint-fix": "eslint . --fix",
+		"lint-nic": "eslint . --no-inline-config",
 		"check-cycles": "dpdm --no-tree --no-warning --exit-code circular:1 ./src/extension.ts",
 		"bundle-tools": "ts-node ./build/bundle-tools.ts --platform",
 		"todo": "leasot **/*.ts --ignore node_modules -x",
@@ -132,7 +132,7 @@
 		"esbuild-node-externals": "^1.16.0",
 		"esbuild-plugin-svgr": "^3.1.0",
 		"esbuild-sass-plugin": "^3.3.1",
-		"eslint": "^8.57.1",
+		"eslint": "^9.19.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-import-resolver-typescript": "^3.7.0",
 		"eslint-plugin-header": "^3.1.1",
@@ -182,6 +182,7 @@
 		"tmp": "^0.2.3",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.7.3",
+		"typescript-eslint": "8.21.0",
 		"unzip-stream": "^0.3.4",
 		"validator": "^13.12.0",
 		"vscode-extension-tester": "^8.11.0",
@@ -196,7 +197,8 @@
 	"overrides": {
 		"cookie": "^1.0.1",
 		"cross-spawn": "^7.0.6",
-		"tough-cookie": "^5.0.0"
+		"tough-cookie": "^5.0.0",
+		"globals": "^15.14.0"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",

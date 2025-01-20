@@ -24,6 +24,7 @@ export function failed<T>(e: Errorable<T>): e is Failed {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace Errorable {
     export function succeeded<T>(e: Errorable<T>): e is Succeeded<T> {
         return e.succeeded;
