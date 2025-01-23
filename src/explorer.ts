@@ -41,7 +41,7 @@ import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
 
-type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo;
+type ExplorerItem = KubernetesObject | Helm.HelmRelease | Context | TreeItem | OpenShiftObject | HelmRepo | PipelineTasks;
 
 export type OpenShiftObject = {
     kind: string,
@@ -50,9 +50,18 @@ export type OpenShiftObject = {
     },
 }
 
-export interface DeploymentPodObject extends KubernetesObject {
+export type PipelineTasks = {
+    name: string
+    context: string
+}
+
+export type task = {
+    [key: string]: string
+}
+
+export interface OtherObject extends KubernetesObject {
     spec?: {
-        [key: string]: string
+        tasks?: task[]
     },
     status?: {
         [key: string]: string
@@ -209,6 +218,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             };
         }
 
+        if ('name' in element && 'context' in element) {
+            return {
+                contextValue: 'openshift.pipeline.tasks',
+                label: element.name,
+                tooltip: 'Task Name',
+                collapsibleState: TreeItemCollapsibleState.None,
+                iconPath: new ThemeIcon('repo')
+            };
+        }
+
         // It's a Helm installation
         if ('chart' in element) {
             if (element.chart === 'noChart') {
@@ -255,7 +274,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     collapsibleState: TreeItemCollapsibleState.Collapsed
                 }
             } else if (element.kind === 'Pod') {
-                const contextElement: DeploymentPodObject = element;
+                const contextElement: OtherObject = element;
                 return {
                     contextValue: 'openshift.k8sObject.pod',
                     label: contextElement.metadata.name,
@@ -270,7 +289,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     }
                 }
             }
-            const contextElement: DeploymentPodObject = element;
+            const contextElement: OtherObject = element;
             if (!contextElement.spec) {
                 const elementValue = this.makeCaps(element.metadata.name);
                 return {
@@ -286,7 +305,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         }
     }
 
-    private getDeploymentIconSuffix(pods: DeploymentPodObject[]): string {
+    private getDeploymentIconSuffix(pods: OtherObject[]): string {
         // Find all not 'Running' pods
         const notRunning = pods.filter((pod) => pod.status && pod.status.phase !== 'Running');
         if (notRunning.length === 0) {
@@ -294,7 +313,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         }
         // Find any 'Failed' or 'Unknown' pod - if any return error ('red')
         const failed = notRunning.find((pod) => pod.status &&
-                (pod.status.phase === 'Failed' || pod.status.phase === 'Unknown'));
+            (pod.status.phase === 'Failed' || pod.status.phase === 'Unknown'));
         if (failed) {
             return '-red'; // At least one failed or unknown - return 'red'
         }
@@ -327,7 +346,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
                         inCrashLoopBackOff = inCrashLoopBackOff || reason === 'CrashLoopBackOff';
 
-                        const msg = `${reason}: ${message ? message.trim(): 'No valuable message'}`;
+                        const msg = `${reason}: ${message ? message.trim() : 'No valuable message'}`;
                         // Skip duplicated messages
                         if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${reason}:`)))) {
                             messages.push(msg);
@@ -347,7 +366,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         const messages: string[] = [];
         deployment.status.conditions?.filter((c) => c.status === 'False')
             .forEach((c) => {
-                const message = `${c.reason}: ${c.message ? c.message.trim(): 'No valuable message'}`;
+                const message = `${c.reason}: ${c.message ? c.message.trim() : 'No valuable message'}`;
 
                 // Skip duplicated messages
                 if (messages.length < 3 && !(messages.find((m) => m.startsWith(`${c.reason}:`)))) {
@@ -366,7 +385,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         const availableReplicas = element.status.availableReplicas ? element.status.availableReplicas : 0;
         const unavailableReplicas = element.status.unavailableReplicas ? element.status.unavailableReplicas : 0;
 
-        let pods: DeploymentPodObject[] = [];
+        let pods: OtherObject[] = [];
         if (shouldHaveReplicas) {
             try {
                 pods = await this.getPods(element);
@@ -404,24 +423,24 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             );
         }
         const iconSuffix = !shouldHaveReplicas ? '' :
-                podErrors.inCrashLoopBackOff ? '-red' : this.getDeploymentIconSuffix(pods);
+            podErrors.inCrashLoopBackOff ? '-red' : this.getDeploymentIconSuffix(pods);
         const iconPath = element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ?
             imagePath(`context/component-node${iconSuffix}.png`) : undefined;
 
         const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
         return {
-                contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
-                label: element.metadata.name,
-                description,
-                tooltip,
-                collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
-                iconPath,
-                command: {
-                    title: 'Load',
-                    command: 'openshift.resource.load',
-                    arguments: [element]
-                }
-            };
+            contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
+            label: element.metadata.name,
+            description,
+            tooltip,
+            collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
+            iconPath,
+            command: {
+                title: 'Load',
+                command: 'openshift.resource.load',
+                arguments: [element]
+            }
+        };
     }
 
     private makeCaps(kind: string): string {
@@ -615,7 +634,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             }
         } else if ('kind' in element) {
             const collectableServices: CustomResourceDefinitionStub[] = await this.getServiceKinds();
-            let collections: KubernetesObject[] | Helm.HelmRelease[] | ExplorerItem[];
+            let collections: KubernetesObject[] | Helm.HelmRelease[] | ExplorerItem[] | PipelineTasks[];
             switch (element.kind) {
                 case 'helmReleases':
                     collections = await Helm.getHelmReleases();
@@ -625,10 +644,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                         }]
                     }
                     break;
+                    case 'pipelines':
+                    collections =  await this.getPipelineTasks(element);
+                    break;
                 default:
                     try {
-                        const namespace: string = await Oc.Instance.getActiveProject();
-                        collections = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext);
+                        collections = await Oc.Instance.getKubernetesObjects(element.kind, undefined, undefined, this.executionContext);
                     } catch {
                         collections = [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
                     }
@@ -672,6 +693,17 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return await Oc.Instance.getKubernetesObjects('pods', undefined, element.metadata.name, this.executionContext);
     }
 
+    public async getPipelineTasks(element: KubernetesObject | OpenShiftObject): Promise<PipelineTasks[]> {
+        const namespace: string = await Oc.Instance.getActiveProject();
+        const collections: OtherObject[] = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext);
+        const taskNames: PipelineTasks[] = [];
+        const tasks = collections[0].spec.tasks;
+        tasks.map((task) => {
+            taskNames.push({ name : task.name, context: 'pipelineTask' });
+        })
+        return taskNames;
+    }
+
     refresh(target?: ExplorerItem): void {
         // Create new Execution Context before refreshing
         if (this.executionContext) {
@@ -693,15 +725,15 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     public static async loadResource(component: KubernetesObject) {
         if (component) {
             if ('chart' in component && 'name' in component && 'revision' in component
-                    && 'status' in component && component.chart !== 'noChart'
-                    && component.status === 'deployed') { // Deployed Helm Chart
+                && 'status' in component && component.chart !== 'noChart'
+                && component.status === 'deployed') { // Deployed Helm Chart
                 const releaseName: string = typeof component.name === 'string' ? component.name : '';
                 const revisionString: string | undefined = typeof component.revision === 'string' ? component.revision : undefined;
                 const revision = revisionString ? parseInt(revisionString, 10) : undefined;
                 void OpenShiftExplorer.getInstance().loadKubernetesHelmChart(releaseName, revision);
             } else {
                 if (component.kind === 'Pod') {
-                    const contextElement: DeploymentPodObject = component;
+                    const contextElement: OtherObject = component;
                     const pods = await OpenShiftExplorer.getInstance().getPods(contextElement);
                     if (pods.length === 0) {
                         contextElement.status.phase = 'Terminated'
