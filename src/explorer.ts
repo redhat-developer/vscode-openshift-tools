@@ -697,8 +697,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         const namespace: string = await Oc.Instance.getActiveProject();
         const collections: OtherObject[] = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext);
         const taskNames: PipelineTasks[] = [];
+        if (!collections || collections.length === 0 || !collections[0].spec) {
+            return [];
+        }
         const tasks = collections[0].spec.tasks;
-        tasks.map((task) => {
+        tasks?.map((task) => {
             taskNames.push({ name : task.name, context: 'pipelineTask' });
         })
         return taskNames;
