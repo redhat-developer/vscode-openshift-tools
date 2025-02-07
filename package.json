@@ -84,7 +84,7 @@
 		"@mui/lab": "^6.0.0-beta.26",
 		"@mui/material": "^6.1.8",
 		"@mui/styles": "^6.4.3",
-		"@mui/x-tree-view": "^7.25.0",
+		"@mui/x-tree-view": "^7.26.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.9.1",
 		"@rjsf/core": "^5.24.3",
 		"@rjsf/mui": "^5.24.3",
