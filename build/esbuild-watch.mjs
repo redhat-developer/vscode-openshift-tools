@@ -5,13 +5,13 @@
 
 /* eslint-disable no-console */
 
+import { transform } from '@svgr/core';
 import { watch } from 'chokidar';
 import * as esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
-import * as fs from 'node:fs/promises';
-import process from 'node:process';
 import * as cp from 'node:child_process';
-import svgr from 'esbuild-plugin-svgr';
+import { cp as copyFile, readdir, readFile } from 'node:fs/promises';
+import process from 'node:process';
 
 // This script runs tsc and esbuild in parallel when there are filesystem changes.
 // It outputs predictable markers for the beginning and ending of the compilation,
@@ -24,9 +24,60 @@ import svgr from 'esbuild-plugin-svgr';
 // in order to reduce the number of times the build is run
 let timeout = undefined;
 
-const webviews = (await fs.readdir('./src/webview', { withFileTypes: true }))
+const webviews = (await readdir('./src/webview', { withFileTypes: true }))
     .filter((dirent) => dirent.isDirectory() && !['@types', 'common', 'common-ext'].includes(dirent.name))
     .map((dirent) => dirent.name);
+
+// The following 'svgrPlugin' const have been stolen from 'esbuild-plugin-scgr' due to lack of support of the latest 'esbuild' versions
+// by the plugin itself.
+// See: https://github.com/kazijawad/esbuild-plugin-svgr/issues/20
+//
+const svgrPlugin = (options = {
+    markExternal: true
+}) => ({
+    name: 'svgr',
+    setup(build) {
+        build.onResolve({ filter: /\.svg$/ }, async (args) => {
+            switch (args.kind) {
+                case 'import-statement':
+                case 'require-call':
+                case 'dynamic-import':
+                case 'require-resolve':
+                    return
+                default:
+                    if (options.markExternal) {
+                        return {
+                            external: true,
+                        }
+                    }
+            }
+        })
+
+        build.onLoad({ filter: /\.svg$/ }, async (args) => {
+            const svg = await readFile(args.path, { encoding: 'utf8' })
+
+            if (options.plugins && !options.plugins.includes('@svgr/plugin-jsx')) {
+                options.plugins.push('@svgr/plugin-jsx')
+            } else if (!options.plugins) {
+                options.plugins = ['@svgr/plugin-jsx']
+            }
+
+            const contents = await transform(svg, { ...options }, { filePath: args.path })
+
+            if (args.suffix === '?url') {
+                return {
+                    contents: args.path,
+                    loader: 'text',
+                }
+            }
+
+            return {
+                contents,
+                loader: options.typescript ? 'tsx' : 'jsx',
+            }
+        })
+    },
+});
 
 // build the esbuild contexts
 const esbuildContext = await esbuild.context({
@@ -42,9 +93,7 @@ const esbuildContext = await esbuild.context({
     },
     plugins: [
         sassPlugin(),
-        svgr({
-            plugins: ['@svgr/plugin-jsx'],
-        }),
+        svgrPlugin({ plugins: ['@svgr/plugin-jsx'] }),
     ],
 });
 
@@ -82,7 +131,7 @@ async function runBuildProcess() {
             promiseExec('npx tsc -p ./'),
             promiseExec('npx tsc -p ./src/webview -noEmit'),
             esbuildContext.rebuild(),
-            ...webviews.map((webview) => fs.cp(
+            ...webviews.map((webview) => copyFile(
                 `./src/webview/${webview}/app/index.html`,
                 `./out/${webview}/app/index.html`)),
         ]);
