@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { transform } from '@svgr/core';
 import * as esbuild from 'esbuild';
-import svgr from 'esbuild-plugin-svgr';
 import { sassPlugin } from 'esbuild-sass-plugin';
-import * as fs from 'fs/promises';
 import * as glob from 'glob';
 import { createRequire } from 'module';
+import { cp, mkdir, readFile, stat } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -115,6 +115,57 @@ const nativeNodeModulesPlugin = {
     },
 };
 
+// The following 'svgrPlugin' const have been stolen from 'esbuild-plugin-scgr' due to lack of support of the latest 'esbuild' versions
+// by the plugin itself.
+// See: https://github.com/kazijawad/esbuild-plugin-svgr/issues/20
+//
+const svgrPlugin = (options = {
+    markExternal: true
+}) => ({
+    name: 'svgr',
+    setup(build) {
+        build.onResolve({ filter: /\.svg$/ }, async (args) => {
+            switch (args.kind) {
+                case 'import-statement':
+                case 'require-call':
+                case 'dynamic-import':
+                case 'require-resolve':
+                    return
+                default:
+                    if (options.markExternal) {
+                        return {
+                            external: true,
+                        }
+                    }
+            }
+        })
+
+        build.onLoad({ filter: /\.svg$/ }, async (args) => {
+            const svg = await readFile(args.path, { encoding: 'utf8' })
+
+            if (options.plugins && !options.plugins.includes('@svgr/plugin-jsx')) {
+                options.plugins.push('@svgr/plugin-jsx')
+            } else if (!options.plugins) {
+                options.plugins = ['@svgr/plugin-jsx']
+            }
+
+            const contents = await transform(svg, { ...options }, { filePath: args.path })
+
+            if (args.suffix === '?url') {
+                return {
+                    contents: args.path,
+                    loader: 'text',
+                }
+            }
+
+            return {
+                contents,
+                loader: options.typescript ? 'tsx' : 'jsx',
+            }
+        })
+    },
+});
+
 const baseConfig = {
     bundle: true,
     target: 'chrome108',
@@ -149,9 +200,7 @@ if (production) {
         },
         plugins: [
             sassPlugin(),
-            svgr({
-                plugins: ['@svgr/plugin-jsx']
-            }),
+            svgrPlugin({ plugins: ['@svgr/plugin-jsx'] }),
             esbuildProblemMatcherPlugin // this one is to be added to the end of plugins array
         ]
     };
@@ -168,9 +217,7 @@ if (production) {
         },
         plugins: [
             sassPlugin(),
-            svgr({
-                plugins: ['@svgr/plugin-jsx']
-            }),
+            svgrPlugin({ plugins: ['@svgr/plugin-jsx'] }),
             esbuildProblemMatcherPlugin // this one is to be added to the end of plugins array
         ]
     };
@@ -179,7 +226,7 @@ if (production) {
 
 async function dirExists(path) {
     try {
-        if ((await fs.stat(path)).isDirectory()) {
+        if ((await stat(path)).isDirectory()) {
             return true;
         }
     } catch {
@@ -193,10 +240,10 @@ await Promise.all([
     ...webviews.map(async webview => {
         const targetDir = path.join(__dirname, `${outDir}/${webview}/app`);
         if (!dirExists(targetDir)) {
-            await fs.mkdir(targetDir, { recursive: true, mode: 0o750} );
+            await mkdir(targetDir, { recursive: true, mode: 0o750} );
         }
         glob.sync([ `${srcDir}/webview/${webview}/app/index.html` ]).map(async srcFile => {
-            await fs.cp(path.join(__dirname, srcFile), path.join(targetDir, `${path.basename(srcFile)}`))
+            await cp(path.join(__dirname, srcFile), path.join(targetDir, `${path.basename(srcFile)}`))
         });
     })
 ]);
