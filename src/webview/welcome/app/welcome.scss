@@ -1,7 +1,7 @@
-@import './base';
-@import './buttons';
-@import './icons';
-@import './utils';
+@use 'base';
+@use 'buttons';
+@use 'icons';
+@use 'utils';
 
 body {
     &.vscode-light {
