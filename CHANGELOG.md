@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.18.0 (February 12, 2025)
+
+ * [#4681](https://github.com/redhat-developer/vscode-openshift-tools/pull/4681) The "Bind Service" feature is **removed** due to the deprecation of the Service Binding Operator
+ * [#4677](https://github.com/redhat-developer/vscode-openshift-tools/pull/4677) The extension activation is fixed for the cases when the 'KUBECONGIG' environment variable is misconfigured
+ * [#4484](https://github.com/redhat-developer/vscode-openshift-tools/issues/4484) OpenShift Pipeline Tasks in Cluster View are added to the Application Explorer
+ * [#3935](https://github.com/redhat-developer/vscode-openshift-tools/issues/3935) Fixed the failure with logging in to an existing cluster
+ * [#3872](https://github.com/redhat-developer/vscode-openshift-tools/issues/3872) Fixed the failure with logging in to a cluster when Kube config doesn't exist
+
 ## 1.17.0 (November 27, 2024)
 
  * [#4226](https://github.com/redhat-developer/vscode-openshift-tools/issues/4226) The extension activation is improved by bundling and removing unnecessary files
