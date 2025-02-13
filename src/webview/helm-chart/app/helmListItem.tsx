@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Box, Button, Chip, Link, Stack, SvgIcon, Tooltip, Typography } from '@mui/material';
+import DOMPurify from 'dompurify';
 import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
 import { Chart, ChartResponse } from '../../../helm/helmChartType';
@@ -97,7 +98,7 @@ function HelmChartListContent(props: HelmListItemProps) {
             >
                 {
                     props.selectedVersion.icon ?
-                        <img src={props.selectedVersion.icon} style={{
+                        <img src={DOMPurify.sanitize(props.selectedVersion.icon)} style={{
                             maxWidth: !props.isDetailedPage ? '3em' : '6em',
                             maxHeight: !props.isDetailedPage ? '3em' : '6em'
                         }} />
