@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import type { API, Branch, Ref, Remote } from 'git';
 import * as vscode from 'vscode';
-import type { API, Branch, Ref, Remote } from '../../@types/git';
 
 const GIT_EXTENSION_ID = 'vscode.git';
 

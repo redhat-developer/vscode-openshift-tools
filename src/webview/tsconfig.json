@@ -6,8 +6,8 @@
         "target": "es6",
         "jsx": "react",
         "typeRoots": [
+            "@types",
             "../../node_modules/@types",
-            "@types"
         ],
         "experimentalDecorators": true,
         "skipLibCheck": true,
@@ -16,6 +16,8 @@
         "incremental": true,
     },
     "include": [
+        "@types/**/*.d.ts",
+        "../../src/@types/**/*.d.ts",
         "*/app/**/*.ts",
         "*/app/**/*.tsx",
         "common/*.tsx",

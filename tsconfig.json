@@ -8,8 +8,11 @@
             "es6",
             "dom"
         ],
+        "types": ["node", "vscode", "mocha"],
         "typeRoots": [
-            "./src/@types"
+            "src/@types",
+            "src/webview/@types",
+            "node_modules/@types"
         ],
         "sourceMap": true,
         "rootDir": ".",
@@ -17,18 +20,27 @@
         /* Strict Type-Checking Option */
         "strict": false,   /* enable all strict type-checking options */
         /* Additional Checks */
-        "noUnusedLocals": true, /* Report errors on unused locals. */
+        "noUnusedLocals": false, // Let eslint process this
+        "noUnusedParameters": false, // Let eslint process this
         // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
         // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-        // "noUnusedParameters": true,  /* Report errors on unused parameters. */
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "incremental": true
     },
+    "include": [
+        "src/@types/**/*.d.ts",
+        "src/webview/@types/**/*.d.ts",
+        "build/**/*",
+        "src/**/*",
+        "test/**/*"
+    ],
     "exclude": [
         "node_modules",
         ".vscode-test",
+        "coverage",
+        ".nyc_output",
         "test-resources",
         "src/webview/cluster/app",
         "src/webview/create-service/app",
