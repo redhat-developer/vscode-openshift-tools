@@ -143,6 +143,8 @@ export default [
           'vars': 'local',
           'args': 'none', // Check args after they're used
           'caughtErrors': 'none', // Disable checking for caught errors
+          'varsIgnorePattern': '^_',
+          "argsIgnorePattern": "^_",
         }
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -173,9 +175,10 @@ export default [
       'out',
       '.vscode-test',
       '.yarn',
+      '.*',
       'images',
       'doc/images',
-      '__coverage__',
+      '.nyc_output',
       'coverage',
       'public/dist',
       '*.min.js',

@@ -64,14 +64,62 @@
 		"bundle-tools": "ts-node ./build/bundle-tools.ts --platform",
 		"todo": "leasot **/*.ts --ignore node_modules -x",
 		"test:prepare": "npm install && npm run build",
-		"test": "npm run test:prepare && node ./out/build/install-vscode.js && node ./out/build/run-tests.js unit",
+		"test": "npm run test:prepare && node ./out/build/install-vscode.js && NODE_DEBUG=all node ./out/build/run-tests.js unit",
 		"test-integration": "npm run test:prepare && node ./out/build/run-tests.js integration",
 		"test-integration:coverage": "npm run test:prepare && npm run test:instrument && node ./out/build/run-tests.js integration",
-		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
-		"test:coverage": "npm run build && npm run test:instrument && node ./out/build/install-vscode.js && node ./out/build/run-tests.js unit",
+		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && node ./out/build/run-instrument.js",
+		"test:instrument-nyc": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && nyc instrument --complete-copy --embed-source --output out/src out/src-orig",
+		"test:coverage": "npm run test:prepare && npm run test:instrument && COVERAGE=true nyc --cwd ./ --require ts-node/register --extension .ts --reporter=lcov --reporter=text-summary node -r ts-node/register ./out/build/run-tests.js unit",
 		"build": "npm run clean && npm run lint && npm run compile && npm run bundle-tools",
 		"cluster-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max",
 		"public-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max"
+	},
+	"nyc": {
+		"include": [
+			"out/src/**/*",
+			"out/buid/**/*",
+			"out/test/**/*",
+			"src/**/*",
+			"build/**.*",
+			"test/**/*",
+			"out/src/webview/cluster/clusterViewLoader.js",
+			"out/src/webview/create-component/createComponentLoader.js",
+			"out/src/webview/create-deployment/createDeploymentLoader.js",
+			"out/src/webview/create-route/createRouteViewLoader.js",
+			"out/src/webview/create-service/createServiceViewLoader.js",
+			"out/src/webview/devfile-registry/registryViewLoader.js",
+			"out/src/webview/feedback/feedbackLoader.js",
+			"out/src/webview/helm-chart/helmChartLoader.js",
+			"out/src/webview/helm-manage-repository/manageRepositoryLoader.js",
+			"out/src/webview/invoke-serverless-function/invokeServerlessFunctionLoader.js",
+			"out/src/webview/openshift-terminal/openShiftTerminal.js",
+			"out/src/webview/serverless-function/serverlessFunctionLoader.js",
+			"out/src/webview/serverless-manage-repository/manageRepositoryLoader.js",
+			"out/src/webview/welcome/welcomeViewLoader.js"
+		],
+		"exclude": [
+			"**/node_modules/**",
+			"src/@types/**/*.d.ts",
+			"src/webview/@types/**/*.d.ts",
+			".vscode-test",
+			"test-resources",
+			"src/webview/**",
+			"out/src/webview/**"
+		],
+		"extension": [".ts", ".js"],
+		"require": [
+			"ts-node/register"
+		],
+		"reporter": [
+			"html",
+			"text",
+			"cobertura",
+			"json",
+			"lcov",
+			"text-summary"
+		],
+		"all": true,
+		"check-coverage": true
 	},
 	"dependencies": {
 		"shelljs": "^0.8.5"
@@ -147,7 +195,6 @@
 		"glob": "^11.0.1",
 		"got": "^11.8.6",
 		"hasha": "^5.2.2",
-		"istanbul": "^0.4.5",
 		"json-schema": "^0.4.0",
 		"json-to-ast": "^2.1.0",
 		"js-yaml": "^4.1.0",
@@ -157,6 +204,7 @@
 		"mocha": "^11.1.0",
 		"node-yaml-parser": "^0.0.9",
 		"npm-run-all": "^4.1.5",
+		"nyc": "^17.1.0",
 		"portfinder": "^1.0.33",
 		"prettier": "^3.5.3",
 		"pretty-bytes": "^6.1.1",
