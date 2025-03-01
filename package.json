@@ -98,7 +98,7 @@
 		"@types/express": "^5.0.0",
 		"@types/fs-extra": "^11.0.4",
 		"@types/git-url-parse": "^9.0.3",
-		"@types/lodash": "^4.17.15",
+		"@types/lodash": "^4.17.16",
 		"@types/mocha": "^10.0.10",
 		"@types/node": "^18.19.76",
 		"@types/proxyquire": "^1.3.31",
