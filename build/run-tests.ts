@@ -18,6 +18,21 @@ async function main(): Promise<void> {
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
     const integrationWorkspacePath = path.resolve(extensionRootPath, 'test', 'fixtures', 'components', 'components.code-workspace');
     const unitTestWorkspacePath = path.resolve(extensionRootPath, 'test', 'fixtures', 'components', 'empty.code-workspace');
+
+    // On some environments, the Mocha reporters do not make amy output to the console when running tests locally if
+    // tests are invoked without '--verbose' argument. Set the VERBOSE environment variable to any positive boolean value ('true', or 'yes')
+    // before running the tests to make tests to report to the console, for example:
+    // ```
+    // $ export VERBOSE=true
+    // $ npm test
+    // ```
+    // or
+    // ```
+    // $ VERBOSE=yes npm test
+    // ```
+    //
+    const boolPattern = /^(true|1|yes)$/i;
+    const verbose = boolPattern.test(process.env.VERBOSE);
     try {
         await etest.runTests({
             extensionDevelopmentPath,
@@ -25,6 +40,7 @@ async function main(): Promise<void> {
             launchArgs: [
                 tests === 'integration' ? integrationWorkspacePath : unitTestWorkspacePath,
                 '--disable-workspace-trust',
+                verbose ? '--verbose' : ''
             ],
         });
     } catch (err) {

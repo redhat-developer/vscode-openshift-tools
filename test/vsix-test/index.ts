@@ -9,7 +9,7 @@ import Mocha from 'mocha';
 import * as paths from 'path';
 
 const config: Mocha.MochaOptions = {
-    reporter: 'xunit',
+    reporter: 'spec',
     ui: 'tdd',
     timeout: 15000,
     color: true
