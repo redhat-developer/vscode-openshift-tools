@@ -14,7 +14,7 @@ sourceMapSupport.install();
 
 
 const config: Mocha.MochaOptions = {
-    reporter: 'xunit',
+    reporter: 'spec',
     ui: 'tdd',
     timeout: 60000,
     color: true,

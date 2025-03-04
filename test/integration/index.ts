@@ -13,7 +13,14 @@ import { CoverageRunner, TestRunnerOptions } from '../coverage';
 sourceMapSupport.install();
 
 const config: Mocha.MochaOptions = {
-    reporter: 'xunit',
+    // Previously used reporter ('mocha-jenkins-reporter') has been removed as deprecated.
+    // We're currently not using Jenkins, but if needed, it's probably better to use `xunit` reporter instead
+    // when we're testing on Jenkins. Also, probably this will need an adoption on how the test report is to be
+    // stored on Jenkins (something like `reporterOptions: { output: 'report.xml' }` is to be added to MochaOptions
+    // in order to output xunit results to the file to be processed on Jenkins).
+    //
+    // reporter: process.env.JUNIT_REPORT_PATH ? 'mocha-jenkins-reporter' : 'spec',
+    reporter: 'spec',
     ui: 'tdd',
     timeout: 120000,
     color: true,
