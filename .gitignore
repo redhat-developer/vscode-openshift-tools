@@ -10,4 +10,4 @@ dist/
 public/
 test-resources/
 .DS_Store
-
+.nyc_output/
