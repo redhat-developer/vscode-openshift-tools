@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
+import * as fs from 'fs-extra';
+import * as yml from 'js-yaml';
 import {
     ActivityBar,
     EditorView,
@@ -13,18 +15,17 @@ import {
     TreeItem,
     VSBrowser,
     ViewSection,
+    WelcomeContentButton,
     Workbench,
-    before,
-    beforeEach,
     after,
+    before,
+    beforeEach
 } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
 import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
-import { collapse } from '../common/overdrives';
 import { addKubeContext, getKubeConfigContent, getKubeConfigPath } from '../common/kubeConfigUtils';
-import * as fs from 'fs-extra';
-import * as yml from 'js-yaml';
+import { collapse } from '../common/overdrives';
 
 export function kubernetesContextTest(isOpenshiftCluster: boolean) {
     describe('Kubernetes Context', function () {
@@ -35,6 +36,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         let explorer: ViewSection;
 
         let quickPicks: QuickPickItem[];
+        const allQuickPicksLabels: string[] = [];
         const allQuickPicksTexts: string[] = [];
 
         const kubeCopy = `${getKubeConfigPath()}-cp`;
@@ -95,7 +97,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             await explorer.expand();
 
             const welcomeContent = await explorer.findWelcomeContent();
-            const buttons = await welcomeContent.getButtons();
+            const buttons: WelcomeContentButton[] = await welcomeContent.getButtons();
             const contextButton = buttons[1];
 
             await contextButton.click();
@@ -106,14 +108,19 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             expect(quickPicks).is.not.empty;
 
             for (let i = 0; i < quickPicks.length; i++) {
+                allQuickPicksLabels[i] = await quickPicks[i].getLabel();
                 allQuickPicksTexts[i] = await quickPicks[i].getText();
             }
 
             const quickPickText = allQuickPicksTexts[0];
-            const project = quickPickText.match(/\w+/)[0];
-            const projectName = project.split('on')[0];
 
-            await inputBox.selectQuickPick(projectName);
+            // Find project name for QuickPick Item #0
+            // Example quickPick text: [... Project: test-namespace, User: kind-kind]
+            const project = quickPickText.split(',')[0]; // Left: [... Project: test-namespace]
+            const projectName = project.split(':')[1].trim(); // Left [test-namespace]
+
+            // Select QuickPick Item #0
+            await inputBox.selectQuickPick(allQuickPicksLabels[0]);
 
             if (isOpenshiftCluster) {
                 inputBox = await InputBox.create();
@@ -122,6 +129,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
                 await inputBox.confirm();
             }
 
+            // Check project name appeared on the App. Tree
             const clusterNode = (await itemExists(clusterName, explorer)) as TreeItem;
             await clusterNode.expand();
             await itemExists(projectName, explorer);
@@ -130,8 +138,10 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         it('Switch context', async function () {
             this.timeout(20_000);
 
-            const quickPickText = allQuickPicksTexts[1];
-            const projectName = quickPickText.split('on')[0];
+            const quickPickText = allQuickPicksTexts[1]; // Use the second context of two
+            // Example quickPick text: [... Project: test-namespace, User: kind-kind]
+            const project = quickPickText.split(',')[0]; // Left: [... Project: test-namespace]
+            const projectName = project.split(':')[1].trim(); // Left [test-namespace]
 
             await collapse(explorer);
             await explorer.expand();
@@ -140,7 +150,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             await action.click();
 
             const inputBox = await InputBox.create();
-            await inputBox.selectQuickPick(projectName);
+            await inputBox.selectQuickPick(allQuickPicksLabels[1]); // Swtich to the second context of two
 
             await itemExists(projectName, explorer);
         });

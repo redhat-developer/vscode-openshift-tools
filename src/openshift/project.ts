@@ -7,7 +7,7 @@ import { KubernetesObject } from '@kubernetes/client-node';
 import { Disposable, commands, window } from 'vscode';
 import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
-import { KubeConfigUtils, getNamespaceKind } from '../util/kubeUtils';
+import { KubeConfigInfo, getNamespaceKind } from '../util/kubeUtils';
 import { Progress } from '../util/progress';
 import { VsCommandError, vsCommand } from '../vscommand';
 import OpenShiftItem from './openshiftItem';
@@ -83,8 +83,8 @@ export class Project extends OpenShiftItem implements Disposable {
         projectName = projectName.trim();
         return Oc.Instance.createProject(projectName)
             .then(() => {
-                const kcu = new KubeConfigUtils();
-                const currentContext = kcu.findContext(kcu.currentContext);
+                const k8sConfigInfo = new KubeConfigInfo();
+                const currentContext = k8sConfigInfo.findContext(k8sConfigInfo.getEffectiveKubeConfig().currentContext);
                 if (currentContext && projectName === currentContext.namespace) {
                     // We have to force refresh on App Explorer in case of the new project name
                     // is the same as the one set in current context (active project) because,

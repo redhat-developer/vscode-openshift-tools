@@ -6,18 +6,20 @@
 import { Context, KubernetesObject } from '@kubernetes/client-node';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as tmp from 'tmp';
 import {
+    commands,
     Disposable,
     Event,
     EventEmitter,
+    extensions,
+    TextDocumentShowOptions,
     ThemeIcon,
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
     TreeView,
     Uri,
-    commands,
-    extensions,
     version,
     window,
     workspace
@@ -31,7 +33,7 @@ import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs, getServices } from './openshift/serviceHelpers';
 import { PortForward } from './port-forward';
-import { KubeConfigUtils, getKubeConfigFiles, getNamespaceKind, isOpenShiftCluster } from './util/kubeUtils';
+import { getKubeConfigFiles, getNamespaceKind, isOpenShiftCluster, KubeConfigInfo } from './util/kubeUtils';
 import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
@@ -106,7 +108,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private kubeConfigWatchers: FileContentChangeNotifier[];
     private kubeContext: Context;
-    private kubeConfig: KubeConfigUtils;
+    private kubeConfigInfo: KubeConfigInfo;
 
     private executionContext: ExecutionContext = new ExecutionContext();
 
@@ -120,8 +122,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private constructor() {
         try {
-            this.kubeConfig = new KubeConfigUtils();
-            this.kubeContext = this.kubeConfig.getContextObject(this.kubeConfig.currentContext);
+            this.kubeConfigInfo = new KubeConfigInfo();
+            this.kubeContext = this.kubeConfigInfo.getEffectiveKubeConfig().getContextObject(this.kubeConfigInfo.getEffectiveKubeConfig().currentContext);
         } catch {
             // ignore config loading error and let odo report it on first call
         }
@@ -137,17 +139,18 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         }
         for (const fsw of this.kubeConfigWatchers) {
             fsw.emitter?.on('file-changed', () => {
-                const ku2 = new KubeConfigUtils();
-                const newCtx = ku2.getContextObject(ku2.currentContext);
+                const kci2 = new KubeConfigInfo();
+                const kc2 = kci2.getEffectiveKubeConfig();
+                const newCtx = kc2.getContextObject(kc2.currentContext);
                 if (Boolean(this.kubeContext) !== Boolean(newCtx)
-                    || (this.kubeContext.cluster !== newCtx.cluster
-                        || this.kubeContext.user !== newCtx.user
-                        || this.kubeContext.namespace !== newCtx.namespace)) {
+                    || (this.kubeContext?.cluster !== newCtx?.cluster
+                        || this.kubeContext?.user !== newCtx?.user
+                        || this.kubeContext?.namespace !== newCtx?.namespace)) {
                     this.refresh();
                     this.onDidChangeContextEmitter.fire(newCtx?.name); // newCtx can be 'null'
                 }
                 this.kubeContext = newCtx;
-                this.kubeConfig = ku2;
+                this.kubeConfigInfo = kci2;
             });
         }
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
@@ -202,7 +205,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             void commands.executeCommand('setContext', 'isLoggedIn', true);
             return {
                 contextValue: 'openshift.k8sContext',
-                label: this.kubeConfig.getCluster(element.cluster)?.server,
+                label: this.kubeConfigInfo.getEffectiveKubeConfig().getCluster(element.cluster)?.server,
                 collapsibleState: TreeItemCollapsibleState.Collapsed,
                 iconPath: imagePath('context/cluster-node.png')
             };
@@ -466,7 +469,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             } catch {
                 // ignore because ether server is not accessible or user is logged out
             }
-            OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(new KubeConfigUtils().currentContext);
+            OpenShiftExplorer.getInstance().onDidChangeContextEmitter.fire(this.kubeConfigInfo.getEffectiveKubeConfig().currentContext);
         } else if ('name' in element) { // we are dealing with context here
             // user is logged into cluster from current context
             // and project should be shown as child node of current context
@@ -494,7 +497,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     },
                 } as KubernetesObject]
             } else {
-                const projectName = this.kubeConfig.extractProjectNameFromCurrentContext() || 'default';
+                const projectName = this.kubeConfigInfo.extractProjectNameFromCurrentContext() || 'default';
                 result = [await createOrSetProjectItem(projectName, this.executionContext)];
             }
 
@@ -544,7 +547,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             try {
                 return this.getPods(element);
             } catch {
-                return [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
+                return [ couldNotGetItem(element.kind, this.kubeConfigInfo.getEffectiveKubeConfig().getCluster(this.kubeContext.cluster)?.server) ];
             }
         } else if ('kind' in element && element.kind === 'project') {
             const deployments = {
@@ -651,7 +654,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     try {
                         collections = await Oc.Instance.getKubernetesObjects(element.kind, undefined, undefined, this.executionContext);
                     } catch {
-                        collections = [ couldNotGetItem(element.kind, this.kubeConfig.getCluster(this.kubeContext.cluster)?.server) ];
+                        collections = [ couldNotGetItem(element.kind, this.kubeConfigInfo.getEffectiveKubeConfig().getCluster(this.kubeContext.cluster)?.server) ];
                     }
                     break;
             }
@@ -871,5 +874,29 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             `Extension version: ${packageJSON.version}`,
         ].join('\n');
         return `${packageJSON.bugs}/new?labels=kind/bug&title=&body=**Environment**\n${body}\n**Description**`;
+    }
+
+    @vsCommand('openshift.explorer.describe.kubeconfig', true)
+    static async describeEffectiveConfig(): Promise<void> {
+        const k8sConfig: string = new KubeConfigInfo().dumpEffectiveKubeConfig();
+        const tempK8sConfigFile = await new Promise<string>((resolve, reject) => {
+            tmp.file({ prefix: 'effective.config' ,postfix: '.yaml' }, (err, name) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(name);
+            });
+        });
+        fs.writeFileSync(tempK8sConfigFile, k8sConfig, 'utf-8')
+        fs.chmodSync(tempK8sConfigFile, 0o400);
+        const fileUri = Uri.parse(tempK8sConfigFile);
+        window.showTextDocument(fileUri, { preview: true, readOnly: true } as TextDocumentShowOptions);
+        const onCloseSubscription = workspace.onDidCloseTextDocument((closedDoc) => {
+            if (closedDoc.uri.toString() === fileUri.toString()) {
+                fs.chmodSync(tempK8sConfigFile, 0o600);
+                fs.unlinkSync(tempK8sConfigFile);
+                onCloseSubscription.dispose();
+            }
+        });
     }
 }

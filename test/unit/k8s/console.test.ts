@@ -9,7 +9,7 @@ import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { Console } from '../../../src/k8s/console';
-import { KubeConfigUtils } from '../../../src/util/kubeUtils';
+import { KubeConfigInfo } from '../../../src/util/kubeUtils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -19,7 +19,8 @@ suite('K8s/console', () => {
     let cliExecStub: sinon.SinonStub;
     let commandStub: any;
 
-    const k8sConfig = new KubeConfigUtils();
+    const k8sConfigInfo = new KubeConfigInfo();
+    const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
     const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
 
     const context = {

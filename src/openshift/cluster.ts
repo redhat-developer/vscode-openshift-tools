@@ -6,7 +6,7 @@
 import { CoreV1Api, KubeConfig, KubernetesObject, V1Secret, V1ServiceAccount } from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import * as https from 'https';
-import { Disposable, ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
+import { Disposable, ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, QuickPickItemKind, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
@@ -16,10 +16,11 @@ import * as NameValidator from '../openshift/nameValidator';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { inputValue, quickBtn } from '../util/inputValue';
-import { KubeConfigUtils } from '../util/kubeUtils';
+import { KubeConfigInfo, extractProjectNameFromContextName } from '../util/kubeUtils';
 import { LoginUtil } from '../util/loginUtil';
 import { Platform } from '../util/platform';
 import { Progress } from '../util/progress';
+import { imagePath } from '../util/utils';
 import { VsCommandError, vsCommand } from '../vscommand';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired } from './openshiftItem';
@@ -174,8 +175,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
     }
 
     private static getProjectLabel(ctx: KcuContext): string {
-        const k8sConfig = new KubeConfigUtils();
-        const pn = k8sConfig.extractProjectNameFromContextName(ctx.name) || '';
+        const pn = extractProjectNameFromContextName(ctx.name) || '';
         const ns = ctx.namespace || pn;
         let label = ns.length > 0 ? ns : '[default]';
         if (ns !== pn && pn.length > 0) label = `${label} (${pn})`;
@@ -209,33 +209,72 @@ export class Cluster extends OpenShiftItem implements Disposable {
 
     static async switchContextInternal(abortController?: AbortController): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            const k8sConfig = new KubeConfigUtils();
-            const contexts = k8sConfig.contexts.filter(
-                (item) => item.name !== k8sConfig.currentContext,
-            );
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItemExt[] = contexts
-            .map((ctx) => {
-                return {
-                        ...ctx,
-                        label: Cluster.getProjectLabel(ctx)
-                    }
-            })
-            .map((ctx) => ({
-                name: `${ctx.name}`,
-                cluster: `${ctx.cluster}`,
-                user: `${ctx.user}`,
-                namespace: `${ctx.namespace}`,
-                label: `${ctx.label}`,
-                description: `on ${ctx.cluster}`,
-                detail: `User: ${ctx.user}`,
-                buttons: [deleteBtn],
-            }));
-            quickPick.items = contextNames;
+
+            const k8sConfigInfo = new KubeConfigInfo();
+            const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+            const contextEntries = [...k8sConfigInfo.getContextMap()];
+            const contextItems: any[] = []; // Will contain QuickPickItem properties plus some additional ones
+
+            const currentCtxPaths = contextEntries.filter(([key, value]) => value.find((c) => c.name === k8sConfig.currentContext)).map(([key, value]) => key);
+
+            // Show first the items that come from the config that defines the current context
+            contextEntries.filter(([key, value]) => currentCtxPaths.length > 0 && currentCtxPaths.find((p) => p === key)).forEach(([key, value]) => {
+                contextItems.push( {kind: QuickPickItemKind.Separator, label: key});
+                // Show the current context first
+                value.filter((ctx) => ctx.name === k8sConfig.currentContext).forEach((ctx) => {
+                    contextItems.push( {
+                        label: ctx.name,
+                        cluster: `${ctx.cluster}`,
+                        user: `${ctx.user}`,
+                        namespace: `${ctx.namespace}`,
+                        description: `on ${ctx.cluster}`,
+                        detail: `Current Context: Project: ${Cluster.getProjectLabel(ctx)}, User: ${ctx.user}`,
+                        iconPath: new ThemeIcon('layers-active'),
+                        picked: true
+                    });
+                });
+                // Show the rest contexts from the same config
+                value.filter((ctx) => ctx.name !== k8sConfig.currentContext).forEach((ctx) => {
+                    contextItems.push( {
+                        label: ctx.name,
+                        cluster: `${ctx.cluster}`,
+                        user: `${ctx.user}`,
+                        namespace: `${ctx.namespace}`,
+                        description: `on ${ctx.cluster}`,
+                        detail: `Project: ${Cluster.getProjectLabel(ctx)}, User: ${ctx.user}`,
+                        buttons: [deleteBtn],
+                        iconPath: new ThemeIcon('layers'),
+                        picked: false
+                    });
+                });
+            });
+            // Show the rest items
+            contextEntries.filter(([key, value]) => currentCtxPaths.length === 0 || currentCtxPaths?.find((p) => p !== key)).forEach(([key, value]) => {
+                contextItems.push( {kind: QuickPickItemKind.Separator, label: key});
+                value.forEach((ctx) => {
+                    contextItems.push( {
+                        label: ctx.name,
+                        cluster: `${ctx.cluster}`,
+                        user: `${ctx.user}`,
+                        namespace: `${ctx.namespace}`,
+                        description: `on ${ctx.cluster}`,
+                        detail: `Project: ${Cluster.getProjectLabel(ctx)}, User: ${ctx.user}`,
+                        buttons: [deleteBtn],
+                        iconPath: new ThemeIcon('layers'),
+                        picked: false
+                    });
+                });
+            });
+
+            quickPick.items = contextItems;
+            quickPick.matchOnDetail = true;
+            quickPick.matchOnDescription = true;
+
             const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
             quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
-            if (contextNames.length === 0) {
+            if (contextItems.length === 0) {
                 void window
                     .showInformationMessage(
                         'You have no Kubernetes contexts yet, please login to a cluster.',
@@ -258,15 +297,23 @@ export class Cluster extends OpenShiftItem implements Disposable {
                     const choice = selection[0] as QuickPickItemExt;
                     hideDisposable.dispose();
                     quickPick.hide();
-                    Oc.Instance.setContext(choice.name)
+                    if (choice.label === k8sConfig.currentContext) {
+                        const currentContext = k8sConfigInfo.findContext(k8sConfig.currentContext);
+                        const pr = currentContext ? Cluster.getProjectLabel(currentContext) : 'not defined';
+                        const cl = currentContext ? currentContext.cluster : 'not defined';
+                        const msg = `You've already switched to context '${k8sConfig.currentContext}' with project '${pr}' on cluster '${cl}'.`;
+                        void window.showWarningMessage(msg);
+                        // resolve(msg);
+                    }
+                    Oc.Instance.setContext(choice.label)
                         .then(async () => {
-                            const clusterURL = k8sConfig.findClusterURL(choice.cluster);
+                            const clusterURL = k8sConfigInfo.findClusterURL(choice.cluster);
                             if (await LoginUtil.Instance.requireLogin(clusterURL)) {
-                                const status = await Cluster.login(choice.name, true, abortController);
+                                const status = await Cluster.login(choice.label, true, abortController);
                                 if (status) {
-                                    const newKcu = new KubeConfigUtils(); // Can be updated after login
+                                    const newConfigInfo = new KubeConfigInfo(); // Can be updated after login
                                     if (Cluster.isSandboxCluster(clusterURL)
-                                            && !newKcu.equalsToCurrentContext(choice.name, choice.cluster, choice.namespace, choice.user)) {
+                                            && !newConfigInfo.equalsToCurrentContext(choice.name, choice.cluster, choice.namespace, choice.user)) {
                                         await window.showWarningMessage(
                                             'The cluster appears to be a OpenShift Dev Sandbox cluster, \
                                             but the required project doesn\'t appear to be existing. \
@@ -276,11 +323,11 @@ export class Cluster extends OpenShiftItem implements Disposable {
                                     }
                                 }
                             }
-                            const kcu = new KubeConfigUtils();
-                            const currentContext = kcu.findContext(kcu.currentContext);
-                            const pr = currentContext ? Cluster.getProjectLabel(currentContext) : choice.label;
-                            const cl = currentContext ? currentContext.cluster : choice.description;
-                            resolve(`Cluster context is changed to ${pr} on ${cl}.`);
+                            const kci = new KubeConfigInfo();
+                            const currentContext = kci.findContext(kci.getEffectiveKubeConfig().currentContext);
+                            const pr = currentContext ? Cluster.getProjectLabel(currentContext) : 'not defined';
+                            const cl = currentContext ? currentContext.cluster : 'not defined';
+                            resolve(`Cluster context is changed to '${currentContext.name}' with project '${pr}' on cluster '${cl}'.`);
                         })
                         .catch(reject);
                 });
@@ -292,9 +339,8 @@ export class Cluster extends OpenShiftItem implements Disposable {
                         await window.showInformationMessage(`Do you want to delete '${event.item.label}' Context from Kubernetes configuration?`, 'Yes', 'No')
                             .then((command: string) => {
                                 if (command === 'Yes') {
-                                    const context = k8sConfig.getContextObject(event.item.label);
-                                    const index = contexts.indexOf(context);
-                                    if (index > -1) {
+                                    const context = k8sConfigInfo.findContext((event.item as any).name);
+                                    if (context) {
                                         Oc.Instance.deleteContext(context.name)
                                             .then(() => resolve(`Context ${context.name} deleted.`))
                                             .catch(reject);
@@ -318,22 +364,67 @@ export class Cluster extends OpenShiftItem implements Disposable {
 
     private static async showQuickPick(clusterURl: string, abortController?: AbortController): Promise<string> {
         return new Promise<string | null>((resolve, reject) => {
-            const k8sConfig = new KubeConfigUtils();
             const deleteBtn = new quickBtn(new ThemeIcon('trash'), 'Delete');
             const createUrl: QuickPickItem = { label: '$(plus) Provide new URL...' };
-            const clusterItems = k8sConfig.getServers();
             const quickPick = window.createQuickPick();
-            const contextNames: QuickPickItem[] = clusterItems.map((ctx) => ({
-                ...ctx,
-                buttons: ctx.description ? [] : [deleteBtn],
-            }));
-            quickPick.items = [createUrl, ...contextNames];
+
+            const k8sConfigInfo = new KubeConfigInfo();
+            const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+            const clusterEntries = [...k8sConfigInfo.getClusterMap()];
+            const currentCluster = k8sConfig.getCurrentCluster();
+            const clusterItems: any[] = []; // Will contain QuickPickItem properties plus some additional ones
+
+            const currentClusterPaths = currentCluster ? clusterEntries.filter(([key, value]) => value.find((c) => c.name === currentCluster.name)).map(([key, value]) => key) : [];
+
+            // Show first the items that come from the config that defines the current cluster
+            clusterEntries.filter(([key, value]) => currentClusterPaths.length > 0 && currentClusterPaths.find((p) => p === key)).forEach(([key, value]) => {
+                clusterItems.push( {kind: QuickPickItemKind.Separator, label: key});
+                // Show the current cluster first
+                value.filter((cluster) => cluster.name === currentCluster.name).forEach((c) => {
+                    clusterItems.push( {
+                        label: c.name,
+                        server: c.server,
+                        detail: `Current Server: ${c.server}`,
+                        iconPath: imagePath('context/cluster-node.png'),
+                        picked: true
+                    });
+                });
+                // Show the rest contexts from the same config
+                value.filter((cluster) => cluster.name !== currentCluster.name).forEach((c) => {
+                    clusterItems.push( {
+                        label: c.name,
+                        server: c.server,
+                        detail: `Server: ${c.server}`,
+                        iconPath: imagePath('context/cluster-node-gray.png'),
+                        picked: false
+                    });
+                });
+            });
+            // Show the rest items
+            clusterEntries.filter(([key, value]) => currentClusterPaths.length === 0 || currentClusterPaths.find((p) => p !== key)).forEach(([key, value]) => {
+                clusterItems.push( {kind: QuickPickItemKind.Separator, label: key});
+                value.forEach((c) => {
+                    clusterItems.push( {
+                        label: c.name,
+                        server: c.server,
+                        // description: `on ${ctx.cluster}`,
+                        detail: `Server: ${c.server}`,
+                        iconPath: imagePath('context/cluster-node-gray.png'),
+                        picked: false
+                    });
+                });
+            });
+
+            quickPick.items = [createUrl, ...clusterItems];
+            quickPick.matchOnDetail = true;
+            quickPick.matchOnDescription = true;
+
             const cancelBtn = new quickBtn(new ThemeIcon('close'), 'Cancel');
             quickPick.buttons = [QuickInputButtons.Back, cancelBtn];
             let selection: readonly QuickPickItem[] | undefined;
             const hideDisposable = quickPick.onDidHide(() => resolve(null));
             quickPick.onDidAccept(async () => {
-                const choice = selection[0];
+                const choice = selection[0] as any;
                 hideDisposable.dispose();
                 quickPick.hide();
                 if (choice.label === createUrl.label) {
@@ -344,7 +435,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
                     else if (!newURL) resolve(await Cluster.showQuickPick(clusterURl, abortController)); // Back
                     else resolve(newURL);
                 } else {
-                    resolve(choice.label);
+                    resolve(choice.server);
                 }
             });
             quickPick.onDidChangeSelection((selects) => {
@@ -496,18 +587,18 @@ export class Cluster extends OpenShiftItem implements Disposable {
      *      false in case we're already logged in
      */
     static async shouldAskForLoginCredentials(clusterURI: string, contextName?: string): Promise<boolean> {
-        const kcu = new KubeConfigUtils();
-        const cluster: KcuCluster = kcu.findCluster(clusterURI);
+        const kci = new KubeConfigInfo();
+        const cluster: KcuCluster = kci.findCluster(clusterURI);
         if (!cluster) return true;
 
-        let context: KcuContext = contextName && kcu.findContext(contextName);
+        let context: KcuContext = contextName && kci.findContext(contextName);
         if (!context || context.cluster !== context.cluster) {
-            context = kcu.findContextForCluster(cluster.name);
+            context = kci.findContextForCluster(cluster.name);
         }
         if (!context) return true;
 
         // Save `current-context`
-        const savedContext = kcu.currentContext;
+        const savedContext = kci.getEffectiveKubeConfig().currentContext;
         try {
             await Oc.Instance.setContext(context.name)
             return await LoginUtil.Instance.requireLogin(cluster.server)
@@ -547,7 +638,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
     private static async checkOngoingOperation(abortController: AbortController): Promise<boolean> {
         if (Cluster.ongoingOperationCanceller && Cluster.ongoingOperationCanceller !== abortController) {
             let response = 'Yes';
-            const cluster = new KubeConfigUtils().getCurrentCluster();
+            const cluster = new KubeConfigInfo().getEffectiveKubeConfig().getCurrentCluster();
             response = await window.showInformationMessage(
                 `You are already trying to login to ${cluster ? cluster.server : ''} cluster. Do you want to login to cancel and try again?`,
                 'Yes',
@@ -588,7 +679,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
             }).on('success', (s) => {
                 resolve(true);
             });
-    });
+        });
     }
 
     /**
@@ -604,9 +695,9 @@ export class Cluster extends OpenShiftItem implements Disposable {
         let clusterURL: string = undefined;
         if (context) {
             // If context is specified, we'll initialize clusterURL from it
-            const kcu = new KubeConfigUtils();
-            const ctx = kcu.findContext(context);
-            clusterURL = ctx && kcu.findClusterURL(ctx.cluster);
+            const kci = new KubeConfigInfo();
+            const ctx = kci.findContext(context);
+            clusterURL = ctx && kci.findClusterURL(ctx.cluster);
         }
 
         const localAbortController = abortController || new AbortController();
@@ -641,9 +732,9 @@ export class Cluster extends OpenShiftItem implements Disposable {
         let clusterURL: string;
         if (context) {
             // If context is specified, we'll initialize clusterURL from it
-            const kcu = new KubeConfigUtils();
-            const ctx = kcu.findContext(context);
-            clusterURL = ctx && kcu.findClusterURL(ctx.cluster);
+            const kci = new KubeConfigInfo();
+            const ctx = kci.findContext(context);
+            clusterURL = ctx && kci.findClusterURL(ctx.cluster);
         }
 
         enum Step {
@@ -702,8 +793,8 @@ export class Cluster extends OpenShiftItem implements Disposable {
                             }
 
                             // Stop trying because the cluster doesn't appear to be available
-                            void window.showWarningMessage(
-                                'Unable to contact the cluster. Is it running and accessible?',
+                            void window.showErrorMessage(
+                                `Unable to contact the cluster${ clusterURL && clusterURL.length > 0 ? `: "${clusterURL}"` : ''}. Is it running and accessible?`,
                             );
                             return null;
                         }
@@ -732,8 +823,8 @@ export class Cluster extends OpenShiftItem implements Disposable {
                 case Step.loginUsingCredentials: // Drop down
                 case Step.loginUsingToken: {
                     const successMessage: string = step === Step.loginUsingCredentials
-                        ? await Cluster.credentialsLogin(true, clusterURL, undefined, undefined, abortController)
-                            : await Cluster.tokenLogin(clusterURL, true, undefined, abortController);
+                        ? await Cluster.credentialsLogin(clusterURL, true, context, undefined, undefined, abortController)
+                            : await Cluster.tokenLogin(clusterURL, true, context, undefined, abortController);
 
                     if (successMessage === null) { // User cancelled the operation
                         return null;
@@ -754,7 +845,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
     private static async requestLoginConfirmation(skipConfirmation = false): Promise<string> {
         let response = 'Yes';
         if (!skipConfirmation && !(await LoginUtil.Instance.requireLogin())) {
-            const cluster = new KubeConfigUtils().getCurrentCluster();
+            const cluster = new KubeConfigInfo().getEffectiveKubeConfig().getCurrentCluster();
             response = await window.showInformationMessage(
                 `You are already logged into ${cluster.server} cluster. Do you want to login to a different cluster?`,
                 'Yes',
@@ -795,7 +886,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
     private static async getUserName(clusterURL: string, addUserLabel: string,
         abortController?: AbortController): Promise<string | null | undefined> {
         return new Promise<string | null | undefined>((resolve, reject) => {
-            const users = new KubeConfigUtils().getClusterUsers(clusterURL);
+            const users = new KubeConfigInfo().getClusterUsers(clusterURL);
             const addUser: QuickPickItem = { label: addUserLabel };
 
             const quickPick = window.createQuickPick();
@@ -832,8 +923,8 @@ export class Cluster extends OpenShiftItem implements Disposable {
     }
 
     @vsCommand('openshift.explorer.login.credentialsLogin')
-    static async credentialsLogin(skipConfirmation = false, userClusterUrl?: string, userName?: string, userPassword?: string,
-        abortController?: AbortController): Promise<string | null | undefined> {
+    static async credentialsLogin(userClusterUrl?: string, skipConfirmation = false, context?: string,
+        userName?: string, userPassword?: string, abortController?: AbortController): Promise<string | null | undefined> {
         let password: string;
         const response = await Cluster.requestLoginConfirmation(skipConfirmation);
 
@@ -922,7 +1013,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
         // If there is saved password for the username - read it
         password = await TokenStore.getItem('login', username);
         try {
-            await Oc.Instance.loginWithUsernamePassword(clusterURL, username, passwd, abortController);
+            await Oc.Instance.loginWithUsernamePassword(clusterURL, username, passwd, context, abortController);
             await Cluster.save(username, passwd, password);
             return await Cluster.loginMessage(clusterURL);
         } catch (error) {
@@ -971,6 +1062,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
     static async tokenLogin(
         userClusterUrl: string,
         skipConfirmation = false,
+        context?: string,
         userToken?: string,
         abortController?: AbortController
     ): Promise<string | null> {
@@ -1007,7 +1099,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
         }
 
         try {
-            await Oc.Instance.loginWithToken(clusterURL, ocToken, abortController);
+            await Oc.Instance.loginWithToken(clusterURL, ocToken, context, abortController);
             return Cluster.loginMessage(clusterURL);
         } catch (error) {
             if (abortController?.signal.aborted) return null;
@@ -1051,7 +1143,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
             }
             return;
         }
-        return Cluster.tokenLogin(apiEndpointUrl, true, clipboard);
+        return Cluster.tokenLogin(apiEndpointUrl, true, undefined, clipboard);
     }
 
     static async loginUsingClipboardInfo(dashboardUrl: string): Promise<string | null> {
@@ -1066,7 +1158,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
         }
         const url = NameValidator.clusterURL(clipboard);
         const token = NameValidator.getToken(clipboard);
-        return Cluster.tokenLogin(url, true, token);
+        return Cluster.tokenLogin(url, true, undefined, token);
     }
 
     static async loginMessage(clusterURL: string): Promise<string> {
@@ -1156,6 +1248,6 @@ export class Cluster extends OpenShiftItem implements Disposable {
         if (!pipelineToken) {
             return;
         }
-        return Cluster.tokenLogin(server, true, pipelineToken);
+        return Cluster.tokenLogin(server, true, kcu.currentContext, pipelineToken);
     }
 }

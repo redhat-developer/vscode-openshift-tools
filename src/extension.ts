@@ -40,7 +40,7 @@ import { ServerlessFunctionView } from './serverlessFunction/view';
 import { startTelemetry } from './telemetry';
 import { ToolsConfig } from './tools';
 import { TokenStore } from './util/credentialManager';
-import { getNamespaceKind, KubeConfigUtils, setKubeConfig } from './util/kubeUtils';
+import { getNamespaceKind, KubeConfigInfo } from './util/kubeUtils';
 import { setupWorkspaceDevfileContext } from './util/workspace';
 import { registerCommands } from './vscommand';
 import ClusterViewLoader from './webview/cluster/clusterViewLoader';
@@ -86,9 +86,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     // Link from resources to referenced resources
     const resourceLinkProvider = new KubernetesResourceLinkProvider();
-
-    // pick kube config in case multiple are configured
-    const setKubeConfigPromise = setKubeConfig();
 
     const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
     crcStatusItem.command = 'openshift.explorer.stopCluster';
@@ -276,8 +273,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
             updateContextStatusBarItem(activeNamespaceStatusBarItem, 'project-node', '', '', false);
         }
 
-        const kcu: KubeConfigUtils = new KubeConfigUtils();
-        const currentContext: KcuContext = kcu.findContext(context ? context : kcu.currentContext);
+        const k8sConfigInfo = new KubeConfigInfo();
+        const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+        const currentContext: KcuContext = k8sConfigInfo.findContext(context ? context : k8sConfig.currentContext);
         updateContextStatusBarItem(activeContextStatusBarItem, 'current-context', currentContext?.name, `${currentContext?.name}\nCluster: ${currentContext?.cluster}`,
             !isContextInfoStatusBarDisabled());
     }
@@ -297,9 +295,6 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     await verifyBinariesInRemoteContainer();
 
     void OdoPreference.Instance.getRegistries(); // Initializes '~/.odo/preference.json', if not initialized yet
-
-    // Wait for finishing Kube Config setup
-    await setKubeConfigPromise;
 
     return {
         verifyBundledBinaries
