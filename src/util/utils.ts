@@ -22,7 +22,13 @@ import { decompress as decompressOriginal } from 'targz';
  * @returns An absolute path to specified image
  */
 export function imagePath(imagePath: string): string {
-    return path.join(__dirname, '../../images/', imagePath);
+    // The module path can be either 'out/src/util' or 'out/util', so we should
+    // construct the path to 'images' as '.../.../.../images' or '../../images'
+    // according to the way the extension is executed.
+    //
+    let baseDir = path.join(__dirname, '..', '..');
+    baseDir = path.parse(baseDir).name === 'out' ? path.dirname(baseDir) : baseDir;
+    return path.join(baseDir, 'images', imagePath);
 }
 
 // The following wrappers are needed for unit tests due to

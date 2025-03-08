@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Cluster, Context, User } from '@kubernetes/client-node';
 import { KubernetesObject } from '@kubernetes/client-node/dist/types';
 import * as fs from 'fs/promises';
 import * as tmp from 'tmp';
@@ -10,7 +11,7 @@ import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel, ExecutionContext } from '../cli';
 import { CliExitData } from '../util/childProcessUtil';
-import { isOpenShiftCluster, KubeConfigUtils } from '../util/kubeUtils';
+import { isOpenShiftCluster, KubeConfigInfo, loadKubeConfig, serializeKubeConfig } from '../util/kubeUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
 
@@ -318,26 +319,18 @@ export class Oc {
      * @param clusterURL the URL of the cluster to log in to
      * @param username the username to use when logging in
      * @param password the password to use when logging in
+     * @param context the context to be altered, if specified
      * @param abortController if provided, allows cancelling the operation
      */
-    public async loginWithUsernamePassword(
-        clusterURL: string,
-        username: string,
-        password: string,
-        abortController?: AbortController
-    ): Promise<void> {
-        const options = abortController ? { signal: abortController.signal } : undefined;
-        const result = await CliChannel.getInstance().executeTool(
-            new CommandText('oc', `login ${clusterURL}`, [
-                new CommandOption('-u', username, true, true),
-                new CommandOption('-p', password, true, true),
-                new CommandOption('--insecure-skip-tls-verify'),
-            ]),
-            options
-        );
-        if (result.stderr) {
-            throw new Error(result.stderr);
-        }
+    public async loginWithUsernamePassword(clusterURL: string, username: string, password: string,
+        context?: string, abortController?: AbortController): Promise<void> {
+        const args: CommandOption[] = [
+            new CommandOption('-u', username, true, true),
+            new CommandOption('-p', password, true, true),
+            new CommandOption('--insecure-skip-tls-verify')
+        ];
+
+        await this.wrapLogin(clusterURL, args, context, abortController);
     }
 
     /**
@@ -345,31 +338,170 @@ export class Oc {
      *
      * @param clusterURL the URL of the cluster to log in to
      * @param token the token to use to log in to the cluster
+     * @param context the context to be altered, if specified
      * @param abortController if provided, allows cancelling the operation
      */
-    public async loginWithToken(clusterURL: string, token: string,
-        abortController?: AbortController): Promise<void> {
-        const options = abortController ? { signal: abortController.signal } : undefined;
-        const result = await CliChannel.getInstance().executeTool(
-            new CommandText('oc', `login ${clusterURL}`, [
-                new CommandOption('--token', token.trim()),
-                new CommandOption('--insecure-skip-tls-verify'),
-            ]),
-            options
-        );
-        if (result.stderr) {
-            throw new Error(result.stderr);
+    public async loginWithToken(clusterURL: string, token: string, context?: string, abortController?: AbortController): Promise<void> {
+        const args: CommandOption[] = [
+            new CommandOption('--token', token.trim()),
+            new CommandOption('--insecure-skip-tls-verify')
+        ];
+
+        await this.wrapLogin(clusterURL, args, context, abortController);
+    }
+
+    /**
+     * Executes 'oc login' using the given Cluster URL and the command options, altering the selected
+     * Kube config, if provided, or creating a new one (created by 'oc')
+     *
+     * @param clusterURL the URL of the cluster to log in to
+     * @param commandOptions A 'CommandOption` array for `oc login` command
+     * @param selectedContext [optional] A context to alter with the result of login operation
+     * @param abortController if provided, allows cancelling the operation
+     * @returns A Kube context name used in or created after successfull login.
+     */
+    private async wrapLogin(clusterURL: string, commandOptions: CommandOption[], selectedContext?: string, abortController?: AbortController): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            tmp.file(async (err, path, fd, cleanupCallback) => {
+                if (err) throw err;
+                try {
+                    const options = abortController ? { signal: abortController.signal } : undefined;
+
+                    // Find `--kubeconfig` Command Option and replace its value with the path to temporary config file
+                    const kcOptionIndex = commandOptions.findIndex((o) => o.name === '--kubeconfig');
+                    if (kcOptionIndex !== -1) {
+                        commandOptions.splice(kcOptionIndex, 1);
+                    }
+                    commandOptions.push(new CommandOption('--kubeconfig', path, true, true));
+
+                    const result = await CliChannel.getInstance().executeTool(new CommandText('oc', `login ${clusterURL}`, commandOptions), options);
+                    if (result.stderr) {
+                        throw new Error(result.stderr);
+                    }
+
+                    // Get the context/cluster/user objects from the temporary config created by 'oc login'
+                    const newConfig = loadKubeConfig(path);
+                    let newContext: Context = newConfig?.contexts?.find((c) => c.name === newConfig.currentContext);
+                    let newCluster: Cluster = newContext && newConfig?.clusters?.find((c) => c.name === newContext.cluster);
+                    let newUser: User = newContext && newConfig?.users?.find((u) => u.name === newContext.user);
+                    let newContextPath, newClusterPath, newUserPath;
+
+                    // Default path for the Kube config changes
+                    newContextPath = newClusterPath = newUserPath = KubeConfigInfo.getMainContextConfigPath();
+
+                    if (selectedContext) {
+                        // Get the context/cluster/user object mappings for the current context from the Kube config
+                        const k8cConfigInfo = new KubeConfigInfo();
+                        const [ selectedCtxPath, selectedCtx ] = [...k8cConfigInfo.getContextMap()].find(([key, values]) => values?.find((c) => c.name === selectedContext))
+                            || [undefined, undefined];
+                        if (selectedCtx && selectedCtx[0]) {
+                            const [ selectedClusterPath, selectedCluster] = [...k8cConfigInfo.getClusterMap()].find(([key, values]) => values?.find((c) => c.name === selectedCtx[0].cluster))
+                                || [undefined, undefined];
+
+                            if (selectedCluster && selectedCluster[0]) {
+                                newClusterPath = selectedClusterPath; // Change the path to save the cluster
+                                newCluster = { ...newCluster, name: selectedCtx[0].cluster }; // Replace the only cluster name in newContext
+                            } else {
+                                newClusterPath = selectedCtxPath; // If it's a new cluster, save it to the same config as context
+                            }
+
+                            const [ selectedUserPath, selectedUser ] =  [...k8cConfigInfo.getUserMap()].find(([key, values]) => values?.find((u) => u.name === selectedCtx[0].user))
+                                || [undefined, undefined];
+                            if (selectedUser && selectedUser[0]) {
+                                newUserPath = selectedUserPath; // Change the path to save the user
+                                newUser = { ...newUser, name: selectedCtx[0].user }; // Replace the only user name in newContext
+                            } else {
+                                newUserPath = selectedCtxPath; // If it's a new user, save it to the same config as context
+                            }
+
+                            // Update context with the new properties, leaving the others as they are (f.i., namespace property)
+                            newContextPath = selectedCtxPath; // Change the path to save the context
+                            newContext = { ...newContext, name: selectedCtx[0].name, cluster: newCluster.name, user: newUser.name};
+                        }
+                    }
+
+                    type ConfigChange = { context: Context, cluster: Cluster, user: User };
+
+                    // Group the Config items by Config paths so we can minimize file operations
+                    const configItemMap: Map<string, ConfigChange> = new Map<string, ConfigChange>();
+                    let item: ConfigChange = configItemMap.get(newContextPath) ; // This is an excessive as we're sure the map is empty gere
+                    configItemMap.set(newContextPath, { context: newContext, cluster: item?.cluster, user: item?.user });
+                    item = configItemMap.get(newClusterPath);
+                    configItemMap.set(newClusterPath, { context: item?.context, cluster: newCluster, user: item?.user });
+                    item = configItemMap.get(newUserPath);
+                    configItemMap.set(newUserPath, { context: item?.context, cluster: item?.cluster, user: newUser });
+
+                    // Save the changes
+                    for (const [key, value] of configItemMap.entries()) {
+                        await this.mergeOrAddConfigData(key, value?.context, value?.cluster, value?.user);
+                    }
+
+                    // Fix up for a newly created context: if no selectedContext was provided,
+                    // a new context might be created, so we have to switch current context to point
+                    // to that new context
+                    if (newContext.name !== selectedContext) {
+                        await this.setContext(newContext.name);
+                    }
+
+                    resolve(selectedContext);
+                } catch (_err) {
+                    reject(_err);
+                } finally {
+                    cleanupCallback();
+                }
+            });
+        });
+    }
+
+    private async mergeOrAddConfigData(configPath: string, context: Context, cluster: Cluster, user: User): Promise<void> {
+        const kubeConfig =loadKubeConfig(configPath);
+
+        // Merge or add Context
+        const modifiedContexts: Context[] = kubeConfig.contexts;
+        const contextIndex = modifiedContexts.findIndex((c) => c.name === context.name);
+        if (contextIndex !== -1) { // Remove existing context
+            modifiedContexts.splice(contextIndex, 1);
         }
+        modifiedContexts.unshift(context);
+        kubeConfig.contexts = modifiedContexts;
+
+        // Merge or add Cluster
+        const modifiedClusters: Cluster[] = kubeConfig.clusters;
+        const clusterIndex = modifiedClusters.findIndex((c) => c.name === cluster.name);
+        if (clusterIndex !== -1) { // Remove existing context
+            modifiedClusters.splice(clusterIndex, 1);
+        }
+        modifiedClusters.unshift(cluster);
+        kubeConfig.clusters = modifiedClusters;
+
+        // Merge or add User
+        const modifiedUsers: User[] = kubeConfig.users;
+        const userIndex = modifiedUsers.findIndex((c) => c.name === user.name);
+        if (userIndex !== -1) { // Remove existing context
+            modifiedUsers.splice(userIndex, 1);
+        }
+        modifiedUsers.unshift(user);
+        kubeConfig.users = modifiedUsers;
+
+        await fs.writeFile(configPath, serializeKubeConfig(kubeConfig), 'utf8');
     }
 
     /**
      * Switches the current Kubernetes context to the given named context.
+     * If multiple Kube configs are defined in '$KUBECONFIG' env. variable,
+     * the first 'current-context' instance will be set to the specified context name, while
+     * all the other instances will be cleared, to prevent 'random' context switching at
+     * logging off the current cluster.
      *
      * @param contextName the name of the context to switch to
      */
     public async setContext(contextName: string): Promise<void> {
+        // Clear the current Context in all the configs
+        await this.unsetContext();
+
+        // Set Context in the main config (default or the first in '$KUBECONFIG' env. variable)
         await CliChannel.getInstance().executeTool(
-            new CommandText('oc', `config use-context ${contextName}`),
+            new CommandText('oc', `config use-context ${contextName}`)
         );
     }
 
@@ -377,9 +509,16 @@ export class Oc {
      * Clears (unsets) the current Kubernetes context.
      */
     public async unsetContext(): Promise<void> {
-        await CliChannel.getInstance().executeTool(
-            new CommandText('oc', 'config unset current-context'),
-        );
+        const allConfigPaths = KubeConfigInfo.getAllConfigPaths();
+        // Clear the current Context in all the configs but the main one
+        for (let i = 0; i < allConfigPaths.length; i++) {
+            const path = allConfigPaths[i];
+            if (path && path.trim().length > 0) {
+                await CliChannel.getInstance().executeTool(
+                    new CommandText('oc', 'config unset current-context',
+                        [ new CommandOption('--kubeconfig', path.trim(), true, true) ]));
+            }
+        }
     }
 
     /**
@@ -594,8 +733,9 @@ export class Oc {
      * @returns The array of Projects with at least one project marked as an active
      */
     public fixActiveProject(projects: Project[], executionContext?: ExecutionContext): Project[] {
-        const kcu = new KubeConfigUtils();
-        const currentContext = kcu.findContext(kcu.currentContext);
+        const k8sConfigInfo = new KubeConfigInfo();
+        const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+        const currentContext = k8sConfigInfo.findContext(k8sConfig.currentContext);
 
         let fixedProjects = projects.length ? projects : [];
         let activeProject = undefined;
@@ -612,7 +752,7 @@ export class Oc {
 
             // [fixup for Sandbox cluster] Get Kube Configs's curernt username and try finding a project,
             // which name is partially created from that username
-            const currentUser = kcu.getCurrentUser();
+            const currentUser = k8sConfig.getCurrentUser();
             if (currentUser) {
                 const projectPrefix = currentUser.name.substring(0, currentUser.name.indexOf('/'));
                 const matches = projectPrefix.match(/^system:serviceaccount:([a-zA-Z-_.]+-dev):pipeline$/);

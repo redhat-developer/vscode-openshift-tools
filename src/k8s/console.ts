@@ -7,7 +7,7 @@ import { commands, Disposable, Uri, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { ClusterType } from '../oc/types';
-import { KubeConfigUtils } from '../util/kubeUtils';
+import { KubeConfigInfo } from '../util/kubeUtils';
 import { vsCommand } from '../vscommand';
 
 export class Console implements Disposable {
@@ -24,8 +24,9 @@ export class Console implements Disposable {
 
     static cli = CliChannel.getInstance()
     static getCurrentProject(): string {
-        const k8sConfig = new KubeConfigUtils();
-        const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
+        const k8sConfigInfo = new KubeConfigInfo();
+        const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+        const project = k8sConfig.contexts?.find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
         return project;
     }
 
