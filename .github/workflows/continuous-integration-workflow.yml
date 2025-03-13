@@ -58,7 +58,7 @@ jobs:
         if: (success() || failure()) && runner.os == 'Linux'
         name: Start cluster
         with:
-          version: v0.20.0
+          version: v0.24.0
 
       - name: Configure cluster
         if: (success() || failure()) && runner.os == 'Linux'
