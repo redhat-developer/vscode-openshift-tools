@@ -28,6 +28,10 @@ updates:
     uiw:
       patterns:
       - "@uiw/*"
+    react:
+      patterns:
+        - "react"
+        - "react-dom"
     sinon-chai:
       patterns:
         - "chai"
