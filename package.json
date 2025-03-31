@@ -140,7 +140,7 @@
 		"eslint-plugin-jsdoc": "^50.6.9",
 		"eslint-plugin-json": "^4.0.1",
 		"eslint-plugin-prettier": "^5.2.5",
-		"express": "^5.0.1",
+		"express": "^5.1.0",
 		"file-loader": "^6.2.0",
 		"fs-extra": "^11.3.0",
 		"git-up": "^8.0.1",
