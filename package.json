@@ -164,7 +164,7 @@
 		"react-dom": "^18.3.1",
 		"react-error-boundary": "^5.0.0",
 		"react-phone-input-2": "^2.14.0",
-		"react-scroll-to-top": "^3.0.0",
+		"react-scroll-to-top": "^3.1.0",
 		"remap-istanbul": "^0.13.0",
 		"rxjs": "^7.8.2",
 		"semver": "^7.7.1",
