@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { findHomeDir } from '@kubernetes/client-node';
 import * as chai from 'chai';
+import * as fs from 'fs';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
@@ -14,12 +16,33 @@ import { KubeConfigUtils } from '../../../src/util/kubeUtils';
 const {expect} = chai;
 chai.use(sinonChai);
 
+function fileExists(file: string): boolean {
+    try {
+        fs.accessSync(file);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 suite('K8s/console', () => {
     let sandbox: sinon.SinonSandbox;
     let cliExecStub: sinon.SinonStub;
     let commandStub: any;
 
     const k8sConfig = new KubeConfigUtils();
+    /* eslint-disable no-console */
+
+    console.log(`K8s/console test: KubeConfig Original findHomeDir(): ${findHomeDir()}`);
+
+    console.log(`K8s/console test: ${findHomeDir()}/.kube/config exists: ${fileExists(`${findHomeDir()}/.kube/config`)}`);
+    if (fileExists(`${findHomeDir()}/.kube/config`)) {
+        console.log(`K8s/console test: cat ${findHomeDir()}/.kube/config: ${fs.readFileSync(`${findHomeDir()}/.kube/config`)}`);
+    }
+    console.log(`K8s/console test: $KUBECONFIG: ${process.env.KUBECONFIG}`);
+
+    console.log(`K8s/console test:      KubeConfigInfo currentContext=[${k8sConfig.currentContext}]`);
+
     const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
 
     const context = {
