@@ -79,7 +79,7 @@
 	"devDependencies": {
 		"@codemirror/lang-yaml": "^6.1.2",
 		"@devfile/api": "^2.2.2-1716821574",
-		"@kubernetes/client-node": "^0.22.3",
+		"@kubernetes/client-node": "^1.1.2",
 		"@mui/icons-material": "^6.4.11",
 		"@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
 		"@mui/material": "^6.4.11",
