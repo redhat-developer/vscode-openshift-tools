@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.19.0 (April 29, 2025)
+
+ * [#4816](https://github.com/redhat-developer/vscode-openshift-tools/issues/4816) Multiple K8s configuration files are supported when configured in KUBECONFIG environment variable
+ * [#4874](https://github.com/redhat-developer/vscode-openshift-tools/issues/4874) Fixed: Cluster is not accessible even if correct K8s configuration file is selected
+ * [#1579](https://github.com/redhat-developer/vscode-openshift-tools/issues/1579) Fixed: Listen to changes in K8s configuration files configured in KUBECONFIG environment variable
+
 ## 1.18.0 (February 12, 2025)
 
  * [#4681](https://github.com/redhat-developer/vscode-openshift-tools/pull/4681) The "Bind Service" feature is **removed** due to the deprecation of the Service Binding Operator
