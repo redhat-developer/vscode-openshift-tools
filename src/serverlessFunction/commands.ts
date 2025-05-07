@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs-extra';
+import * as fs from 'fs/promises';
 import { load } from 'js-yaml';
 import * as path from 'path';
 import { CommandOption, CommandText } from '../base/command';
