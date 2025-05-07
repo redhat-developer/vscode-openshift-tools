@@ -28,7 +28,7 @@ import { CommandOption, CommandText } from './base/command';
 import { ExecutionContext } from './cli';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
-import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.virtualfs';
+import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.utils';
 import { Oc } from './oc/ocWrapper';
 import { Component } from './openshift/component';
 import { getServiceKindStubs, getServices } from './openshift/serviceHelpers';

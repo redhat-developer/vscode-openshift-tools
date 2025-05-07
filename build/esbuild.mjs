@@ -80,21 +80,26 @@ const nativeNodeModulesPlugin = {
         try {
             // If a ".node" file is imported within a module in the "file" namespace, resolve
             // it to an absolute path and put it into the "node-file" virtual namespace.
-            build.onResolve({ filter: /\.node$/, namespace: 'file' }, args => ({
-                path: require.resolve(args.path, { paths: [args.resolveDir] }),
-                namespace: 'node-file',
-            }));
+            build.onResolve({ filter: /\.node$/, namespace: 'file' }, args => {
+                const resolvedId = require.resolve(args.path, { paths: [args.resolveDir] });
+                if (resolvedId.endsWith('.node')) {
+                    return { path: resolvedId, namespace: 'node-file' };
+                }
+                return { path: resolvedId };
+            });
 
             // Files in the "node-file" virtual namespace call "require()" on the
             // path from esbuild of the ".node" file in the output directory.
-            build.onLoad({ filter: /.*/, namespace: 'node-file' }, args => ({
-            contents: `
-                import path from ${JSON.stringify(args.path)}
-                try {
-                    module.exports = require(path)
-                } catch {}
-            `,
-            }))
+            build.onLoad({ filter: /.*/, namespace: 'node-file' }, args => {
+                return {
+                    contents: `
+                        import path from ${JSON.stringify(args.path)}
+                        try { module.exports = require(path) }
+                        catch {}
+                    `,
+                    resolveDir: path.dirname(args.path),
+                };
+            });
 
             // If a ".node" file is imported within a module in the "node-file" namespace, put
             // it in the "file" namespace where esbuild's default loading behavior will handle
@@ -169,6 +174,7 @@ const svgrPlugin = (options = {
 const baseConfig = {
     bundle: true,
     target: 'chrome108',
+    format: 'cjs',
     minify: production,
     sourcemap: !production,
     logLevel: 'warning',
@@ -181,7 +187,7 @@ if (production) {
         platform: 'node',
         entryPoints: [`./${srcDir}/extension.ts`],
         outfile: `${outDir}/${srcDir}/extension.js`,
-        external: ['vscode', 'shelljs'],
+        external: [ 'vscode', 'shelljs', 'jsonc-parser' ],
         plugins: [
             nativeNodeModulesPlugin,
             esbuildProblemMatcherPlugin // this one is to be added to the end of plugins array

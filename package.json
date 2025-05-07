@@ -74,9 +74,11 @@
 		"public-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max"
 	},
 	"dependencies": {
+		"jsonc-parser": "^3.3.1",
 		"shelljs": "^0.10.0"
 	},
 	"devDependencies": {
+		"@apidevtools/json-schema-ref-parser": "^12.0.2",
 		"@codemirror/lang-yaml": "^6.1.2",
 		"@devfile/api": "^2.2.2-1716821574",
 		"@kubernetes/client-node": "^0.22.3",
@@ -190,7 +192,8 @@
 		"xterm-addon-serialize": "^0.11.0",
 		"xterm-addon-web-links": "^0.9.0",
 		"xterm-addon-webgl": "^0.16.0",
-		"xterm-headless": "^5.3.0"
+		"xterm-headless": "^5.3.0",
+		"yaml": "^2.8.0"
 	},
 	"overrides": {
 		"cookie": "^1.0.2",

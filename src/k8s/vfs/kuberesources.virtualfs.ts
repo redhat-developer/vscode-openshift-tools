@@ -5,73 +5,16 @@
 
 import * as vscode from 'vscode';
 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as querystring from 'querystring';
 import { Disposable, Event, EventEmitter, FileChangeEvent, FileStat, FileSystemProvider, FileType, Uri } from 'vscode';
-
-import { CommandText } from '../../base/command';
+import { CommandOption, CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
 import { helmSyntaxVersion, HelmSyntaxVersion } from '../../helm/helm';
+import { Oc } from '../../oc/ocWrapper';
 import { CliExitData } from '../../util/childProcessUtil';
 import { Progress } from '../../util/progress';
 import { Errorable } from './errorable';
-
-export const K8S_RESOURCE_SCHEME = 'osmsx'; // Changed from 'k8smsx' to 'osmsx' to not make a conflict with k8s extension
-export const K8S_RESOURCE_SCHEME_READONLY = 'osmsxro'; // Changed from 'k8smsxro' to 'osmsxro' to not make a conflict with k8s extension
-export const KUBECTL_RESOURCE_AUTHORITY = 'loadkubernetescore';
-export const KUBECTL_DESCRIBE_AUTHORITY = 'kubernetesdescribe';
-export const HELM_RESOURCE_AUTHORITY = 'helmget';
-
-export const OUTPUT_FORMAT_YAML = 'yaml'    // Default
-export const OUTPUT_FORMAT_JSON = 'json'
-
-export function findOpenEditor(uri: Uri) {
-    const uriWithoutNonce = uri.toString(true).replace(/&_=[0-9]+/g, '');
-    return vscode.workspace.textDocuments.map((doc) => doc.uri)
-        .find((docUri) => docUri.toString(true).replace(/&_=[0-9]+/g, '') === uriWithoutNonce);
-}
-
-export function kubefsUri(namespace: string | null | undefined /* TODO: rationalise null and undefined */,
-        value: string, outputFormat: string, action?: string, dedupe?: boolean): Uri {
-    const docname = `${value.replace('/', '-')}${outputFormat !== '' ? `.${outputFormat}` : ''}`;
-    const nonce = new Date().getTime();
-    const nsquery = namespace ? `ns=${namespace}&` : '';
-    const scheme = action === 'describe' ? K8S_RESOURCE_SCHEME_READONLY : K8S_RESOURCE_SCHEME;
-    const authority = action === 'describe' ? KUBECTL_DESCRIBE_AUTHORITY : KUBECTL_RESOURCE_AUTHORITY;
-    const uri = `${scheme}://${authority}/${docname}?${nsquery}value=${value}&_=${nonce}`;
-    const newUri = Uri.parse(uri);
-    if (!dedupe) {
-        return newUri;
-    }
-    const editedUri = findOpenEditor(newUri);
-    return editedUri ? editedUri : newUri;
-}
-
-export function helmfsUri(releaseName: string, revision: number | undefined, dedupe?: boolean): vscode.Uri {
-    const revisionSuffix = revision ? `-${revision}` : '';
-    const revisionQuery = revision ? `&revision=${revision}` : '';
-
-    const docname = `helmrelease-${releaseName}${revisionSuffix}.txt`;
-    const nonce = new Date().getTime();
-    const uri = `${K8S_RESOURCE_SCHEME}://${HELM_RESOURCE_AUTHORITY}/${docname}?value=${releaseName}${revisionQuery}&_=${nonce}`;
-    const newUri = Uri.parse(uri);
-    if (!dedupe) {
-        return newUri;
-    }
-    const editedUri = findOpenEditor(newUri);
-    return editedUri ? editedUri : newUri;
-}
-
-/**
- * Get output format from openshiftToolkit.outputFormat
- * default yaml
- *
- * @returns output format
- */
-export function getOutputFormat(): string {
-    return vscode.workspace.getConfiguration('openshiftToolkit').get('outputFormat');
-}
+import { getOutputFormat, HELM_RESOURCE_AUTHORITY, K8sResourceCache, KUBECTL_DESCRIBE_AUTHORITY, KUBECTL_RESOURCE_AUTHORITY, Neater } from './kuberesources.utils';
 
 export class KubernetesResourceVirtualFileSystemProvider implements FileSystemProvider {
     private encoder = new TextEncoder();
@@ -90,12 +33,7 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
     }
 
     stat(_uri: Uri): FileStat {
-        return {
-            type: FileType.File,
-            ctime: 0,
-            mtime: 0,
-            size: 65536  // These files don't seem to matter for us
-        };
+        return K8sResourceCache.Instance.getStat(_uri);
     }
 
     readDirectory(_uri: Uri): [string, FileType][] | Thenable<[string, FileType][]> {
@@ -116,9 +54,8 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
     }
 
     async loadResource(uri: Uri): Promise<string> {
-        const query = querystring.parse(uri.query);
-
         const outputFormat = getOutputFormat();
+        const query = querystring.parse(uri.query);
         const value = query.value as string;
         const revision = query.revision as string | undefined;
         const ns = query.ns as string | undefined;
@@ -137,6 +74,7 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
             throw new Error(message);
         }
 
+        K8sResourceCache.Instance.set(uri, er.stdout);
         return er.stdout;
     }
 
@@ -145,7 +83,14 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
         switch (resourceAuthority) {
             case KUBECTL_RESOURCE_AUTHORITY: {
                 const ced = await Progress.execFunctionWithProgress(`Loading ${value}...`, async () => {
-                        return await CliChannel.getInstance().executeTool(new CommandText(`oc -o ${outputFormat} ${nsarg} get ${value}`), undefined, false);
+                        const options = [];
+                        options.push(new CommandOption('-o', outputFormat, false, false));
+                        if (ns) {
+                            options.push(new CommandOption('--namespace', ns));
+                        }
+
+                        return await CliChannel.getInstance().executeTool(
+                            new CommandText('oc', `get ${value}`, options), undefined, false);
                     });
                 return { succeeded: true, result: ced };
             }
@@ -153,7 +98,7 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
                 const scopearg = ((await helmSyntaxVersion()) === HelmSyntaxVersion.V2) ? '' : 'all';
                 const revarg = revision ? ` --revision=${revision}` : '';
                 const her = await Progress.execFunctionWithProgress(`Loading ${value}...`, async () => {
-                        return await CliChannel.getInstance().executeTool(new CommandText(`helm get ${scopearg} ${value}${revarg}`), undefined, false);
+                        return await CliChannel.getInstance().executeTool(new CommandText(`helm get ${scopearg} ${value}${revarg} -o ${outputFormat}`), undefined, false);
                     });
                 return { succeeded: true, result: her };
             }
@@ -173,16 +118,25 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
     }
 
     private async saveAsync(uri: Uri, content: Uint8Array): Promise<void> {
-        // This assumes no pathing in the URI - if this changes, we'll need to
-        // create subdirectories.
-        // TODO: not loving prompting as part of the write when it should really be part of a separate
-        // 'save' workflow - but needs must, I think
-        const rootPath = await this.selectRootFolder();
-        if (!rootPath) {
-            return;
+        const neatContent = await Neater.neat(content.toString());
+
+        let errors: vscode.Diagnostic[];
+        try {
+            errors = await K8sResourceCache.Instance.validateResourceDocument(uri, neatContent);
+        } catch (_err) {
+            void vscode.window.showErrorMessage(`An exception happened during the Validation: ${_err}`);
+            throw vscode.FileSystemError.Unavailable(_err);
         }
-        const fspath = path.join(rootPath, uri.fsPath);
-        fs.writeFileSync(fspath, content);
+
+        if (!errors || errors.length === 0) {
+            await Oc.Instance.applyConfiguration(neatContent);
+        } else {
+            const shortcut = process.platform === 'darwin' ? '⇧⌘M' : 'Ctrl+Shift+M';
+            const errorMsg = '⚠️  The Kubernetes Resource cannot be saved due to the potential SSA conflicts. ' +
+                `See the Problems panel (${shortcut}) for details.`;
+            await vscode.commands.executeCommand('workbench.actions.view.problems');
+            throw vscode.FileSystemError.NoPermissions(errorMsg);
+        }
     }
 
     delete(_uri: Uri, _options: { recursive: boolean }): void | Thenable<void> {
@@ -192,26 +146,5 @@ export class KubernetesResourceVirtualFileSystemProvider implements FileSystemPr
     rename(_oldUri: Uri, _newUri: Uri, _options: { overwrite: boolean }): void | Thenable<void> {
         // no-op
     }
-
-    private async showWorkspaceFolderPick(): Promise<vscode.WorkspaceFolder | undefined> {
-        if (!vscode.workspace.workspaceFolders) {
-            void vscode.window.showErrorMessage('This command requires an open folder.');
-            return undefined;
-        } else if (vscode.workspace.workspaceFolders.length === 1) {
-            return vscode.workspace.workspaceFolders[0];
-        }
-        return await vscode.window.showWorkspaceFolderPick();
-    }
-
-    private async selectRootFolder(): Promise<string | undefined> {
-        const folder = await this.showWorkspaceFolderPick();
-        if (!folder) {
-            return undefined;
-        }
-        if (folder.uri.scheme !== 'file') {
-            void vscode.window.showErrorMessage('This command requires a filesystem folder');  // TODO: make it not
-            return undefined;
-        }
-        return folder.uri.fsPath;
-    }
 }
+

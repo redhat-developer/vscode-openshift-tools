@@ -105,12 +105,12 @@ export class ChildProcessUtil {
         return (!isNaN(length) && length > 0 ? length : 4) * 1024 * 1024;
     }
 
-    public execute(cmd: string, opts: ExecOptions = {}): Promise<CliExitData> {
+    public execute(cmd: string, opts: ExecOptions = {}, outText?: string): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
             if (opts.maxBuffer === undefined) {
                 opts.maxBuffer = ChildProcessUtil.getExecMaxBufferLength();
             }
-            cp.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
+            const childProcess = cp.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
                 // filter out info about update
                 this.odoChannel.print(cmd);
                 this.odoChannel.print(stdout);
@@ -120,6 +120,11 @@ export class ChildProcessUtil {
                 // Filter update message text which starts with `---`
                 resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts?.cwd?.toString() });
             });
+
+            if (childProcess && outText) {
+                childProcess.stdin.write(outText);
+                childProcess.stdin.end();
+            }
         });
     }
 
