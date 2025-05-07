@@ -6,9 +6,9 @@
 import { Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
 import {
     authentication,
-    commands, env, ExtensionContext, languages, QuickPickItemKind,
+    commands, Diagnostic, env, ExtensionContext, languages, QuickPickItemKind,
     StatusBarAlignment,
-    StatusBarItem, window,
+    StatusBarItem, TextDocument, window,
     workspace
 } from 'vscode';
 import { extension as k8sExtension } from 'vscode-kubernetes-tools-api';
@@ -26,7 +26,8 @@ import { Console as K8sConsole } from './k8s/console';
 import { DeploymentConfig as K8sDeploymentConfig } from './k8s/deploymentConfig';
 import { Route as K8sRoute } from './k8s/route';
 import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprovider';
-import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
+import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, K8sResourceCache } from './k8s/vfs/kuberesources.utils';
+import { KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
 import { Oc } from './oc/ocWrapper';
 import { OdoPreference } from './odo/odoPreference';
 import { Cluster } from './openshift/cluster';
@@ -53,7 +54,6 @@ import { WelcomePage } from './welcomePage';
 import { registerYamlHandlers } from './yaml/yamlDocumentFeatures';
 import { YamlFileCommands } from './yamlFileCommands';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 // this method is called when your extension is deactivated
 export function deactivate(): void {
     // intentionally left blank
@@ -86,6 +86,30 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     // Link from resources to referenced resources
     const resourceLinkProvider = new KubernetesResourceLinkProvider();
+
+    // Diagnostics for K8s resources
+    async function updateDiagnostics(document: TextDocument): Promise<void> {
+        if ( document.languageId !== 'yaml' && document.languageId !== 'json') return;
+
+        const diagnostics: Diagnostic[] = await K8sResourceCache.Instance.validateResourceDocument(document.uri, document.getText());;
+
+        diagnosticCollection.set(document.uri, diagnostics);
+    }
+
+    const diagnosticCollection = languages.createDiagnosticCollection(extensionContext.extension.id);
+    window.onDidChangeActiveTextEditor(editor => {
+        if (editor) {
+            void updateDiagnostics(editor.document);
+        }
+    });
+
+    workspace.onDidChangeTextDocument(event => {
+        void updateDiagnostics(event.document);
+    });
+
+    if (window.activeTextEditor) {
+        void updateDiagnostics(window.activeTextEditor.document);
+    }
 
     const crcStatusItem = window.createStatusBarItem(StatusBarAlignment.Left);
     crcStatusItem.command = 'openshift.explorer.stopCluster';
@@ -138,6 +162,9 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
         // Link from resources to referenced resources
         languages.registerDocumentLinkProvider({ scheme: K8S_RESOURCE_SCHEME }, resourceLinkProvider),
+
+        // Diagnostic collection for K8s Resources
+        diagnosticCollection
     ];
 
     disposable.push(...registerCommands());

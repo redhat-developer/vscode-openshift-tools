@@ -879,4 +879,20 @@ export class Oc {
         }
         return new CommandText('oc', `delete ${resourceType} ${resourceName}`, args);
     }
+
+    public static async getK8sOpenAPI(executionContext?: ExecutionContext): Promise<string> {
+        // oc get --raw /openapi/v2
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'get --raw /openapi/v2'), undefined, true, executionContext);
+        return result.stdout;
+    }
+
+    public async applyConfiguration(config: string): Promise<string> {
+        // kubectl apply --server-side=true -f -
+        const result = await CliChannel.getInstance().executeToolWithText(
+            new CommandText('oc', 'apply -f -',
+                [ new CommandOption('--server-side', 'true', false, false) ]),
+            undefined, true, config);
+        return result.stdout;
+    }
 }

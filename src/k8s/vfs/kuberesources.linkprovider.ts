@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import * as _ from 'lodash';
+import * as querystring from 'querystring';
 import * as vscode from 'vscode';
 import { DocumentLinkProvider, Uri } from 'vscode';
-
-import * as querystring from 'querystring';
-import * as _ from 'lodash';
-import { MappingItem, Node, NodeProvider } from './locator-util';
-import * as kuberesources from './kuberesources';
-import * as yl from './yaml-locator';
 import * as jl from './json-locator';
-import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, getOutputFormat, helmfsUri, kubefsUri } from './kuberesources.virtualfs';
+import * as kuberesources from './kuberesources';
+import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, getOutputFormat, helmfsUri, kubefsUri } from './kuberesources.utils';
+import { MappingItem, Node, NodeProvider } from './locator-util';
+import * as yl from './yaml-locator';
 
 // >>> URI Cache >>>
 
@@ -38,10 +37,7 @@ function cacheEditingUris() {
 export class KubernetesResourceLinkProvider implements DocumentLinkProvider {
     provideDocumentLinks(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentLink[]> {
         const sourceKind = k8sKind(document);
-        const df = getDocumentFormat(document);
-        const docs = (df === 'yaml' || df === 'yml') ?
-                yl.yamlLocator.getYamlDocuments(document)
-                    : df === 'json' ? jl.jsonLocator.getJsonDocuments(document) : [];
+        const docs = getParsedDocuments(document);
         const leaves = getLeafNodes(docs);
 
         try {
@@ -54,13 +50,21 @@ export class KubernetesResourceLinkProvider implements DocumentLinkProvider {
     }
 }
 
+export function getParsedDocuments(document: vscode.TextDocument): NodeProvider[] {
+    const df = getDocumentFormat(document);
+    const docs = (df === 'yaml' || df === 'yml') ?
+            yl.yamlLocator.getYamlDocuments(document)
+                : df === 'json' ? jl.jsonLocator.getJsonDocuments(document) : [];
+    return docs;
+}
+
 function getDocumentFormat(document: vscode.TextDocument): string | undefined {
     const path = document.uri.path;
     const sepIndex = path.indexOf('.');
     return sepIndex >= 0 ? path.substring(sepIndex + 1).toLocaleLowerCase() : undefined;
 }
 
-function getLeafNodes(docs: NodeProvider[]): Node[] {
+export function getLeafNodes(docs: NodeProvider[]): Node[] {
     const rootNodes = _.flatMap(docs, (d) => d.nodes);
     const nonRootNodes = _.flatMap(rootNodes, (n) => descendants(n));
     const allNodes = rootNodes.concat(nonRootNodes);
@@ -80,10 +84,17 @@ function getLink(document: vscode.TextDocument, sourceKind: string, node: Node):
     return undefined;
 }
 
-function range(document: vscode.TextDocument, node: MappingItem) {
+export function range(document: vscode.TextDocument, node: MappingItem): vscode.Range {
     return new vscode.Range(
         document.positionAt(node.value.startPosition),
         document.positionAt(node.value.endPosition)
+    );
+}
+
+export function keyRange(document: vscode.TextDocument, node: MappingItem): vscode.Range {
+    return new vscode.Range(
+        document.positionAt(node.key.startPosition),
+        document.positionAt(node.key.endPosition)
     );
 }
 

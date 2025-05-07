@@ -90,6 +90,30 @@ export class CliChannel {
         return result;
     }
 
+    async executeToolWithText(command: CommandText, opts?: cp.ExecOptions, fail = true, stdout?: string): Promise<CliExitData> {
+        const commandActual = command.toString();
+        const commandPrivacy = command.privacyMode(true).toString();
+        const [cmd] = commandActual.split(' ');
+        const toolLocation = await ToolsConfig.detect(cmd);
+        const optsCopy = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv())
+
+        const result: CliExitData = await ChildProcessUtil.Instance.execute(
+            toolLocation ? commandActual.replace(cmd, `"${toolLocation}"`) : commandActual, optsCopy, stdout);
+
+        if (result.error && fail) {
+            if (result.error.code && result.error.code.toString() === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+                void vscode.window.showErrorMessage('Do you want to change the maximum \'stdout\' buffer size by modifying the \'openshiftToolkit.execMaxBufferLength\' preference value?', 'Yes', 'Cancel')
+                    .then((answer)=> {
+                        if (answer === 'Yes') {
+                            void vscode.commands.executeCommand('workbench.action.openSettings', 'openshiftToolkit.execMaxBufferLength');
+                        }
+                    });
+            }
+            throw new VsCommandError(`${result.error.message}`, `Error when running command: ${commandPrivacy}`, result.error);
+        };
+        return result;
+    }
+
     async spawnTool(cmd: CommandText, opts: cp.SpawnOptions = {cwd: undefined, env: process.env}): Promise<cp.ChildProcess> {
         const toolLocation = await ToolsConfig.detect(cmd.command);
         const optWithTelemetryEnv = CliChannel.applyEnv(opts, CliChannel.createTelemetryEnv());
