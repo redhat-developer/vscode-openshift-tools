@@ -95,7 +95,7 @@
 		"@svgr/plugin-jsx": "^8.1.0",
 		"@types/chai": "^5.2.2",
 		"@types/dockerode": "^3.3.38",
-		"@types/express": "^5.0.1",
+		"@types/express": "^5.0.2",
 		"@types/fs-extra": "^11.0.4",
 		"@types/lodash": "^4.17.16",
 		"@types/mocha": "^10.0.10",
