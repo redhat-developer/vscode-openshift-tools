@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Check if a Nightly Build exists for the last commit id
         id: check-nightly-build-exists
-        run: echo nightly-build-exists=`curl -s "https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-linux-arm64-${{ needs.check-odo.outputs.last-commit-id }}.tar.gz.sha256" | grep -E "^[A-Za-z0-9]+$" | wc -w` >> $GITHUB_OUTPUT
+        run: echo nightly-build-exists=`curl -s "https://s3.us-south.cloud-object-storage.appdomain.cloud/odo-nightly/odo-linux-arm64-${{ needs.check-odo.outputs.last-commit-id }}.tar.gz.sha256" | grep -E "^[A-Za-z0-9]+$" | wc -w` >> $GITHUB_OUTPUT
 
   update-odo:
     runs-on: ubuntu-latest
@@ -93,7 +93,7 @@ jobs:
             if [[ $platform == *"-a"* ]]; then
               arch="" # already in platform string
             fi
-            new_url="https://s3.eu-de.cloud-object-storage.appdomain.cloud/odo-nightly-builds/odo-${pltfrm}${arch}-${{ needs.check-odo.outputs.last-commit-id }}${ext}"
+            new_url="https://s3.us-south.cloud-object-storage.appdomain.cloud/odo-nightly/odo-${pltfrm}${arch}-${{ needs.check-odo.outputs.last-commit-id }}${ext}"
             checksum=`curl -s ${new_url}.sha256`
             dlFileName="odo-${pltfrm}${arch}${ext}"
             cmdFileName="odo-${pltfrm}${arch}-${{ needs.check-odo.outputs.last-commit-id }}${exeExt}"
