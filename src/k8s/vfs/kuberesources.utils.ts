@@ -4,14 +4,14 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
-import * as JSYAML from 'js-yaml';
 import { findNodeAtLocation, getNodeValue, Node, parseTree } from 'jsonc-parser';
 import * as _ from 'lodash';
 import { Diagnostic, DiagnosticSeverity, FileStat, FileType, Range, TextDocument, Uri, workspace } from 'vscode';
-import { Document, isMap, isPair, isScalar, isSeq, Pair, ParsedNode, parseDocument } from 'yaml';
+import { Document, isMap, isPair, isScalar, isSeq, Pair, parse, ParsedNode, parseDocument, stringify } from 'yaml';
 import { CommandOption, CommandText } from '../../base/command';
 import { CliChannel, ExecutionContext } from '../../cli';
 import { Oc } from '../../oc/ocWrapper';
+import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 
 export const K8S_RESOURCE_SCHEME = 'osmsx'; // Changed from 'k8smsx' to 'osmsx' to not make a conflict with k8s extension
 export const K8S_RESOURCE_SCHEME_READONLY = 'osmsxro'; // Changed from 'k8smsxro' to 'osmsxro' to not make a conflict with k8s extension
@@ -95,7 +95,7 @@ export function getK8sResourceObject(document: string): K8sResource {
   }
 
   // If not JSON or not parsed - try parcing as YAML
-  try { return JSYAML.load(document) as K8sResource; } catch { /* ignore */ }
+  try { return parse(document) as K8sResource; } catch { /* ignore */ }
 
   return {} as K8sResource; // Never return 'undefined'
 }
@@ -393,7 +393,7 @@ export class Neater {
 
   public static safeLoadYaml(raw: string): string | undefined {
     try {
-      return JSYAML.load(raw);
+      return parse(raw);
     } catch {
       // Ignore
     }
@@ -464,7 +464,7 @@ export class Neater {
    */
   public static async neat(raw: string, executionContext?: ExecutionContext): Promise<string> {
     const resource = getK8sResourceObject(raw);
-    return isK8sResource(resource) ? JSYAML.dump(await Neater.neatK8sResource(resource, executionContext)) : raw;
+    return isK8sResource(resource) ? stringify(await Neater.neatK8sResource(resource, executionContext), YAML_STRINGIFY_OPTIONS) : raw;
   }
 }
 

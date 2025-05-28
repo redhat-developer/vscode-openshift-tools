@@ -5,7 +5,8 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as yml from 'js-yaml';
+import { parse, stringify } from 'yaml';
+import { YAML_STRINGIFY_OPTIONS } from '../../../src/util/utils';
 
 const kubeConfig = path.join(
     process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'],
@@ -41,7 +42,7 @@ export function addKubeContext(
     name: string,
 ) {
     const kube = fs.readFileSync(kubeConfig, 'utf-8');
-    const kubeYaml = yml.load(kube) as { [key: string]: any };
+    const kubeYaml = parse(kube) as { [key: string]: any };
     kubeYaml.contexts.push({
         context: {
             cluster,
@@ -51,6 +52,6 @@ export function addKubeContext(
         name,
     });
 
-    const updatedKube = yml.dump(kubeYaml);
+    const updatedKube = stringify(kubeYaml, YAML_STRINGIFY_OPTIONS);
     fs.writeFileSync(kubeConfig, updatedKube);
 }

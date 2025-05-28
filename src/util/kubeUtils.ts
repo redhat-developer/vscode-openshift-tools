@@ -6,12 +6,13 @@
 import { KubeConfig, loadYaml } from '@kubernetes/client-node';
 import { ActionOnInvalid, Cluster, Context, User } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
-import { dump } from 'js-yaml';
 import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
+import { stringify } from 'yaml';
 import { CommandText } from '../base/command';
 import { CliChannel, ExecutionContext } from '../cli';
 import { Platform } from './platform';
+import { YAML_STRINGIFY_OPTIONS } from './utils';
 
 function fileExists(file: string): boolean {
     try {
@@ -361,7 +362,7 @@ export class KubeConfigInfo {
     }
 
     public dumpEffectiveKubeConfig(): string {
-        return dump(this.sanitizeKubeConfig(this.getEffectiveKubeConfig()), { sortKeys: true, lineWidth: -1 });
+        return stringify(this.sanitizeKubeConfig(this.getEffectiveKubeConfig()), YAML_STRINGIFY_OPTIONS);
     }
 
     private sanitizeKubeConfig(config: KubeConfig): any {
@@ -491,7 +492,7 @@ export function serializeKubeConfig(kc: KubeConfig): string {
         users: kc?.users?.map(toKubeUser),
     };
 
-    return dump(fullConfig, { indent: 2, lineWidth: -1, styles: { '!!str': 'plain' } });
+    return stringify(fullConfig, YAML_STRINGIFY_OPTIONS);
 }
 
 const _kubeConfigErrorCache: Map<string, any> = new Map<string, any>(); // Cache for KC loading errors, allows to skip duplicate reporting

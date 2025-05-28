@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubernetesObject } from '@kubernetes/client-node';
-import { load as loadYaml } from 'js-yaml';
 import * as vscode from 'vscode';
+import { parse } from 'yaml';
 
 const YAML_SELECTOR: vscode.DocumentSelector = {
     language: 'yaml',
@@ -29,7 +29,7 @@ class YamlCodeLensProvider implements vscode.CodeLensProvider {
             const objectTexts: string[] = document.getText().split(/(?:^---\r?\n)|(?:\n---\r?\n)/).filter(text => text && text.length > 0);
 
             for (const objectText of objectTexts) {
-                const yaml = loadYaml(objectText) as KubernetesObject;
+                const yaml = parse(objectText) as KubernetesObject;
 
                 // heuristic to check if it's a k8s yaml
                 if (!yaml.apiVersion || !yaml.kind || !yaml.metadata) {

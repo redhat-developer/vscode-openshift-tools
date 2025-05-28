@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { yaml } from '@codemirror/lang-yaml';
 import { Close } from '@mui/icons-material';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Box, FormControl, FormHelperText, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Stack, TextField, Theme, Typography, useMediaQuery } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
 import React from 'react';
+import { parse } from 'yaml';
 import { Chart, ChartResponse } from '../../../helm/helmChartType';
+import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from '../../common/vscode-theme';
 import { VSCodeMessage } from '../vsCodeMessage';
 import { HelmListItem } from './helmListItem';
-import CodeMirror from '@uiw/react-codemirror';
-import { yaml } from '@codemirror/lang-yaml';
-import { vsDarkCodeMirrorTheme, vsLightCodeMirrorTheme } from '../../common/vscode-theme';
-import jsyaml from 'js-yaml';
 
 type Message = {
     action: string;
@@ -118,7 +118,7 @@ export const HelmModal = React.forwardRef(
         const handleChange = (newValue: string) => {
             setYAMLError(undefined);
             try {
-                jsyaml.load(newValue);
+                parse(newValue);
                 setYAMLValues(newValue);
             } catch(e) {
                 setYAMLError(e.message);

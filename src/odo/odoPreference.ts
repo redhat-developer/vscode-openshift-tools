@@ -4,10 +4,11 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs/promises';
-import * as YAML from 'js-yaml';
 import * as path from 'path';
+import { parse, stringify } from 'yaml';
 import { TelemetryProps } from '../telemetry';
 import { Platform } from '../util/platform';
+import { YAML_STRINGIFY_OPTIONS } from '../util/utils';
 import { Registry } from './componentType';
 
 
@@ -117,7 +118,7 @@ export class OdoPreference {
         let isToBeReWritten: boolean = false;
         try {
             const odoPreferenceFile = await fs.readFile(odoPreferenceFilePath, 'utf8');
-            const odoPreferences = YAML.load(odoPreferenceFile) as OdoPreferenceObject;
+            const odoPreferences = parse(odoPreferenceFile) as OdoPreferenceObject;
 
             // If `odoPreferences.OdoSettings.RegistryList` is `null` or doesn't contain the `DefaultDevfileRegistry` item
             // we have to recover at least the 'DefaultDevfileRegistry` item on it because this whole list will be replaced
@@ -157,7 +158,7 @@ export class OdoPreference {
     private async writeOdoPreference(preference: any):  Promise<any> {
         const odoPreferenceFilePath = this.getOdoPreferenceFile();
         try {
-            const preferenceYaml = YAML.dump(preference);
+            const preferenceYaml = stringify(preference, YAML_STRINGIFY_OPTIONS);
             const odoPreferenceDir = path.parse(odoPreferenceFilePath).dir;
             if (!await this.dirExists(odoPreferenceDir)) {
                 await fs.mkdir(odoPreferenceDir, { recursive: true, mode: 0o750} );

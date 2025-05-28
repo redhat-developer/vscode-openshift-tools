@@ -5,13 +5,13 @@
 import * as cp from 'child_process';
 import * as fse from 'fs-extra';
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import { extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import { parse, stringify } from 'yaml';
 import { Alizer } from '../../alizer/alizerWrapper';
 import { AlizerDevfileResponse, Version } from '../../alizer/types';
 import { DevfileInfo, DevfileInfoExt, DevfileVersionInfo } from '../../devfile-registry/devfileInfo';
@@ -23,6 +23,7 @@ import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { DevfileV1 } from '../../util/devfileV1Type';
+import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
     isValidProjectFolder,
@@ -474,11 +475,11 @@ export default class CreateComponentLoader {
     static async updateDevfileWithComponentName(ucomponentFolderUri: vscode.Uri, componentName: string): Promise<void> {
         const devFilePath = path.join(ucomponentFolderUri.fsPath, 'devfile.yaml');
         const file = await fs.readFile(devFilePath, 'utf8');
-        const devfile = JSYAML.load(file.toString()) as any;
+        const devfile = parse(file.toString());
         if (devfile?.metadata?.name !== componentName) {
             devfile.metadata.name = componentName;
             await fs.unlink(devFilePath);
-            const yaml = JSYAML.dump(devfile, { sortKeys: true });
+            const yaml = stringify(devfile, YAML_STRINGIFY_OPTIONS);
             await fs.writeFile(devFilePath, yaml.toString(), 'utf-8');
         }
     }
@@ -504,7 +505,7 @@ export default class CreateComponentLoader {
                 //Try reading the raw devfile
                 const devFileYamlPath = path.join(tmpFolder.fsPath, 'devfile.yaml');
                 const file = await fs.readFile(devFileYamlPath, 'utf8');
-                rawDevfile = JSYAML.load(file.toString());
+                rawDevfile = parse(file.toString());
             }
 
             void CreateComponentLoader.panel.webview.postMessage({
@@ -517,7 +518,7 @@ export default class CreateComponentLoader {
                 id: rawDevfile.metadata.name,
                 starterProjects: rawDevfile.starterProjects,
                 tags: [],
-                yaml: JSYAML.dump(rawDevfile),
+                yaml: stringify(rawDevfile, YAML_STRINGIFY_OPTIONS),
                 supportsDebug,
                 supportsDeploy,
             } as Devfile;
@@ -551,7 +552,7 @@ export default class CreateComponentLoader {
                     try {
                         const devFileV1Path = path.join(uri.fsPath, 'devfile.yaml');
                         const file = await fs.readFile(devFileV1Path, 'utf8');
-                        const devfileV1 = JSYAML.load(file.toString()) as DevfileV1;
+                        const devfileV1 = parse(file.toString()) as DevfileV1;
                         await fs.unlink(devFileV1Path);
                         analyzeRes = await Alizer.Instance.alizerDevfile(uri);
                         compDescriptions = await getCompDescriptionsAfterAnalizer(analyzeRes);
@@ -560,7 +561,7 @@ export default class CreateComponentLoader {
                             devfileV1,
                             endPoints,
                         );
-                        const yaml = JSYAML.dump(devfileV2, { sortKeys: true });
+                        const yaml = stringify(devfileV2, YAML_STRINGIFY_OPTIONS);
                         await fs.writeFile(devFileV1Path, yaml.toString(), 'utf-8');
                         await CreateComponentLoader.panel?.webview.postMessage({
                             action: 'devfileRegenerated',

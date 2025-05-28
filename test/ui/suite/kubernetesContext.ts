@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import { expect } from 'chai';
 import * as fs from 'fs-extra';
-import * as yml from 'js-yaml';
 import {
     ActivityBar,
     EditorView,
@@ -21,6 +20,7 @@ import {
     before,
     beforeEach
 } from 'vscode-extension-tester';
+import { parse } from 'yaml';
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
 import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
@@ -66,7 +66,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
 
             //add kube context for test
             const kubeContent = getKubeConfigContent();
-            const kubeYaml = yml.load(kubeContent) as { [key: string]: any };
+            const kubeYaml = parse(kubeContent) as { [key: string]: any };
             addKubeContext(
                 kubeYaml.contexts[0].context.cluster,
                 'test-namespace',

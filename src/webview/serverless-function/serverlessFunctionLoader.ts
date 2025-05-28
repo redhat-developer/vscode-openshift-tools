@@ -4,15 +4,16 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as cp from 'child_process';
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { stringify } from 'yaml';
 import { Odo } from '../../odo/odoWrapper';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import sendTelemetry from '../../telemetry';
 import { CliExitData } from '../../util/childProcessUtil';
 import { Platform } from '../../util/platform';
 import { Progress } from '../../util/progress';
+import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 import { selectWorkspaceFolder, selectWorkspaceFolders } from '../../util/workspace';
 import { VsCommandError } from '../../vscommand';
 import { getExtensionPath, loadWebviewHtml, validateName } from '../common-ext/utils';
@@ -209,7 +210,7 @@ export default class ServerlessFunctionViewLoader {
                     await fs.rm(path.join(location, 'func.yaml'));
                     await fs.writeFile(
                         path.join(location, 'func.yaml'),
-                        JSYAML.dump(yamlContent),
+                        stringify(yamlContent, YAML_STRINGIFY_OPTIONS),
                         'utf-8',
                     );
                     functionResponse = {
