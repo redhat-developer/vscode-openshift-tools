@@ -8,11 +8,11 @@ import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { EventEmitter, Terminal, window, workspace } from 'vscode';
+import { parse, stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
@@ -21,6 +21,7 @@ import { ComponentDescription } from '../../src/odo/componentTypeDescription';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
+import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
 
 const ODO = Odo.Instance;
 
@@ -329,7 +330,7 @@ suite('odo commands integration', function () {
             //
             // and then save into the same debfile.yaml
             const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile = JSYAML.load(file.toString()) as V222Devfile;
+            const devfile = parse(file.toString()) as V222Devfile;
             if (!devfile || !devfile.commands) {
                 fail(`DevFile '${devfilePath}' cannot be read`);
             }
@@ -361,7 +362,7 @@ suite('odo commands integration', function () {
                     id: helloWorldCommandId
                 })
             }
-            await fs.writeFile(devfilePath, JSYAML.dump(devfile));
+            await fs.writeFile(devfilePath, stringify(devfile, YAML_STRINGIFY_OPTIONS));
         }
 
         test('runComponentCommand()', async function () {

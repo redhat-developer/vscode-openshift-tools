@@ -3,16 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { randomInt } from 'crypto';
-import { dump as dumpYaml, load as loadYaml } from 'js-yaml';
 import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { parse, stringify } from 'yaml';
 import { OpenShiftExplorer } from '../../explorer';
 import { ClusterServiceVersionKind, CustomResourceDefinitionKind } from '../../k8s/olm/types';
 import { Oc } from '../../oc/ocWrapper';
 import { getServiceKindStubs } from '../../openshift/serviceHelpers';
 import { ExtensionID } from '../../util/constants';
+import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 import { loadWebviewHtml } from '../common-ext/utils';
 import type {
     CustomResourceDefinitionStub,
@@ -122,7 +123,7 @@ export default class CreateServiceViewLoader {
                         });
                     } else {
                         // create a new unsaved YAML file with the default data and show it to the user
-                        const serviceYaml = dumpYaml(defaults);
+                        const serviceYaml = stringify(defaults, YAML_STRINGIFY_OPTIONS);
                         const newTextDocument = await vscode.workspace.openTextDocument({ content: serviceYaml, language: 'yaml' });
                         await vscode.window.showTextDocument(newTextDocument);
 
@@ -200,7 +201,7 @@ async function getDefaultsFromServiceKindStub(clusterServiceVersion: ClusterServ
     };
     const examplesYaml: string =
         clusterServiceVersion.metadata?.annotations?.['alm-examples'];
-    const examples: any[] = examplesYaml ? loadYaml(examplesYaml) as any[] : [];
+    const examples: any[] = examplesYaml ? parse(examplesYaml) as any[] : [];
     const example = examples.find((item) => item.kind === stub.kind);
     if (example) {
         defaults = _.merge(example, defaults);

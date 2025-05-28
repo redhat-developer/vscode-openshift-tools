@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import * as fs from 'fs';
-import * as JSYAML from 'js-yaml';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { ColorTheme, ColorThemeKind, commands, Disposable, extensions, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import { parse } from 'yaml';
 import { OpenShiftExplorer } from '../../explorer';
 import * as Helm from '../../helm/helm';
 import { Chart, ChartResponse, HelmRepo } from '../../helm/helmChartType';
@@ -244,7 +244,7 @@ export default class HelmChartLoader implements Disposable {
 
     private static async fetchURL(repo: HelmRepo, url: string) {
         const helmRepoContent = await fetch(url);
-        const yamlResponse = JSYAML.load(await helmRepoContent.text()) as {
+        const yamlResponse = parse(await helmRepoContent.text()) as {
             entries: { [key: string]: Chart[] };
         };
         const entries = yamlResponse.entries;

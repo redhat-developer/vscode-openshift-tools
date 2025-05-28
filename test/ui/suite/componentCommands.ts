@@ -3,23 +3,23 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as pth from 'path';
 import {
     ActivityBar,
     EditorView,
     SideBarView,
     TreeItem,
     ViewSection,
-    before,
     after,
+    before,
 } from 'vscode-extension-tester';
-import { VIEWS } from '../common/constants';
-import { expect } from 'chai';
-import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
-import * as yml from 'js-yaml';
-import * as fs from 'fs';
-import * as pth from 'path';
-import { reloadWindow } from '../common/overdrives';
+import { parse } from 'yaml';
 import { itemExists } from '../common/conditions';
+import { VIEWS } from '../common/constants';
+import { reloadWindow } from '../common/overdrives';
+import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
@@ -59,7 +59,7 @@ export function testComponentCommands(path: string) {
         it('Commands are listed', async function () {
             //get expected commands
             const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
-            const parsedDevfile = yml.load(devfile) as { [key: string]: any };
+            const parsedDevfile = parse(devfile) as { [key: string]: any };
             const expectedCommands = [];
 
             parsedDevfile.commands.forEach((command) => {

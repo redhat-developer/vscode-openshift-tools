@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-
-import * as YAML from 'js-yaml';
 import { findNodeAtPosition, parse } from 'node-yaml-parser';
+import * as vscode from 'vscode';
+import { parse as yamlParse } from 'yaml';
 import { MappingItem, Node, NodeProvider } from './locator-util';
 
 export function isMapping(node: YamlNode): node is YamlMap {
@@ -112,7 +111,7 @@ export class YamlLocator {
             // the document and line lengths from parse method is cached into YamlCachedDocuments to avoid duplicate
             // parse against the same text.
             try {
-                YAML.load(textDocument.getText()); // this is used to detect errors in the yaml file before actually parse it with the node-yaml-parser lib
+                yamlParse(textDocument.getText()); // this is used to detect errors in the yaml file before actually parse it with the node-yaml-parser lib
                 const { documents, lineLengths } = parse(textDocument.getText());
                 this.cache[key].yamlDocs = documents;
                 this.cache[key].lineLengths = lineLengths;

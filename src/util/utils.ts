@@ -14,6 +14,7 @@ import {
 import { access as accessOriginal, rm as rmOriginal } from 'fs/promises';
 import * as path from 'path';
 import { decompress as decompressOriginal } from 'targz';
+import { CreateNodeOptions, DocumentOptions, ParseOptions, SchemaOptions, ToStringOptions } from 'yaml';
 
 /**
  * Returns the absolute path for a specified relative image path
@@ -30,6 +31,16 @@ export function imagePath(imagePath: string): string {
     baseDir = path.parse(baseDir).name === 'out' ? path.dirname(baseDir) : baseDir;
     return path.join(baseDir, 'images', imagePath);
 }
+
+/**
+ * YAML serialization options tailored for Kubernetes manifests and similar configs:
+ * - sortMapEntries: true     → ensures object keys are sorted for consistency (useful for diffs)
+ * - indent: 2                → standard YAML indentation, aligns with K8s and Devfile formatting
+ * - lineWidth: 0             → disables line wrapping for better readability and stability in tools
+ * - version: '1.2'           → uses modern YAML 1.2 spec (default is 1.2 but made explicit here)
+ * - directives: false        → omits the '---' document start marker unless explicitly needed
+ */
+export const YAML_STRINGIFY_OPTIONS: DocumentOptions & SchemaOptions & ParseOptions & CreateNodeOptions & ToStringOptions = { sortMapEntries: true, indent: 2, lineWidth: 0, version: '1.2', directives: false }
 
 // The following wrappers are needed for unit tests due to
 // 'TypeError: Descriptor for property XXX is non-configurable and non-writable' error

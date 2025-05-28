@@ -148,7 +148,6 @@
 		"got": "^11.8.6",
 		"hasha": "^5.2.2",
 		"istanbul": "^0.4.5",
-		"js-yaml": "^4.1.0",
 		"json-schema": "^0.4.0",
 		"json-to-ast": "^2.1.0",
 		"leasot": "^14.4.0",

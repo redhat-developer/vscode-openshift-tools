@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs/promises';
-import { load } from 'js-yaml';
 import * as path from 'path';
+import { parse } from 'yaml';
 import { CommandOption, CommandText } from '../base/command';
 import { GitModel } from './git/git';
 import { FunctionContent, InvokeFunction } from './types';
@@ -15,7 +15,7 @@ export class Utils {
         let funcData: FunctionContent;
         try {
             const funcYaml: string = await fs.readFile(path.join(dir, 'func.yaml'), 'utf-8');
-            funcData = load(funcYaml) as FunctionContent;
+            funcData = parse(funcYaml) as FunctionContent;
         } catch {
             // ignore
         }

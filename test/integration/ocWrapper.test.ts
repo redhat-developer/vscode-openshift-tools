@@ -7,9 +7,9 @@ import { KubeConfig } from '@kubernetes/client-node';
 import { fail } from 'assert';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
-import * as JSYAML from 'js-yaml';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
+import { parse } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
@@ -200,7 +200,7 @@ suite('./oc/ocWrapper.ts', function () {
         test('createKubernetesObjectFromSpec()', async function () {
             let deployments = await Oc.Instance.getKubernetesObjects('Deployment');
             expect(deployments).to.have.length(0);
-            await Oc.Instance.createKubernetesObjectFromSpec(JSYAML.load(serviceFileYaml) as object);
+            await Oc.Instance.createKubernetesObjectFromSpec(parse(serviceFileYaml) as object);
             deployments = await Oc.Instance.getKubernetesObjects('Deployment');
             expect(deployments).to.have.length(1);
         });
