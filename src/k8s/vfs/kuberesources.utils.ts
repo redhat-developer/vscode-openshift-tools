@@ -190,8 +190,11 @@ export class K8sResourceCache {
       return [];
     }
 
-    const errors: Diagnostic[] = [];
     const cachedResource: K8sResource = this.get(uri)?.resource;
+    if (!cachedResource) { // Nothing to validate against - skip
+      return [];
+    }
+
     const resourceName = cachedResource.metadata.name;
     const namespace = cachedResource.metadata.namespace || 'default';
     const kind = cachedResource.kind.toLowerCase();
@@ -203,6 +206,7 @@ export class K8sResourceCache {
       `The field "${fieldPath.join('.')}" cannot be changed after the resource has been created. ` +
       'Kubernetes does not allow updates to immutable fields such as apiVersion, kind, metadata.name, or metadata.namespace.');
     const nullRange = new Range(textDocument.positionAt(0), textDocument.positionAt(0));
+    const errors: Diagnostic[] = [];
 
     // Validate whether the K8s resource is the same (kine/apiVersion/name/namespace)
     if (!this.isSameKind(cachedResource, resource)) {
