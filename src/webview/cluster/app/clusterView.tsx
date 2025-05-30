@@ -11,25 +11,25 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import StopIcon from '@mui/icons-material/Stop';
 import { Alert } from '@mui/lab';
 import {
-    Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
-    Button,
-    Chip,
-    Divider,
-    LinearProgress,
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
-    Paper, Step, StepContent, StepLabel, Stepper, TextField,
-    ThemeProvider,
-    Tooltip,
-    Typography
+  Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
+  Button,
+  Chip,
+  Divider,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper, Step, StepContent, StepLabel, Stepper, TextField,
+  ThemeProvider,
+  Tooltip,
+  Typography
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import * as React from 'react';
-import * as ClusterViewStyles from './clusterView.style';
+import { EsmBridge } from '../../../../src/util/esmBridge';
 import { ClusterViewProps } from '../../common/propertyTypes';
-import prettyBytes from 'pretty-bytes';
+import * as ClusterViewStyles from './clusterView.style';
 
 const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
@@ -74,7 +74,7 @@ export default function addClusterView(props: ClusterViewProps) {
 
   const steps = getSteps();
 
-    const setCrcStatus = (message) => {
+    const setCrcStatus = async (message) => {
         if (!message.status.success) {
             setStatus(
                 {
@@ -86,8 +86,8 @@ export default function addClusterView(props: ClusterViewProps) {
             setStatus({
                 crcStatus: message.status.crcStatus,
                 openshiftStatus: message.status.openshiftStatus,
-                diskUsage: message.status.diskUsage ? prettyBytes(message.status.diskUsage) : 'N/A',
-                cacheUsage: message.status.cacheUsage ? prettyBytes(message.status.cacheUsage) : 'N/A',
+                diskUsage: message.status.diskUsage ? (await EsmBridge.Instance.prettyBytesApi()).prettyBytes(message.status.diskUsage) : 'N/A',
+                cacheUsage: message.status.cacheUsage ? (await EsmBridge.Instance.prettyBytesApi()).prettyBytes(message.status.cacheUsage) : 'N/A',
                 cacheDir: message.status.cacheDir,
                 crcVer: message.versionInfo.version,
                 openshiftVer: message.versionInfo.openshiftVersion,
@@ -96,7 +96,7 @@ export default function addClusterView(props: ClusterViewProps) {
         }
     }
 
-  const messageListener = (event) => {
+  const messageListener = async (event) => {
     if (event?.data?.action){
       const message = event.data;
         switch (message.action) {
@@ -107,7 +107,7 @@ export default function addClusterView(props: ClusterViewProps) {
           case 'crcstartstatus' :
             setProgress(false);
             setStatusSkeleton(false);
-            setCrcStatus(message);
+            await setCrcStatus(message);
             setSettingPresent(true);
             break;
           case 'sendcrcstoperror' :
@@ -122,7 +122,7 @@ export default function addClusterView(props: ClusterViewProps) {
             }
             setStopProgress(false);
             setStatusSkeleton(false);
-            setCrcStatus(message);
+            await setCrcStatus(message);
             break;
           case 'crcsetting' :
             setSettingPresent(true);
@@ -132,7 +132,7 @@ export default function addClusterView(props: ClusterViewProps) {
             if (message.errorStatus) {
               setStatusError(true);
             } else {
-              setCrcStatus(message);
+              await setCrcStatus(message);
             }
             break;
           default:
