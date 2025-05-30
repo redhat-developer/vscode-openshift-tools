@@ -27,6 +27,13 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Install clipboard utility required by `clipboardy >=4.0.0` package
+      # - name: Install clipboard utility
+      #   if: (success() || failure()) && runner.os == 'Linux'
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y xclip
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
