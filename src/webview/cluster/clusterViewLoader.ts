@@ -116,10 +116,8 @@ async function clusterEditorMessageListener (event: any ): Promise<any> {
                         const oauthInfo = await sandboxAPI.getOauthServerInfo(signupStatus.apiEndpoint);
                         const makeCoreV1ApiClient = ((proxy: string, username: string, accessToken: string): CoreV1Api => {
                             const kcu = Cluster.prepareSSOInKubeConfig(proxy, username, accessToken);
-                            const apiClient = new CoreV1Api(proxy);
-                                apiClient.setDefaultAuthentication(kcu);
-                                return apiClient;
-                            });
+                            return kcu.makeApiClient(CoreV1Api);
+                        });
                         const pipelineAccountToken = await Cluster.getPipelineServiceAccountToken(
                                 makeCoreV1ApiClient(signupStatus.proxyURL, signupStatus.compliantUsername,
                                     (sessionCheck as any).idToken),
