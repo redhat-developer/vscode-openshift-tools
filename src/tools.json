@@ -130,43 +130,43 @@
         "description": "Helm CLI tool",
         "vendor": "The Helm Project",
         "name": "helm",
-        "version": "3.18.1",
-        "versionRange": "^3.18.1",
-        "versionRangeLabel": "version >= 3.18.1",
+        "version": "3.18.2",
+        "versionRange": "^3.18.2",
+        "versionRangeLabel": "version >= 3.18.2",
         "dlFileName": "helm",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://get.helm.sh/helm-v3.18.1-windows-amd64.zip",
-                "sha256sum": "d0f74d2043dae67992d4dcdd430844aa4817e4735a42ef9ecb4d2f042e2ed2bb",
+                "url": "https://get.helm.sh/helm-v3.18.2-windows-amd64.zip",
+                "sha256sum": "49fc2d74a351974ebf544f8252a4e43d7e5f9e0137472415393178c2d3996e9f",
                 "dlFileName": "helm-windows-amd64.zip",
                 "cmdFileName": "helm.exe",
                 "filePrefix": "windows-amd64/"
             },
             "darwin": {
-                "url": "https://get.helm.sh/helm-v3.18.1-darwin-amd64.tar.gz",
-                "sha256sum": "3973bda1863d74614e1dca69ee65050928a80b88f6d10ec514fa7886a02de309",
+                "url": "https://get.helm.sh/helm-v3.18.2-darwin-amd64.tar.gz",
+                "sha256sum": "8bfc850d4451dccecb01c73bdc844cb1b3ed2f1b90a89fc47e7b1670e1f369ec",
                 "dlFileName": "helm-darwin-amd64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "darwin-amd64/"
             },
             "darwin-arm64": {
-                "url": "https://get.helm.sh/helm-v3.18.1-darwin-arm64.tar.gz",
-                "sha256sum": "93562d2a0e34a505954e5b9556e319f390bc5bd07bed754ddc038b09cfe6fbd9",
+                "url": "https://get.helm.sh/helm-v3.18.2-darwin-arm64.tar.gz",
+                "sha256sum": "d82a30d654862668ae1e58dbbba5ea6ed5f84312da59666ef628bf73b2188d39",
                 "dlFileName": "helm-darwin-arm64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "darwin-arm64/"
             },
             "linux": {
-                "url": "https://get.helm.sh/helm-v3.18.1-linux-amd64.tar.gz",
-                "sha256sum": "b1c7e8e261fd30f34c617282813ecafc63628fcd59a255a9fc51b1fe43394c05",
+                "url": "https://get.helm.sh/helm-v3.18.2-linux-amd64.tar.gz",
+                "sha256sum": "c5deada86fe609deefdf40e9cbbe3da2f8cf3f6a4551a0ebe7886dc8fcf98bce",
                 "dlFileName": "helm-linux-amd64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "linux-amd64/"
             },
             "linux-arm64": {
-                "url": "https://get.helm.sh/helm-v3.18.1-linux-arm64.tar.gz",
-                "sha256sum": "5ddc8fbd4b17857754a95be799543ceafa5aa9532b05f738ee590a76bb049988",
+                "url": "https://get.helm.sh/helm-v3.18.2-linux-arm64.tar.gz",
+                "sha256sum": "03181a494a0916b370a100a5b2536104963b095be53fb23d1e29b2afb1c7de8d",
                 "dlFileName": "helm-linux-arm64.tar.gz",
                 "cmdFileName": "helm",
                 "filePrefix": "linux-arm64/"
