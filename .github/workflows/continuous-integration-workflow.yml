@@ -54,9 +54,9 @@ jobs:
             NODE_OPTIONS: --max_old_space_size=16384
         run: xvfb-run npm run test:coverage --silent
 
-      - uses: engineerd/setup-kind@v0.6.2
+      - name: Start KinD cluster
         if: (success() || failure()) && runner.os == 'Linux'
-        name: Start cluster
+        uses: helm/kind-action@v1.10.0
         with:
           version: v0.24.0
 
