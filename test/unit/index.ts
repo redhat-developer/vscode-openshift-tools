@@ -12,7 +12,6 @@ import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
 sourceMapSupport.install();
 
-
 const config: Mocha.MochaOptions = {
     reporter: 'spec',
     ui: 'tdd',

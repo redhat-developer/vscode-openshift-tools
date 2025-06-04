@@ -17,7 +17,6 @@ import { access as accessOriginal, rm as rmOriginal } from 'fs/promises';
 import * as path from 'path';
 import { decompress as decompressOriginal } from 'targz';
 import { CreateNodeOptions, DocumentOptions, ParseOptions, SchemaOptions, ToStringOptions } from 'yaml';
-
 /**
  * Returns the absolute path for a specified relative image path
  *
@@ -63,20 +62,21 @@ export const YAML_STRINGIFY_OPTIONS: DocumentOptions & SchemaOptions & ParseOpti
 // 'TypeError: Descriptor for property XXX is non-configurable and non-writable' error
 // that may occure when trying to stub the following methods with SinonStub
 //
+export const Util = {
+    // Wraps from fs/promises
+    rm: rmOriginal,
+    access: accessOriginal,
 
-// Wraps from fs/promises
-export const rm = rmOriginal;
-export const access = accessOriginal;
+    // Wraps from fs-extra
+    ensureDirSync: ensureDirSyncOriginal,
+    watch: watchOriginal,
+    realpathSync: realpathSyncOriginal,
+    ensureFileSync: ensureFileSyncOriginal,
+    writeFileSync: writeFileSyncOriginal,
 
-// Wraps from fs-extra
-export const ensureDirSync = ensureDirSyncOriginal;
-export const watch = watchOriginal;
-export const realpathSync = realpathSyncOriginal;
-export const ensureFileSync = ensureFileSyncOriginal;
-export const writeFileSync = writeFileSyncOriginal;
+    // Wraps from child_process
+    exec: execOriginal,
 
-// Wraps from child_process
-export const exec = execOriginal;
-
-// Wraps from child_process
-export const decompress = decompressOriginal;
+    // Wraps from child_process
+    decompress: decompressOriginal
+};

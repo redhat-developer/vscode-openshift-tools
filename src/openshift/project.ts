@@ -29,8 +29,9 @@ export class Project extends OpenShiftItem implements Disposable {
     static async set(): Promise<string | null> {
         let message: string = null;
         const kind = await getNamespaceKind();
-        const canCreateProjects = await Oc.Instance.canCreateNamespace();
-        const canListProjects = await Oc.Instance.canListNamespaces();
+        const oc = Oc.Instance;
+        const canCreateProjects = await oc.canCreateNamespace();
+        const canListProjects = await oc.canListNamespaces();
 
         const createNewProject = {
             label: `Create new ${kind}`,
@@ -40,8 +41,7 @@ export class Project extends OpenShiftItem implements Disposable {
             label: `Manually set active ${kind}`,
             description: `Type in ${kind} name and make it active`
         };
-        const projectsAndCreateNew = Oc.Instance
-            .getProjects() //
+        const projectsAndCreateNew = oc.getProjects() //
             .then((projects) => {
                 const items = [];
                 if (canCreateProjects) {
@@ -65,7 +65,7 @@ export class Project extends OpenShiftItem implements Disposable {
                 await Project.getProjectName(`${kind} name`, Promise.resolve([])) : selectedItem.label;
             if (!projectName) return null;
 
-            await Oc.Instance.setProject(projectName);
+            await oc.setProject(projectName);
             OpenShiftExplorer.getInstance().refresh();
             Project.serverlessView.refresh();
             message = `${kind} '${projectName}' set as active.`;
@@ -77,11 +77,12 @@ export class Project extends OpenShiftItem implements Disposable {
     @vsCommand('openshift.namespace.create')
     static async create(): Promise<string> {
         const kind = await getNamespaceKind();
-        const projectList = Oc.Instance.getProjects(true);
+        const oc = Oc.Instance;
+        const projectList = oc.getProjects(true);
         let projectName = await Project.getProjectName(`${kind} name`, projectList);
         if (!projectName) return null;
         projectName = projectName.trim();
-        return Oc.Instance.createProject(projectName)
+        return oc.createProject(projectName)
             .then(() => {
                 const k8sConfigInfo = new KubeConfigInfo();
                 const currentContext = k8sConfigInfo.findContext(k8sConfigInfo.getEffectiveKubeConfig().currentContext);
@@ -102,8 +103,8 @@ export class Project extends OpenShiftItem implements Disposable {
     @vsCommand('openshift.namespace.delete.palette', true)
     static async delFromPalette(): Promise<string | null> {
         const kind = await getNamespaceKind();
-        const projects = Oc.Instance
-            .getProjects(true) // Get only projects existing on cluster
+        const oc = Oc.Instance;
+        const projects = oc.getProjects(true) // Get only projects existing on cluster
             .then((projects) => [
                 ...projects.map((project) => ({
                     label: project.name,
@@ -113,20 +114,21 @@ export class Project extends OpenShiftItem implements Disposable {
         const selectedItem = await window.showQuickPick(projects, {placeHolder: `Select ${kind} to delete`});
         if (!selectedItem) return null;
         return Project.del({
-            kind: 'project',
-            metadata: {
-                name: selectedItem.label,
-            },
-        } as KubernetesObject);
+                kind: 'project',
+                metadata: {
+                    name: selectedItem.label,
+                },
+            } as KubernetesObject
+        );
     }
 
     @vsCommand('openshift.project.delete', false)
     @vsCommand('openshift.namespace.delete', false)
-    static async del(project: KubernetesObject): Promise<string> {
+    static async del(project: KubernetesObject, context?: { oc?: Oc }): Promise<string> {
         let result: Promise<string> = null;
-
-        const isProjectEmpty = (await Oc.Instance.getAllKubernetesObjects(project.metadata.name)).length === 0;
-
+        const oc = context?.oc ?? Oc.Instance;
+        const projectObjects = await oc.getAllKubernetesObjects(project.metadata.name);
+        const isProjectEmpty = !projectObjects || projectObjects.length === 0;
         const kind = await getNamespaceKind();
         const value = await window.showWarningMessage(`Do you want to delete ${kind} '${project.metadata.name}'${!isProjectEmpty ? ' and all its contents' : ''}?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
@@ -134,9 +136,13 @@ export class Project extends OpenShiftItem implements Disposable {
                 `Deleting ${kind} '${project.metadata.name}'`,
                 async () => {
                     // migrate to odo3.ts
-                    const projects = await Oc.Instance.getProjects();
+                    const projects = await oc.getProjects();
                     const selectedProject = projects.find(p => p.name === project.metadata.name);
-                    await Oc.Instance.deleteProject(selectedProject.name);
+                    if (selectedProject) {
+                        await oc.deleteProject(selectedProject.name);
+                    } else {
+                        throw Error(`${kind} to delete not found: ${project.metadata.name}`)
+                    }
                     OpenShiftExplorer.getInstance().refresh();
                 })
                 .catch((err) => Promise.reject(new VsCommandError(`Failed to delete ${kind} with error '${err}'`, `Failed to delete ${kind}`)))

@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
-import * as childProcess from '../../../src/util/utils';
+import { Util as childProcess } from '../../../src/util/utils';
 
 const {expect} = chai;
 chai.use(sinonChai);

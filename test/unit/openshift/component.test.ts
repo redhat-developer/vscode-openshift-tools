@@ -6,8 +6,6 @@
 
 import * as chai from 'chai';
 import { PathLike, RmOptions } from 'fs-extra';
-import * as fsp from '../../../src/util/utils';
-// import * as fsp from 'fs/promises';
 import * as path from 'path';
 import pq from 'proxyquire';
 import * as sinon from 'sinon';
@@ -23,9 +21,11 @@ import { CommandProvider } from '../../../src/odo/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
-import * as Util from '../../../src/util/async';
+import { Util } from '../../../src/util/async';
+import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
+
 
 const { expect } = chai;
 chai.use(sinonChai);
@@ -129,7 +129,9 @@ suite('OpenShift/Component', function () {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
+
         Component = pq('../../../src/openshift/component', {}).Component;
+
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);

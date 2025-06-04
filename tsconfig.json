@@ -1,51 +1,39 @@
 {
-    "compilerOptions": {
-        "jsx": "react",
-        "module": "commonjs",
-        "target": "es6",
-        "outDir": "out",
-        "lib": [
-            "es6",
-            "dom"
-        ],
-        "typeRoots": [
-            "./src/@types"
-        ],
-        "sourceMap": true,
-        "rootDir": ".",
-        "esModuleInterop": true,
-        /* Strict Type-Checking Option */
-        "strict": false,   /* enable all strict type-checking options */
-        /* Additional Checks */
-        "noUnusedLocals": true, /* Report errors on unused locals. */
-        // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-        // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-        // "noUnusedParameters": true,  /* Report errors on unused parameters. */
-        "experimentalDecorators": true,
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "incremental": true
+  "compilerOptions": {
+    "outDir": "./out",
+    "rootDir": ".",
+    "paths": {
+      "clipboardy": [ "out/esm/clipboardy.cjs" ],
+      "got": [ "out/esm/got.cjs" ],
+      "@kubernetes/client-node": [ "out/esm/k8s-client-node.cjs" ]
     },
-    "exclude": [
-        "node_modules",
-        ".vscode-test",
-        "test-resources",
-        "src/webview/cluster/app",
-        "src/webview/create-service/app",
-        "src/webview/create-route/app",
-        "src/webview/create-component/app",
-        "src/webview/create-deployment/app",
-        "src/webview/create-component/pages",
-        "src/webview/create-deployment/pages",
-        "src/webview/devfile-registry/app",
-        "src/webview/welcome/app",
-        "src/webview/git-import/app",
-        "src/webview/helm-chart/app",
-        "src/webview/helm-manage-repository/app",
-        "src/webview/feedback/app",
-        "src/webview/serverless-function/app",
-        "src/webview/serverless-manage-repository/app",
-        "src/webview/openshift-terminal/app",
-        "src/webview/common"
-    ]
+    "baseUrl": ".",
+    "jsx": "react",
+    "target": "es6",
+    "lib": ["es6", "dom"],
+    "noEmit": false,
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "strict": false,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "noImplicitOverride": false,
+    "skipLibCheck": true,
+    "incremental": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "typeRoots": [ "./src/@types", "./node_modules/@types", "./out/extension" ],
+    "sourceMap": true
+  },
+  "include": [ "test/**/*.ts", "src/**/*.ts" ],
+  "exclude": [
+    "node_modules",
+    ".vscode-test",
+    "test-resources",
+    "src/webview/**/app/**/*",
+    "src/webview/common/**/*"
+  ]
 }

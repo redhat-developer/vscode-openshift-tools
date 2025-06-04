@@ -147,7 +147,6 @@ suite('OpenShift/Project', () => {
 
         test('works without context', async () => {
             const result = await Project.del(null);
-
             expect(result).equals(`Project '${projectItem.name}' successfully deleted`);
             expect(deleteProjectStub).to.be.calledWith(projectItem.name);
         });
@@ -155,7 +154,6 @@ suite('OpenShift/Project', () => {
         test('returns null when cancelled', async () => {
             warnStub.resolves('Cancel');
             const result = await Project.del(null);
-
             expect(result).null;
         });
 
