@@ -11,16 +11,16 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   ignore:
-  - dependency-name: "mui/lab"
-    versions: [">=7.0.0"]
-  - dependency-name: "@mui/material"
-    versions: [">=7.0.0"]
   - dependency-name: "@mui/icons-material"
-    versions: [">=7.0.0"]
+    versions: [">=7.0.0-0"]
+  - dependency-name: "mui/lab"
+    versions: [">=7.0.0-0"]
+  - dependency-name: "@mui/material"
+    versions: [">=7.0.0-0"]
   - dependency-name: "@mui/styles"
-    versions: [">=7.0.0"]
-  - dependency-name: "@mui/lab"
-    versions: [">=7.0.0"]
+    versions: [">=7.0.0-0"]
+  - dependency-name: "@mui/x-tree-view"
+    versions: [">=8.0.0-0"]
   groups:
     typescript-eslint:
       patterns:
