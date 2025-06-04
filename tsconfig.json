@@ -2,6 +2,7 @@
     "compilerOptions": {
         "jsx": "react",
         "module": "commonjs",
+        "moduleResolution": "node",
         "target": "es6",
         "outDir": "out",
         "lib": [
@@ -9,22 +10,20 @@
             "dom"
         ],
         "typeRoots": [
-            "./src/@types"
+            "./src/@types-ignore", "./src/@types"
         ],
-        "sourceMap": true,
+        // "sourceMap": true,
         "rootDir": ".",
         "esModuleInterop": true,
-        /* Strict Type-Checking Option */
-        "strict": false,   /* enable all strict type-checking options */
-        /* Additional Checks */
-        "noUnusedLocals": true, /* Report errors on unused locals. */
-        // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-        // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-        // "noUnusedParameters": true,  /* Report errors on unused parameters. */
+        "strict": false,
+        "noUnusedLocals": true,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
-        "incremental": true
+        "incremental": true,
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true,
     },
     "exclude": [
         "node_modules",

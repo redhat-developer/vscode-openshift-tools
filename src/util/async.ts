@@ -14,6 +14,12 @@ export async function wait(timeout = 2500): Promise<void> {
     return new Promise((res) => setTimeout(res, timeout));
 }
 
+export const Util = {
+  wait: async function (timeout = 2500): Promise<void> {
+    return new Promise((res) => setTimeout(res, timeout));
+  }
+};
+
 export interface Task<T> {
     (): T;
 }

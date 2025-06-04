@@ -6,7 +6,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { FSWatcher } from 'fs-extra';
-import * as fsxt from '../util/utils';
+import { Util as fsxt } from '../util/utils';
 
 export class WatchUtil {
     static watchFileForContextChange(

@@ -4,19 +4,18 @@
  *-----------------------------------------------------------------------------------------------*/
 /* eslint-disable no-console */
 
-import * as testElectron from '@vscode/test-electron';
-import { platform } from 'os';
+const testElectron = require('@vscode/test-electron');
+const { platform } = require('os');
+const cp = require('child_process');
+const path = require('path');
+const packageJson = require('../package.json');
 
-import * as cp from 'child_process';
-import * as path from 'path';
-import * as packageJson from '../package.json';
-
-void testElectron.downloadAndUnzipVSCode().then((executable: string) => {
+void testElectron.downloadAndUnzipVSCode().then((executable) => {
     // Install extensions that openshift-toolkit depends on
     const extensionsToInstall = packageJson.extensionDependencies;
 
     if (extensionsToInstall) {
-        let vsCodeExecutable: string;
+        let vsCodeExecutable;
         if (platform() === 'darwin') {
             console.log(executable);
             vsCodeExecutable = `'${path.join(
