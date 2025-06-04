@@ -14,7 +14,7 @@ import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
-import * as fs from '../util/utils';
+import { Util as fs } from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';

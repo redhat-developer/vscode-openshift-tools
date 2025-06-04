@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { KubeConfig, loadYaml } from '@kubernetes/client-node';
+import { KubeConfig, loadYaml } from '@kubernetes/client-node/dist';
 import { ActionOnInvalid, Cluster, Context, User } from '@kubernetes/client-node/dist/config_types';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -31,10 +31,12 @@ type KubeConfigEntry = {
 class CustomKubeConfig extends KubeConfig {
     constructor(ctmContexts: Context[], ctmCurrentContext: string, ctmClusters: Cluster[], ctmUsers: User[]) {
         super();
-        this.contexts = ctmContexts;
-        this.clusters = ctmClusters;
-        this.users = ctmUsers;
-        this.currentContext = ctmCurrentContext;
+        super.loadFromOptions({
+            contexts: ctmContexts,
+            currentContext: ctmCurrentContext,
+            clusters: ctmClusters,
+            users: ctmUsers,
+        });
     }
 };
 

@@ -4,21 +4,36 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "watch",
+            "label": "watch:extension",
             "type": "npm",
-            "script": "watch",
+            "script": "watch:extension",
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch"
+        },
+        {
+            "label": "watch:webviews",
+            "type": "npm",
+            "script": "watch:webviews",
             "isBackground": true,
             "problemMatcher": {
-                "background": {
-                    "beginsPattern": "\\[[^\\]]+\\] File change detected. Compiling...",
-                    "endsPattern": "\\[[^\\]]+\\] Compilation complete. Found (?:no|some) errors. Watching for file changes.",
-                    "activeOnStart": false,
+                "owner": "custom",
+                "pattern": {
+                    "regexp": "."
                 },
-                "base": "$tsc-watch",
-            },
-            "presentation": {
-                "reveal": "never",
-            },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*Building the webviews\\.\\.\\.",
+                    "endsPattern": ".*Watching the webviews\\.\\.\\."
+                }
+            }
+        },
+        {
+            "label": "watch",
+            "dependsOn": [
+                "watch:extension",
+                "watch:webviews"
+            ],
+            "dependsOrder": "parallel"
         },
         {
             "label": "compile",

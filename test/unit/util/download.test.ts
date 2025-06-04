@@ -27,21 +27,28 @@ suite('Download Util', () => {
         requestEmitter = new EventEmitter();
         streamEmitter = new EventEmitter();
         requestEmitter.pipe = (): any => streamEmitter;
-        progressMock = pq('../../../src/downloadUtil/download', {
-            got: {
-                stream: (): any => requestEmitter
-            },
-            stream: {
-                pipeline: async (a, b, cb): Promise<void> => {
-                    await wait(300);
-                    requestEmitter.emit('downloadProgress', {percent: 0.33});
-                    await wait(300);
-                    requestEmitter.emit('downloadProgress', {percent: 0.66});
-                    await wait(300);
-                    requestEmitter.emit('end');
-                    cb(null);
-                }
+
+        const mockGot = {
+            default: (): any => requestEmitter,
+            got: (): any => requestEmitter,
+            stream: (): any => requestEmitter
+        };
+
+        const mockStream = {
+            pipeline: async (a, b, cb): Promise<void> => {
+                await wait(300);
+                requestEmitter.emit('downloadProgress', {percent: 0.33});
+                await wait(300);
+                requestEmitter.emit('downloadProgress', {percent: 0.66});
+                await wait(300);
+                requestEmitter.emit('end');
+                cb(null);
             }
+        };
+
+        progressMock = pq('../../../src/downloadUtil/download', {
+            got: mockGot,
+            stream: mockStream
         }).DownloadUtil as typeof DownloadUtilType;
     });
 

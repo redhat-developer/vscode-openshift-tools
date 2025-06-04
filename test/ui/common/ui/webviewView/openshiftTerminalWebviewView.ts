@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import clipboard from 'clipboardy';
 import { By, Key, VSBrowser, WebElement, WebviewView } from 'vscode-extension-tester';
 import { WebviewViewForm } from './webviewViewForm';
 
@@ -16,8 +17,7 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
             async () => {
                 try {
                     await this.sendKeysToTerminal(copyKeys);
-                    const cb = await import('clipboardy');
-                    return await cb.read();
+                    return await clipboard.read();
                 } catch {
                     return null;
                 }

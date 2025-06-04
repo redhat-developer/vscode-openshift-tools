@@ -26,8 +26,10 @@ export class Console implements Disposable {
     static getCurrentProject(): string {
         const k8sConfigInfo = new KubeConfigInfo();
         const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
-        const project = k8sConfig.contexts?.find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
-        return project;
+        if (k8sConfig.currentContext === undefined) {
+            return undefined;
+        }
+        return k8sConfig.contexts?.find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
     }
 
     @vsCommand('clusters.openshift.build.openConsole')

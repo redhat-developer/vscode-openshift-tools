@@ -18,10 +18,7 @@ suite('K8s/console', () => {
     let sandbox: sinon.SinonSandbox;
     let cliExecStub: sinon.SinonStub;
     let commandStub: any;
-
-    const k8sConfigInfo = new KubeConfigInfo();
-    const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
-    const project = (k8sConfig.contexts).find((ctx) => ctx.name === k8sConfig.currentContext).namespace;
+    let project: string;
 
     const context = {
         extraInfo: undefined,
@@ -37,6 +34,11 @@ suite('K8s/console', () => {
         sandbox = sinon.createSandbox();
         cliExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: undefined, error: undefined});
         commandStub = sandbox.stub(vscode.commands, 'executeCommand');
+
+        const k8sConfigInfo = new KubeConfigInfo();
+        const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
+        const ctx = k8sConfig.contexts.find((ctx) => ctx.name === k8sConfig.currentContext);
+        project = (ctx && ctx.namespace) ? ctx.namespace : undefined;
     });
 
     teardown(() => {
@@ -56,6 +58,7 @@ suite('K8s/console', () => {
                     }
                 })
             });
+
             await Console.openBuildConfig(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://console-openshift-console.apps-crc.testing/k8s/ns/${project}/buildconfigs/cpm1-app1`));
 
@@ -70,7 +73,6 @@ suite('K8s/console', () => {
             });
             await Console.openBuildConfig(context);
             expect(commandStub).calledOnceWith('vscode.open', vscode.Uri.parse(`https://162.165.64.43:8443/console/project/${project}/browse/builds/cpm1-app1?tab=history`));
-
         });
 
     });

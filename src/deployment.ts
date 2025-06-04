@@ -8,7 +8,7 @@ import * as path from 'path';
 import validator from 'validator';
 import { Disposable, InputBox, QuickInputButtons, ThemeIcon, TreeItem, window } from 'vscode';
 import { CommandText } from './base/command';
-import { OtherObject, OpenShiftExplorer } from './explorer';
+import { OpenShiftExplorer, OtherObject } from './explorer';
 import { Oc } from './oc/ocWrapper';
 import { validateRFC1123DNSLabel } from './openshift/nameValidator';
 import { inputValue, quickBtn } from './util/inputValue';
@@ -103,7 +103,7 @@ export class Deployment implements Disposable {
         if (!component) {
             return;
         }
-        const pods: OtherObject[] = await OpenShiftExplorer.getInstance().getPods(component);
+        const pods: OtherObject[] = await OpenShiftExplorer.getInstance().getPods(component) as unknown as OtherObject[];
         const runnngPodsLength = pods.filter((pod) => pod.status.phase === 'Running').length;
         let count = runnngPodsLength.toString();
         count = await inputValue(`How many replicas would you like to scale ${component.kind}/${component.metadata.name}?`,

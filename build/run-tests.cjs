@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as etest from '@vscode/test-electron';
-import * as path from 'path';
+const etest = require('@vscode/test-electron');
+const path = require('path');
 
 /**
  * Run mocha tests from project's tests folder.
  * This script expects a subfolder name and extension development path as parameters to
  * identify what kind of tests to run: unit, integration or ui.
  */
-async function main(): Promise<void> {
+async function main() {
     const [, , tests, extension = ''] = process.argv;
-    const extensionRootPath = path.resolve(__dirname, '../../');
+    const extensionRootPath = path.resolve(__dirname, '../');
     const extensionDevelopmentPath = path.resolve(extensionRootPath, extension);
     const extensionTestsPath = path.resolve(extensionRootPath, 'out', 'test', tests);
     const integrationWorkspacePath = path.resolve(extensionRootPath, 'test', 'fixtures', 'components', 'components.code-workspace');
@@ -33,6 +33,10 @@ async function main(): Promise<void> {
     //
     const boolPattern = /^(true|1|yes)$/i;
     const verbose = boolPattern.test(process.env.VERBOSE);
+
+    // Point to bootstrap loader
+    process.env.NODE_OPTIONS = `--require ${path.resolve(__dirname, '../test/bootstrap.js')}`;
+
     try {
         await etest.runTests({
             extensionDevelopmentPath,
@@ -45,7 +49,7 @@ async function main(): Promise<void> {
         });
     } catch (err) {
         // eslint-disable-next-line no-console
-        console.error(`Failed to run tests: ${err}`);
+        console.error(`❌ Failed to run tests: `, err);
         process.exit(1);
     }
 }

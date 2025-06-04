@@ -49,7 +49,7 @@ export function registerCommands(): Disposable[] {
             let exception: any;
             const startTime = Date.now();
             try {
-                result = await Promise.resolve(cmd.method.call(null, ...params));
+                result = await Promise.resolve(cmd.method.apply(null, params));
                 displayResult(result);
             } catch (err) {
                 let stack:stackTraceParser.StackFrame[];
@@ -90,7 +90,7 @@ export function registerCommands(): Disposable[] {
     });
 }
 
-export function vsCommand(commandId: string, palette = false): (_target: any, key: string, descriptor: any)=> void {
+export function vsCommand(commandId: string, palette = false): MethodDecorator {
     return (_target: any, key: string, descriptor: any): void => {
         if (!(typeof descriptor.value === 'function')) {
             throw new Error('not supported');
