@@ -9,7 +9,7 @@ import type { Headers } from 'tar-fs';
 import * as unzipm from 'unzip-stream';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
-import * as targz from '../util/utils';
+import { Util as targz } from '../util/utils';
 
 export class Archive {
     static extract(

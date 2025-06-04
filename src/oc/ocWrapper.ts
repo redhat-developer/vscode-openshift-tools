@@ -28,6 +28,10 @@ export class Oc {
         return Oc.INSTANCE;
     }
 
+    static set Instance(val: Oc) {
+        this.INSTANCE = val;
+    }
+
     /**
      * Returns a list of all resources of the given type in the given namespace.
      *

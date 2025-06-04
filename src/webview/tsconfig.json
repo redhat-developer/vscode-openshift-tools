@@ -2,17 +2,17 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
-        "outDir": "../../out/webview",
+        "outDir": "../../out",
         "target": "es6",
         "jsx": "react",
         "typeRoots": [
+            "../../src/@types-ignore",
             "../../node_modules/@types",
             "@types"
         ],
         "experimentalDecorators": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "noEmit": true,
         "incremental": true,
     },
     "include": [

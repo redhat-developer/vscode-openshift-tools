@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Context, KubernetesObject } from '@kubernetes/client-node';
+import type { Context, KubernetesObject } from '@kubernetes/client-node';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as tmp from 'tmp';
@@ -276,12 +276,14 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     label: element.metadata.name,
                     collapsibleState: TreeItemCollapsibleState.Collapsed
                 }
-            } else if (element.kind === 'Pod') {
-                const contextElement: OtherObject = element;
+            } else if (element.kind === 'Pod' && element ) {
+                const contextElement = element as OtherObject;
+                const podLabel = (contextElement as KubernetesObject).metadata?.name ?? 'unknown';
+                const podKind = (contextElement as KubernetesObject).kind ?? 'unknown';
                 return {
                     contextValue: 'openshift.k8sObject.pod',
-                    label: contextElement.metadata.name,
-                    description: `${contextElement.kind.substring(0, 1).toLocaleUpperCase()}${contextElement.kind.substring(1)}`,
+                    label: podLabel,
+                    description: `${podKind.substring(0, 1).toLocaleUpperCase()}${podKind.substring(1)}`,
                     collapsibleState: TreeItemCollapsibleState.None,
                     iconPath: contextElement.status.phase === 'Running' ? imagePath('context/runningPod.svg') : imagePath('context/notReadyPod.svg'),
                     tooltip: `${contextElement.status.phase}\n${contextElement.status.podIP ? contextElement.status.podIP : ''}`,
@@ -391,7 +393,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         let pods: OtherObject[] = [];
         if (shouldHaveReplicas) {
             try {
-                pods = await this.getPods(element);
+                pods = await this.getPods(element) as OtherObject[];
             } catch {
                 // ignore
             }
@@ -698,7 +700,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     public async getPipelineTasks(element: KubernetesObject | OpenShiftObject): Promise<PipelineTasks[]> {
         const namespace: string = await Oc.Instance.getActiveProject();
-        const collections: OtherObject[] = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext);
+        const collections = await Oc.Instance.getKubernetesObjects(element.kind, namespace, undefined, this.executionContext) as OtherObject[];
         const taskNames: PipelineTasks[] = [];
         if (!collections || collections.length === 0 || !collections[0].spec) {
             return [];
@@ -744,7 +746,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     if (pods.length === 0) {
                         contextElement.status.phase = 'Terminated'
                         void OpenShiftExplorer.getInstance().refresh(contextElement);
-                        void window.showInformationMessage(`Pod ${contextElement.metadata.name} ${contextElement.status.phase.toLowerCase()}`);
+                        void window.showInformationMessage(`Pod ${(contextElement as KubernetesObject).metadata?.name} ${contextElement.status.phase.toLowerCase()}`);
                         void OpenShiftExplorer.getInstance().refresh();
                         return;
                     }

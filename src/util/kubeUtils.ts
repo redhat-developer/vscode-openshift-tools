@@ -31,10 +31,10 @@ type KubeConfigEntry = {
 class CustomKubeConfig extends KubeConfig {
     constructor(ctmContexts: Context[], ctmCurrentContext: string, ctmClusters: Cluster[], ctmUsers: User[]) {
         super();
-        this.contexts = ctmContexts;
-        this.clusters = ctmClusters;
-        this.users = ctmUsers;
-        this.currentContext = ctmCurrentContext;
+        this['contexts'] = ctmContexts;
+        this['clusters'] = ctmClusters;
+        this['users'] = ctmUsers;
+        this['currentContext'] = ctmCurrentContext;
     }
 };
 

@@ -18,6 +18,8 @@ out/build**
 out/build/**
 out/coverage/**
 out/**/*.map
+out/esm/**
+out/shared/**
 out/src-orig/**
 out/test/**
 out/test-resources/**

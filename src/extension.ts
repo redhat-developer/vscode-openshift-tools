@@ -16,6 +16,7 @@ import { REDHAT_CLOUD_PROVIDER } from './cloudProvider/redhatCloudProvider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
 import { Deployment } from './deployment';
+import { downloadFileAndCreateSha256, PlatformData } from './downloadUtil/downloadBinaries';
 import { OpenShiftExplorer } from './explorer';
 import { Feedback } from './feedback';
 import { ManageRepository as HelmManageRepository } from './helm/manageRepository';
@@ -75,6 +76,13 @@ async function registerKubernetesCloudProvider(): Promise<void> {
 }
 
 export async function activate(extensionContext: ExtensionContext): Promise<unknown> {
+    // exlint-disable no-console
+    console.log('🧪 activate(): process.argv:', process.argv);
+    const extDir = process.env.TEST_EXTENSIONS_DIR;
+    const userDataDir = process.env.TEST_USER_DATA_DIR;
+    console.log('🧪 TEST_EXTENSIONS_DIR:', extDir);
+    console.log('🧪 TEST_USER_DATA_DIR:', userDataDir);
+
     void WelcomePage.createOrShow();
     void commands.executeCommand('setContext', 'isVSCode', env.uiKind);
 
@@ -326,4 +334,12 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     return {
         verifyBundledBinaries
     };
+}
+
+export async function downloadFileAndCreateSha256Ex(
+    toolsCacheFolder: string,
+    toolsFolder: string,
+    platform: PlatformData,
+): Promise<void> {
+    return downloadFileAndCreateSha256(toolsCacheFolder, toolsFolder, platform);
 }
