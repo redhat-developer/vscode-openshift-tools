@@ -14,7 +14,7 @@ updates:
   - dependency-name: "@mui/icons-material"
     versions: [">=7.0.0-0"]
   - dependency-name: "mui/lab"
-    versions: [">=7.0.0-0"]
+    versions: [">=6.999"]
   - dependency-name: "@mui/material"
     versions: [">=7.0.0-0"]
   - dependency-name: "@mui/styles"
