@@ -12,7 +12,7 @@ updates:
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: "@types/node"
-    versions: [">=21.0.0-0"]
+    versions: [">=21.0.0"]
   - dependency-name: "@mui/icons-material"
     versions: [">=7.0.0-0"]
   - dependency-name: "@mui/lab"
