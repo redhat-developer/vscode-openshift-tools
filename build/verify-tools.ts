@@ -11,13 +11,13 @@
 
 import * as cp from 'child_process';
 import * as fs from 'fs-extra';
-import * as hasha from 'hasha';
 import * as mkdirp from 'mkdirp';
 import * as os from 'os';
 import * as path from 'path';
 import { exit } from 'shelljs';
 import { DownloadUtil } from '../src/downloadUtil/download';
 import * as configData from '../src/tools.json';
+import { hashFile } from '../src/util/utils';
 
 /**
  * Download reqURL to targetFolder and save it to fileName. Verify the downloaded file sha256 is matching sha256sum
@@ -38,7 +38,7 @@ async function downloadFileAndCreateSha256(
     const currentFile = path.join(targetFolder, fileName);
     console.log(`${currentFile} download started from ${reqURL}`);
     await DownloadUtil.downloadFile(reqURL, currentFile, (current) => console.log(`${current}%`));
-    const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
+    const currentSHA256 = await hashFile(currentFile);
     if (currentSHA256 === sha256sum) {
         console.log(`[INFO] ${currentFile} is downloaded and sha256 is correct`);
     } else {

@@ -4,7 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { exec as execOriginal } from 'child_process';
+import { createHash } from 'crypto';
 import {
+    createReadStream,
     ensureDirSync as ensureDirSyncOriginal,
     ensureFileSync as ensureFileSyncOriginal,
     realpathSync as realpathSyncOriginal,
@@ -30,6 +32,21 @@ export function imagePath(imagePath: string): string {
     let baseDir = path.join(__dirname, '..', '..');
     baseDir = path.parse(baseDir).name === 'out' ? path.dirname(baseDir) : baseDir;
     return path.join(baseDir, 'images', imagePath);
+}
+
+export function hash(input, algorithm = 'sha256') {
+    return createHash(algorithm).update(input).digest('hex');
+}
+
+export function hashFile(filePath, algorithm = 'sha256') {
+    return new Promise((resolve, reject) => {
+        const hash = createHash(algorithm);
+        const stream = createReadStream(filePath);
+
+        stream.on('error', reject);
+        stream.on('data', (chunk) => hash.update(chunk));
+        stream.on('end', () => resolve(hash.digest('hex')));
+    });
 }
 
 /**
