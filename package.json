@@ -78,7 +78,7 @@
 		"shelljs": "^0.10.0"
 	},
 	"devDependencies": {
-		"@apidevtools/json-schema-ref-parser": "^13.0.1",
+		"@apidevtools/json-schema-ref-parser": "^13.0.2",
 		"@codemirror/lang-yaml": "^6.1.2",
 		"@devfile/api": "^2.2.2-1716821574",
 		"@kubernetes/client-node": "^0.22.3",
