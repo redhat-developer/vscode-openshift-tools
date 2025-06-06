@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { By, Key, VSBrowser, WebElement, WebviewView } from 'vscode-extension-tester';
+import { EsmBridge } from '../../../../../src/util/esmBridge';
 import { WebviewViewForm } from './webviewViewForm';
 
 export class OpenshiftTerminalWebviewView extends WebviewViewForm {
@@ -16,9 +17,21 @@ export class OpenshiftTerminalWebviewView extends WebviewViewForm {
             async () => {
                 try {
                     await this.sendKeysToTerminal(copyKeys);
-                    const cb = await import('clipboardy');
+                    const cb = await EsmBridge.Instance.clibboardyApi();
+                    /* eslint-disable no-console */
+
+                    console.error(`clibboardyApi: ${cb}`);
+                    console.error(`clibboardyApi.read: ${cb?.read}`);
+
+                    /* eslint-disable no-console */
+
                     return await cb.read();
-                } catch {
+                } catch(__err) {
+                    /* eslint-disable no-console */
+
+                    console.error(`clibboardyApi call error: ${__err}`);
+
+                    /* eslint-disable no-console */
                     return null;
                 }
             },
