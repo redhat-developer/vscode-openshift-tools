@@ -6,9 +6,9 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs-extra';
-import * as hasha from 'hasha';
 import * as mkdirp from 'mkdirp';
 import * as path from 'path';
+import { hashFile } from '../util/utils';
 import { Archive } from './archive';
 import { DownloadUtil } from './download';
 
@@ -23,7 +23,7 @@ export interface PlatformData {
 export async function isDownloadRequired(filePath: string, sha256: string): Promise<boolean> {
     let result = true;
     if (fs.existsSync(filePath)) {
-        const fileSha256 = await hasha.fromFile(filePath, { algorithm: 'sha256' });
+        const fileSha256 = await hashFile(filePath);
         result = fileSha256 !== sha256;
     }
     return result;
@@ -56,7 +56,7 @@ export async function downloadFileAndCreateSha256(
         await DownloadUtil.downloadFile(platform.url, currentFile, (current) =>
             console.log(`${current}%`),
         );
-        const currentSHA256 = await hasha.fromFile(currentFile, { algorithm: 'sha256' });
+        const currentSHA256 = await hashFile(currentFile);
         if (platform.sha256sum) {
             if (currentSHA256 === platform.sha256sum) {
                 console.log(`Download of ${currentFile} has finished and SHA256 is correct`);

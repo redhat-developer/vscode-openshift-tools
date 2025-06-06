@@ -7,7 +7,6 @@ import * as assert from 'assert';
 import * as chai from 'chai';
 import * as fs from 'fs';
 import * as fsex from 'fs-extra';
-import * as hasha from 'hasha';
 import * as path from 'path';
 import pq from 'proxyquire';
 import * as shelljs from 'shelljs';
@@ -16,6 +15,7 @@ import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
+import * as utils from '../../src/util/utils';
 
 chai.use(sinonChai);
 
@@ -103,7 +103,7 @@ suite('tools configuration', () => {
                 sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
                 sb.stub<any, any>(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-                const stub = sb.stub(hasha, 'fromFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
+                const stub = sb.stub(utils, 'hashFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
                 await ToolsConfig.detect('odo');
                 assert.ok(!chmodSyncStub.called);
