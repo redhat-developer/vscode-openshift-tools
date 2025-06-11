@@ -198,7 +198,8 @@
 		"cross-spawn": "^7.0.6",
 		"globals": "^16.0.0",
 		"tough-cookie": "^5.1.2",
-		"tar-fs": "^2.1.2"
+		"tar-fs": "^2.1.2",
+		"brace-expansion": "^4.0.1"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
