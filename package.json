@@ -144,7 +144,6 @@
 		"file-loader": "^6.2.0",
 		"fs-extra": "^11.3.0",
 		"git-up": "^8.1.1",
-		"glob": "^11.0.2",
 		"got": "^11.8.6",
 		"istanbul": "^0.4.5",
 		"json-schema": "^0.4.0",
@@ -198,8 +197,7 @@
 		"cross-spawn": "^7.0.6",
 		"globals": "^16.0.0",
 		"tough-cookie": "^5.1.2",
-		"tar-fs": "^2.1.2",
-		"brace-expansion": "^4.0.1"
+		"tar-fs": "^2.1.2"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",

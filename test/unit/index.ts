@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { sync } from 'fast-glob';
 import * as fs from 'fs';
-import { sync } from 'glob';
 import Mocha from 'mocha';
 import * as paths from 'path';
 import * as sourceMapSupport from 'source-map-support';
