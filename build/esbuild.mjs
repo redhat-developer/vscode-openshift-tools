@@ -6,7 +6,7 @@
 import { transform } from '@svgr/core';
 import * as esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
-import * as glob from 'glob';
+import fglob from 'fast-glob';
 import { createRequire } from 'module';
 import { cp, mkdir, readFile, stat } from 'node:fs/promises';
 import * as path from 'path';
@@ -248,7 +248,7 @@ await Promise.all([
         if (!dirExists(targetDir)) {
             await mkdir(targetDir, { recursive: true, mode: 0o750} );
         }
-        glob.sync([ `${srcDir}/webview/${webview}/app/index.html` ]).map(async srcFile => {
+        fglob.sync([ `${srcDir}/webview/${webview}/app/index.html` ]).map(async srcFile => {
             await cp(path.join(__dirname, srcFile), path.join(targetDir, `${path.basename(srcFile)}`))
         });
     })

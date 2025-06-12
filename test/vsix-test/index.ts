@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 /* tslint:disable no-require-imports */
 
-import { sync } from 'glob';
+import { sync } from 'fast-glob';
 import Mocha from 'mocha';
 import * as paths from 'path';
 
