@@ -21,9 +21,12 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node: [ 20 ]
+    env:
+      VERBOSE: true
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

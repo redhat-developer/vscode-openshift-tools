@@ -6,7 +6,7 @@
 
 import * as chai from 'chai';
 import { PathLike, RmOptions } from 'fs-extra';
-import * as fsp from '../../../src/util/utils';
+// import * as fsp from '../../../src/util/utils';
 // import * as fsp from 'fs/promises';
 import * as path from 'path';
 import pq from 'proxyquire';
@@ -23,9 +23,13 @@ import { CommandProvider } from '../../../src/odo/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
-import * as Util from '../../../src/util/async';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
+
+// import * as Util from '../../../src/util/async';
+// const Util = require('../../../src/util/async');
+import { Util } from '../../../src/util/async';
+import { Util as fsp } from '../../../src/util/utils';
 
 const { expect } = chai;
 chai.use(sinonChai);

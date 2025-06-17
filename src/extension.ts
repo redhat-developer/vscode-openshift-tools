@@ -16,6 +16,7 @@ import { REDHAT_CLOUD_PROVIDER } from './cloudProvider/redhatCloudProvider';
 import { ComponentsTreeDataProvider } from './componentsView';
 import { DebugSessionsView } from './debug';
 import { Deployment } from './deployment';
+import { downloadFileAndCreateSha256, PlatformData } from './downloadUtil/downloadBinaries';
 import { OpenShiftExplorer } from './explorer';
 import { Feedback } from './feedback';
 import { ManageRepository as HelmManageRepository } from './helm/manageRepository';
@@ -326,4 +327,12 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     return {
         verifyBundledBinaries
     };
+}
+
+export async function downloadFileAndCreateSha256Ex(
+    toolsCacheFolder: string,
+    toolsFolder: string,
+    platform: PlatformData,
+): Promise<void> {
+    return downloadFileAndCreateSha256(toolsCacheFolder, toolsFolder, platform);
 }

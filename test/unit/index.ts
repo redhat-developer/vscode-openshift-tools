@@ -54,6 +54,12 @@ export async function run(): Promise<void> {
     const testFinder = createTestFinder(testsRoot);
     const testFiles:string[] = [];
 
+
+    // Mock ESM '@kubernetes/client-node' with a transferred to CJS module
+    const mock = require('mock-require');
+    const path = require('path');
+    mock('@kubernetes/client-node', require(path.resolve(__dirname, '../../../out/esm/k8s-client-node.cjs')));
+
     // add activation test first
     testFiles.push(...await testFinder('activation.js'));
 

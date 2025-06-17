@@ -5,7 +5,7 @@
 
 import { ExecException, ExecOptions } from 'child_process';
 import * as vscode from 'vscode';
-import * as cp from '../util/utils';
+import { Util as cp } from '../util/utils';
 import { Filters } from './filters';
 
 export interface CliExitData {

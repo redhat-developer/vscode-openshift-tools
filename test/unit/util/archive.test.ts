@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as tmp from 'tmp';
 import { Archive } from '../../../src/downloadUtil/archive';
-import * as targz from '../../../src/util/utils';
+import { Util as targz } from '../../../src/util/utils';
 
 const {expect} = chai;
 chai.use(sinonChai);
