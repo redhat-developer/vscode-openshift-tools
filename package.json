@@ -125,7 +125,7 @@
 		"chokidar": "^4.0.3",
 		"clipboardy": "^2.3.0",
 		"clsx": "^2.1.1",
-		"codemirror": "^6.0.1",
+		"codemirror": "^6.0.2",
 		"dockerode": "^4.0.7",
 		"dompurify": "^3.2.6",
 		"dpdm": "^3.14.0",
