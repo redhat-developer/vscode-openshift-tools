@@ -63,7 +63,7 @@
 		"check-cycles": "dpdm --no-tree --no-warning --exit-code circular:1 ./src/extension.ts",
 		"bundle-tools": "ts-node ./build/bundle-tools.ts --platform",
 		"todo": "leasot **/*.ts --ignore node_modules -x",
-		"test:prepare": "npm install && npm run build",
+		"test:prepare": "npm install && npm install --save-dev @secretlint/node && npm run build",
 		"test": "npm run test:prepare && node ./out/build/install-vscode.js && node ./out/build/run-tests.js unit",
 		"test-integration": "npm run test:prepare && node ./out/build/run-tests.js integration",
 		"test-integration:coverage": "npm run test:prepare && npm run test:instrument && node ./out/build/run-tests.js integration",
@@ -193,6 +193,7 @@
 		"yaml": "^2.8.0"
 	},
 	"overrides": {
+		"@vscode/vsce": "^3.4.0",
 		"cookie": "^1.0.2",
 		"cross-spawn": "^7.0.6",
 		"globals": "^16.0.0",
