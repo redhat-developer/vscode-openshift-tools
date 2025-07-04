@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { CoreV1Api, KubeConfig, KubernetesObject, V1Secret, V1ServiceAccount } from '@kubernetes/client-node';
-import { Cluster as KcuCluster, Context as KcuContext } from '@kubernetes/client-node/dist/config_types';
+import { Cluster as KcuCluster, Context as KcuContext, User } from '@kubernetes/client-node/dist/config_types';
 import * as https from 'https';
 import { Disposable, ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, QuickPickItemKind, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
@@ -464,7 +464,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
                                 )
                                     .then(() =>
                                         Promise.all(
-                                            users.map((user) =>
+                                            users.map((user: User) =>
                                                 Oc.Instance.deleteUser(user.name)
                                             ),
                                         ),
@@ -1175,24 +1175,17 @@ export class Cluster extends OpenShiftItem implements Disposable {
 
     static prepareSSOInKubeConfig(proxy: string, username: string, accessToken: string): KubeConfig {
         const kcu = new KubeConfig();
-        const clusterProxy = {
-            name: 'sandbox-proxy',
-            server: proxy,
-        };
-        const user = {
-            name: 'sso-user',
-            token: accessToken,
-        };
-        const context = {
-            cluster: clusterProxy.name,
-            name: 'sandbox-proxy-context',
-            user: user.name,
-            namespace: `${username}-dev`,
-        };
-        kcu.addCluster(clusterProxy);
-        kcu.addUser(user)
-        kcu.addContext(context);
-        kcu.setCurrentContext(context.name);
+        kcu.loadFromOptions({
+            clusters: [{ name: 'sandbox-proxy', server: proxy, skipTLSVerify: false }],
+            users: [{ name: 'sso-user', token: accessToken }],
+            contexts: [{
+                name: 'sandbox-proxy-context',
+                cluster: 'sandbox-proxy',
+                user: 'sso-user',
+                namespace: `${username}-dev`,
+            }],
+            currentContext: 'sandbox-proxy-context',
+        });
         return kcu;
     }
 
@@ -1211,24 +1204,24 @@ export class Cluster extends OpenShiftItem implements Disposable {
         } as V1Secret
 
         try {
-            await k8sApi.createNamespacedSecret(`${username}-dev`, v1Secret);
+            await k8sApi.createNamespacedSecret({ namespace: `${username}-dev`, body: v1Secret });
         } catch {
             // Ignore
         }
-        const newSecrets = await k8sApi.listNamespacedSecret(`${username}-dev`);
-        return newSecrets?.body.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
+        const newSecrets = await k8sApi.listNamespacedSecret({ namespace: `${username}-dev` });
+        return newSecrets?.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
     }
 
     static async getPipelineServiceAccountToken(k8sApi: CoreV1Api, username: string): Promise<string> {
         try {
-            const serviceAccounts = await k8sApi.listNamespacedServiceAccount(`${username}-dev`);
-            const pipelineServiceAccount = serviceAccounts.body.items.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
+            const serviceAccounts = await k8sApi.listNamespacedServiceAccount({ namespace: `${username}-dev` });
+            const pipelineServiceAccount = serviceAccounts.items.find(serviceAccount => serviceAccount.metadata.name === 'pipeline');
             if (!pipelineServiceAccount) {
                 return;
             }
 
-            const secrets = await k8sApi.listNamespacedSecret(`${username}-dev`);
-            let pipelineTokenSecret = secrets?.body.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
+            const secrets = await k8sApi.listNamespacedSecret({ namespace: `${username}-dev` });
+            let pipelineTokenSecret = secrets?.items.find((secret) => secret.metadata.name === `pipeline-secret-${username}-dev`);
             if (!pipelineTokenSecret) {
                 pipelineTokenSecret = await Cluster.installPipelineSecretToken(k8sApi, pipelineServiceAccount, username);
                 if (!pipelineTokenSecret) {

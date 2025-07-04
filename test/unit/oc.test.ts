@@ -7,6 +7,7 @@ import * as chai from 'chai';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { window } from 'vscode';
+
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
 import { ToolsConfig } from '../../src/tools';

@@ -49,6 +49,19 @@
     </head>
     <body>
         <div class="box" id="root"></div>
+        <script>
+            // Tis script is a workaround for runtime errors like:
+            // `Uncaught SecurityError: Failed to read a named property from 'Window': Blocked a frame with origin ...`,
+            // that are typical of libraries that attempt to use window.top, window.parent, or manipulate the DOM outside
+            // the scope allowed in VS Code WebViews. In this certain case `@popperjs/core` causes this error.
+            // So, the workaround is to block Popper from using window.top or window.parent.
+            Object.defineProperty(window, 'parent', {
+                get: () => window,
+            });
+            Object.defineProperty(window, 'top', {
+                get: () => window,
+            });
+        </script>
         <script src="%SCRIPT%" ></script>
         <link rel="stylesheet" href="%STYLE%"></link>
     </body>

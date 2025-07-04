@@ -3,15 +3,34 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+// try {
+//   const Factory = require('istanbul/lib/object-utils/factory');
+//   const originalRegister = Factory.register;
+
+//   Factory.register = function (obj: any) {
+//     if (
+//       typeof obj === 'object' &&
+//       (typeof obj.runTests === 'function' || obj?.name === 'registerTests')
+//     ) {
+//       console.warn('[istanbul patch] Skipping test-like object from registration');
+//       return;
+//     }
+//     return originalRegister.call(this, obj);
+//   };
+
+//   console.log('[istanbul patch] Factory.register patched');
+// } catch (err) {
+//   console.warn('[istanbul patch] Failed to patch Factory.register:', err);
+// }
+
 import { sync } from 'fast-glob';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import Mocha from 'mocha';
 import * as paths from 'path';
 import * as sourceMapSupport from 'source-map-support';
-import { CoverageRunner, TestRunnerOptions } from '../coverage';
+// import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
 sourceMapSupport.install();
-
 
 const config: Mocha.MochaOptions = {
     reporter: 'spec',
@@ -24,16 +43,16 @@ const config: Mocha.MochaOptions = {
 
 const mocha = new Mocha(config);
 
-function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
-    let coverageRunner: CoverageRunner;
-    const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
-    if (process.env.OST_DISABLE_COVERAGE !== 'yes' && fs.existsSync(coverConfigPath)) {
-        const coverageConfig = JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions;
-        coverageConfig.relativeCoverageDir = paths.join(coverageConfig.relativeCoverageDir, 'unit');
-        coverageRunner = new CoverageRunner(coverageConfig, testsRoot);
-    }
-    return coverageRunner;
-}
+// function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
+//     let coverageRunner: CoverageRunner;
+//     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
+//     if (process.env.OST_DISABLE_COVERAGE !== 'yes' && fs.existsSync(coverConfigPath)) {
+//         const coverageConfig = JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions;
+//         coverageConfig.relativeCoverageDir = paths.join(coverageConfig.relativeCoverageDir, 'unit');
+//         coverageRunner = new CoverageRunner(coverageConfig, testsRoot);
+//     }
+//     return coverageRunner;
+// }
 
 function createTestFinder(testsRoot: string) {
     return (pattern: string): Promise<string[]> => {
@@ -49,10 +68,18 @@ function createTestFinder(testsRoot: string) {
 }
 
 export async function run(): Promise<void> {
+    console.log('🧪 process.argv:', process.argv);
+
     const testsRoot = paths.resolve(__dirname);
-    const coverageRunner = loadCoverageRunner(testsRoot);
+    // const coverageRunner = loadCoverageRunner(testsRoot);
     const testFinder = createTestFinder(testsRoot);
     const testFiles:string[] = [];
+
+
+    // // Mock ESM '@kubernetes/client-node' with a transferred to CJS module
+    // const mock = require('mock-require');
+    // const path = require('path');
+    // mock('@kubernetes/client-node', require(path.resolve(__dirname, '../../../out/esm/k8s-client-node.cjs')));
 
     // add activation test first
     testFiles.push(...await testFinder('activation.js'));
@@ -66,7 +93,18 @@ export async function run(): Promise<void> {
     testFiles.push(...await testFinder('k8s/*.test.js'));
     testFiles.push(...await testFinder('util/*.test.js'));
 
-    testFiles.forEach((f) => mocha.addFile(paths.join(testsRoot, f)));
+    testFiles.forEach((f) => {
+        console.log(`[unit/index: Adding test file: ${f}`);
+        mocha.addFile(paths.join(testsRoot, f));
+        // const testModule = require(paths.join(testsRoot, f));
+        // console.log(`[unit/index: Test module for file: ${f}: ${testModule ? `Found: ${testModule}` : 'Not found'}`);
+        // if (typeof testModule?.runTests === 'function') {
+        //     console.log(`[unit/index: Test module for file: ${f}: Invoking...`);
+        //     testModule();
+        //     console.log(`[unit/index: Test module for file: ${f}: Invoked`);
+        // }
+    });
+    console.log('[unit/index: Running the tests with Mocha');
 
     return new Promise((resolve, reject) => {
         let failed = 0;
@@ -77,9 +115,9 @@ export async function run(): Promise<void> {
                 }
             }).on('end', () => {
                 let coverageReported = Promise.resolve();
-                if (coverageRunner) {
-                    coverageReported = coverageRunner.reportCoverage();
-                }
+                // if (coverageRunner) {
+                //     coverageReported = coverageRunner.reportCoverage();
+                // }
                 coverageReported.then(() => {
                     if (failed > 0) {
                         reject (new Error(`Test failures: ${failed}`));

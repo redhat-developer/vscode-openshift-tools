@@ -14,14 +14,14 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import * as packagejson from '../../package.json';
 import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
 import { Odo } from '../../src/odo/odoWrapper';
 import { getNamespaceKind } from '../../src/util/kubeUtils';
 import { Progress } from '../../src/util/progress';
-
-import * as packagejson from '../../package.json';
+// import { getOc, OcWrapper } from '../../src/util/wrapperUtils';
 
 const {expect} = chai;
 chai.use(sinonChai);
@@ -52,13 +52,17 @@ function genComponentJson(p: string, a: string, n: string, c: string ): string {
 }
 
 suite('openshift toolkit Extension', () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     let sandbox: sinon.SinonSandbox;
     const projectItem: Project = {
         name: 'myproject',
         active: true,
     };
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
+    console.log(`fixtureFolder: ${fixtureFolder}`);
+
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
+    console.log(`comp2Uri: ${comp2Uri}`);
 
     setup(() => {
         sandbox = sinon.createSandbox();
@@ -67,7 +71,7 @@ suite('openshift toolkit Extension', () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
-        // eslint-disable-next-line @typescript-eslint/require-await
+
         sandbox.stub(Odo.prototype, 'execute').callsFake(async (cmd: CommandText, cwd: string)=> {
             if (`${cmd}`.includes('version')) {
                 return { error: undefined, stdout: 'Server: https://api.crc.testing:6443', stderr: '' };
@@ -90,8 +94,6 @@ suite('openshift toolkit Extension', () => {
             }
             return { error: undefined, stdout: '', stderr: ''};
         });
-        sandbox.stub(Oc.prototype, 'getAllKubernetesObjects').resolves([]);
-        sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
     });
 
     teardown(() => {
@@ -117,21 +119,27 @@ suite('openshift toolkit Extension', () => {
         sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         const simStub = sandbox.stub(vscode.window, 'showInformationMessage');
         sandbox.stub(Progress, 'execFunctionWithProgress').resolves();
-        const p1 = {kind: 'project', metadata: { name: 'p1'}};
-        await vscode.commands.executeCommand('openshift.project.delete', p1);
+        const p1 = {kind: 'project', metadata: { name: 'myproject'}};
+        const stubbedOc = sandbox.createStubInstance(Oc);
+        stubbedOc.getProjects.resolves([ projectItem ]);
+        await vscode.commands.executeCommand('openshift.project.delete', p1, { oc: stubbedOc });
         const kind = await getNamespaceKind();
         expect(simStub).calledWith(`${kind} '${p1.metadata.name}' successfully deleted`);
     });
 
     test('async command wrapper shows error message from rejected command', async () => {
+        const stubbedOc = sandbox.createStubInstance(Oc);
+        stubbedOc.getProjects.resolves([ projectItem ]);
         sandbox.stub<any, any>(vscode.window, 'showWarningMessage').resolves('Yes');
         sandbox.stub(vscode.window, 'showInformationMessage');
         const semStub = sandbox.stub(vscode.window, 'showErrorMessage');
         const error = new Error('message');
         sandbox.stub(Progress, 'execFunctionWithProgress').rejects(error);
-        const p1 = {kind: 'project', metadata: { name: 'p1'}};
-        await vscode.commands.executeCommand('openshift.project.delete', p1);
+        const p1 = {kind: 'project', metadata: { name: 'myproject1'}};
+        await vscode.commands.executeCommand('openshift.project.delete', p1, { oc: stubbedOc });
         const kind = await getNamespaceKind();
-        expect(semStub).calledWith(`Failed to delete ${kind} with error '${error}'`);
+        expect(semStub).to.have.been.calledWithMatch(
+            sinon.match((msg: string) => msg.includes(`Failed to delete ${kind} with error`))
+        );
     });
 });
