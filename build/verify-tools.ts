@@ -14,7 +14,6 @@ import * as fs from 'fs-extra';
 import * as mkdirp from 'mkdirp';
 import * as os from 'os';
 import * as path from 'path';
-import { exit } from 'shelljs';
 import { DownloadUtil } from '../src/downloadUtil/download';
 import * as configData from '../src/tools.json';
 import { hashFile } from '../src/util/utils';
@@ -72,7 +71,7 @@ cp.exec('git diff --name-only origin/master -- .', async (error, stdout) => {
         try {
             await verifyTools();
         } catch {
-            exit(1);
+            process.exit(1);
         }
     } else {
         console.log('tools.json is not changed, skipping download verification');

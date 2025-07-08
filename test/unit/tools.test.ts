@@ -9,10 +9,10 @@ import * as fs from 'fs';
 import * as fsex from 'fs-extra';
 import * as path from 'path';
 import pq from 'proxyquire';
-import * as shelljs from 'shelljs';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import which from 'which';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
 import * as utils from '../../src/util/utils';
@@ -77,7 +77,7 @@ suite('tools configuration', () => {
     suite('detect', () => {
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
+            sb.stub(which, 'sync').returns({stdout: 'odo'} as string & null);
             sb.stub(fs, 'existsSync').returns(false);
             sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
             const toolLocation = await ToolsConfig.detect('odo');
@@ -98,7 +98,7 @@ suite('tools configuration', () => {
             });
 
             test('does not set executable attribute for tool file', async () => {
-                sb.stub(shelljs, 'which');
+                sb.stub(which, 'sync');
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
@@ -119,7 +119,7 @@ suite('tools configuration', () => {
                 ToolsConfig.resetConfiguration();
             });
             test('set executable attribute for tool file', async () => {
-                sb.stub(shelljs, 'which');
+                sb.stub(which, 'sync');
                 sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.version);
                 await ToolsConfig.detect('odo');
                 assert.ok(chmodSyncStub.called);

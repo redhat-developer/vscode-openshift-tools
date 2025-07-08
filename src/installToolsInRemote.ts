@@ -7,7 +7,7 @@
 import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import * as shell from 'shelljs';
+import which from 'which';
 import { downloadFileAndCreateSha256 } from './downloadUtil/downloadBinaries';
 import * as configData from './tools.json';
 
@@ -29,8 +29,11 @@ async function installBinary(tool): Promise<void> {
 export async function verifyBinariesInRemoteContainer(): Promise<void> {
     if (process.env.REMOTE_CONTAINERS === 'true') {
         for (const key in configData) {
-            if (shell.which(configData[key].name) == null) {
-                await installBinary(configData[key]);
+            if (key) {
+                const path = which.sync(configData[key].name, { nothrow: true });
+                if (!path) {
+                    await installBinary(configData[key]);
+                }
             }
         }
     }

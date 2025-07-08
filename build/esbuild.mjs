@@ -187,7 +187,7 @@ if (production) {
         platform: 'node',
         entryPoints: [`./${srcDir}/extension.ts`],
         outfile: `${outDir}/${srcDir}/extension.js`,
-        external: [ 'vscode', 'shelljs', 'jsonc-parser' ],
+        external: [ 'vscode', 'jsonc-parser' ],
         plugins: [
             nativeNodeModulesPlugin,
             esbuildProblemMatcherPlugin // this one is to be added to the end of plugins array
