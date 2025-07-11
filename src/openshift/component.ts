@@ -5,8 +5,8 @@
 
 import { platform } from 'os';
 import * as path from 'path';
-import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
+import which from 'which';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
 import { CommandProvider } from '../odo/componentTypeDescription';
@@ -207,7 +207,7 @@ export class Component extends OpenShiftItem {
     }
 
     private static async checkForPodman(): Promise<boolean> {
-        const podmanPath = which('podman');
+        const podmanPath = which.sync('podman', { nothrow: true });
         if (podmanPath) {
             if (platform() === 'linux') {
                 return true;

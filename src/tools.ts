@@ -7,8 +7,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { which } from 'shelljs';
 import * as vscode from 'vscode';
+import which from 'which';
 import * as configData from './tools.json';
 import { ChildProcessUtil } from './util/childProcessUtil';
 import { Platform } from './util/platform';
@@ -53,7 +53,7 @@ export class ToolsConfig {
                 }
             }
             if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
-                const whichLocation = which(cmd);
+                const whichLocation = which.sync(cmd, { nothrow: true });
                 toolLocations.unshift(whichLocation && whichLocation.stdout);
             }
 
