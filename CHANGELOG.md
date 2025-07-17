@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.20.0 (July 17, 2025)
+
+ * [#5086](https://github.com/redhat-developer/vscode-openshift-tools/issues/5086) Use the latest @kubernetes/client-node
+ * [#4535](https://github.com/redhat-developer/vscode-openshift-tools/issues/4535) Fixed the VSCode OpenShift Toolkit extension activation
+ * [#4472](https://github.com/redhat-developer/vscode-openshift-tools/issues/4472) Added the validation and save for a K8s resources loaded from cluster
+
 ## 1.19.0 (April 29, 2025)
 
  * [#4816](https://github.com/redhat-developer/vscode-openshift-tools/issues/4816) Multiple K8s configuration files are supported when configured in KUBECONFIG environment variable
