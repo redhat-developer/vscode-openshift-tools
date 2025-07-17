@@ -12,7 +12,7 @@ suite('Extension activation', function() {
 
         console.log('Installed extensions:', vscode.extensions.all.map(e => e.id));
 
-        const accExt = await vscode.extensions.getExtension('redhat.vscode-redhat-account');
+        const accExt = vscode.extensions.getExtension('redhat.vscode-redhat-account');
         assert.ok(accExt, 'Extension "redhat.vscode-redhat-account" not found');
         await accExt.activate();
 
