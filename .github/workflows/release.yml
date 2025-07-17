@@ -48,7 +48,7 @@ jobs:
 
       - name: Package
         run: |
-          node ./out/build/update-readme.js
+          node ./build/update-readme.cjs
           declare -A targets
           targets["win32-x64"]=win32
           targets["win32-arm64"]=win32
