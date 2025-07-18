@@ -694,8 +694,31 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         return collectableServices;
     }
 
+    private getPodLabelSelector(element: KubernetesObject): string | undefined {
+        const kind = element.kind;
+
+        const matchLabels = (element as any)?.spec?.selector?.matchLabels;
+        if (matchLabels && typeof matchLabels === 'object') {
+            return this.toLabelSelectorArg(matchLabels);
+        }
+
+        if (kind === 'Pod') {
+            const labels = (element as any)?.metadata?.labels;
+            if (labels && typeof labels === 'object') {
+                return this.toLabelSelectorArg(labels);
+            }
+        }
+
+        return undefined;
+    }
+
+    private toLabelSelectorArg(labels: Record<string, string>): string {
+        return labels && Object.entries(labels).map(([k, v]) => `${k}=${v}`).join(',');
+    }
+
     public async getPods(element: KubernetesObject | OpenShiftObject) {
-        return await Oc.Instance.getKubernetesObjects('pods', undefined, element.metadata.name, this.executionContext);
+        const selectorArg = this.getPodLabelSelector(element);
+        return await Oc.Instance.getKubernetesObjects('pods', undefined, selectorArg, this.executionContext);
     }
 
     public async getPipelineTasks(element: KubernetesObject | OpenShiftObject): Promise<PipelineTasks[]> {
