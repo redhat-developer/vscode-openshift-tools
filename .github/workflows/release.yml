@@ -96,7 +96,7 @@ jobs:
         npm install -g typescript "vsce" "ovsx"
         echo "EXT_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
     - name: Download VSIX Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
     - name: Publish to VS Code Marketplace
       if: ${{ github.event_name == 'schedule' || inputs.publishToMarketPlace == 'true' || inputs.publishPreRelease == 'true' }}
       run: |
