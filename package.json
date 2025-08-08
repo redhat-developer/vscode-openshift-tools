@@ -177,7 +177,7 @@
 		"survey-core": "^2.3.0",
 		"survey-react-ui": "^2.3.0",
 		"targz": "^1.0.1",
-		"tmp": "^0.2.3",
+		"tmp": "^0.2.5",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "8.38.0",
