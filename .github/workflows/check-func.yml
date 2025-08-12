@@ -12,7 +12,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Get latest FUNC version
         run: |
           echo "REPO_FUNC_VERSION=$(cat src/tools.json | jq -r .func.version)" >> $GITHUB_ENV

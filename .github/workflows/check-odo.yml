@@ -16,7 +16,7 @@ jobs:
       last-release-version: ${{ steps.repo-last-commit-info.outputs.repo-last-release-version }}
       nightly-build-version: ${{ steps.repo-last-commit-info.outputs.repo-nightly-build-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: '${{ env.TOOL_REPO }}'
           fetch-depth: 2
@@ -70,7 +70,7 @@ jobs:
     if: ${{ needs.check-odo.outputs.last-commit-id != '' && needs.check-pr.outputs.pr-exists == 0 && needs.check-nightly-build.outputs.nightly-build-exists != 0 }}
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Update src/tools.json with latest odo version
         run: |
           jq --indent 4 '.odo.description = "ODO CLI tool"' src/tools.json \
