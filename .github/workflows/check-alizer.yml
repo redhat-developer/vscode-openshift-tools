@@ -12,7 +12,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Get latest Alizer version
         run: |
           echo "REPO_ALIZER_VERSION=$(cat src/tools.json | jq -r .alizer.version)" >> $GITHUB_ENV

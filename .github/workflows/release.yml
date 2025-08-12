@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout vscode-openshift-tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -86,7 +86,7 @@ jobs:
     needs: packaging-job
     steps:
     - name: Checkout vscode-openshift-tools
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:

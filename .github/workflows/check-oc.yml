@@ -12,7 +12,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Get latest OC version
         run: |
           echo "REPO_OC_VERSION=$(cat src/tools.json | jq -r .oc.version)" >> $GITHUB_ENV
