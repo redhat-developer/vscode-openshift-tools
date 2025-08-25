@@ -23,7 +23,13 @@ updates:
     versions: [">=7.0.0-0"]
   - dependency-name: "@mui/x-tree-view"
     versions: [">=8.0.0-0"]
-  - dependency-name: "*react*"
+  - dependency-name: "react"
+    versions: [">=19.0.0-0"]
+  - dependency-name: "react-dom"
+    versions: [">=19.0.0-0"]
+  - dependency-name: "@types/react"
+    versions: [">=19.0.0-0"]
+  - dependency-name: "@types/react-dom"
     versions: [">=19.0.0-0"]
   groups:
     typescript-eslint:
