@@ -10,7 +10,7 @@ updates:
   schedule:
     interval: daily
   allow:
-    - dependency-type: "all"
+    - dependency-type: "direct"
   versioning-strategy: increase
   open-pull-requests-limit: 10
   ignore:
