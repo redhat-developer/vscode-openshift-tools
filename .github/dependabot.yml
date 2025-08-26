@@ -51,8 +51,10 @@ updates:
       - "@uiw/*"
     react:
       patterns:
-        - "react"
-        - "react-dom"
+      - "react"
+      - "@types/react"
+      - "react-dom"
+      - "@types/react-dom"
     sinon-chai:
       patterns:
         - "chai"
