@@ -9,9 +9,6 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-  allow:
-    - dependency-type: "direct"
-  versioning-strategy: increase
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: "@types/node"
