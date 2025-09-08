@@ -125,7 +125,7 @@
 		"clipboardy": "^4.0.0",
 		"clsx": "^2.1.1",
 		"codemirror": "^6.0.2",
-		"dockerode": "^4.0.7",
+		"dockerode": "^4.0.8",
 		"dompurify": "^3.2.6",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.25.9",
