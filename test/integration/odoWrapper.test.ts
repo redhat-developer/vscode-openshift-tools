@@ -143,7 +143,7 @@ suite('./odo/odoWrapper.ts', function () {
 
     suite('create component', function() {
 
-        const COMPONENT_TYPE = 'dotnet50';
+        const COMPONENT_TYPE = 'dotnet80';
         const COMPONENT_VERSION = 'latest';
 
         let tmpFolder: string;
@@ -159,7 +159,7 @@ suite('./odo/odoWrapper.ts', function () {
 
         test('createComponentFromTemplateProject()', async function() {
             await Odo.Instance.createComponentFromTemplateProject(tmpFolder, 'my-component', 8080,
-                COMPONENT_TYPE, COMPONENT_VERSION, OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME, 'dotnet50-example');
+                COMPONENT_TYPE, COMPONENT_VERSION, OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME, 'dotnet80-example');
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
@@ -180,7 +180,7 @@ suite('./odo/odoWrapper.ts', function () {
         test('createComponentFromLocation()', async function() {
             // the project already exists from the previous step,
             // we just need to recreate the Devfile
-            await Odo.Instance.createComponentFromLocation('dotnet50', undefined, 'my-component', 8080, Uri.file(tmpFolder));
+            await Odo.Instance.createComponentFromLocation('dotnet80', undefined, 'my-component', 8080, Uri.file(tmpFolder));
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
