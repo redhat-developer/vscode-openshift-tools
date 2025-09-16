@@ -653,18 +653,22 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                     collections =  await this.getPipelineTasks(element);
                     break;
                 default:
-                    try {
-                        collections = await Oc.Instance.getKubernetesObjects(element.kind, undefined, undefined, this.executionContext);
-                    } catch {
-                        collections = [ couldNotGetItem(element.kind, this.kubeConfigInfo.getEffectiveKubeConfig().getCluster(this.kubeContext.cluster)?.server) ];
-                    }
+                    collections = await Oc.Instance.getKubernetesObjects(
+                            element.kind, undefined, undefined, this.executionContext
+                        ).catch(() => Promise.resolve([
+                            couldNotGetItem(
+                                element.kind,
+                                this.kubeConfigInfo.getEffectiveKubeConfig().getCluster(this.kubeContext.cluster)?.server
+                            )
+                        ]));
                     break;
             }
             const toCollect = [
-                collections,
+                Promise.resolve(collections),
                 ...collectableServices
                     .map(serviceKind => Oc.Instance.getKubernetesObjects(serviceKind.name, undefined, undefined, this.executionContext))
             ];
+
             result = await Promise.all(toCollect).then(listOfLists => listOfLists.flatMap(a => a as ExplorerItem[]));
         }
         if (!element) {
