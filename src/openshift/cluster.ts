@@ -5,7 +5,8 @@
 
 import { CoreV1Api, KubeConfig, KubernetesObject, V1Secret, V1ServiceAccount } from '@kubernetes/client-node';
 import { Cluster as KcuCluster, Context as KcuContext, User } from '@kubernetes/client-node/dist/config_types';
-import * as https from 'https';
+import { get as httpGet } from 'http';
+import { get as httpsGet } from 'https';
 import { Disposable, ExtensionContext, QuickInputButtons, QuickPickItem, QuickPickItemButtonEvent, QuickPickItemKind, ThemeIcon, Uri, commands, env, window, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
@@ -666,9 +667,15 @@ export class Cluster extends OpenShiftItem implements Disposable {
      */
     static async pingCluster(url: string, abortController: AbortController): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
+            let request = httpGet;
+            try {
+                request = new URL(url).protocol.startsWith('https') ? httpsGet : httpGet;
+            } catch (err) {
+                // continue
+            }
             const signal = abortController?.signal;
             const options = { rejectUnauthorized: false, signal };
-            https.get(`${url}/api`, options, (response) => {
+            request(`${url}/api`, options, (response) => {
                 if (response.statusCode < 500) {
                     resolve(true);
                 } else {
