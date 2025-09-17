@@ -120,16 +120,11 @@ export class OdoPreference {
             const odoPreferenceFile = await fs.readFile(odoPreferenceFilePath, 'utf8');
             const odoPreferences = parse(odoPreferenceFile) as OdoPreferenceObject;
 
-            // If `odoPreferences.OdoSettings.RegistryList` is `null` or doesn't contain the `DefaultDevfileRegistry` item
-            // we have to recover at least the 'DefaultDevfileRegistry` item on it because this whole list will be replaced
-            if (!odoPreferences.OdoSettings.RegistryList) {
+            // If `odoPreferences.OdoSettings.RegistryList` is `null` or doesn't contain any registry item
+            // we should recover the 'DefaultDevfileRegistry` item on it
+            if (!odoPreferences.OdoSettings.RegistryList || odoPreferences.OdoSettings.RegistryList.length === 0) {
                 odoPreferences.OdoSettings.RegistryList = OdoPreference.DefaultOdoPreference.OdoSettings.RegistryList;
                 isToBeReWritten = true;
-            } else {
-                if (!odoPreferences.OdoSettings.RegistryList.find((r) => r.Name === OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME)) {
-                    odoPreferences.OdoSettings.RegistryList.push(OdoPreference.DefaultOdoPreference.OdoSettings.RegistryList[0]);
-                    isToBeReWritten = true;
-                }
             }
 
             mergedPreference = { ...mergedPreference, ...odoPreferences };
