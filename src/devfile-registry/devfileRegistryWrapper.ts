@@ -2,7 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as https from 'https';
+import { get as httpGet } from 'http';
+import { get as httpsGet } from 'https';
 import * as YAML from 'js-yaml';
 import { ExecutionContext } from '../cli';
 import { Registry } from '../odo/componentType';
@@ -143,11 +144,17 @@ export class DevfileRegistry {
 
     private static async _get(url: string, abortTimeout?: number, abortController?: AbortController): Promise<string> {
         return new Promise<string>((resolve, reject) => {
+            let request = httpGet;
+            try {
+                request = new URL(url).protocol.startsWith('https') ? httpsGet : httpGet;
+            } catch (err) {
+                // continue
+            }
             const signal = abortController?.signal;
             const timeout = abortTimeout ? abortTimeout : 5000;
             const options = { rejectUnauthorized: false, signal, timeout };
             let result: string = '';
-            https.get(url, options, (response) => {
+            request(url, options, (response) => {
                 if (response.statusCode < 500) {
                     response.on('data', (d) => {
                         result = result.concat(d);
