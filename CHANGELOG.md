@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.21.0 (September 22, 2025)
+
+ * [#5361](https://github.com/redhat-developer/vscode-openshift-tools/pull/5361) Devfile Registries list needs not contain Default Devfile Registry
+ * [#5215](https://github.com/redhat-developer/vscode-openshift-tools/issues/5215) Fixed Pod selector when loading Pods from Che Dev Space workspace
+
+
 ## 1.20.0 (July 17, 2025)
 
  * [#5086](https://github.com/redhat-developer/vscode-openshift-tools/issues/5086) Use the latest @kubernetes/client-node
