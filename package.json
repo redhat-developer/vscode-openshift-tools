@@ -70,7 +70,8 @@
 		"test-integration": "npm run test:prepare && node ./build/run-tests.cjs integration",
 		"test-integration:coverage": "npm run test:prepare && npm run test:instrument && node ./build/run-tests.cjs integration",
 		"cluster-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max",
-		"public-ui-test": "extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max"
+		"install-secretlint": "npm install --no-save @secretlint/node",
+		"public-ui-test": "npm run install-secretlint && extest setup-tests -e ./test-resources/extensions -c max -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions -c max"
 	},
 	"dependencies": {
 		"jsonc-parser": "^3.3.1",
@@ -196,7 +197,6 @@
 	"overrides": {
 		"cookie": "^1.0.2",
 		"cross-spawn": "^7.0.6",
-		"glob": "^7.2.3",
 		"globals": "^16.0.0",
 		"tough-cookie": "^5.1.2",
 		"tar-fs": "^2.1.2"
