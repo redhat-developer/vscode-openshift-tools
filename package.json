@@ -120,7 +120,7 @@
 		"@uiw/codemirror-theme-vscode": "^4.25.2",
 		"@uiw/react-codemirror": "^4.25.2",
 		"@vscode/test-electron": "^2.5.2",
-		"chai": "^6.0.1",
+		"chai": "^6.2.0",
 		"chokidar": "^4.0.3",
 		"clipboardy": "^5.0.0",
 		"clsx": "^2.1.1",
