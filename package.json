@@ -126,7 +126,7 @@
 		"clsx": "^2.1.1",
 		"codemirror": "^6.0.2",
 		"dockerode": "^4.0.9",
-		"dompurify": "^3.2.7",
+		"dompurify": "^3.3.0",
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.25.10",
 		"esbuild-node-externals": "^1.18.0",
