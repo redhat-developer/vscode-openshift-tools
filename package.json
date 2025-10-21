@@ -94,7 +94,7 @@
 		"@segment/analytics-next": "^1.81.1",
 		"@svgr/core": "^8.1.0",
 		"@svgr/plugin-jsx": "^8.1.0",
-		"@types/chai": "^5.2.2",
+		"@types/chai": "^5.2.3",
 		"@types/dockerode": "^3.3.44",
 		"@types/express": "^5.0.3",
 		"@types/fs-extra": "^11.0.4",
