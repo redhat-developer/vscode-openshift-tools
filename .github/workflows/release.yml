@@ -63,7 +63,7 @@ jobs:
           done
           ls -lash *.vsix *.sha256
       - name: Upload VSIX Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: openshift-toolkit
           path: openshift-toolkit*-${{ env.EXT_VERSION }}-${{github.run_number}}*.vsix
