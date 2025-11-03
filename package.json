@@ -128,7 +128,7 @@
 		"dockerode": "^4.0.9",
 		"dompurify": "^3.3.0",
 		"dpdm": "^3.14.0",
-		"esbuild": "^0.25.11",
+		"esbuild": "^0.25.12",
 		"esbuild-node-externals": "^1.18.0",
 		"esbuild-sass-plugin": "^3.3.1",
 		"eslint": "^9.39.1",
