@@ -11,7 +11,6 @@ import * as NameValidator from '../../openshift/nameValidator';
 import { ExtensionID } from '../../util/constants';
 import { gitUrlParse } from '../../util/gitParse';
 import { validateURLProps } from '../common/propertyTypes';
-
 export type Message = {
     action: string;
     data: any;
@@ -51,17 +50,6 @@ export async function loadWebviewHtml(webviewName: string, webviewPanel: Webview
     return htmlWithAdditionalInjections;
 }
 
-function isGitURL(host: string): boolean {
-    return [
-        'github.com',
-        'bitbucket.org',
-        'gitlab.com',
-        'git.sr.ht',
-        'codeberg.org',
-        'gitea.com',
-    ].includes(host);
-}
-
 export function validateURL(event: Message | { command: string; data: object }, isRequired = true): validateURLProps {
     if (isRequired && typeof event.data === 'string' && (event.data).trim().length === 0) {
         return {
@@ -93,10 +81,6 @@ export function validateGitURL(event: Message): validateURLProps {
     }
     try {
         const parse = gitUrlParse(event.data);
-        const isGitRepo = isGitURL(parse.host);
-        if (!isGitRepo) {
-            throw new Error('Invalid Git URL');
-        }
         if (parse.organization !== '' && parse.name !== '') {
             return {
                 url: event.data,
