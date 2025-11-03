@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.21.1 (November 4, 2025)
+
+ * [#5453](https://github.com/redhat-developer/vscode-openshift-tools/issues/5453) Remove Git URL validation to support non-standard git repository locations
+
 ## 1.21.0 (September 22, 2025)
 
  * [#5361](https://github.com/redhat-developer/vscode-openshift-tools/pull/5361) Devfile Registries list needs not contain Default Devfile Registry
