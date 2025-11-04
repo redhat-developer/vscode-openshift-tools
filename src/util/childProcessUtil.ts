@@ -98,27 +98,34 @@ export class ChildProcessUtil {
         this.odoChannel = odoChannel;
     }
 
-    public static getExecMaxBufferLength(): number {
-        const execMaxBufferLengthFromSetting: string = vscode.workspace.getConfiguration('openshiftToolkit')
-            .get('execMaxBufferLength');
-        const length = parseInt(execMaxBufferLengthFromSetting, 10);
-        return (!isNaN(length) && length > 0 ? length : 4) * 1024 * 1024;
-    }
-
     public execute(cmd: string, opts: ExecOptions = {}, outText?: string): Promise<CliExitData> {
         return new Promise<CliExitData>((resolve) => {
-            if (opts.maxBuffer === undefined) {
-                opts.maxBuffer = ChildProcessUtil.getExecMaxBufferLength();
-            }
-            const childProcess = cp.exec(cmd, opts, (error: ExecException, stdout: string, stderr: string) => {
-                // filter out info about update
+            const childProcess = cp.spawn(cmd, { ...opts, shell: true });
+
+            let stdout = '';
+            let stderr = '';
+
+            childProcess.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+
+            childProcess.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
+
+            childProcess.on('error', (error) => {
                 this.odoChannel.print(cmd);
                 this.odoChannel.print(stdout);
                 this.odoChannel.print(stderr);
-                // do not reject it here, because caller in some cases need the error and the streams
-                // to make a decision
-                // Filter update message text which starts with `---`
-                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts?.cwd?.toString() });
+                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts.cwd?.toString() });
+            });
+
+            childProcess.on('close', (code) => {
+                this.odoChannel.print(cmd);
+                this.odoChannel.print(stdout);
+                this.odoChannel.print(stderr);
+                const error = code !== 0 ? new Error(`Exited with code ${code}`) : undefined;
+                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts.cwd?.toString() });
             });
 
             if (childProcess && outText) {

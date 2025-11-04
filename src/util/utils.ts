@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { exec as execOriginal } from 'child_process';
+import { exec as execOriginal, spawn as spawnOriginal } from 'child_process';
 import { createHash } from 'crypto';
 import {
     createReadStream,
@@ -76,6 +76,7 @@ export const Util = {
 
     // Wraps from child_process
     exec: execOriginal,
+    spawn: spawnOriginal,
 
     // Wraps from child_process
     decompress: decompressOriginal
