@@ -84,50 +84,22 @@
             "request": "launch",
             "program": "${workspaceFolder}/node_modules/.bin/extest",
             "args": [
-                "setup-and-run",
-                "${workspaceFolder}/out/test/ui/public-ui-test.js",
-                "-o",
-                "${workspaceFolder}/test/ui/settings.json",
-                "-m",
-                "${workspaceFolder}/test/ui/.mocharc.js",
-                "-c",
-                "max",
-                "-e",
-                "./test-resources/extensions",
-                "-i"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
-            ],
-            "sourceMaps": true,
-            "preLaunchTask": "compile",
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "env": {
-                "NODE_OPTIONS": "--max_old_space_size=4096"
-            }
-        },
-        {
-            "name": "Debug UI Tests (Fast)",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceFolder}/node_modules/.bin/extest",
-            "args": [
                 "run-tests",
                 "${workspaceFolder}/out/test/ui/public-ui-test.js",
                 "-o",
                 "${workspaceFolder}/test/ui/settings.json",
                 "-m",
-                "--mocha_config",
                 "${workspaceFolder}/test/ui/.mocharc.js",
                 "-e",
-                "./test-resources/extensions"
+                "${workspaceFolder}/test-resources/extensions",
+                "-c",
+                "max"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
             "sourceMaps": true,
-            "preLaunchTask": "compile",
+            "preLaunchTask": "setup-tests",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
         },
