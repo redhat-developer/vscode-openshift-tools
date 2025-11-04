@@ -4,10 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as chai from 'chai';
-import { ExecException, ExecOptions } from 'child_process';
+import { ExecOptions } from 'child_process';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import * as vscode from 'vscode';
+import { EventEmitter, PassThrough } from 'stream';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import { Util as childProcess } from '../../../src/util/utils';
 
@@ -16,48 +16,77 @@ chai.use(sinonChai);
 
 suite('ChildProcessUtil', function() {
     let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub;
-    const childProcessUtil = ChildProcessUtil.Instance;
+    let spawnStub: sinon.SinonStub;
     const command = 'command';
     const options: ExecOptions = { cwd: 'cwd' };
     const stdout = 'Standard output';
     const stderr = 'Error output';
-    const error: ExecException = {
-        message: 'Fatal Error',
-        name: 'name'
-    };
 
     setup(function() {
         sandbox = sinon.createSandbox();
-        execStub = sandbox.stub(childProcess, 'exec');
     });
 
     teardown(function() {
         sandbox.restore();
     });
 
+    function createFakeProcess() {
+        const fake: any = new EventEmitter();
+        fake.stdout = new PassThrough();
+        fake.stderr = new PassThrough();
+        fake.stdin = new PassThrough();
+        return fake;
+    }
+
     test('execute runs the given command from shell', async function() {
-        execStub.yields(null, stdout, '');
+        const fakeProcess: any = createFakeProcess();
+        spawnStub = sandbox.stub(childProcess, 'spawn').returns(fakeProcess);
+
+        // create util AFTER stubbing
+        const childProcessUtil = ChildProcessUtil.Instance;
+
+        // simulate normal completion
+        setImmediate(() => {
+            fakeProcess.stdout.emit('data', stdout);
+            fakeProcess.stderr.emit('data', '');
+            fakeProcess.emit('close', 0);
+        });
+
         const result = await childProcessUtil.execute(command, options);
 
-        expect(execStub).calledWithExactly(command, options, sinon.match.func);
-        expect(result).deep.equals({ error: null, stdout, stderr: '', cwd: 'cwd' });
-    });
+        sinon.assert.calledOnce(spawnStub);
+        sinon.assert.calledWith(spawnStub, command, sinon.match({ shell: true, cwd: 'cwd' }));
 
-    test('execute uses a 2MB buffer by default', async function() {
-        // Change Exec Max Buffer Length to 2Mb (while the default value is 4Gb)
-        await vscode.workspace.getConfiguration('openshiftToolkit').update('execMaxBufferLength', 2);
-
-        execStub.yields(null, stdout, '');
-        await childProcessUtil.execute(command);
-
-        expect(execStub).calledOnceWith(command, { maxBuffer: 2*1024*1024 }, sinon.match.func);
+        expect(result).deep.equals({
+            error: undefined,
+            stdout: 'Standard output',
+            stderr: '',
+            cwd: 'cwd'
+        });
     });
 
     test('execute passes errors into its exit data', async function() {
-        execStub.yields(error, stdout, stderr);
+        const fakeProcess: any = createFakeProcess();
+        spawnStub = sandbox.stub(childProcess, 'spawn').returns(fakeProcess);
+
+        // create util AFTER stubbing
+        const childProcessUtil = ChildProcessUtil.Instance;
+
+        // simulate error output + non-zero exit
+        setTimeout(() => {
+            fakeProcess.stdout.write(stdout);
+            fakeProcess.stderr.write(stderr);
+            fakeProcess.emit('close', 1);
+        }, 0);
+
         const result = await childProcessUtil.execute(command);
 
-        expect(result).deep.equals({ error, stdout, stderr , cwd: undefined});
+        sinon.assert.calledOnce(spawnStub);
+        sinon.assert.calledWith(spawnStub, command, sinon.match({ shell: true }));
+
+        expect(result.error).to.be.instanceOf(Error).and.have.property('message', 'Exited with code 1');
+        expect(result.stdout).to.equal(stdout);
+        expect(result.stderr).to.equal(stderr);
+        expect(result.cwd).to.be.undefined;
     });
 });
