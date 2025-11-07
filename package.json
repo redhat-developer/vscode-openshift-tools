@@ -144,7 +144,7 @@
 		"file-loader": "^6.2.0",
 		"fs-extra": "^11.3.2",
 		"git-up": "^8.1.1",
-		"got": "^14.6.2",
+		"got": "^14.6.3",
 		"istanbul": "^0.4.5",
 		"json-schema": "^0.4.0",
 		"json-to-ast": "^2.1.0",
