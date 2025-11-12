@@ -59,7 +59,7 @@ export function testComponentContextMenu() {
         it('Start Dev works', async function () {
             this.timeout(60_000);
 
-            await stabilizeComponentsView(getSection);
+            await waitForItemStable(getSection, componentName, true);
 
             //start dev
             await startDev(true);
@@ -237,21 +237,24 @@ export function testComponentContextMenu() {
 
             //open debug console view
             const bottomBar = new BottomBarPanel();
-            await bottomBar.openDebugConsoleView();
+            const debugConsole = await bottomBar.openDebugConsoleView();
 
             //wait for console to have text
-            await new Promise((res) => setTimeout(res, 1_000));
+            // await new Promise((res) => setTimeout(res, 1_000));
             const bottomBarText = await bottomBar.getDriver().wait(
-                async () => {
-                    const text = await bottomBar.getText();
-                    if (text.length !== 0) {
-                        return text;
-                    }
-                },
-                10_000,
-                'No text in debug console found in 10 seconds',
+            async () => {
+                const text = await debugConsole.getText();
+
+                if (text && text.includes('App started on PORT')) {
+                    return text;
+                }
+
+                return null;
+            },
+            20_000,
+            'Debug console did not contain expected output'
             );
-            //const bottomBarText = await bottomBar.getText();
+
             expect(bottomBarText).to.contain('App started on PORT');
 
             //Check side bar view has been switched from openshift to run and debug
@@ -326,7 +329,8 @@ export function testComponentContextMenu() {
                     const items = await menu.getItems();
 
                     for (const item of items) {
-                        if ((await item.getLabel()) === option) {
+                        const itemLabel = await item.getLabel();
+                        if (itemLabel === option) {
                             try {
                                 await item.safeClick();
                                 return true;

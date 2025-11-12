@@ -126,10 +126,15 @@ export function testCreateComponent(path: string) {
             }
 
             await refreshView();
-            await clickCreateComponent();
+
+            await step('Click Create Component', async () => {
+                await clickCreateComponent();
+            });
 
             const createCompView = await initializeEditor();
-            await createCompView.createComponentFromLocalCodebase();
+            await step('Click Create from Local Codebase', async () => {
+                await createCompView.createComponentFromLocalCodebase();
+            });
 
             const localCodeBasePage = new LocalCodeBasePage();
             await localCodeBasePage.initializeEditor();

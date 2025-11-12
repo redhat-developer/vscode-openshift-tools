@@ -8,16 +8,21 @@ export interface Ctx {
 }
 
 export interface ForwardedPort {
-    containerName: string,
-    localAddress: string,
-    localPort: number,
-    containerPort: number,
+    containerName: string;
+    localAddress: string;
+    localPort: number;
+    containerPort: number;
+    name?: string;
+    isDebug?: boolean;
+    exposure?: string;
+    platform?: string;
 }
 
 export interface ComponentDescription {
     devfilePath: string;
     devfileData: {
         devfile: Data;
+        commands: any[],
         supportedOdoFeatures: {
             debug: boolean;
             deploy: boolean;
@@ -26,7 +31,27 @@ export interface ComponentDescription {
     }
     devForwardedPorts: ForwardedPort[],
     runningIn: string[];
+    runningOn: string[];
+    devControlPlane?: {
+        platform: string
+        localPort?: number
+        apiServerPath?: string
+        webInterfacePath?: string
+    }[];
     managedBy: string;
+    warnings?: string[];
+}
+
+export type DevControlPlaneInfo = NonNullable<ComponentDescription['devControlPlane']>;
+
+export interface CommandInfo {
+    name: string
+    type: string
+    group: string
+    isDefault: boolean
+    commandLine: string
+    component: string
+    componentType: string
 }
 
 export interface ComponentItem {

@@ -6,17 +6,18 @@
 
 import * as chai from 'chai';
 import { PathLike, RmOptions } from 'fs-extra';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import pq from 'proxyquire';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import { CliChannel } from '../../../src/cli';
 import { ComponentInfo, ComponentsTreeDataProvider } from '../../../src/componentsView';
 import { DevfileInfo } from '../../../src/devfile-registry/devfileInfo';
 import { DevfileRegistry } from '../../../src/devfile-registry/devfileRegistryWrapper';
 import { Oc } from '../../../src/oc/ocWrapper';
 import { Project } from '../../../src/oc/project';
-import { Command } from '../../../src/odo/command';
 import { CommandProvider } from '../../../src/odo/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
@@ -25,14 +26,13 @@ import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-import { CliChannel } from '../../../src/cli';
 
 const { expect } = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Component', function () {
     let sandbox: sinon.SinonSandbox;
-    let termStub: sinon.SinonStub; let execStub: sinon.SinonStub; let ocExecStub: sinon.SinonStub;
+    let execStub: sinon.SinonStub; let ocExecStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
@@ -112,6 +112,7 @@ suite('OpenShift/Component', function () {
                         postStart: []
                     }
                 },
+                commands: [],
                 supportedOdoFeatures: {
                     debug: true,
                     deploy: true,
@@ -119,6 +120,7 @@ suite('OpenShift/Component', function () {
                 }
             },
             runningIn: null,
+            runningOn: null,
             managedBy: 'odo',
             devForwardedPorts: []
         }
@@ -132,7 +134,6 @@ suite('OpenShift/Component', function () {
 
         Component = pq('../../../src/openshift/component', {}).Component;
 
-        termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         ocExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined });
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
@@ -177,23 +178,28 @@ suite('OpenShift/Component', function () {
         });
 
         test('confirm delete', async function () {
-            showWarningMessageStub.resolves('Delete Configuration');
-            await Component.deleteConfigurationFiles({
-                component: {
-                name: 'comp1',
-                },
-                contextPath: wsFolder1.uri.fsPath
-            } as unknown as ComponentWorkspaceFolder);
+            const originalDevfile = await fs.readFile(componentItem1.component.devfilePath, 'utf-8');
+            try {
+                showWarningMessageStub.resolves('Delete Configuration');
+                await Component.deleteConfigurationFiles({
+                    component: {
+                    name: 'comp1',
+                    },
+                    contextPath: wsFolder1.uri.fsPath
+                } as unknown as ComponentWorkspaceFolder);
 
-            expect(ocExecStub.called).to.be.true;
+                expect(ocExecStub.called).to.be.true;
 
-            const commands = ocExecStub.getCalls().map(call =>
-                call.args[0].toString()
-            );
+                const commands = ocExecStub.getCalls().map(call =>
+                    call.args[0].toString()
+                );
 
-            expect(commands.some(cmd =>
-                cmd.includes('oc') && cmd.includes('delete')
-            )).to.be.true;
+                expect(commands.some(cmd =>
+                    cmd.includes('oc') && cmd.includes('delete')
+                )).to.be.true;
+            } finally {
+                await fs.writeFile(componentItem1.component.devfilePath, originalDevfile, 'utf-8');
+            }
         });
 
         test('cancel delete', async function () {
@@ -233,7 +239,7 @@ suite('OpenShift/Component', function () {
         setup(function () {
             rmStub.reset();
             showWarningMessageStub.resetBehavior();
-        })
+        });
 
         suiteTeardown(function () {
             subSandbox.restore();
@@ -265,11 +271,26 @@ suite('OpenShift/Component', function () {
 
     suite('describe', function() {
 
-        test('calls the correct odo command', async function () {
-            await Component.describe(componentItem1);
-            expect(termStub).calledOnceWith(Command.describeComponent());
+        teardown(function() {
+            sinon.restore();
         });
 
+        test('calls the correct odo command', async function () {
+            // As `odo describe` has removed, now we need to check the OpenShift terminal output
+            // instead of stubbing 'executeInTerminal' expecting the command to be invoked on the terminal
+            const compName = componentItem1.component.devfileData.devfile.metadata.name
+
+            const writeStub = sinon.stub();
+            sinon.stub(OpenShiftTerminalManager, 'getInstance').returns({
+                writeToTerminal: writeStub
+            } as any);
+
+            await Component.describe(componentItem1);
+
+            const output = writeStub.firstCall.args[0];
+            expect(writeStub).calledOnce;
+            expect(output).to.contain(compName);
+        });
     });
 
     suite('component commands tree', function () {
@@ -398,6 +419,7 @@ suite('OpenShift/Component', function () {
                 },
             }).Component as typeof openShiftComponent.Component;
         }
+
         test('starts java debugger for devfile component with java in builder image', async () => {
             const startDebugging = sandbox.stub().resolves(true);
             Component = mockComponent(startDebugging);

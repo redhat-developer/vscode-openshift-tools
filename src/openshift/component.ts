@@ -11,6 +11,7 @@ import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
 import { CommandProvider } from '../odo/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
+import { describeComponentYAML } from '../odo/util/describe';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
@@ -102,7 +103,9 @@ export class Component extends OpenShiftItem {
                 debugStatus: folder.component?.devfileData?.supportedOdoFeatures?.debug ? ComponentContextState.DEB : undefined,
                 deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? ComponentContextState.DEP : undefined,
             };
-            this.componentStates.set(folder.contextPath, state);
+            if (folder.component?.devfileData?.supportedOdoFeatures !== undefined) {
+                Component.componentStates.set(folder.contextPath, state);
+            }
         }
         return state;
     }
@@ -322,7 +325,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openInBrowser')
     @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
-        const componentDescription = await Odo.Instance.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
+        const componentDescription = await Odo.Instance.describeComponent(component.contextPath);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
@@ -352,11 +355,20 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.describe', true)
     static async describe(componentFolder: ComponentWorkspaceFolder): Promise<void> {
-        const command = Command.describeComponent();
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(
-            command,
+        const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        const devfilePath = componentFolder.component.devfilePath;
+
+        const { description } = await describeComponentYAML(devfilePath, {
+            namespace: undefined, // Current Kube config context will be used
+            componentName,
+            useBold: true
+        });
+
+        await OpenShiftTerminalManager.getInstance().writeToTerminal(
+            description,
             componentFolder.contextPath,
-            `Describe '${componentFolder.component.devfileData.devfile.metadata.name}' Component`);
+            `Describe '${componentName}' Component`
+        );
     }
 
     @vsCommand('openshift.component.openCreateComponent')
@@ -482,12 +494,13 @@ export class Component extends OpenShiftItem {
     }
 
     static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
-            const componentDescription = await Odo.Instance.describeComponent(component.contextPath, !!Component.getComponentDevState(component).runOn);
+            const componentDescription = await Odo.Instance.describeComponent(component.contextPath);
             if (componentDescription.devForwardedPorts?.length > 0) {
                 // try to find debug port
                 const debugPortsCandidates:number[] = [];
                 componentDescription.devForwardedPorts.forEach((pf) => {
-                    const devComponent = componentDescription.devfileData.devfile.components.find(item => item.name === pf.containerName);
+                    const devfile = componentDescription?.devfileData?.devfile;
+                    const devComponent = devfile?.components?.find(item => item.name === pf.containerName);
                     if (devComponent?.container) {
                         const candidatePort = devComponent.container.endpoints.find(endpoint => endpoint.targetPort === pf.containerPort);
                         if (candidatePort.name.startsWith('debug')) {
