@@ -23,7 +23,8 @@ const webviews = [
 const esmImportTargets = {
   'clipboardy': { entry: 'node_modules/clipboardy/index.js', outfile: 'out/esm/clipboardy.cjs' },
   'got': { entry: 'node_modules/got/dist/source/index.js', outfile: 'out/esm/got.cjs' },
-  '@kubernetes/client-node': { entry: 'node_modules/@kubernetes/client-node/dist/index.js', outfile: 'out/esm/k8s-client-node.cjs' }
+  '@kubernetes/client-node': { entry: 'node_modules/@kubernetes/client-node/dist/index.js', outfile: 'out/esm/k8s-client-node.cjs' },
+  '@apidevtools/json-schema-ref-parser': { entry: 'node_modules/@apidevtools/json-schema-ref-parser/dist/lib/index.js', outfile: 'out/esm/apidevtools-json-schema-ref-parser.cjs' }
 };
 
 const srcDir = 'src'; // Input source directory
