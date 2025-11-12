@@ -6,6 +6,7 @@
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import * as cliInstance from '../cli';
+import { getComponentDescription } from '../odo/util/describe';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
@@ -30,20 +31,13 @@ export class Odo {
     }
 
     public async describeComponent(
-        contextPath: string,
-        experimental = false,
+        contextPath: string
     ): Promise<ComponentDescription | undefined> {
-        const expEnv = experimental ? { ODO_EXPERIMENTAL_MODE: 'true' } : {};
         try {
-            const describeCmdResult: CliExitData = await this.execute(
-                Command.describeComponentJson(),
-                contextPath,
-                false,
-                expEnv,
-            );
-            return JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+            return await getComponentDescription(contextPath, {})
         } catch {
             // ignore and return undefined
+            return undefined;
         }
     }
 
