@@ -12,6 +12,7 @@ export interface ForwardedPort {
     localAddress: string,
     localPort: number,
     containerPort: number,
+    name?: string
 }
 
 export interface ComponentDescription {
@@ -26,7 +27,27 @@ export interface ComponentDescription {
     }
     devForwardedPorts: ForwardedPort[],
     runningIn: string[];
+    runningOn: string[];
+    devControlPlane?: {
+        platform: string
+        localPort?: number
+        apiServerPath?: string
+        webInterfacePath?: string
+    }[];
     managedBy: string;
+    warnings?: string[];
+}
+
+export type DevControlPlaneInfo = NonNullable<ComponentDescription['devControlPlane']>;
+
+export interface CommandInfo {
+    name: string
+    type: string
+    group: string
+    isDefault: boolean
+    commandLine: string
+    component: string
+    componentType: string
 }
 
 export interface ComponentItem {

@@ -10,6 +10,8 @@ import * as paths from 'path';
 import * as sourceMapSupport from 'source-map-support';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
 
+/* eslint-disable no-console */
+
 sourceMapSupport.install();
 
 const config: Mocha.MochaOptions = {
@@ -71,6 +73,8 @@ export async function run(): Promise<void> {
         let failed = 0;
         try {
             mocha.run(failures => {
+                console.log('Mocha reported failures:', failures);
+
                 if (failures > 0) {
                     failed = failures;
                 }
@@ -89,7 +93,9 @@ export async function run(): Promise<void> {
                 }).catch((e) => {
                     reject(e as Error);
                 })
-            }).on('fail', () => {
+            }).on('fail', (test, err) => {
+                console.error('Test failed:', test.fullTitle());
+                console.error(err);
                 failed++;
             });
         } catch (e) {

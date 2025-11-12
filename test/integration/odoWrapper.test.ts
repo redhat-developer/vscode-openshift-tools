@@ -135,6 +135,7 @@ suite('./odo/odoWrapper.ts', function () {
             const componentDescription1 = await Odo.Instance.describeComponent(tmpFolder1.fsPath);
             expect(componentDescription1).to.exist;
             expect(componentDescription1.managedBy).to.equal('odo');
+
             const componentDescription2 = await Odo.Instance.describeComponent(tmpFolder2.fsPath);
             expect(componentDescription2).to.exist;
             expect(componentDescription2.managedBy).to.equal('odo');
