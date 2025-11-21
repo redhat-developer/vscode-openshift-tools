@@ -8,6 +8,12 @@ import * as vscode from 'vscode';
 import { Util as cp } from '../util/utils';
 import { Filters } from './filters';
 
+const channel = vscode.window.createOutputChannel('OpenShift');
+
+export function getOpenShiftLogChannel(): vscode.OutputChannel {
+    return channel;
+}
+
 export interface CliExitData {
     readonly error: ExecException;
     readonly stdout: string;
@@ -38,32 +44,29 @@ class OdoChannel {
 
     private static instance = new OdoChannel();
 
-    private channel: vscode.OutputChannel;
-
     public static get Instance() {
         return OdoChannel.instance;
     }
 
     public constructor() {
-        this.channel = vscode.window.createOutputChannel('OpenShift');
     }
 
     show(): void {
-        this.channel.show();
+        channel.show();
     }
 
     print(text: string): void {
         const textData = OdoChannel.prettifyJson(text);
-        this.channel.append(textData);
+        channel.append(textData);
         if (!textData.endsWith('\n')) {
-            this.channel.append('\n');
+            channel.append('\n');
         }
         if (
             vscode.workspace
                 .getConfiguration('openshiftToolkit')
                 .get<boolean>('showChannelOnOutput')
         ) {
-            this.channel.show();
+            channel.show();
         }
     }
 

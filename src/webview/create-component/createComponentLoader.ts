@@ -37,6 +37,7 @@ import {
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
 import { Devfile, TemplateProjectIdentifier } from '../common/devfile';
+import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
 
 interface CloneProcess {
     status: boolean;
@@ -680,21 +681,38 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;
-    let command = `${git} clone ${url} ${location}`;
+    let command = `${git} clone --progress ${url} ${location}`;
     command = branch ? `${command} --branch ${branch}` : command;
     void CreateComponentLoader.panel.webview.postMessage({
         action: 'cloneExecution'
     });
-    // run 'git clone url location' as external process and return location
-    return new Promise((resolve, reject) =>
-        cp.exec(command, (error: cp.ExecException) => {
-            if (error) {
-                resolve({ status: false, error: error.message });
-            } else {
-                resolve({ status: true, error: undefined });
-            }
-        })
-    );
+    const channel = getOpenShiftLogChannel();
+
+    return new Promise((resolve, reject) => {
+        const proc = cp.spawn(command, {shell: true});
+        channel.appendLine(command);
+
+        proc.stdout.on('data', (data) => {
+            channel.append(data.toString());
+        });
+        proc.stderr.on('data', (data) => {
+            channel.append(data.toString());
+
+            void CreateComponentLoader.panel.webview.postMessage({
+                action: 'cloneProgress',
+                data: {
+                    completionProgress: data.toString(),
+                }
+            });
+        });
+
+        proc.on('error', (error) => {
+            resolve({ status: false, error: error.message });
+        });
+        proc.on('close', (code) => {
+            resolve({ status: true, error: undefined });
+        });
+    });
 }
 
 async function validateFolderPath(path: string) {
