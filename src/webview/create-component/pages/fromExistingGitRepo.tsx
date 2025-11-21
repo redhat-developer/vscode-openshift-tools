@@ -36,6 +36,7 @@ type RecommendedDevfileState = {
     completionValue: number;
     isDevfileExistsInRepo: boolean;
     noRecommendation: boolean;
+    completionProgress: string;
 };
 
 type GitURLState = {
@@ -63,6 +64,7 @@ export function FromExistingGitRepo({ setCurrentView }) {
         completionValue: 0,
         isDevfileExistsInRepo: false,
         noRecommendation: false,
+        completionProgress: undefined
     });
     const [selectedDevfile, setSelectedDevfile] = React.useState<DevfileData>(undefined);
     const [initialComponentParentFolder, setInitialComponentParentFolder] = React.useState<string>(undefined);
@@ -121,6 +123,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
             case 'cloneExecution':
             case 'getRecommendedDevfileStart': {
                 setRecommendedDevfile((prevState) => ({ ...prevState, completionValue: prevState.completionValue + 10}));
+                break;
+            }
+            case 'cloneProgress': {
+                setRecommendedDevfile((prevState) => ({ ...prevState, completionProgress: message.data.completionProgress}));
                 break;
             }
             case 'getRecommendedDevfile': {
@@ -299,6 +305,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                     Cloning git repository and scanning for
                                                     recommended devfile.
                                                 </Typography>
+                                                {recommendedDevfile.completionProgress && (
+                                                    <Typography variant="body2">
+                                                        {recommendedDevfile.completionProgress}
+                                                    </Typography>
+                                                )}
                                             </Stack>
                                         )}
                                     </>
