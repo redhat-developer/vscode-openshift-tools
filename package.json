@@ -131,7 +131,7 @@
 		"esbuild": "^0.27.1",
 		"esbuild-node-externals": "^1.20.1",
 		"esbuild-sass-plugin": "^3.3.1",
-		"eslint": "^9.39.1",
+		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"eslint-plugin-header": "^3.1.1",
