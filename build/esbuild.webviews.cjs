@@ -92,7 +92,15 @@ async function copyHtmlFiles() {
                 await mkdir(targetDir, { recursive: true, mode: 0o750 });
             }
 
-            const htmlFiles = sync(path.resolve(__dirname, '..', `${srcDir}/webview/${webview}/app/index.html`));
+            const pattern = path
+                .join(srcDir, 'webview', webview, 'app', 'index.html')
+                .replace(/\\/g, '/');
+
+            const htmlFiles = sync(pattern, {
+                cwd: path.resolve(__dirname, '..'),
+                absolute: true,
+            });
+
             await Promise.all(
                 htmlFiles.map(async srcFile => {
                     await cp(srcFile, path.join(targetDir, path.basename(srcFile)));
@@ -110,10 +118,10 @@ async function dirExists(path) {
 }
 
 if (require.main === module) {
-  buildWebviews().catch(err => {
-    console.error('❌ Build failed:', err);
-    process.exit(1);
-  });
+    buildWebviews().catch(err => {
+        console.error('❌ Build failed:', err);
+        process.exit(1);
+    });
 }
 
 module.exports = { buildWebviews };
