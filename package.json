@@ -130,7 +130,7 @@
 		"dpdm": "^3.14.0",
 		"esbuild": "^0.27.2",
 		"esbuild-node-externals": "^1.20.1",
-		"esbuild-sass-plugin": "^3.3.1",
+		"esbuild-sass-plugin": "^3.6.0",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.4",
