@@ -177,41 +177,41 @@
         "description": "Alizer CLI tool",
         "vendor": "The Devfile Project",
         "name": "alizer",
-        "version": "1.9.3",
-        "versionRange": "^1.9.3",
-        "versionRangeLabel": "version >= 1.9.3",
+        "version": "1.9.5",
+        "versionRange": "^1.9.5",
+        "versionRangeLabel": "version >= 1.9.5",
         "dlFileName": "alizer",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.9.3/alizer-v1.9.3-windows-amd64.exe",
+                "url": "https://github.com/devfile/alizer/releases/download/v1.9.5/alizer-v1.9.5-windows-amd64.exe",
                 "dlFileName": "alizer-windows-amd64.exe",
                 "cmdFileName": "alizer.exe",
-                "sha256sum": "212cbfb3adbb0f7f56cd059ad60b50f955ccc43966caa63d882a731a8138b893"
+                "sha256sum": "947fb19834b774c7990a5725847f669e8f40356d742c860470c302b00484d822"
             },
             "darwin": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.9.3/alizer-v1.9.3-darwin-amd64",
+                "url": "https://github.com/devfile/alizer/releases/download/v1.9.5/alizer-v1.9.5-darwin-amd64",
                 "dlFileName": "alizer-darwin-amd64",
                 "cmdFileName": "alizer",
-                "sha256sum": "f8880f12e848a0c45f238726e4227dc5f1a5d2aa740c2812369564e82bda5de6"
+                "sha256sum": "5ac5592256949bff175bb319a2414aa30f8b20dc0530a6e8c5650e31443e0c4b"
             },
             "darwin-arm64": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.9.3/alizer-v1.9.3-darwin-arm64",
+                "url": "https://github.com/devfile/alizer/releases/download/v1.9.5/alizer-v1.9.5-darwin-arm64",
                 "dlFileName": "alizer-darwin-arm64",
                 "cmdFileName": "alizer",
-                "sha256sum": "111141727015e5d2ad1fad4f41c76e6d4f97d0c0a3e2f3da3bcef1f848fb6f07"
+                "sha256sum": "fa5ffd5981227bda6fa310efe6984a73c77a1f6eb93a24578b9ebf56b6fd88f7"
             },
             "linux": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.9.3/alizer-v1.9.3-linux-amd64",
+                "url": "https://github.com/devfile/alizer/releases/download/v1.9.5/alizer-v1.9.5-linux-amd64",
                 "dlFileName": "alizer-linux-amd64",
                 "cmdFileName": "alizer",
-                "sha256sum": "e48815d77fd62c019f3cc7955e459ee348440a5918872ea3c2e97931508cb9fb"
+                "sha256sum": "76745d2e40161c75a5835b40b3ceea0a42a3aacbaf0e700f6ddb60c10d721812"
             },
             "linux-arm64": {
-                "url": "https://github.com/devfile/alizer/releases/download/v1.9.3/alizer-v1.9.3-linux-arm64",
+                "url": "https://github.com/devfile/alizer/releases/download/v1.9.5/alizer-v1.9.5-linux-arm64",
                 "dlFileName": "alizer-linux-arm64",
                 "cmdFileName": "alizer",
-                "sha256sum": "42a0144858494c0a8f0d52b221d55f147cbe7fa86ed3d42886ed27e732fa1d46"
+                "sha256sum": "f6402fa0466cf108004180b34f9cffbc93a2ffa219bc0b109f723e13de21ab09"
             }
         }
     },
