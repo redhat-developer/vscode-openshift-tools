@@ -127,7 +127,7 @@
 		"codemirror": "^6.0.2",
 		"dockerode": "^4.0.9",
 		"dompurify": "^3.3.1",
-		"dpdm": "^3.14.0",
+		"dpdm": "^4.0.1",
 		"esbuild": "^0.27.2",
 		"esbuild-node-externals": "^1.20.1",
 		"esbuild-sass-plugin": "^3.6.0",
