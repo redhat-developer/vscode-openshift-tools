@@ -92,7 +92,7 @@ jobs:
 
       # Archiving integration tests artifacts
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure() && runner.os == 'Linux'
         with:
           name: artifacts-${{ matrix.os }}
