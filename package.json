@@ -142,7 +142,7 @@
 		"express": "^5.2.1",
 		"fast-glob": "^3.3.3",
 		"file-loader": "^6.2.0",
-		"fs-extra": "^11.3.3",
+		"fs-extra": "^11.3.4",
 		"git-up": "^8.1.1",
 		"got": "^14.6.6",
 		"istanbul": "^0.4.5",
