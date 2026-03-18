@@ -46,39 +46,39 @@
         "vendor": "Red Hat, Inc.",
         "name": "oc",
         "cmdFileName": "oc",
-        "version": "4.21.4",
-        "versionRange": "^4.21.4",
-        "versionRangeLabel": "version >= 4.21.4 and < 5.0.0",
+        "version": "4.21.5",
+        "versionRange": "^4.21.5",
+        "versionRangeLabel": "version >= 4.21.5 and < 5.0.0",
         "filePrefix": "",
         "platform": {
             "win32": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.4/openshift-client-windows-4.21.4.zip",
-                "sha256sum": "b9b8cf6317cf4f02789e9609b27f7ffb4f0a6f50d56c80ca21d059be1fb828e2",
-                "dlFileName": "openshift-client-windows-4.21.4.zip",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.5/openshift-client-windows-4.21.5.zip",
+                "sha256sum": "bc65a757e461f142dea7d6937ae99b00ff8158982f8bedd441199960ae520d2a",
+                "dlFileName": "openshift-client-windows-4.21.5.zip",
                 "cmdFileName": "oc.exe"
             },
             "darwin": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.4/openshift-client-mac-4.21.4.tar.gz",
-                "sha256sum": "02c1f5e6ada56aaacfda95023e508761b742fb0509e6c76c9e801aeb5ec48f97",
-                "dlFileName": "openshift-client-mac-4.21.4.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.5/openshift-client-mac-4.21.5.tar.gz",
+                "sha256sum": "47fadfbf95d592d8287340a63889f80abb50f351034eb5f6693bdff8dc2697fc",
+                "dlFileName": "openshift-client-mac-4.21.5.tar.gz",
                 "cmdFileName": "oc"
             },
             "darwin-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.4/openshift-client-mac-arm64-4.21.4.tar.gz",
-                "sha256sum": "d566aad59a1bccd21eb00949bad6c8f72a4c3d8a01939414727198b94e4c2b56",
-                "dlFileName": "openshift-client-mac-arm64-4.21.4.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.5/openshift-client-mac-arm64-4.21.5.tar.gz",
+                "sha256sum": "8d45e52733e7fec4bf845cca22ac15458458365742b5b516aa668df502c783cf",
+                "dlFileName": "openshift-client-mac-arm64-4.21.5.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.4/openshift-client-linux-4.21.4.tar.gz",
-                "sha256sum": "44935de9ffe64fba83b33624d3b40f49219f5b1068dea5bb6f359e1f222e5e35",
-                "dlFileName": "openshift-client-linux-4.21.4.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.5/openshift-client-linux-4.21.5.tar.gz",
+                "sha256sum": "082ccc491c107ba9dbb2405f3eb23659c576dd2d7f955e268b8475d47f8aabb4",
+                "dlFileName": "openshift-client-linux-4.21.5.tar.gz",
                 "cmdFileName": "oc"
             },
             "linux-arm64": {
-                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.4/openshift-client-linux-arm64-4.21.4.tar.gz",
-                "sha256sum": "cb3b521d7ae90f9569c8d4788261fb2eedabb6716171b59065798ccf7232d843",
-                "dlFileName": "openshift-client-linux-arm64-4.21.4.tar.gz",
+                "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.21.5/openshift-client-linux-arm64-4.21.5.tar.gz",
+                "sha256sum": "180b80773a0e41c58f5e372c6df2f086edc77b0fb34f36a3a58acf14b59130bc",
+                "dlFileName": "openshift-client-linux-arm64-4.21.5.tar.gz",
                 "cmdFileName": "oc"
             }
         }
