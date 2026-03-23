@@ -383,12 +383,16 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     private async getDeploymentItem(element): Promise<TreeItem> {
-        const shouldHaveReplicas = element.spec.replicas > 0;
-        const desiredReplicas = element.spec.replicas ? element.spec.replicas : 0;
-        const actualReplicas = element.status.replicas ? element.status.replicas : 0;
-        const readyReplicas = element.status.readyReplicas ? element.status.readyReplicas : 0;
-        const availableReplicas = element.status.availableReplicas ? element.status.availableReplicas : 0;
-        const unavailableReplicas = element.status.unavailableReplicas ? element.status.unavailableReplicas : 0;
+        if (element.kind !== 'Deployment') {
+            return this.getGenericItem(element);
+        }
+
+        const desiredReplicas = element.spec?.replicas ?? 0;
+        const actualReplicas = element.status?.replicas ?? 0;
+        const readyReplicas = element.status?.readyReplicas ?? 0;
+        const availableReplicas = element.status?.availableReplicas ?? 0;
+        const unavailableReplicas = element.status?.unavailableReplicas ?? 0;
+        const shouldHaveReplicas = desiredReplicas > 0;
 
         let pods: OtherObject[] = [];
         if (shouldHaveReplicas) {
@@ -411,22 +415,19 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         deploymentErrors.forEach((m) => errorMessages = errorMessages.concat(`\n\t${m}`));
 
         // const inCrashLoopBackOff = element.status.conditions.find((condition) => condition.status === 'False' && condition.reason === 'CrashLoopBackOff');
-        let description = `${this.makeCaps(element.kind)}`;
-        let tooltip = description;
-        if (element.kind === 'Deployment') {
-            description = `${description} (${availableReplicas}/${desiredReplicas})`
-            tooltip = `${tooltip}: ${element.metadata.name}\n`.concat(
-                `Desired Replicas: ${desiredReplicas}\n`,
-                `Actual Replicas: ${actualReplicas}\n`,
-                'Of which:\n',
-                `\tReady Replicas: ${readyReplicas}\n`,
-                `\tAvailable Replicas: ${availableReplicas}\n`,
-                `\tUnavailable Replicas: ${unavailableReplicas}\n`,
-                `---\nCrashLoopBackOff detected: ${podErrors.inCrashLoopBackOff ? 'Yes' : 'No'}\n`,
-                podsMessages.length > 0 ? `---\nPod Container Failures:${podsMessages}\n` : '',
-                errorMessages.length > 0 ? `---\nDeployment Failures:${errorMessages}\n` : ''
-            );
-        }
+        const title = `${this.makeCaps(element.kind)}`;
+        const description = `${title} (${availableReplicas}/${desiredReplicas})`
+        const tooltip = `${title}: ${element.metadata.name}\n`.concat(
+            `Desired Replicas: ${desiredReplicas}\n`,
+            `Actual Replicas: ${actualReplicas}\n`,
+            'Of which:\n',
+            `\tReady Replicas: ${readyReplicas}\n`,
+            `\tAvailable Replicas: ${availableReplicas}\n`,
+            `\tUnavailable Replicas: ${unavailableReplicas}\n`,
+            `---\nCrashLoopBackOff detected: ${podErrors.inCrashLoopBackOff ? 'Yes' : 'No'}\n`,
+            podsMessages.length > 0 ? `---\nPod Container Failures:${podsMessages}\n` : '',
+            errorMessages.length > 0 ? `---\nDeployment Failures:${errorMessages}\n` : ''
+        );
         const iconSuffix = !shouldHaveReplicas ? '' :
             podErrors.inCrashLoopBackOff ? '-red' : this.getDeploymentIconSuffix(pods);
         const iconPath = element.kind === 'Deployment' || element.kind === 'DeploymentConfig' ?
@@ -440,6 +441,26 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             tooltip,
             collapsibleState: element.kind === 'Deployment' ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None,
             iconPath,
+            command: {
+                title: 'Load',
+                command: 'openshift.resource.load',
+                arguments: [element]
+            }
+        };
+    }
+
+    private async getGenericItem(element): Promise<TreeItem> {
+        const description = `${this.makeCaps(element.kind)}`;
+        const tooltip = `${description}`;
+        const routeURL = await Oc.Instance.getRouteURL(element.metadata.name);
+
+        return {
+            contextValue: `openshift.k8sObject.${element.kind}${routeURL ? '.route' : ''}`,
+            label: element.metadata.name,
+            description,
+            tooltip,
+            collapsibleState: TreeItemCollapsibleState.None,
+            iconPath: undefined,
             command: {
                 title: 'Load',
                 command: 'openshift.resource.load',
