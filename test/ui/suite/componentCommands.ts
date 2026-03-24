@@ -8,12 +8,13 @@ import * as fs from 'fs';
 import * as pth from 'path';
 import {
     ActivityBar,
+    after,
+    before,
     EditorView,
     SideBarView,
     TreeItem,
     ViewSection,
-    after,
-    before,
+    Workbench,
 } from 'vscode-extension-tester';
 import { parse } from 'yaml';
 import { itemExists } from '../common/conditions';
@@ -33,6 +34,8 @@ export function testComponentCommands(path: string) {
             this.timeout(30_000);
             await new EditorView().closeAllEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+
             for (const item of [
                 VIEWS.appExplorer,
                 VIEWS.compRegistries,
@@ -42,7 +45,7 @@ export function testComponentCommands(path: string) {
                 await (await view.getContent().getSection(item)).collapse();
             }
 
-            //expect component is running
+            // expect component is running
             section = await view.getContent().getSection(VIEWS.components);
             try {
                 await itemExists(`${componentName} (dev running)`, section);
