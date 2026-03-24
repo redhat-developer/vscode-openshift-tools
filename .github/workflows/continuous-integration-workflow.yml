@@ -82,7 +82,15 @@ jobs:
         env:
             NODE_OPTIONS: --max_old_space_size=16384
         if: runner.os == 'Linux'
-        run: xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-test
+        run: |
+          # Patch vscode:prepublish to reinstall secretlint AFTER prune
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json'));
+            pkg.scripts['vscode:prepublish'] += ' && npm install @secretlint/node';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+          xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-test
 
       - name: Build and run integration tests
         if: (success() || failure()) && runner.os == 'Linux'
