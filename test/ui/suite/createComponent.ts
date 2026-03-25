@@ -13,10 +13,9 @@ import {
     InputBox,
     NotificationType,
     SideBarView,
-    ViewSection,
     VSBrowser,
     WelcomeContentButton,
-    Workbench,
+    Workbench
 } from 'vscode-extension-tester';
 import { notificationExists } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
@@ -36,7 +35,6 @@ import {
 export function testCreateComponent(path: string) {
     describe('Create Component Wizard', function () {
         let view: SideBarView;
-        let section: ViewSection;
         let button: WelcomeContentButton;
         let componentName: string;
         let dlt = true;
@@ -83,14 +81,16 @@ export function testCreateComponent(path: string) {
             await createComponent(createCompView);
 
             componentName = 'node-js-runtime';
-            expect(await section.findItem(componentName)).to.be.not.undefined;
+
+            const item = await waitForItem(componentName);
+            expect(item).to.be.not.undefined;
 
             dlt = false;
         });
 
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
-            const component = await section.findItem(componentName);
+            const component = await waitForItem(componentName);
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.deleteConfiguration);
 
@@ -127,11 +127,10 @@ export function testCreateComponent(path: string) {
                 setTimeout(res, 500);
             });
             await localCodeBasePage.clickCreateComponent();
-            await new Promise((res) => {
-                setTimeout(res, 6_000);
-            });
 
-            expect(await section.findItem(componentName)).to.be.not.undefined;
+            const item = await waitForItem(componentName);
+            expect(item).to.be.not.undefined;
+
             dlt = true;
         });
 
@@ -163,7 +162,8 @@ export function testCreateComponent(path: string) {
 
             //check if component is in component view
             componentName = 'nodejs-starter';
-            expect(await section.findItem(componentName)).to.be.not.undefined;
+            const item = await waitForItem(componentName);
+            expect(item).to.be.not.undefined;
 
             dlt = false;
         });
@@ -172,7 +172,7 @@ export function testCreateComponent(path: string) {
         afterEach(async function context() {
             this.timeout(30_000);
             if (componentName && dlt) {
-                const component = await section.findItem(componentName);
+                const component = await waitForItem(componentName);
                 const contextMenu = await component.openContextMenu();
                 await contextMenu.select(MENUS.deleteSourceCodeFolder);
                 const notification = await notificationExists(
@@ -212,9 +212,6 @@ export function testCreateComponent(path: string) {
             await page.clearProjectFolderPath();
             await page.insertProjectFolderPath(path);
             await page.clickCreateComponentButton();
-            await new Promise((res) => {
-                setTimeout(res, 6_000);
-            });
         }
 
         async function initializeEditor(): Promise<CreateComponentWebView> {
@@ -224,13 +221,16 @@ export function testCreateComponent(path: string) {
         }
 
         async function refreshView() {
+            let section = await view.getContent().getSection(VIEWS.components);
+
             await section.collapse();
             await section.expand();
+            await new Promise(res => setTimeout(res, 1_000));
+
+            section = await view.getContent().getSection(VIEWS.components);
             const refresh = await section.getAction('Refresh Components View');
             await refresh.click();
-            await new Promise((res) => {
-                setTimeout(res, 1_000);
-            });
+            await new Promise((res) => setTimeout(res, 1_000));
         }
 
         async function clickCreateComponent() {
@@ -241,7 +241,7 @@ export function testCreateComponent(path: string) {
         }
 
         async function loadCreateComponentButton() {
-            section = await view.getContent().getSection(VIEWS.components);
+            const section = await view.getContent().getSection(VIEWS.components);
             await VSBrowser.instance.driver.wait(async () => {
                 const buttons = await (await section.findWelcomeContent()).getButtons();
                 for (const btn of buttons) {
@@ -251,6 +251,27 @@ export function testCreateComponent(path: string) {
                     }
                 }
             }, 10_000);
+        }
+
+        async function waitForItem(label, timeout = 15000) {
+            const section = await view.getContent().getSection(VIEWS.components);
+
+            const start = Date.now();
+
+            while (Date.now() - start < timeout) {
+                try {
+                    const item = await section.findItem(label);
+                    if (item) {
+                        return item;
+                    }
+                } catch {
+                    // ignore transient errors
+                }
+
+                await new Promise(res => setTimeout(res, 500));
+            }
+
+            throw new Error(`Item "${label}" not found in section within ${timeout}ms`);
         }
     });
 }
