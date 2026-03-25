@@ -105,7 +105,7 @@ jobs:
         with:
           name: artifacts-${{ matrix.os }}
           path: |
-            /tmp/test-resources/screenshots/*.png
+            /tmp/test-resources/screenshots/**/*.png
           retention-days: 2
 
       # Upload coverage to codecov.io
