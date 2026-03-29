@@ -4,46 +4,46 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, ExtensionsViewItem, ExtensionsViewSection, SideBarView } from 'vscode-extension-tester';
+import { ActivityBar, ExtensionsViewItem, SideBarView } from 'vscode-extension-tester';
 import * as pjson from '../../../package.json';
 import { VIEWS } from '../common/constants';
 
 export function checkExtension() {
     describe('Extensions view check', () => {
-        let extView: ExtensionsViewSection;
-        let item: ExtensionsViewItem;
 
-        before(async function () {
-            this.timeout(15_000);
-            const btn = await new ActivityBar().getViewControl(VIEWS.extensions);
-            await btn.openView();
-            extView = await new SideBarView().getContent().getSection(VIEWS.installed);
-            item = await extView.findItem(`@installed ${pjson.displayName}`);
+        beforeEach(async function () {
+            this.timeout(15000);
+
+            const view = await new ActivityBar().getViewControl(VIEWS.extensions);
+            await view.openView();
+
+            await new Promise(res => setTimeout(res, 500));
         });
 
-        it('Openshift Toolkit is installed', () => {
+        it('Openshift Toolkit is installed', async function () {
+            this.timeout(30000);
+
+            const item = await getItem();
             expect(item).not.undefined;
         });
 
-        it('Openshift toolkit has the correct attributes', async function() {
-            this.timeout(15_000)
-            let version: string;
-            let author: string;
-            let desc: string;
-            try{
-                version = await item.getVersion();
-                author = await item.getAuthor();
-                desc = await item.getDescription();
-            } catch {
-                await new Promise(res => setTimeout(res, 5_000));
-                version = await item.getVersion();
-                author = await item.getAuthor();
-                desc = await item.getDescription();
-            }
+        it('Openshift toolkit has the correct attributes', async function () {
+            this.timeout(30000);
+
+            const item = await getItem();
+
+            const version = await item.getVersion();
+            const author = await item.getAuthor();
+            const desc = await item.getDescription();
 
             expect(version).equals(pjson.version);
             expect(author).equals(pjson.author);
             expect(desc).equals(pjson.description);
         });
+
+        async function getItem(): Promise<ExtensionsViewItem> {
+            const section = await new SideBarView().getContent().getSection(VIEWS.installed);
+            return await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+        }
     });
 }

@@ -12,11 +12,9 @@ import {
     EditorView,
     InputBox,
     NotificationType,
-    SideBarView,
-    ViewSection,
     VSBrowser,
     WelcomeContentButton,
-    Workbench,
+    Workbench
 } from 'vscode-extension-tester';
 import { notificationExists } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
@@ -35,8 +33,6 @@ import {
 //TODO: Add more checks for different elements
 export function testCreateComponent(path: string) {
     describe('Create Component Wizard', function () {
-        let view: SideBarView;
-        let section: ViewSection;
         let button: WelcomeContentButton;
         let componentName: string;
         let dlt = true;
@@ -45,7 +41,8 @@ export function testCreateComponent(path: string) {
             this.timeout(10_000);
             await new EditorView().closeAllEditors();
             fs.ensureDirSync(path, 0o6777);
-            view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             for (const item of [
                 VIEWS.appExplorer,
                 VIEWS.compRegistries,
@@ -55,6 +52,47 @@ export function testCreateComponent(path: string) {
                 await collapse(await view.getContent().getSection(item));
             }
             await loadCreateComponentButton();
+        });
+
+        after(async function context() {
+            this.timeout(15_000);
+            const prompt = await new Workbench().openCommandPrompt();
+            await prompt.setText('>Workspaces: Remove Folder From Workspace...');
+            await prompt.confirm();
+            await prompt.setText('node-js-runtime');
+            await prompt.confirm();
+
+            if (await prompt.isDisplayed()) {
+                await prompt.cancel();
+            }
+        });
+
+        //Delete the component using file system
+        afterEach(async function context() {
+            this.timeout(30_000);
+            if (componentName && dlt) {
+                const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+                await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+                const section = await view.getContent().getSection(VIEWS.components);
+                const component = await section.findItem(componentName);
+                const contextMenu = await component.openContextMenu();
+                await contextMenu.select(MENUS.deleteSourceCodeFolder);
+                const notification = await notificationExists(
+                    NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)),
+                    VSBrowser.instance.driver,
+                );
+                await notification.takeAction(INPUTS.deleteSourceFolder);
+                //fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
+                componentName = undefined;
+                await refreshView();
+                await loadCreateComponentButton();
+            }
+            await new EditorView().closeAllEditors();
+            const notificationCenter = await new Workbench().openNotificationsCenter();
+            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+            if (notifications.length > 0) {
+                await notificationCenter.close();
+            }
         });
 
         it('Shows default actions when no component exists', function test() {
@@ -83,6 +121,9 @@ export function testCreateComponent(path: string) {
             await createComponent(createCompView);
 
             componentName = 'node-js-runtime';
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            const section = await view.getContent().getSection(VIEWS.components);
             expect(await section.findItem(componentName)).to.be.not.undefined;
 
             dlt = false;
@@ -90,6 +131,9 @@ export function testCreateComponent(path: string) {
 
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            // await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            const section = await view.getContent().getSection(VIEWS.components);
             const component = await section.findItem(componentName);
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.deleteConfiguration);
@@ -141,6 +185,8 @@ export function testCreateComponent(path: string) {
             //Click on create component
             await clickCreateComponent();
 
+            await waitForCreateComponentView('Create Component');
+
             //Initialize create component editor and select create from template
             const createCompView = await initializeEditor();
             await createCompView.createComponentFromTemplate();
@@ -149,13 +195,12 @@ export function testCreateComponent(path: string) {
             const devfileView = new RegistryWebViewEditor(createCompView.editorName);
             await devfileView.initializeEditor();
             await devfileView.selectRegistryStack('Node.js Runtime');
-            await new Promise((res) => {
-                setTimeout(res, 1_500);
-            });
+            await new Promise((res) => { setTimeout(res, 1_500); });
 
             //Initialize stack window and click Use Devfile
             const devFileWindow = new RegistryWebViewDevfileWindow(createCompView.editorName);
             await devFileWindow.initializeEditor();
+            await devfileView.selectRegistryStack('Node.js Runtime');
             await devFileWindow.useDevfile();
 
             //Initialize next page, fill out path and select create component
@@ -163,48 +208,22 @@ export function testCreateComponent(path: string) {
 
             //check if component is in component view
             componentName = 'nodejs-starter';
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            // await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            const section = await view.getContent().getSection(VIEWS.components);
             expect(await section.findItem(componentName)).to.be.not.undefined;
 
             dlt = false;
         });
 
-        //Delete the component using file system
-        afterEach(async function context() {
-            this.timeout(30_000);
-            if (componentName && dlt) {
-                const component = await section.findItem(componentName);
-                const contextMenu = await component.openContextMenu();
-                await contextMenu.select(MENUS.deleteSourceCodeFolder);
-                const notification = await notificationExists(
-                    NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)),
-                    VSBrowser.instance.driver,
-                );
-                await notification.takeAction(INPUTS.deleteSourceFolder);
-                //fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
-                componentName = undefined;
-                await refreshView();
-                await loadCreateComponentButton();
-            }
-            await new EditorView().closeAllEditors();
-            const notificationCenter = await new Workbench().openNotificationsCenter();
-            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
-            if (notifications.length > 0) {
-                await notificationCenter.close();
-            }
-        });
+        async function waitForCreateComponentView(editorName: string): Promise<void> {
+            const editorView = new EditorView();
 
-        after(async function context() {
-            this.timeout(15_000);
-            const prompt = await new Workbench().openCommandPrompt();
-            await prompt.setText('>Workspaces: Remove Folder From Workspace...');
-            await prompt.confirm();
-            await prompt.setText('node-js-runtime');
-            await prompt.confirm();
-
-            if (await prompt.isDisplayed()) {
-                await prompt.cancel();
-            }
-        });
+            await VSBrowser.instance.driver.wait(async () => {
+                const editors = await editorView.getOpenEditorTitles();
+                return editors.includes(editorName);
+            }, 15000);
+        }
 
         async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
             const page = new SetNameAndFolderPage(createCompView.editorName);
@@ -224,6 +243,9 @@ export function testCreateComponent(path: string) {
         }
 
         async function refreshView() {
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            const section = await view.getContent().getSection(VIEWS.components);
             await section.collapse();
             await section.expand();
             const refresh = await section.getAction('Refresh Components View');
@@ -235,13 +257,23 @@ export function testCreateComponent(path: string) {
 
         async function clickCreateComponent() {
             await button.click();
-            await new Promise((res) => {
-                setTimeout(res, 3_000);
-            });
+            // await new Promise((res) => {
+            //     setTimeout(res, 3_000);
+            // });
+
+            // Wait until editor REALLY opens
+            await VSBrowser.instance.driver.wait(async () => {
+                const editorView = new EditorView();
+                const editors = await editorView.getOpenEditorTitles();
+                return editors.some(e => e.includes('Create Component'));
+            }, 15000);
+
         }
 
         async function loadCreateComponentButton() {
-            section = await view.getContent().getSection(VIEWS.components);
+            const view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
+            // await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            const section = await view.getContent().getSection(VIEWS.components);
             await VSBrowser.instance.driver.wait(async () => {
                 const buttons = await (await section.findWelcomeContent()).getButtons();
                 for (const btn of buttons) {

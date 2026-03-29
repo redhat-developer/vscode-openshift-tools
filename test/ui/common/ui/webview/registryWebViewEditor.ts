@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { By, ModalDialog, WebElement, WebView } from 'vscode-extension-tester';
+import { By, ModalDialog, VSBrowser, WebElement, WebView } from 'vscode-extension-tester';
 import { WebViewForm } from './WebViewForm';
 
 /**
@@ -84,13 +84,34 @@ export class RegistryWebViewEditor extends WebViewForm {
 
     public async selectRegistryStack(stackName: string): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const stacks = await this.getRegistryStacksItems(webView);
-            for(const stack of stacks) {
-                if((await stack.getStackName()).includes(stackName)) {
-                    await stack.selectStack();
-                    return;
+
+            const driver = VSBrowser.instance.driver;
+
+            const stackEl = await driver.wait(async () => {
+                try {
+                    const el = await webView.findWebElement(By.xpath(`
+                        //*[@id="devfileList"]
+                        //p[@id="devfileName" and contains(text(),"${stackName}")]
+                        /ancestor::div[1]
+                    `));
+
+                    if (await el.isDisplayed() && await el.isEnabled()) {
+                        return el;
+                    }
+
+                    return null;
+                } catch {
+                    return null;
                 }
-            }
+            }, 15000);
+
+            // scroll into view (fix interception)
+            await driver.executeScript(
+                'arguments[0].scrollIntoView({block: "center"});',
+                stackEl
+            );
+
+            await stackEl.click();
         });
     }
 }
@@ -115,12 +136,21 @@ export class RegistryWebViewDevfileWindow extends WebViewForm {
 
     public async useDevfile(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const button = await this.getUseDevfileButton(webView);
+            const button = await this.waitForElement(webView, '//button[contains(text(), "Use Devfile")]');
             await button.click();
         });
     }
 
-    private async getUseDevfileButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//button[contains(text(), "Use Devfile")]'));
+    private async waitForElement(webView: WebView, xpath: string, timeout = 15000): Promise<WebElement> {
+        // const driver = webView.getDriver();
+        const driver = VSBrowser.instance.driver;
+        return await driver.wait(async () => {
+            try {
+                const el = await webView.findWebElement(By.xpath(xpath));
+                return (await el.isDisplayed() && await el.isEnabled()) ? el : null;
+            } catch {
+                return null;
+            }
+        }, timeout);
     }
 }
