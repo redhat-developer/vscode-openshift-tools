@@ -28,10 +28,16 @@ suite('Download Util', () => {
         streamEmitter = new EventEmitter();
         requestEmitter.pipe = (): any => streamEmitter;
 
-        const mockGot = {
-            default: (): any => requestEmitter,
-            got: (): any => requestEmitter,
-            stream: (): any => requestEmitter
+        const mockGot = Object.assign(
+            () => requestEmitter,
+            {
+                stream: () => requestEmitter
+            }
+        );
+
+        const mockGotModule = {
+            __esModule: true,
+            default: mockGot
         };
 
         const mockStream = {
@@ -47,7 +53,7 @@ suite('Download Util', () => {
         };
 
         progressMock = pq('../../../src/downloadUtil/download', {
-            got: mockGot,
+            got: mockGotModule,
             stream: mockStream
         }).DownloadUtil as typeof DownloadUtilType;
     });
