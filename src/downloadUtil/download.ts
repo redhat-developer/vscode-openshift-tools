@@ -19,7 +19,7 @@ export class DownloadUtil {
         progressCb?: (current: number, increment: number) => void,
         throttle = 250,
     ): Promise<void> {
-        const dls = got(fromUrl, { isStream: true });
+        const dls = got.stream(fromUrl);
         if (progressCb) {
             let previous = 0;
             // Process progress event from 'got'
