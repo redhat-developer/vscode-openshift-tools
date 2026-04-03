@@ -129,7 +129,7 @@
 		"dompurify": "^3.3.2",
 		"dpdm": "^4.0.1",
 		"esbuild": "^0.27.3",
-		"esbuild-node-externals": "^1.20.1",
+		"esbuild-node-externals": "^1.21.0",
 		"esbuild-sass-plugin": "^3.6.0",
 		"eslint": "^9.39.2",
 		"eslint-config-prettier": "^10.1.8",
