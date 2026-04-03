@@ -38,14 +38,6 @@ export class Command {
         return new CommandText('odo', 'version');
     }
 
-    static describeComponent(): CommandText {
-        return new CommandText('odo', 'describe component');
-    }
-
-    static describeComponentJson(): CommandText {
-        return Command.describeComponent().addOption(new CommandOption('-o', 'json', false));
-    }
-
     @verbose
     static createLocalComponent(
         devfileType = '', // will use empty string in case of undefined devfileType passed in

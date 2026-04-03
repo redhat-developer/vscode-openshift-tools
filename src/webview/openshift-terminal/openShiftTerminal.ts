@@ -104,6 +104,8 @@ class OpenShiftTerminal {
 
     private _encoder = new TextEncoder();
 
+    private _spawnPty: boolean;
+
     /**
      * Creates a new OpenShiftTerminal
      *
@@ -130,6 +132,7 @@ class OpenShiftTerminal {
             onExit?: () => void;
             onText?: (text: string) => void;
         },
+        spawnPty = true
     ) {
         this._uuid = uuid;
 
@@ -157,6 +160,8 @@ class OpenShiftTerminal {
 
         this._disposables.push(this._headlessTerm);
         this._disposables.push(this._termSerializer);
+
+        this._spawnPty = spawnPty;
     }
 
     startPty() {
@@ -301,6 +306,17 @@ class OpenShiftTerminal {
     public write(data: string) {
         if (this.isPtyLive) {
             this._pty.write(data);
+        } else if (!this._spawnPty) {
+            if (this._terminalRendering) {
+                this._sendTerminalData(data);
+                this._headlessTerm.write(data);
+            } else {
+                this._buffer = Uint8Array.from([
+                    ...this._buffer,
+                    ...Uint8Array.from(this._encoder.encode(data))
+                ]);
+            }
+            this._onTextListener(data);
         } else if (this._ptyExited) {
             this._sendExitMessage();
         }
@@ -363,7 +379,7 @@ class OpenShiftTerminal {
      */
     public startRendering(): void {
         this._terminalRendering = true;
-        if (!this._pty) {
+        if (this._spawnPty && !this._pty) {
             this.startPty();
         }
     }
@@ -584,6 +600,40 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
     public async executeInTerminal(command: CommandText, cwd: string = process.cwd(), name = 'OpenShift', addEnv = {} as {[key : string]: string} ): Promise<void> {
         const merged = Object.fromEntries([...Object.entries(addEnv), ...Object.entries(CliChannel.createTelemetryEnv()), ...Object.entries(process.env)]);
         await OpenShiftTerminalManager.getInstance().createTerminal(command, name, cwd, merged);
+    }
+
+    public async writeToTerminal(text: string, cwd = process.cwd(), name = 'OpenShift'): Promise<void> {
+        await commands.executeCommand('openShiftTerminalView.focus');
+        await this.webviewResolved;
+
+        const uuid = randomUUID();
+
+        const term = new OpenShiftTerminal(
+            uuid,
+            (message: Message) => this.sendMessage(message),
+            '',          // no executable
+            [],
+            { cwd, env: process.env, name },
+            false,
+            undefined,
+            false        // ← do NOT spawn PTY
+        );
+
+        this.openShiftTerminals.set(uuid, term);
+
+        await this.sendMessage({
+            kind: 'createTerminal',
+            data: { uuid, name }
+        });
+
+        const normalized = text.replace(/\r?\n/g, '\r\n');
+        const CHUNK = 2000;
+
+        for (let i = 0; i < normalized.length; i += CHUNK) {
+            term.write(normalized.slice(i, i + CHUNK));
+        }
+
+        term.write('\r\n\r\n--- Close this terminal tab when finished ---\r\n');
     }
 
     /**

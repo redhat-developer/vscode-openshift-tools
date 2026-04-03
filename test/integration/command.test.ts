@@ -17,7 +17,6 @@ import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
-import { ComponentDescription } from '../../src/odo/componentTypeDescription';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
@@ -100,18 +99,6 @@ suite('odo commands integration', function () {
                 componentLocation
             );
             await fs.access(path.join(componentLocation, 'devfile.yaml'));
-        });
-
-        test('describeComponent()', async function() {
-            const res = await ODO.execute(Command.describeComponent(), componentLocation);
-            expect(res.stdout).contains(componentName);
-            expect(res.stdout).contains('Go');
-        });
-
-        test('describeComponentJson()', async function () {
-            const res = await ODO.execute(Command.describeComponentJson(), componentLocation);
-            expect(res.stdout).contains(componentName);
-            expect(res.stdout).contains(componentType);
         });
 
         suite('deploying', function() {
@@ -384,8 +371,8 @@ suite('odo commands integration', function () {
 
             await fixupDevFile(devfilePath);
 
-            const describeCmdResult = await ODO.execute(Command.describeComponentJson(), componentLocation);
-            const componentDescription = JSON.parse(describeCmdResult.stdout) as ComponentDescription;
+            const componentDescription = await Odo.Instance.describeComponent(componentLocation);
+
             expect(componentDescription.devfileData.devfile.commands[0]?.id).exist;
 
             const commands = componentDescription.devfileData.devfile.commands

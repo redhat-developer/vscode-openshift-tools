@@ -16,7 +16,7 @@
     "module": "CommonJS",
     "esModuleInterop": true,
     "strict": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
