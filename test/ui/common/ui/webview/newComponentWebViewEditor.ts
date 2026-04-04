@@ -2,7 +2,8 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { By, Key, WebElement, WebView } from 'vscode-extension-tester';
+import { By, EditorView, Key, VSBrowser, WebElement, WebView } from 'vscode-extension-tester';
+import { debugClick } from '../../conditions';
 import { WebViewForm } from './WebViewForm';
 
 //TODO: Add support for create from git page and from local codebase page
@@ -31,24 +32,83 @@ export class CreateComponentWebView extends WebViewForm {
     }
 
     public async createComponentFromTemplate(): Promise<void> {
-        await this.enterWebView(async (webView) => {
-            const button = await this.getCreateFromTemplateButton(webView);
-            await button.click();
-        });
+        await VSBrowser.instance.driver.wait(async () => {
+            try {
+                return await this.enterWebView(async (webView) => {
+                    const button = await this.getCreateFromTemplateButton(webView);
+                    if (!button) return false;
+
+                    const visible = await button.isDisplayed();
+                    const enabled = await button.isEnabled();
+
+                    if (!visible || !enabled) return false;
+
+                    await button.click();
+                    return true;
+                });
+            } catch {
+                return false;
+            }
+        }, 10000, 'Create Component from Template button not clickable');
+
+        await VSBrowser.instance.driver.wait(async () => {
+            const editors = await new EditorView().getOpenEditorTitles();
+            return editors.some(title =>
+                title.includes('Devfile Registry') || title.includes('Create Component')
+            );
+        }, 10000, 'Create Component from Template editor did not open');
     }
 
     public async createComponentFromGit(): Promise<void> {
-        await this.enterWebView(async (webView) => {
-            const button = await this.getCreateFromGitButton(webView);
-            await button.click();
-        });
+        await VSBrowser.instance.driver.wait(async () => {
+            try {
+                return await this.enterWebView(async (webView) => {
+                    const button = await this.getCreateFromGitButton(webView);
+                    if (!button) return false;
+
+                    const visible = await button.isDisplayed();
+                    const enabled = await button.isEnabled();
+
+                    if (!visible || !enabled) return false;
+
+                    await button.click();
+                    return true;
+                });
+            } catch {
+                return false;
+            }
+        }, 10000, 'Create Component from Git button not clickable');
+
+        await VSBrowser.instance.driver.wait(async () => {
+            const editors = await new EditorView().getOpenEditorTitles();
+            return editors.some(title => title.includes('Create Component'));
+        }, 10000, 'Create Component from Git editor did not open');
     }
 
     public async createComponentFromLocalCodebase(): Promise<void> {
-        await this.enterWebView(async (webView) => {
-            const button = await this.getCreateFromLocalButton(webView);
-            await button.click();
-        });
+        await VSBrowser.instance.driver.wait(async () => {
+            try {
+                return await this.enterWebView(async (webView) => {
+                    const button = await this.getCreateFromLocalButton(webView);
+                    if (!button) return false;
+
+                    const visible = await button.isDisplayed();
+                    const enabled = await button.isEnabled();
+
+                    if (!visible || !enabled) return false;
+
+                    await button.click();
+                    return true;
+                });
+            } catch {
+                return false;
+            }
+        }, 10000, 'Create Component from Local Folder button not clickable');
+
+        await VSBrowser.instance.driver.wait(async () => {
+            const editors = await new EditorView().getOpenEditorTitles();
+            return editors.some(title => title.includes('Create Component'));
+        }, 10000, 'Create Component from Local Folder editor did not open');
     }
 }
 
@@ -160,7 +220,7 @@ export class GitProjectPage extends Page {
     public async clickContinueButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.continueButtonExists(webView);
-            await button.click();
+            await debugClick(button, 'Continue');
         });
     }
 
@@ -202,14 +262,14 @@ export class LocalCodeBasePage extends Page {
     public async clickSelectFolderButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getSelectFolderButton(webView);
-            await button.click();
+            await debugClick(button, 'Select Folder');
         });
     }
 
     public async clickCreateComponent(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.createButtonExists(webView);
-            await button.click();
+            await debugClick(button, 'Create Component');
         });
     }
 

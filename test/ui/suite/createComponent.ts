@@ -13,11 +13,11 @@ import {
     InputBox,
     NotificationType,
     SideBarView,
+    ViewSection,
     VSBrowser,
-    WelcomeContentButton,
     Workbench
 } from 'vscode-extension-tester';
-import { notificationExists } from '../common/conditions';
+import { notificationExists, stabilizeComponentsView, step, waitForItemStable, waitForItemToDisappearStable, warn, withStableItem } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 import {
@@ -35,7 +35,6 @@ import {
 export function testCreateComponent(path: string) {
     describe('Create Component Wizard', function () {
         let view: SideBarView;
-        let button: WelcomeContentButton;
         let componentName: string;
         let dlt = true;
 
@@ -52,18 +51,34 @@ export function testCreateComponent(path: string) {
             ]) {
                 await collapse(await view.getContent().getSection(item));
             }
-            await loadCreateComponentButton();
         });
 
-        it('Shows default actions when no component exists', function test() {
-            if (!button) {
-                expect.fail('No Create Component button found');
-            }
+        it('Shows default actions when no component exists', async function test() {
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await stabilizeComponentsView(getSection);
+
+                    const section = await getSection();
+                    const welcome = await section.findWelcomeContent();
+                    const buttons = await welcome.getButtons();
+
+                    for (const btn of buttons) {
+                        if ((await btn.getTitle()) === BUTTONS.newComponent) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                } catch {
+                    return false;
+                }
+            }, 10_000, 'No Create Component button found');
         });
 
         it('Create component from git URL', async function test() {
             this.timeout(25_000);
 
+            await stabilizeComponentsView(getSection);
             await clickCreateComponent();
 
             const createCompView = await initializeEditor();
@@ -82,7 +97,7 @@ export function testCreateComponent(path: string) {
 
             componentName = 'node-js-runtime';
 
-            const item = await waitForItem(componentName);
+            const item = await waitForItemStable(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = false;
@@ -90,9 +105,13 @@ export function testCreateComponent(path: string) {
 
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
-            const component = await waitForItem(componentName);
-            const contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.deleteConfiguration);
+
+            await step(`Delete "${componentName}" component configuration` , async () => {
+                await withStableItem(getSection, componentName, async (item) => {
+                    const menu = await item.openContextMenu();
+                    await menu.select(MENUS.deleteConfiguration);
+                });
+            });
 
             const notification = await notificationExists(
                 NOTIFICATIONS.deleteConfig(pth.join(path, componentName)),
@@ -107,7 +126,6 @@ export function testCreateComponent(path: string) {
             }
 
             await refreshView();
-            await loadCreateComponentButton();
             await clickCreateComponent();
 
             const createCompView = await initializeEditor();
@@ -115,20 +133,42 @@ export function testCreateComponent(path: string) {
 
             const localCodeBasePage = new LocalCodeBasePage();
             await localCodeBasePage.initializeEditor();
-            await localCodeBasePage.insertComponentName(componentName);
-            await localCodeBasePage.clickSelectFolderButton();
 
-            const input = await InputBox.create();
-            await input.setText(pth.join(path, componentName));
-            await input.confirm();
-
-            await localCodeBasePage.clickNextButton();
-            await new Promise((res) => {
-                setTimeout(res, 500);
+            await step('Insert component name', async () => {
+                await localCodeBasePage.insertComponentName(componentName);
             });
-            await localCodeBasePage.clickCreateComponent();
 
-            const item = await waitForItem(componentName);
+            await step('Click Select Folder button', async () => {
+                await localCodeBasePage.clickSelectFolderButton();
+            });
+
+            await step('Input component path', async () => {
+                const input = await InputBox.create();
+                await input.setText(pth.join(path, componentName));
+                await input.confirm();
+                // critical: wait until InputBox is gone
+                await VSBrowser.instance.driver.wait(async () => {
+                    try {
+                        await InputBox.create();
+                        return false;
+                    } catch {
+                        return true;
+                    }
+                }, 10000);
+            });
+
+            await step('Click Next button', async () => {
+                await localCodeBasePage.clickNextButton();
+                await new Promise((res) => {
+                    setTimeout(res, 500);
+                });
+            });
+
+            await step('Click Create Component button', async () => {
+                await localCodeBasePage.clickCreateComponent();
+            });
+
+            const item = await waitForItemStable(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = true;
@@ -138,6 +178,7 @@ export function testCreateComponent(path: string) {
             this.timeout(25_000);
 
             //Click on create component
+            await stabilizeComponentsView(getSection);
             await clickCreateComponent();
 
             //Initialize create component editor and select create from template
@@ -155,14 +196,23 @@ export function testCreateComponent(path: string) {
             //Initialize stack window and click Use Devfile
             const devFileWindow = new RegistryWebViewDevfileWindow(createCompView.editorName);
             await devFileWindow.initializeEditor();
-            await devFileWindow.useDevfile();
+            // await devFileWindow.useDevfile();
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await devFileWindow.useDevfile();
+                    return true;
+                } catch {
+                    return false;
+                }
+            }, 10000, '"Use Devfile" button not clickable');
 
             //Initialize next page, fill out path and select create component
             await createComponent(createCompView);
+            await refreshView();
 
             //check if component is in component view
             componentName = 'nodejs-starter';
-            const item = await waitForItem(componentName);
+            const item = await waitForItemStable(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = false;
@@ -171,40 +221,77 @@ export function testCreateComponent(path: string) {
         //Delete the component using file system
         afterEach(async function context() {
             this.timeout(30_000);
-            if (componentName && dlt) {
-                const component = await waitForItem(componentName);
-                const contextMenu = await component.openContextMenu();
-                await contextMenu.select(MENUS.deleteSourceCodeFolder);
-                const notification = await notificationExists(
-                    NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)),
-                    VSBrowser.instance.driver,
-                );
-                await notification.takeAction(INPUTS.deleteSourceFolder);
-                //fs.rmSync(pth.join(path, componentName), { recursive: true, force: true });
-                componentName = undefined;
-                await refreshView();
-                await loadCreateComponentButton();
+
+            try {
+                if (componentName && dlt) {
+                    await deleteComponentIfExists(componentName);
+                    componentName = undefined;
+                    dlt = false;
+                    await refreshView();
+                } else {
+                    await stabilizeComponentsView(getSection);
+                }
+            } catch (err) {
+                warn('Cleanup source code folder failed (ignored):', err);
             }
-            await new EditorView().closeAllEditors();
-            const notificationCenter = await new Workbench().openNotificationsCenter();
-            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
-            if (notifications.length > 0) {
-                await notificationCenter.close();
-            }
+
+            // Close all editors
+            try { await new EditorView().closeAllEditors(); } catch { /* Ignore */ }
+
+            // Close any remaining notifications
+            try {
+                const notificationCenter = await new Workbench().openNotificationsCenter();
+                const notifications = await notificationCenter.getNotifications(NotificationType.Any);
+                if (notifications.length > 0) {
+                    await notificationCenter.close();
+                }
+            } catch { /* Ignore */ }
         });
 
         after(async function context() {
             this.timeout(15_000);
-            const prompt = await new Workbench().openCommandPrompt();
-            await prompt.setText('>Workspaces: Remove Folder From Workspace...');
-            await prompt.confirm();
-            await prompt.setText('node-js-runtime');
-            await prompt.confirm();
+            try {
+                const prompt = await new Workbench().openCommandPrompt();
+                await VSBrowser.instance.driver.wait(async () => {
+                    return await prompt.isDisplayed();
+                }, 5000);
 
-            if (await prompt.isDisplayed()) {
-                await prompt.cancel();
+                await prompt.setText('>Workspaces: Remove Folder From Workspace...');
+                await prompt.confirm();
+                await prompt.setText('node-js-runtime');
+                await prompt.confirm();
+
+                if (await prompt.isDisplayed()) {
+                    await prompt.cancel();
+                }
+            } catch (err) {
+                warn('Cleanup remove folder failed (ignored):', err);
             }
         });
+
+        async function deleteComponentIfExists(componentName: string) {
+            await withStableItem(getSection, componentName, async (item) => {
+                const menu = await item.openContextMenu();
+                await menu.select(MENUS.deleteSourceCodeFolder);
+            });
+
+            const notification = await notificationExists(
+                NOTIFICATIONS.deleteSourceCodeFolder(pth.join(path, componentName)),
+                VSBrowser.instance.driver
+            );
+            if (!notification) {
+                throw new Error(`Delete notification for "${componentName}" did not appear`);
+            }
+
+            await notification.takeAction(INPUTS.deleteSourceFolder);
+
+            const gone = await waitForItemToDisappearStable(getSection, componentName, 20_000);
+            if (!gone) {
+                throw new Error(`Component "${componentName}" still exists after deletion`);
+            }
+
+            return true;
+        }
 
         async function createComponent(createCompView: CreateComponentWebView): Promise<void> {
             const page = new SetNameAndFolderPage(createCompView.editorName);
@@ -216,62 +303,89 @@ export function testCreateComponent(path: string) {
 
         async function initializeEditor(): Promise<CreateComponentWebView> {
             const createCompView = new CreateComponentWebView();
-            await createCompView.initializeEditor();
+
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await createCompView.initializeEditor();
+                    return true;
+                } catch {
+                    return false;
+                }
+            }, 10000, 'Create Component webview not initialized');
+
             return createCompView;
         }
 
         async function refreshView() {
-            let section = await view.getContent().getSection(VIEWS.components);
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
 
-            await section.collapse();
-            await section.expand();
-            await new Promise(res => setTimeout(res, 1_000));
+                    await section.collapse();
+                    await section.expand();
 
-            section = await view.getContent().getSection(VIEWS.components);
-            const refresh = await section.getAction('Refresh Components View');
-            await refresh.click();
-            await new Promise((res) => setTimeout(res, 1_000));
+                    const action = await section.getAction('Refresh Components View');
+                    if (!action) return false;
+
+                    await action.safeClick();
+                    return true;
+
+                } catch {
+                    return false;
+                }
+            }, 15_000, 'Failed to refresh components view');
+
+            await stabilizeComponentsView(getSection);
         }
 
         async function clickCreateComponent() {
-            await button.click();
-            await new Promise((res) => {
-                setTimeout(res, 3_000);
-            });
-        }
-
-        async function loadCreateComponentButton() {
-            const section = await view.getContent().getSection(VIEWS.components);
             await VSBrowser.instance.driver.wait(async () => {
-                const buttons = await (await section.findWelcomeContent()).getButtons();
-                for (const btn of buttons) {
-                    if ((await btn.getTitle()) === BUTTONS.newComponent) {
-                        button = btn;
-                        return true;
-                    }
-                }
-            }, 10_000);
-        }
-
-        async function waitForItem(label, timeout = 15000) {
-            const section = await view.getContent().getSection(VIEWS.components);
-
-            const start = Date.now();
-
-            while (Date.now() - start < timeout) {
                 try {
-                    const item = await section.findItem(label);
-                    if (item) {
-                        return item;
+                    await stabilizeComponentsView(getSection);
+
+                    // Try welcome content first
+                    try {
+                        const section = await getSection();
+                        const welcome = await section.findWelcomeContent();
+                        const buttons = await welcome.getButtons();
+
+                        for (const btn of buttons) {
+                            if ((await btn.getTitle()) === BUTTONS.newComponent) {
+                                await btn.safeClick();
+                                return true;
+                            }
+                        }
+                    } catch {
+                        // ignore → fallback
+                    }
+
+                    // Fallback: toolbar action
+                    try {
+                        const section = await getSection();
+                        const action = await section.getAction(BUTTONS.newComponent);
+                        await action.safeClick();
+                        return true;
+                    } catch {
+                        return false;
                     }
                 } catch {
-                    // ignore transient errors
+                    return false;
                 }
+            }, 15_000, 'Failed to click New Component button');
 
-                await new Promise(res => setTimeout(res, 500));
-            }
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const editor = new EditorView();
+                    const titles = await editor.getOpenEditorTitles();
+                    return titles.some(t => t.includes('Create Component'));
+                } catch {
+                    return false;
+                }
+            }, 15_000, 'Create Component editor did not open');
+        }
 
-            throw new Error(`Item "${label}" not found in section within ${timeout}ms`);
+        async function getSection(): Promise<ViewSection> {
+            return await view.getContent().getSection(VIEWS.components);
         }
     });
 }

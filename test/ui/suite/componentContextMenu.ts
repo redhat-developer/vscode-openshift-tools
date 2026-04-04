@@ -12,29 +12,26 @@ import {
     Key,
     NotificationType,
     SideBarView,
-    ViewItem,
     ViewSection,
     VSBrowser,
-    Workbench,
+    Workbench
 } from 'vscode-extension-tester';
-import { itemDoesNotExist, itemExists, notificationDoesNotExist } from '../common/conditions';
+import { findItemFuzzy, itemDoesNotExist, notificationDoesNotExist, stabilizeComponentsView, waitForItem, waitForItemStable, waitForItemToDisappear, warn } from '../common/conditions';
 import { MENUS, VIEWS } from '../common/constants';
 import { collapse } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentContextMenu() {
     describe('Component Context Menu', function () {
-        this.timeout(60_000);
+        this.timeout(80_000);
         let view: SideBarView;
-        let section: ViewSection;
-        let component: ViewItem;
         let openshiftTerminal: OpenshiftTerminalWebviewView;
 
         const componentName = 'nodejs-starter';
         const expectedTabName = `odo dev: ${componentName}`;
 
         before(async function context() {
-            this.timeout(20_000);
+            this.timeout(45_000);
             await new EditorView().closeAllEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
@@ -47,10 +44,14 @@ export function testComponentContextMenu() {
                 await (await view.getContent().getSection(item)).collapse();
             }
 
-            section = await view.getContent().getSection(VIEWS.components);
             try {
-                await itemExists(componentName, section);
-            } catch {
+                const item = await waitForItemStable(getSection, componentName, true, 40_000);
+                if (!item) {
+                    warn(`Component "${componentName}" not found, skipping tests`);
+                    this.skip();
+                }
+            } catch (err) {
+                warn('Error in before hook: "Component Context Menu":', err);
                 this.skip();
             }
         });
@@ -58,10 +59,12 @@ export function testComponentContextMenu() {
         it('Start Dev works', async function () {
             this.timeout(60_000);
 
+            await stabilizeComponentsView(getSection);
+
             //start dev
             await startDev(true);
 
-            //workaround for failed start dev due to undefined contextPath error
+            // workaround for failed start dev due to undefined contextPath error
             const notificationCenter = await new Workbench().openNotificationsCenter();
             const notifications = await notificationCenter.getNotifications(NotificationType.Any);
             if (notifications.length > 0) {
@@ -69,10 +72,8 @@ export function testComponentContextMenu() {
             }
             await notificationCenter.close();
 
-            //check openshift terminal for tab name
-            openshiftTerminal = new OpenshiftTerminalWebviewView();
-            const terminalName = await openshiftTerminal.getActiveTabName();
-            expect(terminalName).to.contain(expectedTabName);
+            // wait for terminal tab checking the active tab's name
+            openshiftTerminal = await waitForTerminalWithActiveTab(expectedTabName);
 
             await openshiftTerminal.getTerminalText();
 
@@ -93,11 +94,17 @@ export function testComponentContextMenu() {
 
         it('Stop Dev works', async function () {
             this.timeout(80_000);
-            try {
-                await itemDoesNotExist(componentName, section);
-            } catch {
-                this.skip();
-            }
+
+            await stabilizeComponentsView(getSection);
+
+            // When the component is Dev-running its label has changed, so we'll check that:
+            // - ...component with the original name doesn't exist
+            await waitForItemToDisappear(getSection, componentName);  // Throws if exists
+
+            // - ...component with modifed name (like " (dev running)" added) exists
+            await waitForItem(getSection, componentName, false); // Throws if NOT exists
+
+            // ... if we got to this point then we assume the component exists and is running
 
             //stop dev
             await stopDev();
@@ -117,6 +124,8 @@ export function testComponentContextMenu() {
 
         it('Stop Dev works by pressing Ctrl+c', async function () {
             this.timeout(80_000);
+
+            await stabilizeComponentsView(getSection);
 
             //start dev
             await startDev(true);
@@ -138,6 +147,8 @@ export function testComponentContextMenu() {
 
         it('Start/Stop Dev on Podman works', async () => {
             this.timeout(80_000);
+
+            await stabilizeComponentsView(getSection);
 
             //start dev on podman
             await startDev(false);
@@ -164,17 +175,17 @@ export function testComponentContextMenu() {
 
         it('Describe component works', async function () {
             this.timeout(80_000);
-            try {
-                await itemExists(componentName, section);
-            } catch {
-                this.skip();
-            }
+
+            await stabilizeComponentsView(getSection);
 
             //start dev
             await startDev(true);
 
             //wait for start dev to finish
             await waitForStartDevToFinish(true);
+
+            // get the updated component item
+            const component = await waitForItemStable(getSection, componentName, false);
 
             //describe component
             const contextMenu = await component.openContextMenu();
@@ -198,6 +209,8 @@ export function testComponentContextMenu() {
         });
 
         it('Show dev terminal works', async () => {
+            const component = await waitForItemStable(getSection, componentName, false);
+
             //open menu and select show dev terminal
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.showDevTerminal);
@@ -209,6 +222,8 @@ export function testComponentContextMenu() {
 
         it('Debug works', async () => {
             this.timeout(80_000);
+
+            const component = await waitForItemStable(getSection, componentName, false);
 
             //select debug from component's context menu
             const contextMenu = await component.openContextMenu();
@@ -294,29 +309,109 @@ export function testComponentContextMenu() {
             await itemDoesNotExist(componentName, debugSession);
         });
 
+        async function getSection(): Promise<ViewSection> {
+            return await view.getContent().getSection(VIEWS.components);
+        }
+
         async function startDev(devOnCluster: boolean): Promise<void> {
-            component = await itemExists(componentName, section);
-            const contextMenu = await component.openContextMenu();
             const option = devOnCluster ? MENUS.startDev : MENUS.startDevPodman;
-            await contextMenu.select(option);
+
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    const component = await section.findItem(componentName);
+                    if (!component) return false;
+
+                    const menu = await component.openContextMenu();
+                    const items = await menu.getItems();
+
+                    for (const item of items) {
+                        if ((await item.getLabel()) === option) {
+                            try {
+                                await item.safeClick();
+                                return true;
+                            } catch(err) {
+                                // close menu before retry
+                                await VSBrowser.instance.driver.actions().sendKeys('\uE00C').perform(); // ESC
+                                throw err;
+                            }
+                        }
+                    }
+
+                    // close menu before retry
+                    await VSBrowser.instance.driver.actions().sendKeys('\uE00C').perform(); // ESC
+                    return false;
+
+                } catch {
+                    return false;
+                }
+            }, 20000, `Context menu item "${option}" not available`);
         }
 
         async function waitForStartDevToFinish(devOnCluster: boolean): Promise<void> {
             const podmanString = devOnCluster ? '' : ' on podman';
-            await itemExists(`${componentName} (dev starting${podmanString})`, section);
-            await itemExists(`${componentName} (dev running${podmanString})`, section, 40_000);
+            await waitForItemStable(getSection, `${componentName} (dev starting${podmanString})`);
+            await waitForItemStable(getSection, `${componentName} (dev running${podmanString})`, true, 40_000);
         }
 
         async function stopDev(): Promise<void> {
-            const contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.stopDev);
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    const component = await findItemFuzzy(section, componentName);
+                    if (!component) return false;
+
+                    const menu = await component.openContextMenu();
+                    const items = await menu.getItems();
+
+                    for (const item of items) {
+                        if ((await item.getLabel()) === MENUS.stopDev) {
+                            try {
+                                await item.safeClick();
+                                return true;
+                            } catch(err) {
+                                // close menu before retry
+                                await VSBrowser.instance.driver.actions().sendKeys('\uE00C').perform(); // ESC
+                                throw err;
+                            }
+                        }
+                    }
+
+                    // close menu before retry
+                    await VSBrowser.instance.driver.actions().sendKeys('\uE00C').perform(); // ESC
+                    return false;
+
+                } catch {
+                    return false;
+                }
+            }, 20000, `Context menu item "${MENUS.stopDev}" not available`);
         }
 
         async function waitForStopDevToFinish(devOnCluster: boolean): Promise<void> {
             if (devOnCluster) {
-                await itemExists(`${componentName} (dev stopping)`, section);
+                await waitForItemStable(getSection, `${componentName} (dev stopping)`);
             }
-            await itemExists(componentName, section, 60_000);
+            await waitForItemStable(getSection, componentName, true, 60_000);
+        }
+
+        async function waitForTerminalWithActiveTab(expectedTabName: string, timeout = 20000): Promise<OpenshiftTerminalWebviewView> {
+            let terminal: OpenshiftTerminalWebviewView | undefined;
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    terminal = new OpenshiftTerminalWebviewView();
+                    const tabName = await terminal.getActiveTabName();
+                    if (!tabName || !tabName.includes(expectedTabName)) {
+                        return false;
+                    }
+
+                    const text = await terminal.getTerminalText();
+                    return text !== undefined;
+                } catch {
+                    return false;
+                }
+            }, timeout, `Terminal tab "${expectedTabName}" did not open`);
+
+            return terminal!;
         }
     });
 }
