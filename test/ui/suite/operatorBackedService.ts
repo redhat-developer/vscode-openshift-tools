@@ -73,6 +73,7 @@ export function operatorBackedServiceTest() {
             await notificationExists(
                 NOTIFICATIONS.serviceCreated(serviceName),
                 VSBrowser.instance.driver,
+                50_000
             );
 
             //check that deployment is shown

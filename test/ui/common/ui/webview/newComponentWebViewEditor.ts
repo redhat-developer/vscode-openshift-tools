@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { By, Key, WebElement, WebView } from 'vscode-extension-tester';
+import { debugClick } from '../../utils';
 import { WebViewForm } from './WebViewForm';
 
 //TODO: Add support for create from git page and from local codebase page
@@ -160,7 +161,8 @@ export class GitProjectPage extends Page {
     public async clickContinueButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.continueButtonExists(webView);
-            await button.click();
+            // await button.click();
+            await debugClick(button, 'Continue');
         });
     }
 
@@ -202,14 +204,16 @@ export class LocalCodeBasePage extends Page {
     public async clickSelectFolderButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getSelectFolderButton(webView);
-            await button.click();
+            // await button.click();
+            await debugClick(button, 'Select Folder');
         });
     }
 
     public async clickCreateComponent(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.createButtonExists(webView);
-            await button.click();
+            // await button.click();
+            await debugClick(button, 'Create Component');
         });
     }
 

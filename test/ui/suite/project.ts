@@ -19,6 +19,7 @@ import {
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
+import { waitForItem } from '../common/utils';
 
 export function projectTest(isOpenshiftCluster: boolean) {
     describe('Work with project', function () {
@@ -70,7 +71,8 @@ export function projectTest(isOpenshiftCluster: boolean) {
 
         it('Create a new project', async function () {
             this.timeout(30_000);
-            const clusterItem = (await (await getExplorer()).findItem(clusterName)) as TreeItem;
+
+            const clusterItem = await waitForItem(getExplorer, clusterName) as TreeItem;
             await clusterItem.expand();
             const contextMenu = await clusterItem.openContextMenu();
             await contextMenu.select(newProject);
@@ -90,9 +92,10 @@ export function projectTest(isOpenshiftCluster: boolean) {
 
         it('Project can be changed', async function () {
             this.timeout(30_000);
+
             anotherProjectName = getProjectName();
 
-            const clusterItem = (await (await getExplorer()).findItem(clusterName)) as TreeItem;
+            const clusterItem = await waitForItem(getExplorer, clusterName) as TreeItem;
             await clusterItem.expand();
             const contextMenu = await clusterItem.openContextMenu();
             await contextMenu.select(newProject);
@@ -121,7 +124,7 @@ export function projectTest(isOpenshiftCluster: boolean) {
         it('Delete a project', async function () {
             this.timeout(30_000);
 
-            const projectItem = await (await getExplorer()).findItem(projectName);
+            const projectItem = await waitForItem(getExplorer, projectName) as TreeItem;
             const contextMenu = await projectItem.openContextMenu();
 
             await contextMenu.select(deleteProject);
