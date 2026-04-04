@@ -11,9 +11,10 @@ import {
     NotificationType,
     ViewItem,
     ViewSection,
+    VSBrowser,
     WebDriver,
     WelcomeContentSection,
-    Workbench,
+    Workbench
 } from 'vscode-extension-tester';
 
 export async function waitForInputUpdate(
@@ -95,6 +96,110 @@ export async function itemExists(
         timeout,
         `Item '${title}' not found.`,
     );
+}
+
+export async function stabilizeComponentsView(getSection: () => Promise<ViewSection>, timeout = 20000): Promise<ViewSection> {
+    const result = await VSBrowser.instance.driver.wait(async () => {
+        try {
+            let section = await getSection();
+
+            await section.expand();
+            await new Promise(res => setTimeout(res, 300));
+
+            section = await getSection();
+
+            // ---- try tree mode ----
+            try {
+                const items = await section.getVisibleItems();
+                await Promise.all(items.map(i => i.getText()));
+                return section;
+            } catch {
+                // ---- fallback: welcome content mode ----
+                try {
+                    const welcome = await section.findWelcomeContent();
+                    const buttons = await welcome.getButtons();
+                    if (buttons) {
+                        return section;
+                    }
+                } catch {
+                    return false;
+                }
+            }
+
+            return false;
+
+        } catch {
+            return false;
+        }
+    }, timeout, 'Components view did not stabilize');
+
+    return result as ViewSection;
+}
+
+export async function findItemFuzzy(section: ViewSection, label: string): Promise<ViewItem | undefined> {
+    const items = await section.getVisibleItems();
+    for (const item of items) {
+        try {
+            const text = await item.getText();
+            if (text.includes(label)) {
+                return item;
+            }
+        } catch {
+            // ignore
+        }
+    }
+
+    return undefined;
+}
+
+export async function waitForItem(getSection: () => Promise<ViewSection>, label: string, strict: boolean = true, timeout = 15000) {
+    return VSBrowser.instance.driver.wait(async () => {
+        try {
+            const section = await getSection();
+            const item = strict ? await section.findItem(label) : await findItemFuzzy(section, label);
+            return item ?? false;
+        } catch {
+            return false;
+        }
+    }, timeout, `Item "${label}" not found within ${timeout}ms`) as Promise<ViewItem>;
+}
+
+export async function waitForItemStable(getSection: () => Promise<ViewSection>, label: string, strict: boolean = true, timeout = 15000) {
+    await stabilizeComponentsView(getSection);
+    return waitForItem(getSection, label, strict, timeout);
+}
+
+
+export async function waitForItemToDisappear(getSection: () => Promise<ViewSection>, label: string, timeout = 15000): Promise<boolean> {
+    return VSBrowser.instance.driver.wait(async () => {
+        try {
+            const section = await getSection();
+            const item = await section.findItem(label);
+            return !item;
+        } catch {
+            return true;
+        }
+    }, timeout, `Item "${label}" still exists after ${timeout}ms`);
+}
+
+export async function waitForItemToDisappearStable(getSection: () => Promise<ViewSection>, label: string, timeout = 15000): Promise<boolean> {
+    await stabilizeComponentsView(getSection);
+    return waitForItemToDisappear(getSection, label, timeout);
+}
+
+export async function withStableItem(getSection: () => Promise<ViewSection>, label: string, action: (item: ViewItem) => Promise<void>, timeout = 10_000) {
+    await stabilizeComponentsView(getSection);
+    return VSBrowser.instance.driver.wait(async () => {
+        try {
+            const section = await getSection();
+            const item = await section.findItem(label);
+            if (!item) return false;
+            await action(item);
+            return true;
+        } catch {
+            return false;
+        }
+    }, timeout, `Action on "${label}" could not be performed`);
 }
 
 export async function itemDoesNotExist(
@@ -191,3 +296,100 @@ export async function webViewIsOpened(name: string, driver: WebDriver, timeout =
         }
     }, timeout);
 }
+
+export async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {
+    const callSiteStack = new Error(`Step: ${name}`).stack;
+    try {
+        return await fn();
+    } catch (err) {
+        const error = err as Error;
+        error.message = `Step failed: ${name}\n${error.message}`;
+        if (error.stack && callSiteStack) {
+            error.stack =
+                `${error.stack}\n\n--- Step call site ---\n${callSiteStack}`;
+        }
+        throw error;
+    }
+}
+
+export async function debugClick(element, name: string) {
+    try {
+        await element.click();
+    } catch (e) {
+        /* eslint-disable no-console */
+        error(`Failed to click: ${name}`);
+        error(await element.getAttribute('outerHTML'));
+        /* eslint-enable no-console */
+        throw e;
+    }
+}
+
+/* eslint-disable no-console */
+export async function listItems(getSection: () => Promise<ViewSection>, title = undefined): Promise<void> {
+    const t = title ? `[${title}]: ` : '';
+    log(`${t}Current components in view: >>>`);
+
+    try {
+        await VSBrowser.instance.driver.wait(async () => {
+            try {
+                const section = await getSection();
+
+                // Expand the section
+                await section.expand();
+
+                // First try: list actual components
+                try {
+                    const items = await VSBrowser.instance.driver.wait(async () => {
+                        try {
+                            return await section.getVisibleItems();
+                        } catch {
+                            return null;
+                        }
+                    }, 10000);
+
+                    if (items && items.length) {
+                        const labels = [];
+                        for (const item of items) {
+                            try {
+                                labels.push(await item.getText());
+                            } catch {
+                                labels.push('<error>');
+                            }
+                        }
+                        log(`[${labels.join(', ')}]`);
+                        return true;
+                    }
+                } catch {
+                    // fallback to welcome content
+                }
+
+                // Second try: welcome content (empty section)
+                try {
+                    const welcome = await section.findWelcomeContent();
+                    const buttons = await welcome.getButtons();
+                    if (buttons && buttons.length) {
+                        log('[<empty: welcome content>]');
+                        return true;
+                    }
+                } catch {
+                    // still nothing visible, retry
+                }
+
+                return false;
+
+            } catch {
+                return false;
+            }
+        }, 10000, 'Could not list items');
+
+    } catch (err) {
+        log('Error while getting the current components: ', err);
+    } finally {
+        log('<<<');
+    }
+}
+
+export const log = console.log;
+export const warn = console.warn;
+export const error = console.error;
+/* eslint-enable no-console */
