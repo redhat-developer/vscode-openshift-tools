@@ -183,8 +183,26 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             .then(result => (allTrue(result) ? `${contextValue}.can-delete` : contextValue));
     }
 
+
     // eslint-disable-next-line class-methods-use-this
     async getTreeItem(element: ExplorerItem): Promise<TreeItem> {
+        try {
+            return await this._getTreeItem(element);
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('getTreeItem failed:', err, element);
+
+            return {
+                label: '⚠️ Broken item',
+                tooltip: `${err}`,
+                iconPath: new ThemeIcon('error'),
+                collapsibleState: TreeItemCollapsibleState.None
+            };
+        }
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    async _getTreeItem(element: ExplorerItem): Promise<TreeItem> {
         if ('command' in element || ('label' in element && 'iconPath' in element)) {
             return element;
         }
@@ -474,7 +492,23 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     // eslint-disable-next-line class-methods-use-this
+
     async getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
+        try {
+            return await this._getChildren(element);
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('getChildren failed:', err);
+
+            return [{
+                label: '⚠️ Error loading tree',
+                tooltip: String(err),
+                iconPath: new ThemeIcon('error')
+            }];
+        }
+    }
+
+    async _getChildren(element?: ExplorerItem): Promise<ExplorerItem[]> {
         let result: ExplorerItem[] = [];
         // don't show Open In Developer Dashboard if not openshift cluster
         const isOpenshiftCluster = await isOpenShiftCluster(this.executionContext);

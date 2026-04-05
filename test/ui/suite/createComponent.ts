@@ -13,6 +13,7 @@ import {
     InputBox,
     NotificationType,
     SideBarView,
+    ViewSection,
     VSBrowser,
     WelcomeContentButton,
     Workbench
@@ -30,6 +31,7 @@ import {
     RegistryWebViewDevfileWindow,
     RegistryWebViewEditor,
 } from '../common/ui/webview/registryWebViewEditor';
+import { step, waitForItem } from '../common/utils';
 
 //TODO: Add more checks for different elements
 export function testCreateComponent(path: string) {
@@ -82,7 +84,7 @@ export function testCreateComponent(path: string) {
 
             componentName = 'node-js-runtime';
 
-            const item = await waitForItem(componentName);
+            const item = await waitForItem(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = false;
@@ -90,7 +92,7 @@ export function testCreateComponent(path: string) {
 
         it('Create component from local folder', async function test() {
             this.timeout(25_000);
-            const component = await waitForItem(componentName);
+            const component = await waitForItem(getSection, componentName);
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.deleteConfiguration);
 
@@ -115,20 +117,42 @@ export function testCreateComponent(path: string) {
 
             const localCodeBasePage = new LocalCodeBasePage();
             await localCodeBasePage.initializeEditor();
-            await localCodeBasePage.insertComponentName(componentName);
-            await localCodeBasePage.clickSelectFolderButton();
 
-            const input = await InputBox.create();
-            await input.setText(pth.join(path, componentName));
-            await input.confirm();
-
-            await localCodeBasePage.clickNextButton();
-            await new Promise((res) => {
-                setTimeout(res, 500);
+            await step('Insert component name', async () => {
+                await localCodeBasePage.insertComponentName(componentName);
             });
-            await localCodeBasePage.clickCreateComponent();
 
-            const item = await waitForItem(componentName);
+            await step('Click Select Folder button', async () => {
+                await localCodeBasePage.clickSelectFolderButton();
+            });
+
+            await step('Input component path', async () => {
+                const input = await InputBox.create();
+                await input.setText(pth.join(path, componentName));
+                await input.confirm();
+                // critical: wait until InputBox is gone
+                await VSBrowser.instance.driver.wait(async () => {
+                    try {
+                        await InputBox.create();
+                        return false;
+                    } catch {
+                        return true;
+                    }
+                }, 10000);
+            });
+
+            await step('Click Next button', async () => {
+                await localCodeBasePage.clickNextButton();
+                await new Promise((res) => {
+                    setTimeout(res, 500);
+                });
+            });
+
+            await step('Click Create Component button', async () => {
+                await localCodeBasePage.clickCreateComponent();
+            });
+
+            const item = await waitForItem(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = true;
@@ -162,7 +186,7 @@ export function testCreateComponent(path: string) {
 
             //check if component is in component view
             componentName = 'nodejs-starter';
-            const item = await waitForItem(componentName);
+            const item = await waitForItem(getSection, componentName);
             expect(item).to.be.not.undefined;
 
             dlt = false;
@@ -172,7 +196,7 @@ export function testCreateComponent(path: string) {
         afterEach(async function context() {
             this.timeout(30_000);
             if (componentName && dlt) {
-                const component = await waitForItem(componentName);
+                const component = await waitForItem(getSection, componentName);
                 const contextMenu = await component.openContextMenu();
                 await contextMenu.select(MENUS.deleteSourceCodeFolder);
                 const notification = await notificationExists(
@@ -253,25 +277,8 @@ export function testCreateComponent(path: string) {
             }, 10_000);
         }
 
-        async function waitForItem(label, timeout = 15000) {
-            const section = await view.getContent().getSection(VIEWS.components);
-
-            const start = Date.now();
-
-            while (Date.now() - start < timeout) {
-                try {
-                    const item = await section.findItem(label);
-                    if (item) {
-                        return item;
-                    }
-                } catch {
-                    // ignore transient errors
-                }
-
-                await new Promise(res => setTimeout(res, 500));
-            }
-
-            throw new Error(`Item "${label}" not found in section within ${timeout}ms`);
+        async function getSection(): Promise<ViewSection> {
+            return await view.getContent().getSection(VIEWS.components);
         }
     });
 }
