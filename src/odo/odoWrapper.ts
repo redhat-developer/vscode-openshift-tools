@@ -11,6 +11,9 @@ import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
 import { ComponentDescription } from './componentTypeDescription';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as yaml from 'yaml';
 
 /**
  * Wraps the `odo` cli tool.
@@ -179,12 +182,67 @@ export class Odo {
      * @param componentPath the path to the component
      */
     public async deleteComponentConfiguration(componentPath: string): Promise<void> {
-        await this.execute(
-            new CommandText('odo', 'delete component', [
-                new CommandOption('--files'),
-                new CommandOption('-f'),
-            ]),
-            componentPath,
-        );
+
+        const componentName = path.basename(componentPath);
+
+        // Delete core workload resources
+        await this.execute(new CommandText('oc', 'delete', [
+            new CommandOption('pod,service,deployment,replicaset'),
+            new CommandOption('-l', `app=${componentName}`),
+            new CommandOption('--ignore-not-found'),
+        ]));
+
+        // Delete routes (OpenShift)
+        await this.execute(new CommandText('oc', 'delete', [
+            new CommandOption('route'),
+            new CommandOption('-l', `app=${componentName}`),
+            new CommandOption('--ignore-not-found'),
+        ]));
+
+        // Delete configmaps (optional)
+        await this.execute(new CommandText('oc', 'delete', [
+            new CommandOption('configmap'),
+            new CommandOption('-l', `app=${componentName}`),
+            new CommandOption('--ignore-not-found'),
+        ]));
+
+        await deleteOdoFiles(componentPath, componentName);
+
     }
+}
+
+async function isDevfile(filePath: string, componentName: string): Promise<boolean> {
+    try {
+        const content = await fs.readFile(filePath, 'utf-8');
+        const parsed = yaml.parse(content);
+
+        return (
+            parsed &&
+            typeof parsed === 'object' &&
+            parsed.schemaVersion &&
+            parsed.metadata &&
+            parsed.metadata.name && parsed.metadata.name === componentName
+        );
+    } catch {
+        return false;
+    }
+}
+
+async function deleteOdoFiles(componentDir: string, componentName: string): Promise<void> {
+    const files = await fs.readdir(componentDir);
+
+    for (const file of files) {
+        const fullPath = path.join(componentDir, file);
+
+        // Only check YAML files
+        if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+            if (await isDevfile(fullPath, componentName)) {
+                await fs.rm(fullPath, { force: true });
+            }
+        }
+    }
+
+    // Delete .odo directory
+    const odoDirPath = path.join(componentDir, '.odo');
+    await fs.rm(odoDirPath, { recursive: true, force: true });
 }
