@@ -168,14 +168,14 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('deleteComponentConfiguration()', async function() {
-            await Odo.Instance.deleteComponentConfiguration(tmpFolder);
-            try {
-                await fs.access(path.join(tmpFolder, 'devfile.yaml'));
-                fail('devfile.yaml should have been deleted')
-            } catch {
-                // deleted successfully
-            }
-        });
+        await Odo.Instance.deleteComponentConfiguration(tmpFolder);
+
+        const files = await fs.readdir(tmpFolder);
+
+        if (files.includes('devfile.yaml')) {
+            fail('devfile.yaml should have been deleted');
+        }
+    });
 
         test('createComponentFromLocation()', async function() {
             // the project already exists from the previous step,
