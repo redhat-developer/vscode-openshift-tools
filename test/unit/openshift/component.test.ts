@@ -25,8 +25,7 @@ import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-import { CliChannel } from 'src/cli';
-
+import { CliChannel } from '../../../src/cli';
 
 const { expect } = chai;
 chai.use(sinonChai);
@@ -135,11 +134,7 @@ suite('OpenShift/Component', function () {
 
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
-        ocExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({
-            stdout: '',
-            error: undefined,
-            stderr: ''
-        });
+        ocExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined });
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(Odo.prototype, 'describeComponent').resolves(componentItem1.component);
         sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
