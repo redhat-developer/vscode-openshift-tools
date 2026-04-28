@@ -179,12 +179,15 @@ suite('OpenShift/Component', function () {
             showWarningMessageStub.resolves('Delete Configuration');
             await Component.deleteConfigurationFiles({
                 component: {
-                    // these fields aren't used
+                    name: 'comp1',
                 },
                 contextPath: wsFolder1.uri.fsPath
-            } as ComponentWorkspaceFolder);
-            expect(execStub.called).is.true;
-            expect(execStub.lastCall.args[0].toString().endsWith('odo component delete -f --force'));
+            } as unknown as ComponentWorkspaceFolder);
+            expect(execStub.called).to.be.true;
+
+            const commands = execStub.getCalls().map(call => call.args[0].toString());
+
+            expect(commands.some(cmd => cmd.includes('oc delete'))).to.be.true;
         });
 
         test('cancel delete', async function () {
@@ -234,10 +237,10 @@ suite('OpenShift/Component', function () {
             showWarningMessageStub.resolves('Delete Source Folder');
             await Component.deleteSourceFolder({
                 component: {
-                    // these fields aren't used
+                    name: 'comp1',
                 },
                 contextPath: wsFolder1.uri.fsPath
-            } as ComponentWorkspaceFolder);
+            } as unknown as ComponentWorkspaceFolder);
             expect(rmStub).to.be.called;
             expect(rmStub.lastCall.args[0]).to.equal(wsFolder1.uri.fsPath);
         });
