@@ -14,6 +14,8 @@ import { CliExitData } from '../util/childProcessUtil';
 import { isOpenShiftCluster, KubeConfigInfo, loadKubeConfig, serializeKubeConfig } from '../util/kubeUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
+import { findDevfiles, getComponentName } from './devfileUtils';
+import path from 'path';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -894,5 +896,239 @@ export class Oc {
                 [ new CommandOption('--server-side', 'true', false, false) ]),
             undefined, true, config);
         return result.stdout;
+    }
+
+    async devWorkspaceExists(componentName: string): Promise<boolean> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'get', [
+                new CommandOption('devworkspace'),
+                new CommandOption(componentName),
+                new CommandOption('-o'),
+                new CommandOption('name'),
+            ]),
+            );
+
+            return result?.stdout?.includes('devworkspace');
+        } catch {
+            return false;
+        }
+    }
+
+    async deleteOdoFiles(componentDir: string, componentName?: string): Promise<void> {
+        const devfiles = await findDevfiles(componentDir);
+
+        for (const devfile of devfiles) {
+            if (!componentName || devfile.name === componentName) {
+                await fs.rm(devfile.path, { force: true });
+            }
+        }
+
+        // Delete .odo directory
+        await fs.rm(path.join(componentDir, '.odo'), {
+            recursive: true,
+            force: true,
+        });
+    }
+
+    async findDevWorkspaceByLabel(componentName: string): Promise<string | null> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText('oc', 'get', [
+                    new CommandOption('devworkspace'),
+                    new CommandOption('-l'),
+                    new CommandOption(`app.kubernetes.io/component=${componentName}`),
+                    new CommandOption('-o'),
+            new CommandOption('jsonpath={.items[0].metadata.name}'),
+            ]),
+        );
+            const name = result?.stdout?.trim();
+            return name || null;
+        }
+        catch {
+            return null;
+        }
+
+    }
+    /**
+     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
+     *
+     * @param componentPath the path to the component
+     */
+    public async deleteComponentConfiguration(componentPath: string): Promise<void> {
+        const componentName = await getComponentName(componentPath);
+
+        if (!componentName) {
+            throw new Error('Component name is missing. Cannot delete resources safely.');
+        }
+
+        const cli = CliChannel.getInstance();
+
+        /**
+         * Try to delete the DevWorkspace resource with the component label -
+         * this should trigger the cleanup of all associated resources by the controller and is the safest way to delete a component.
+         * If this fails (e.g. due to RBAC issues), we will try to delete resources by label in the next steps
+         */
+        try {
+            await cli.executeTool(
+            new CommandText('oc', 'delete', [
+                new CommandOption('devworkspace'),
+                new CommandOption(componentName),
+                new CommandOption('--ignore-not-found'),
+            ]),
+            );
+        } catch {
+            // Ignore RBAC / not found
+        }
+
+        /**
+         *  Get all pods with the component label to find dynamic labels (like devworkspace_id) that we can use for safe deletion
+         */
+        let podJson: any = {};
+        try {
+            const podResult = await cli.executeTool(
+            new CommandText('oc', 'get', [
+                new CommandOption('pod'),
+                new CommandOption('-l'),
+                new CommandOption(`app.kubernetes.io/instance=${componentName}`),
+                new CommandOption('-o'),
+                new CommandOption('json'),
+            ]),
+            );
+
+            podJson = JSON.parse(podResult.stdout || '{}');
+        } catch {
+            podJson = {};
+        }
+
+        const items = podJson.items || [];
+
+        /**
+         * Collect unique devworkspace IDs and instance labels from the pods to build label selectors for deletion.
+         */
+        const devworkspaceIds = new Set<string>();
+        const instanceLabels = new Set<string>();
+
+        for (const item of items) {
+            const labels = item?.metadata?.labels || {};
+
+            if (labels['controller.devfile.io/devworkspace_id']) {
+            devworkspaceIds.add(labels['controller.devfile.io/devworkspace_id']);
+            }
+
+            if (labels['app.kubernetes.io/instance']) {
+            instanceLabels.add(labels['app.kubernetes.io/instance']);
+            }
+        }
+
+        instanceLabels.add(componentName);
+
+        /**
+         * Build label selectors for deletion based on collected labels. We will use these selectors to delete resources in the next steps,
+         * ensuring we only target resources associated with our component.
+         */
+        const selectors: string[] = [];
+
+        instanceLabels.forEach((val) => {
+            selectors.push(`app.kubernetes.io/instance=${val}`);
+            selectors.push(`component=${val}`);
+            selectors.push(`app=${val}`);
+        });
+
+        /**
+         * Delete all resources associated with the component using the built label selectors.
+         */
+        try {
+            for (const selector of selectors) {
+                await cli.executeTool(
+                new CommandText('oc', 'delete', [
+                    new CommandOption('all'),
+                    new CommandOption('-l'),
+                    new CommandOption(selector),
+                    new CommandOption('--ignore-not-found'),
+                ]),
+                );
+            }
+        } catch {
+            // Ignore errors
+        }
+
+        /**
+         * To ensure we cover resources that might not have the common labels but are still associated with the component
+         * (like ConfigMaps, Secrets, PVCs, Routes, etc.), we will also attempt to delete these resources using the same label selectors.
+         * This is a safety net to catch any resources that might have been missed in the previous step.
+         */
+        const extraResources = [
+            'configmap',
+            'secret',
+            'pvc',
+            'route', // OpenShift
+            'ingress',
+            'serviceaccount',
+            'role',
+            'rolebinding',
+        ];
+
+        try {
+            for (const resource of extraResources) {
+                    await cli.executeTool(
+                        new CommandText('oc', 'delete', [
+                            new CommandOption('-l'),
+                            new CommandOption(resource),
+                            new CommandOption('--ignore-not-found'),
+                        ]),
+                    );
+            }
+        } catch {
+            // Ignore errors
+        }
+
+        /**
+         * Delete all resources associated with each DevWorkspace ID.
+         */
+        try {
+            for (const dwId of devworkspaceIds) {
+                const dwSelector = `controller.devfile.io/devworkspace_id=${dwId}`;
+
+                await cli.executeTool(
+                new CommandText('oc', 'delete', [
+                    new CommandOption('all'),
+                    new CommandOption('-l'),
+                    new CommandOption(dwSelector),
+                    new CommandOption('--ignore-not-found'),
+                ]),
+                );
+
+                await cli.executeTool(
+                new CommandText('oc', 'delete', [
+                    new CommandOption('route'),
+                    new CommandOption('-l'),
+                    new CommandOption(dwSelector),
+                    new CommandOption('--ignore-not-found'),
+                ]),
+                );
+            }
+        } catch {
+            // Ignore errors
+        }
+
+        /**
+         * As a final safety measure, we will also attempt to delete any remaining resources that have the component instance label,
+         * even if they don't have the other common labels.
+         */
+        try {
+            await cli.executeTool(
+            new CommandText('oc', 'delete', [
+                new CommandOption('all'),
+                new CommandOption('--selector'),
+                new CommandOption(`app.kubernetes.io/instance=${componentName}`),
+                new CommandOption('--ignore-not-found'),
+            ]),
+            );
+        } catch {
+            // ignore
+        }
+
+        await this.deleteOdoFiles(componentPath, componentName);
     }
 }

@@ -568,7 +568,7 @@ export class Component extends OpenShiftItem {
         const CANCEL = 'Cancel';
         const response = await window.showWarningMessage(`Are you sure you want to delete the configuration for the component ${context.contextPath}?\nOpenShift Toolkit will no longer recognize the project as a component.`, DELETE_CONFIGURATION, CANCEL);
         if (response === DELETE_CONFIGURATION) {
-            await Odo.Instance.deleteComponentConfiguration(context.contextPath);
+            await Oc.Instance.deleteComponentConfiguration(context.contextPath);
             void commands.executeCommand('openshift.componentsView.refresh');
         }
     }

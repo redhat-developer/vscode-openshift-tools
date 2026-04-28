@@ -4,16 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
-import { CommandOption, CommandText } from '../base/command';
+import { CommandText } from '../base/command';
 import * as cliInstance from '../cli';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { Command } from './command';
 import { ComponentDescription } from './componentTypeDescription';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as yaml from 'yaml';
 
 /**
  * Wraps the `odo` cli tool.
@@ -83,7 +80,7 @@ export class Odo {
         location: Uri,
         starter: string = undefined,
         useExistingDevfile = false,
-        customDevfilePath = ''
+        customDevfilePath = '',
     ): Promise<void> {
         await this.execute(
             Command.createLocalComponent(
@@ -94,7 +91,7 @@ export class Odo {
                 undefined,
                 starter,
                 useExistingDevfile,
-                customDevfilePath
+                customDevfilePath,
             ),
             location.fsPath,
         );
@@ -137,7 +134,7 @@ export class Odo {
                 portNumber,
                 undefined,
                 false,
-                ''
+                '',
             ),
             location.fsPath,
         );
@@ -176,73 +173,4 @@ export class Odo {
         );
     }
 
-    /**
-     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
-     *
-     * @param componentPath the path to the component
-     */
-    public async deleteComponentConfiguration(componentPath: string): Promise<void> {
-
-        const componentName = path.basename(componentPath);
-
-        // Delete core workload resources
-        await this.execute(new CommandText('oc', 'delete', [
-            new CommandOption('pod,service,deployment,replicaset'),
-            new CommandOption('-l', `app=${componentName}`),
-            new CommandOption('--ignore-not-found'),
-        ]));
-
-        // Delete routes (OpenShift)
-        await this.execute(new CommandText('oc', 'delete', [
-            new CommandOption('route'),
-            new CommandOption('-l', `app=${componentName}`),
-            new CommandOption('--ignore-not-found'),
-        ]));
-
-        // Delete configmaps (optional)
-        await this.execute(new CommandText('oc', 'delete', [
-            new CommandOption('configmap'),
-            new CommandOption('-l', `app=${componentName}`),
-            new CommandOption('--ignore-not-found'),
-        ]));
-
-        await deleteOdoFiles(componentPath, componentName);
-
-    }
-}
-
-async function isDevfile(filePath: string, componentName: string): Promise<boolean> {
-    try {
-        const content = await fs.readFile(filePath, 'utf-8');
-        const parsed = yaml.parse(content);
-
-        return (
-            parsed &&
-            typeof parsed === 'object' &&
-            parsed.schemaVersion &&
-            parsed.metadata &&
-            parsed.metadata.name && parsed.metadata.name === componentName
-        );
-    } catch {
-        return false;
-    }
-}
-
-async function deleteOdoFiles(componentDir: string, componentName: string): Promise<void> {
-    const files = await fs.readdir(componentDir);
-
-    for (const file of files) {
-        const fullPath = path.join(componentDir, file);
-
-        // Only check YAML files
-        if (file.endsWith('.yaml') || file.endsWith('.yml')) {
-            if (await isDevfile(fullPath, componentName)) {
-                await fs.rm(fullPath, { force: true });
-            }
-        }
-    }
-
-    // Delete .odo directory
-    const odoDirPath = path.join(componentDir, '.odo');
-    await fs.rm(odoDirPath, { recursive: true, force: true });
 }
