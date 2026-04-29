@@ -5,6 +5,7 @@
     "paths": {
       "clipboardy": [ "out/esm/clipboardy.cjs" ],
       "got": [ "out/esm/got.cjs" ],
+      "uuid": [ "out/esm/uuid.cjs"],
       "@kubernetes/client-node": [ "out/esm/k8s-client-node.cjs" ],
       "@apidevtools/json-schema-ref-parser": [ "out/esm/apidevtools-json-schema-ref-parser.cjs" ]
     },
