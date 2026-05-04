@@ -36,9 +36,10 @@ import type {
 } from '@rjsf/utils';
 import { getTemplate, getUiOptions } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
+import DOMPurify from 'dompurify';
+import MarkdownIt from 'markdown-it';
 import * as React from 'react';
 import 'react-dom';
-import { Converter } from 'showdown';
 import type { CustomResourceDefinitionStub } from '../../common/createServiceTypes';
 import { ErrorPage } from '../../common/errorPage';
 import { LoadScreen } from '../../common/loading';
@@ -197,9 +198,18 @@ function SelectService(props: {
 }) {
     const [isServiceKindTouched, setServiceKindTouched] = React.useState(false);
 
-    const converter = React.useMemo(() => {
-        return new Converter();
+    const md = React.useMemo(() => {
+        return new MarkdownIt({
+            html: false,
+            linkify: true,
+            typographer: true,
+        });
     }, []);
+
+    const safeConvertToHtml = (textToConvert) => {
+        const rawHtml = md.render(textToConvert);
+        return DOMPurify.sanitize(rawHtml);
+    };
 
     const [isDocumentationExpanded, setDocumentationExpanded] = React.useState(true);
 
@@ -275,7 +285,7 @@ function SelectService(props: {
                                 <Box margin={1}>
                                     <div
                                         dangerouslySetInnerHTML={{
-                                            __html: converter.makeHtml(
+                                            __html: safeConvertToHtml(
                                                 props.selectedServiceKind.csvDescription,
                                             ),
                                         }}
