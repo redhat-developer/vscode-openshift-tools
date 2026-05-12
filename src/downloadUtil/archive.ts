@@ -37,6 +37,36 @@ export class Archive {
         });
     }
 
+    static async validateZipPaths(zipFile: string) {
+        return new Promise<void>((resolve, reject) => {
+            fs.createReadStream(zipFile)
+                .pipe(unzipm.Parse())
+                .on('entry', (entry) => {
+                    const safe = !entry.path.includes('..');
+                    if (!safe) {
+                        reject(new Error(`Unsafe path in zip: ${entry.path}`));
+                    }
+                    entry.autodrain();
+                })
+                .on('close', resolve)
+                .on('error', reject);
+        });
+    }
+
+    static extractAll(zipFile: string, extractTo: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (zipFile.endsWith('.zip')) {
+                fs.createReadStream(zipFile)
+                    .pipe(unzipm.Extract({ path: extractTo }))
+                    .on('close', resolve)
+                    .on('error', reject);
+                return;
+            }
+
+            reject(new Error(`Unsupported archive type: ${zipFile}`));
+        });
+    }
+
     static gunzip(source: string, destination: string): Promise<void> {
         return new Promise((res, rej) => {
             const src = fs.createReadStream(source);

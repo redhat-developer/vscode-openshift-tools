@@ -1,0 +1,725 @@
+/*-----------------------------------------------------------------------------------------------
+ *  Copyright (c) Red Hat, Inc. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE file in the project root for license information.
+ *-----------------------------------------------------------------------------------------------*/
+
+import * as fs from 'fs/promises';
+import * as yaml from 'js-yaml';
+import path from 'path';
+import { OpenshiftLogger } from 'src/util/childProcessUtil';
+import { DevfileRegistry } from '../../devfile-registry/devfileRegistryWrapper';
+import { Archive } from '../../downloadUtil/archive';
+import { DownloadUtil } from '../../downloadUtil/download';
+import { OdoPreference } from '../../odo/odoPreference';
+import { cloneRepository } from '../../util/git';
+import type {
+    Data
+} from '../componentTypeDescription';
+import { DevfileResolver } from './devfileResolver';
+
+export async function odoInit(options: OdoInitOptions) {
+    const ctx = await createInitContext(options);
+
+    logInfo(ctx, 'Initializing a new component...');
+    logInfo(ctx, `Project: ${ctx.projectPath}`);
+
+    await bootstrapWorkspace(ctx);
+
+    const acquired = await acquireDevfile(ctx);
+
+    logInfo(ctx, `Devfile acquired (${ctx.devfileSource})`);
+
+    let workingDevfile = acquired.devfile;
+
+    logInfo(ctx, 'Processing starter project...');
+
+    const starterResult = await materializeStarterProjects(workingDevfile, ctx);
+
+    if (starterResult.starterDevfilePath) {
+        logInfo(ctx, `Using starter devfile: ${starterResult.starterDevfilePath}`);
+
+        const raw = await fs.readFile(starterResult.starterDevfilePath, 'utf8');
+
+        const parsed = yaml.load(raw);
+
+        assertDevfileObject(parsed);
+
+        workingDevfile = parsed;
+        logInfo(ctx, 'Starter devfile overrides registry devfile');
+    }
+
+    logInfo(ctx, 'Checking starter projects...');
+    logInfo(ctx, 'Resolving devfile...');
+
+    const resolvedDevfile = await resolveDevfile(workingDevfile);
+
+    logInfo(ctx, 'Devfile resolved');
+    logInfo(ctx, 'Validating devfile...');
+
+    // analysis-only copy
+    const analysisDevfile = interpolateDevfileVariables(structuredClone(resolvedDevfile));
+    validateDevfileStructure(analysisDevfile);
+
+    logInfo(ctx, 'Devfile valid');
+    logInfo(ctx, 'Analyzing component readiness...');
+
+    const readiness = analyzeDevfileReadiness(analysisDevfile);
+    validateReadinessOrThrow(readiness);
+
+    logInfo(ctx, 'Readiness check complete');
+    logInfo(ctx, 'Normalizing devfile...');
+
+    // The following creates a structured copy of working devfile
+    const normalizedDevfile = normalizeDevfile(workingDevfile, ctx);
+
+    await writeWorkspace(normalizedDevfile, acquired, ctx);
+
+    logInfo(ctx, `Devfile written to ${acquired.devfilePath}`);
+    logInfo(ctx, `Project created in ${ctx.projectPath}`);
+
+    await writeInitState(readiness, acquired, ctx, starterResult);
+
+    logInfo(ctx, `Component '${ctx.name}' initialized`);
+    logInfo(ctx, 'Component ready');
+
+    return buildInitResult(normalizedDevfile, acquired, ctx);
+}
+
+type Devfile = Data;
+
+type DevfileSource = 'local' | 'file' | 'registry';
+
+type InitContext = {
+    projectPath: string;
+
+    devfileSource: DevfileSource;
+    workspaceInitiallyEmpty: boolean;
+    isHybridInit: boolean;
+
+    sourceDevfilePath?: string;
+
+    registryDevfile?: string;
+    registryDevfileVersion?: string;
+
+    name: string;
+    options: OdoInitOptions;
+};
+
+function logInfo(ctx: InitContext, message: string) {
+    try {
+        ctx.options.logger?.info(message);
+    } catch (err) {
+        /* eslint-disable-next-line no-console */
+        console.error('[odoInit logger info failed]', err);
+    }
+}
+
+function logError(ctx: InitContext, message: string) {
+    try {
+        ctx.options.logger?.error(message);
+    } catch (err) {
+        /* eslint-disable-next-line no-console */
+        console.error('[odoInit logger error failed]', err);
+    }
+}
+
+async function createInitContext(options: OdoInitOptions): Promise<InitContext> {
+    const projectPath = path.resolve(options.projectPath ?? process.cwd());
+    const devfileSource = detectSource(options);
+    const sourceDevfilePath = options.devfilePath ? path.resolve(options.devfilePath) : undefined;
+
+    const workspaceInitiallyEmpty = await isWorkspaceEffectivelyEmpty(projectPath);
+    const isHybridInit = devfileSource !== 'local' && !workspaceInitiallyEmpty;
+
+    return {
+        projectPath,
+        devfileSource,
+        workspaceInitiallyEmpty,
+        isHybridInit,
+        sourceDevfilePath,
+        registryDevfile: options.registryDevfile,
+        registryDevfileVersion: options.devfileVersion,
+
+        name: options.name ?? path.basename(projectPath),
+        options
+    };
+}
+
+function detectSource(options: OdoInitOptions): InitContext['devfileSource'] {
+    if (options.devfilePath) {
+        return 'file';
+    }
+
+    if (options.registryDevfile) {
+        return 'registry';
+    }
+
+    return 'local';
+}
+
+export interface OdoInitOptions {
+    name?: string;
+    registryDevfile?: string;
+    devfileVersion?: string;
+    devfilePath?: string;
+    registry?: string;          // optional registry override
+    starterProject?: string;
+    projectPath?: string;
+    runPort?: number;
+    language?: string;
+    force?: boolean;
+    gitInit?: boolean;
+    logger?: OpenshiftLogger;
+}
+
+async function bootstrapWorkspace(ctx: InitContext) {
+    await fs.mkdir(
+        ctx.projectPath,
+        { recursive: true }
+    );
+}
+
+async function fetchDevfileFromRegistry(devfileRef: string, registry?: string, devfileVersion?: string): Promise<AcquiredDevfile> {
+    const registryClient = DevfileRegistry.Instance;
+    const registryUrl = await OdoPreference.Instance.resolveRegistryUrl(registry);
+    const index = await registryClient.getDevfileInfoList(registryUrl);
+
+    const stack = index.find(s => s.name === devfileRef);
+    if (!stack) {
+        throw new Error(`Devfile "${devfileRef}" not found in registry`);
+    }
+
+    const versionEntry =
+        stack.versions.find(
+            v => v.version === devfileVersion
+        )
+        ?? stack.versions.find(v => v.default)
+        ?? stack.versions[0];
+
+    return {
+        devfile:
+            await registryClient.getRegistryDevfile(
+                registryUrl,
+                devfileRef,
+                versionEntry.version
+            ),
+
+        provenance: {
+            url: registryUrl,
+            stack: devfileRef,
+            version: versionEntry.version
+        },
+    };
+}
+
+type DevfileProvenance = {
+    url: string;
+    stack: string;
+    version: string;
+};
+
+type AcquiredDevfile = {
+    devfile: Devfile;
+    devfilePath?: string;
+    provenance?: DevfileProvenance;
+};
+
+async function acquireDevfile(ctx: InitContext): Promise<AcquiredDevfile> {
+    const { options, projectPath } = ctx;
+
+    // CASE 1 — local devfile in workspace
+    if (ctx.devfileSource === 'local') {
+        const resolvedPath = await DevfileResolver.resolveDevfilePath(projectPath);
+        if (!resolvedPath) {
+            throw new Error('No devfile found in project directory');
+        }
+
+        const raw = await fs.readFile(resolvedPath, 'utf-8');
+        const parsed = yaml.load(raw);
+
+        assertDevfileObject(parsed);
+
+        return {
+            devfile: parsed,
+            devfilePath: resolvedPath
+        };
+    }
+
+    // CASE 2 — explicit devfile path
+    if (ctx.devfileSource === 'file') {
+        const sourcePath = ctx.sourceDevfilePath!;
+        const raw = await fs.readFile(sourcePath, 'utf-8');
+        const parsed = sourcePath.endsWith('.json') ? JSON.parse(raw) : yaml.load(raw);
+
+        assertDevfileObject(parsed);
+
+        return {
+            devfile: parsed,
+            devfilePath:
+                path.join(
+                    projectPath,
+                    'devfile.yaml'
+                )
+        };
+    }
+
+    // CASE 3 — registry devfile
+    const outputPath = path.join(projectPath, 'devfile.yaml');
+
+    logInfo(ctx, `Downloading devfile "${options.registryDevfile}:${options.devfileVersion ?? 'latest'}" from registry "${options.registry}"`);
+
+    if (await exists(outputPath)) {
+        throw new Error(`A Devfile already exists in ${projectPath} directory`);
+    }
+
+    try {
+        const acquired = await fetchDevfileFromRegistry(options.registryDevfile!, options.registry, options.devfileVersion);
+
+        // When fetched from defvile registry, the resultig devfile gets added with
+        // `yaml` property containing an original devfile text.
+        // This makes the real ODO to complain about it as "unknown property" found,
+        // so we have to strip this extra property from the object.
+        const rawDevfile = acquired?.devfile as any;
+        if (rawDevfile?.yaml) {
+            delete rawDevfile?.yaml;
+        }
+
+        logInfo(ctx, 'Devfile downloaded');
+
+        assertDevfileObject(rawDevfile);
+
+        return {
+            devfile: rawDevfile,
+            devfilePath: outputPath
+        };
+    } catch (err: any) {
+        logError(ctx, `Failed to download devfile "${options.registryDevfile}"`);
+        logError(ctx, err?.stack ?? '<no stack>');
+        throw err;
+    }
+}
+
+async function resolveDevfile(devfile: Devfile): Promise<Devfile> {
+    const resolver = new DevfileResolver();
+    return resolver.resolve(devfile);
+}
+
+type DevfileReadiness = {
+    runnable: boolean;
+    deployable: boolean;
+    debuggable: boolean;
+    warnings: string[];
+};
+
+function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
+    const warnings: string[] = [];
+
+    const hasContainer = devfile.components?.some(
+        c => c.container || c.image
+    );
+
+    if (!hasContainer) {
+        throw new Error('Devfile must contain at least one container/image component');
+    }
+
+    const runCmd = devfile.commands?.find(
+        c => c.exec?.group?.kind === 'run'
+    );
+
+    if (!runCmd) {
+        warnings.push('No run command (group: run) found');
+    }
+
+    return {
+        runnable: !!runCmd,
+        deployable: devfile.commands?.some(c => c.apply),
+        debuggable: devfile.commands?.some(
+            c => c.exec?.group?.kind === 'debug'
+        ),
+        warnings
+    };
+}
+
+function validateReadinessOrThrow(readiness: ReturnType<typeof analyzeDevfileReadiness>) {
+    if (!readiness.runnable) {
+        throw new Error('Devfile is not runnable: missing run command (group: run)');
+    }
+}
+
+async function writeWorkspace(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext) {
+    if (!acquired.devfilePath) {
+        throw new Error('Missing target devfile path');
+    }
+
+    const content = yaml.dump(devfile, { noRefs: true });
+
+    const tmp = `${acquired.devfilePath}.tmp`;
+    await fs.mkdir(path.dirname(acquired.devfilePath), { recursive: true });
+    await fs.writeFile(tmp, content, 'utf-8');
+    await fs.rename(tmp, acquired.devfilePath);
+
+    const odoDir = path.join(ctx.projectPath, '.odo');
+    await fs.mkdir(odoDir, { recursive: true });
+}
+
+type InitState = {
+    version: number;
+
+    name: string;
+
+    source:
+        | 'local'
+        | 'registry'
+        | 'file';
+
+    devfilePath: string;
+
+    initializedAt: string;
+
+    registry?: DevfileProvenance;
+
+    originalDevfile?: string;
+
+    starterProject?: string;
+
+    starter?: StarterMaterialization;
+
+
+    readiness: {
+        runnable: boolean;
+        deployable: boolean;
+        debuggable: boolean;
+        warnings: string[];
+    };
+};
+
+async function writeInitState(readiness: DevfileReadiness, acquired: AcquiredDevfile, ctx: InitContext, starter: StarterMaterialization) {
+    const state: InitState = {
+        version: 1,
+        name: ctx.name,
+        source: ctx.devfileSource,
+        devfilePath: acquired.devfilePath,
+        initializedAt: new Date().toISOString(),
+        readiness,
+        registry: acquired.provenance,
+        originalDevfile: ctx.sourceDevfilePath,
+        starterProject: ctx.options.starterProject,
+        starter
+    };
+
+    await fs.writeFile(
+        path.join(ctx.projectPath, '.odo', 'initstate.json'),
+        JSON.stringify(state, null, 2),
+        'utf-8'
+    );
+}
+
+function buildInitResult(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext): OdoInitResult {
+    const created = ctx.workspaceInitiallyEmpty;
+
+    return {
+        projectPath: ctx.projectPath,
+        devfilePath: acquired.devfilePath!,
+        devfile,
+        created
+    };
+}
+
+export interface OdoInitResult {
+    projectPath: string;
+    devfilePath: string;
+    devfile: Devfile;
+    created: boolean;
+}
+
+async function exists(file: string): Promise<boolean> {
+    try {
+        await fs.access(file);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function isIgnorableWorkspaceFile(name: string): boolean {
+    return [
+        '.git',
+        '.gitignore',
+        '.odo',
+        '.vscode',
+        '.idea',
+        'README.md'
+    ].includes(name);
+}
+
+async function isWorkspaceEffectivelyEmpty(dir: string): Promise<boolean> {
+    const files = await fs.readdir(dir);
+    return files.every(isIgnorableWorkspaceFile);
+}
+
+type StarterMaterialization = {
+    applied: boolean;
+    type?: 'git' | 'zip';
+    source?: string;
+    branch?: string;
+    selected?: string;
+    starterDevfilePath?: string;
+    skippedReason?: 'hybrid-init' | 'no-starters' | 'no-match';
+};
+
+async function findStarterDevfile(projectPath: string): Promise<string | undefined> {
+    const candidates = [
+        'devfile.yaml',
+        'devfile.yml',
+        'devfile.json'
+    ];
+
+    for (const file of candidates) {
+        const full = path.join(projectPath, file);
+
+        if (await exists(full)) {
+            return full;
+        }
+    }
+
+    return undefined;
+}
+
+async function materializeStarterProjects(devfile: Devfile, ctx: InitContext): Promise<StarterMaterialization> {
+    const starters = devfile.starterProjects;
+
+    if (!starters?.length) {
+        return {
+            applied: false,
+            skippedReason: 'no-starters'
+        };
+    }
+
+    const selected = starters.find(s => s.name === ctx.options.starterProject) ?? starters[0];
+    if (!selected) {
+        return {
+            applied: false,
+            skippedReason: 'no-match'
+        };
+    }
+
+     if (ctx.isHybridInit) {
+        return {
+            applied: false,
+            skippedReason: 'hybrid-init'
+        };
+    }
+
+    const gitRemote = selected.git?.remotes?.origin;
+    if (gitRemote) {
+        const branch = selected.git?.checkoutFrom?.revision;
+
+        logInfo(ctx, `Downloading starter project "${ctx.options.starterProject ?? selected?.name}"`);
+
+        const result = await cloneRepository({
+            url: gitRemote,
+            location: ctx.projectPath,
+            branch
+        });
+
+        if (!result.status) {
+            throw new Error(`Failed to download starter project: ${result.error}`);
+        }
+
+        logInfo(ctx, `Starter project "${selected.name}" downloaded`);
+
+        const starterDevfilePath = await findStarterDevfile(ctx.projectPath);
+
+        logInfo(ctx, 'Starter devfile detected');
+
+        return {
+            applied: true,
+            type: 'git',
+            source: gitRemote,
+            branch,
+            selected: selected.name,
+            starterDevfilePath
+        };
+    }
+
+    if (selected.zip?.location) {
+        logInfo(ctx, `Downloading starter project "${ctx.options.starterProject ?? selected?.name}" (zip)`);
+
+        await materializeZipStarter(selected.zip.location, ctx.projectPath);
+
+        logInfo(ctx, `Starter project "${selected.name}" downloaded and extracted`);
+
+        const starterDevfilePath = await findStarterDevfile(ctx.projectPath);
+
+        logInfo(ctx, 'Starter devfile detected');
+
+        return {
+            applied: true,
+            type: 'zip',
+            source: selected.zip.location,
+            selected: selected.name,
+            starterDevfilePath
+        };
+    }
+
+    return {
+        applied: false,
+        skippedReason: 'no-match'
+    };
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+async function removeStarterDevfiles(projectPath: string) {
+    const candidates = [
+        'devfile.yaml',
+        'devfile.yml',
+        'devfile.json'
+    ];
+
+    for (const file of candidates) {
+        const fullPath = path.join(projectPath, file);
+
+        try {
+            await fs.unlink(fullPath);
+        } catch (err: any) {
+            // ignore missing files
+            if (err?.code !== 'ENOENT') {
+                throw err;
+            }
+        }
+    }
+}
+
+function normalizeDevfile(devfile: Devfile, ctx: InitContext): Devfile {
+    const normalized: Devfile = structuredClone(devfile);
+
+    applyMetadataName(normalized, ctx.name);
+
+    applyRunPort(normalized, ctx.options.runPort);
+
+    return normalized;
+}
+
+function applyMetadataName(devfile: Devfile, name: string) {
+    devfile.metadata.name = name;
+}
+
+function applyRunPort(devfile: Devfile, runPort?: number) {
+    if (!runPort) return;
+
+    const components = devfile.components ?? [];
+
+    const containerComponent = components.find(
+        c => c.container
+    );
+
+    if (!containerComponent?.container) return;
+
+    containerComponent.container.endpoints ??= [];
+
+    const existingEndpoint = containerComponent.container.endpoints.find(
+        e =>
+            e.targetPort === runPort ||
+            e.name === 'http'
+    );
+
+    if (existingEndpoint) {
+        existingEndpoint.targetPort = runPort;
+        existingEndpoint.exposure ??= 'public';
+        existingEndpoint.protocol ??= 'http';
+
+        return;
+    }
+
+    containerComponent.container.endpoints.push({
+        name: 'http',
+        targetPort: runPort,
+        exposure: 'public',
+        protocol: 'http'
+    });
+}
+
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+function getPrimaryContainer(devfile: Devfile) {
+    return devfile.components?.find(
+        c => c.container
+    )?.container;
+}
+
+function validateDevfileStructure(devfile: Devfile) {
+    if (!devfile) {
+        throw new Error('Devfile is empty');
+    }
+
+    if (!devfile.schemaVersion) {
+        throw new Error('Devfile is missing schemaVersion');
+    }
+
+    if (!devfile.metadata) {
+        throw new Error('Devfile is missing metadata');
+    }
+
+    if (!devfile.metadata.name) {
+        throw new Error('Devfile metadata.name is missing');
+    }
+
+    if (!Array.isArray(devfile.components)) {
+        throw new Error('Devfile components must be an array');
+    }
+
+    if (!Array.isArray(devfile.commands)) {
+        throw new Error('Devfile commands must be an array');
+    }
+}
+
+function assertDevfileObject(devfile: unknown): asserts devfile is Devfile {
+    if (!devfile || typeof devfile !== 'object' ||
+        Array.isArray(devfile) ||
+        !('schemaVersion' in devfile) || !('metadata' in devfile)
+    ) {
+        throw new Error('Invalid devfile format');
+    }
+}
+
+function interpolateDevfileVariables(devfile: Devfile): Devfile {
+    const vars = devfile.variables ?? {};
+
+    function walk(value: unknown): unknown {
+        if (typeof value === 'string') {
+            return value.replace(
+                /\{\{([A-Z0-9_]+)\}\}/g,
+                (_, key) => vars[key] ?? `{{${key}}}`
+            );
+        }
+
+        if (Array.isArray(value)) {
+            return value.map(walk);
+        }
+
+        if (value && typeof value === 'object') {
+            const result: any = {};
+
+            for (const [k, v] of Object.entries(value)) {
+                result[k] = walk(v);
+            }
+
+            return result;
+        }
+
+        return value;
+    }
+
+    return walk(devfile) as Devfile;
+}
+
+async function materializeZipStarter(url: string, projectPath: string) {
+    const tmpZip = path.join(projectPath, '.odo-starter.zip');
+
+    try {
+        await DownloadUtil.downloadFile(url, tmpZip);
+        await Archive.validateZipPaths(tmpZip);
+        await Archive.extractAll(tmpZip, projectPath);
+    } finally {
+        await fs.unlink(tmpZip).catch(() => undefined);
+    }
+}

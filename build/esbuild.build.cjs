@@ -36,6 +36,9 @@ const baseConfig = {
     minify: production,
     sourcemap: !production,
     logLevel: 'warning',
+    logOverride: {
+        'equals-negative-zero': 'silent'
+    }
 };
 
 async function buildExtension() {
