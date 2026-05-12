@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import path from 'path';
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import * as cliInstance from '../cli';
-import { getComponentDescription } from '../odo/util/describe';
+import { getComponentDescription } from '../devfile/describe';
+import { odoInit } from '../devfile/init';
 import { ToolsConfig } from '../tools';
-import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
+import { ChildProcessUtil, CliExitData, OdoChannel } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
-import { Command } from './command';
 import { ComponentDescription } from './componentTypeDescription';
 
 /**
@@ -76,19 +77,33 @@ export class Odo {
         useExistingDevfile = false,
         customDevfilePath = '',
     ): Promise<void> {
-        await this.execute(
-            Command.createLocalComponent(
-                type,
-                version,
-                registryName,
-                name,
-                undefined,
-                starter,
-                useExistingDevfile,
-                customDevfilePath,
-            ),
-            location.fsPath,
-        );
+
+        await odoInit({
+            name,
+            projectPath: location.fsPath,
+            registryDevfile:
+                useExistingDevfile
+                    ? undefined
+                    : type || undefined,
+            devfileVersion: version,
+            registry: registryName,
+            starterProject: starter,
+            devfilePath:
+                useExistingDevfile
+                    ? (
+                        customDevfilePath || path.join(
+                            location.fsPath,
+                            'devfile.yaml'
+                        )
+                    )
+                    : undefined,
+            logger: {
+                info: msg => OdoChannel.Instance.print(msg),
+                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+            }
+        });
+
         let wsFolder: WorkspaceFolder;
         if (workspace.workspaceFolders) {
             // could be new or existing folder
@@ -119,19 +134,19 @@ export class Odo {
         portNumber: number,
         location: Uri,
     ): Promise<void> {
-        await this.execute(
-            Command.createLocalComponent(
-                devfileName,
-                devfileVersion,
-                undefined,
-                componentName,
-                portNumber,
-                undefined,
-                false,
-                '',
-            ),
-            location.fsPath,
-        );
+
+        await odoInit({
+            name: componentName,
+            projectPath: location.fsPath,
+            registryDevfile: devfileName,
+            devfileVersion,
+            runPort: portNumber,
+            logger: {
+                info: msg => OdoChannel.Instance.print(msg),
+                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+            }
+        });
     }
 
     /**
@@ -154,17 +169,21 @@ export class Odo {
         registryName: string,
         templateProjectName: string,
     ): Promise<void> {
-        await this.execute(
-            Command.createLocalComponent(
-                devfileName,
-                devfileVersion,
-                registryName,
-                componentName,
-                portNumber,
-                templateProjectName,
-            ),
-            componentPath,
-        );
+
+        await odoInit({
+            name: componentName,
+            projectPath: componentPath,
+            registryDevfile: devfileName,
+            devfileVersion,
+            registry: registryName,
+            starterProject: templateProjectName,
+            runPort: portNumber,
+            logger: {
+                info: msg => OdoChannel.Instance.print(msg),
+                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+            }
+        });
     }
 
 }

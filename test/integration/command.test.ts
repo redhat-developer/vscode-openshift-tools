@@ -15,14 +15,13 @@ import { EventEmitter, Terminal, window, workspace } from 'vscode';
 import { parse, stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
+import { odoInit } from '../../src/devfile/init';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
-
-const ODO = Odo.Instance;
 
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
@@ -81,19 +80,19 @@ suite('odo commands integration', function () {
         });
 
         test('createLocalComponent()', async function () {
-            await ODO.execute(
-                Command.createLocalComponent(
-                    componentType,
-                    '2.0.0',
-                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
-                    componentName,
-                    8080,
-                    componentStarterProject,
-                    undefined,
-                    undefined
-                ),
-                componentLocation
-            );
+            await odoInit({
+                projectPath: componentLocation,
+                name: componentName,
+
+                registryDevfile: componentType,
+                devfileVersion: '2.0.0',
+                registry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+
+                starterProject: componentStarterProject,
+
+                runPort: 8080
+            });
+
             await fs.access(path.join(componentLocation, 'devfile.yaml'));
         });
 
@@ -349,19 +348,17 @@ suite('odo commands integration', function () {
         }
 
         test('runComponentCommand()', async function () {
-             await ODO.execute(
-                Command.createLocalComponent(
-                    componentType,
-                    '2.1.1',
-                    OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
-                    componentName,
-                    undefined,
-                    componentStarterProject,
-                    undefined,
-                    undefined
-                ),
-                componentLocation
-            );
+            await odoInit({
+                projectPath: componentLocation,
+                name: componentName,
+
+                registryDevfile: componentType,
+                devfileVersion: '2.1.1',
+                registry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+
+                starterProject: componentStarterProject
+            });
+
             const devfilePath = path.join(componentLocation, 'devfile.yaml')
             await fs.access(devfilePath);
 

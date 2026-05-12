@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { CommandOption, CommandText, verbose } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 
 export class Command {
 
@@ -32,45 +32,6 @@ export class Command {
             command.addOption(new CommandOption('--no-watch'));
         }
         return command;
-    }
-
-    @verbose
-    static createLocalComponent(
-        devfileType = '', // will use empty string in case of undefined devfileType passed in
-        devfileVersion: string = undefined,
-        registryName: string,
-        name: string,
-        portNumber: number,
-        starter: string = undefined,
-        useExistingDevfile = false,
-        customDevfilePath = ''
-    ): CommandText {
-        const cTxt = new CommandText('odo', 'init', [
-            new CommandOption('--name', name)
-        ]
-        );
-        if (devfileType !== '') {
-            cTxt.addOption(new CommandOption('--devfile', devfileType));
-        }
-        if (devfileVersion) {
-            cTxt.addOption(new CommandOption('--devfile-version', devfileVersion, false));
-        }
-        if (registryName) {
-            cTxt.addOption(new CommandOption('--devfile-registry', registryName));
-        }
-        if (starter) {
-            cTxt.addOption(new CommandOption('--starter', starter, false));
-        }
-        if (useExistingDevfile && customDevfilePath.length === 0) {
-            cTxt.addOption(new CommandOption('--devfile-path', 'devfile.yaml', false));
-        }
-        if (customDevfilePath.length > 0) {
-            cTxt.addOption(new CommandOption('--devfile-path', customDevfilePath, false));
-        }
-        if (portNumber) {
-            cTxt.addOption(new CommandOption(' --run-port', portNumber.toString(), false));
-        }
-        return cTxt;
     }
 
     static runComponentCommand(commandId : string): CommandText {

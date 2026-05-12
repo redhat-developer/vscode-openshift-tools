@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as cp from 'child_process';
 import * as fse from 'fs-extra';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -20,9 +19,11 @@ import { Endpoint } from '../../odo/componentTypeDescription';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
+import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { DevfileV1 } from '../../util/devfileV1Type';
+import { cloneRepository } from '../../util/git';
 import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
@@ -36,13 +37,7 @@ import {
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
-import { Devfile, TemplateProjectIdentifier } from '../common/devfile';
-import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
-
-interface CloneProcess {
-    status: boolean;
-    error: string | undefined;
-}
+import { TemplateProjectIdentifier } from '../common/devfile';
 
 type Message = {
     action: string;
@@ -302,11 +297,32 @@ export default class CreateComponentLoader {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'cloneStart',
                 });
-                const cloneProcess: CloneProcess = await clone(
-                    message.data.url,
-                    tmpFolder.fsPath,
-                    message.data.branch,
-                );
+
+                const channel = getOpenShiftLogChannel();
+                const cloneProcess = await cloneRepository({
+                    url: message.data.url,
+                    location: tmpFolder.fsPath,
+                    branch: message.data.branch,
+
+                    onStart: () => {
+                        void CreateComponentLoader.panel.webview.postMessage({
+                            action: 'cloneExecution',
+                        });
+                    },
+
+                    onLog: (text) => {
+                        channel.append(text);
+                    },
+
+                    onProgress: (text) => {
+                        void CreateComponentLoader.panel.webview.postMessage({
+                            action: 'cloneProgress',
+                            data: {
+                                completionProgress: text,
+                            }
+                        });
+                    }
+                });
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'cloneFailed',
@@ -513,16 +529,11 @@ export default class CreateComponentLoader {
                 action: 'getRecommendedDevfile'
             });
 
-            const devfile: Devfile = {
-                description: rawDevfile.metadata.description,
-                name: rawDevfile.metadata.displayName ? rawDevfile.metadata.displayName : rawDevfile.metadata.name,
-                id: rawDevfile.metadata.name,
-                starterProjects: rawDevfile.starterProjects,
-                tags: [],
-                yaml: stringify(rawDevfile, YAML_STRINGIFY_OPTIONS),
+            const devfile = {
+                ...rawDevfile,
                 supportsDebug,
                 supportsDeploy,
-            } as Devfile;
+            };
 
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
@@ -676,43 +687,6 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
             return false;
         }
     }
-}
-
-function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
-    const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
-    const git = gitExtension.getAPI(1).git.path;
-    let command = `${git} clone --progress ${url} ${location}`;
-    command = branch ? `${command} --branch ${branch}` : command;
-    void CreateComponentLoader.panel.webview.postMessage({
-        action: 'cloneExecution'
-    });
-    const channel = getOpenShiftLogChannel();
-
-    return new Promise((resolve, reject) => {
-        const proc = cp.spawn(command, {shell: true});
-        channel.appendLine(command);
-
-        proc.stdout.on('data', (data) => {
-            channel.append(data.toString());
-        });
-        proc.stderr.on('data', (data) => {
-            channel.append(data.toString());
-
-            void CreateComponentLoader.panel.webview.postMessage({
-                action: 'cloneProgress',
-                data: {
-                    completionProgress: data.toString(),
-                }
-            });
-        });
-
-        proc.on('error', (error) => {
-            resolve({ status: false, error: error.message });
-        });
-        proc.on('close', (code) => {
-            resolve({ status: true, error: undefined });
-        });
-    });
 }
 
 async function validateFolderPath(path: string) {
