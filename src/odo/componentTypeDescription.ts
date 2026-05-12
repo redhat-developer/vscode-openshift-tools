@@ -58,16 +58,18 @@ export interface ComponentItem {
     name: string;
     container?: Container;
     kubernetes?: Kubernetes;
+    image?: Image;
 };
 
 export interface Data {
     schemaVersion: string;
     metadata: Metadata;
-    parent: Parent;
-    starterProjects: StarterProject[];
-    components: ComponentItem[];
-    commands: Command[];
-    events: Events;
+    parent?: Parent;
+    starterProjects?: StarterProject[];
+    components?: ComponentItem[];
+    commands?: Command[];
+    events?: Events;
+    variables?: Record<string, string>;
 }
 
 export interface Metadata {
@@ -106,6 +108,7 @@ export interface StarterProject {
 export interface Git {
     checkoutFrom?: {
         remote: string;
+        revision?: string;
     }
     remotes: Remotes;
 }
@@ -115,6 +118,16 @@ export type Remotes = {[key: string]: string};
 export interface ContainerItem  {
     name: string;
     container: Container;
+}
+
+interface Image {
+  imageName: string;
+  dockerfile?: {
+    uri?: string;
+    buildContext?: string;
+    rootRequired?: boolean;
+  };
+  autoBuild?: boolean;
 }
 
 export interface KubernetesItem {
@@ -133,6 +146,11 @@ export interface Container {
 export interface Endpoint {
     name: string;
     targetPort: number;
+
+    exposure?: 'public' | 'internal';
+    protocol?: 'http' | 'https' | 'ws' | 'wss';
+    secure?: boolean;
+    path?: string;
 }
 
 export interface VolumeMount {
@@ -145,9 +163,10 @@ export interface Volume {
 }
 
 export interface Command {
+    id: string;
     exec?: Exec;
     composite?: Composite;
-    id: string;
+    apply?: Apply;
 }
 
 export interface CommandProvider {
@@ -160,6 +179,12 @@ export interface Exec {
     workingDir: string;
     group?: Group;
     hotReloadCapable?: boolean;
+}
+
+export interface Apply {
+  component: string;
+  group?: Group;
+  label?: string;
 }
 
 export type Composite = {

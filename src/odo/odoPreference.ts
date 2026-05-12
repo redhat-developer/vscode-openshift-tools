@@ -112,6 +112,22 @@ export class OdoPreference {
         await this.writeOdoPreference(odoPreference);
     }
 
+    public async resolveRegistryUrl(registry?: string): Promise<string> {
+        const registries = await this.getRegistries();
+
+        if (!registry) {
+            return OdoPreference.DEFAULT_DEVFILE_REGISTRY_URL;
+        }
+
+        const match = registries.find(r => r.name === registry);
+
+        if (!match) {
+            throw new Error(`Unknown registry name: ${registry}`);
+        }
+
+        return match.url;
+    }
+
     private async readOdoPreference():  Promise<OdoPreferenceObject> {
         let mergedPreference = OdoPreference.DefaultOdoPreference;
         const odoPreferenceFilePath = this.getOdoPreferenceFile();

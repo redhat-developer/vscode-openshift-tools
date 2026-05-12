@@ -40,7 +40,13 @@ export namespace CliExitData {
     }
 }
 
-class OdoChannel {
+export interface OpenshiftLogger {
+    info(message: string): void;
+    warning(message: string): void;
+    error(message: string): void;
+}
+
+export class OdoChannel {
 
     private static instance = new OdoChannel();
 
