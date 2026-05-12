@@ -168,7 +168,7 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('deleteComponentConfiguration()', async function() {
-            await Odo.Instance.deleteComponentConfiguration(tmpFolder);
+            await Oc.Instance.deleteComponentConfiguration(tmpFolder);
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
                 fail('devfile.yaml should have been deleted')

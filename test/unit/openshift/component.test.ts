@@ -25,14 +25,14 @@ import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder } from '../../fixtures';
-
+import { CliChannel } from '../../../src/cli';
 
 const { expect } = chai;
 chai.use(sinonChai);
 
 suite('OpenShift/Component', function () {
     let sandbox: sinon.SinonSandbox;
-    let termStub: sinon.SinonStub; let execStub: sinon.SinonStub;
+    let termStub: sinon.SinonStub; let execStub: sinon.SinonStub; let ocExecStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
@@ -134,6 +134,7 @@ suite('OpenShift/Component', function () {
 
         termStub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
         execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
+        ocExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined });
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
         sandbox.stub(Odo.prototype, 'describeComponent').resolves(componentItem1.component);
         sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
@@ -179,12 +180,20 @@ suite('OpenShift/Component', function () {
             showWarningMessageStub.resolves('Delete Configuration');
             await Component.deleteConfigurationFiles({
                 component: {
-                    // these fields aren't used
+                name: 'comp1',
                 },
                 contextPath: wsFolder1.uri.fsPath
-            } as ComponentWorkspaceFolder);
-            expect(execStub.called).is.true;
-            expect(execStub.lastCall.args[0].toString().endsWith('odo component delete -f --force'));
+            } as unknown as ComponentWorkspaceFolder);
+
+            expect(ocExecStub.called).to.be.true;
+
+            const commands = ocExecStub.getCalls().map(call =>
+                call.args[0].toString()
+            );
+
+            expect(commands.some(cmd =>
+                cmd.includes('oc') && cmd.includes('delete')
+            )).to.be.true;
         });
 
         test('cancel delete', async function () {
@@ -235,7 +244,7 @@ suite('OpenShift/Component', function () {
             await Component.deleteSourceFolder({
                 component: {
                     // these fields aren't used
-                },
+                 },
                 contextPath: wsFolder1.uri.fsPath
             } as ComponentWorkspaceFolder);
             expect(rmStub).to.be.called;

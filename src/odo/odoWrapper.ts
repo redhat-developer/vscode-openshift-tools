@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
-import { CommandOption, CommandText } from '../base/command';
+import { CommandText } from '../base/command';
 import * as cliInstance from '../cli';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
@@ -80,7 +80,7 @@ export class Odo {
         location: Uri,
         starter: string = undefined,
         useExistingDevfile = false,
-        customDevfilePath = ''
+        customDevfilePath = '',
     ): Promise<void> {
         await this.execute(
             Command.createLocalComponent(
@@ -91,7 +91,7 @@ export class Odo {
                 undefined,
                 starter,
                 useExistingDevfile,
-                customDevfilePath
+                customDevfilePath,
             ),
             location.fsPath,
         );
@@ -134,7 +134,7 @@ export class Odo {
                 portNumber,
                 undefined,
                 false,
-                ''
+                '',
             ),
             location.fsPath,
         );
@@ -173,18 +173,4 @@ export class Odo {
         );
     }
 
-    /**
-     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
-     *
-     * @param componentPath the path to the component
-     */
-    public async deleteComponentConfiguration(componentPath: string): Promise<void> {
-        await this.execute(
-            new CommandText('odo', 'delete component', [
-                new CommandOption('--files'),
-                new CommandOption('-f'),
-            ]),
-            componentPath,
-        );
-    }
 }
