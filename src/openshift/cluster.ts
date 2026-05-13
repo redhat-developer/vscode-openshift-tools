@@ -1175,11 +1175,6 @@ export class Cluster extends OpenShiftItem implements Disposable {
         return `Successfully logged in to '${clusterURL}'`;
     }
 
-    static isOpenShiftSandbox(url :string): boolean {
-        const asUrl = new URL(url);
-        return asUrl.hostname.endsWith('openshiftapps.com');
-    }
-
     static prepareSSOInKubeConfig(proxy: string, username: string, accessToken: string): KubeConfig {
         const kcu = new KubeConfig();
         kcu.loadFromOptions({
