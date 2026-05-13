@@ -16,6 +16,7 @@ jobs:
 
     env:
         TOOL_REPO: devfile/alizer
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Check Out Code
