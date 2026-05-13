@@ -4,15 +4,24 @@ on:
   schedule:
     - cron: "0 8 * * *"
   workflow_dispatch:
+
 jobs:
   check-helm-repo:
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
     env:
         TOOL_REPO: helm/helm
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Check Out Code
         uses: actions/checkout@v6
+
       - name: Get latest HELM version
         run: |
           echo "REPO_HELM_VERSION=$(cat src/tools.json | jq -r .helm.version)" >> $GITHUB_ENV
@@ -20,6 +29,7 @@ jobs:
           echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName)" >> $GITHUB_ENV
           echo "LATEST_TOOL_VERSION=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|v||')" >> $GITHUB_ENV
           echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
+
       - name: Find existing PR for HELM version
         if: ${{ env.LATEST_TOOL_VERSION != '' }}
         run: |
@@ -29,6 +39,7 @@ jobs:
               echo SHOULD_UPDATE=true >> $GITHUB_ENV
             fi
           fi
+
       - name: Update src/tools.json with latest helm version
         if: ${{ env.SHOULD_UPDATE == 'true' }}
         run: |
@@ -65,6 +76,7 @@ jobs:
               | jq --indent 4 ".helm.platform[\"${platform}\"].cmdFileName = \"${cmdFileName}\"" > src/tools.json.new > src/tools.json.new
             mv src/tools.json.new src/tools.json
           done
+
       - name: Create pull request
         if: ${{ env.SHOULD_UPDATE == 'true' }}
         run: |
