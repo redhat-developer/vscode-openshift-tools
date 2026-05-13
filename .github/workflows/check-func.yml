@@ -4,24 +4,35 @@ on:
   schedule:
     - cron: "0 8 * * *"
   workflow_dispatch:
+
 jobs:
   check-func-repo:
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
     env:
         TOOL_REPO: knative/func
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Check Out Code
         uses: actions/checkout@v6
+
       - name: Get latest FUNC version
         run: |
           echo "REPO_FUNC_VERSION=$(cat src/tools.json | jq -r .func.version)" >> $GITHUB_ENV
           LATEST_TOOL_RELEASE_RESP=$(gh release --repo ${{ env.TOOL_REPO }} view --json tagName,url)
           echo "LATEST_TOOL_RELEASE=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .tagName | sed 's|knative-v||')" >> $GITHUB_ENV
           echo "LATEST_TOOL_URL=$(echo ${LATEST_TOOL_RELEASE_RESP} | jq -r .url)" >> $GITHUB_ENV
+
       - name: Find existing PR for FUNC version
         run: |
           echo PR_EXISTS=$(gh pr --repo ${{ github.repository }} list --state all --search "update func ${{env.LATEST_TOOL_RELEASE}} in:title" --json url | jq length) >> $GITHUB_ENV
+
       - name: Update src/tools.json with latest func version
         if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_FUNC_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
@@ -36,6 +47,7 @@ jobs:
             jq --indent 4 ".func.platform[\"${platform}\"].url = \"${new_url}\"" src/tools.json | jq --indent 4 ".func.platform[\"${platform}\"].sha256sum = \"${checksum}\"" > src/tools.json.new
             mv src/tools.json.new src/tools.json
           done
+
       - name: Create pull request
         if: ${{ (env.LATEST_TOOL_RELEASE != env.REPO_FUNC_VERSION) && (env.PR_EXISTS == 0) }}
         run: |
