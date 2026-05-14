@@ -4,17 +4,25 @@ on:
   schedule:
     - cron: "0 8 * * *"
   workflow_dispatch:
+
 env:
   TOOL_REPO: redhat-developer/odo
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   check-odo:
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     outputs:
       last-commit-id: ${{ steps.repo-last-commit-info.outputs.repo-last-commit-id }}
       last-release-tag: ${{ steps.repo-last-commit-info.outputs.repo-last-release-tag }}
       last-release-version: ${{ steps.repo-last-commit-info.outputs.repo-last-release-version }}
       nightly-build-version: ${{ steps.repo-last-commit-info.outputs.repo-nightly-build-version }}
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -22,6 +30,7 @@ jobs:
           fetch-depth: 2
           fetch-tags: false
           path: redhat-developer-odo-repository
+
       - name: Get Last Commit Info
         id: repo-last-commit-info
         run: |
@@ -44,10 +53,17 @@ jobs:
 
   check-pr:
     runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: read
+
     outputs:
       pr-exists: ${{ steps.check-pr-exists.outputs.pr-exists }}
+
     needs: check-odo
+
     if: ${{ needs.check-odo.outputs.last-commit-id != '' }}
+
     steps:
       - name: Check if the update PR already exists
         id: check-pr-exists
@@ -55,10 +71,16 @@ jobs:
 
   check-nightly-build:
     runs-on: ubuntu-latest
+
+    permissions: {}
+
     outputs:
       nightly-build-exists: ${{ steps.check-nightly-build-exists.outputs.nightly-build-exists }}
+
     needs: [check-odo, check-pr]
+
     if: ${{ needs.check-odo.outputs.last-commit-id != '' && needs.check-pr.outputs.pr-exists == 0 }}
+
     steps:
       - name: Check if a Nightly Build exists for the last commit id
         id: check-nightly-build-exists
@@ -66,11 +88,19 @@ jobs:
 
   update-odo:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
     needs: [check-odo, check-pr, check-nightly-build]
+
     if: ${{ needs.check-odo.outputs.last-commit-id != '' && needs.check-pr.outputs.pr-exists == 0 && needs.check-nightly-build.outputs.nightly-build-exists != 0 }}
+
     steps:
       - name: Check Out Code
         uses: actions/checkout@v6
+
       - name: Update src/tools.json with latest odo version
         run: |
           jq --indent 4 '.odo.description = "ODO CLI tool"' src/tools.json \
@@ -103,6 +133,7 @@ jobs:
               | jq --indent 4 ".odo.platform[\"${platform}\"].cmdFileName = \"${cmdFileName}\"" > src/tools.json.new > src/tools.json.new
             mv src/tools.json.new src/tools.json
           done
+
       - name: Create pull request
         run: |
           git config --global user.email "openshifttools-bot@users.noreply.github.com"
