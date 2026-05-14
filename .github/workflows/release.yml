@@ -31,6 +31,10 @@ on:
 jobs:
   packaging-job:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout vscode-openshift-tools
         uses: actions/checkout@v6
@@ -81,9 +85,16 @@ jobs:
 
   release-job:
     if: ${{ inputs.publishToMarketPlace == 'true' || inputs.publishToOVSX == 'true' }}
+
     environment: ${{ (inputs.publishToMarketPlace == 'true' || inputs.publishToOVSX == 'true') && 'release' || 'pre-release' }}
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     needs: packaging-job
+
     steps:
     - name: Checkout vscode-openshift-tools
       uses: actions/checkout@v6
