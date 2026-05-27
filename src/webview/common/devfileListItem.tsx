@@ -5,8 +5,6 @@
 import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
-import validator from 'validator';
-import DOMPurify from 'dompurify';
 import DevfileLogo from '../../../images/context/devfile.png';
 import { DevfileData, DevfileInfo } from '../../devfile-registry/devfileInfo';
 
@@ -17,11 +15,26 @@ export type DevfileListItemProps = {
     showFullDescription?: boolean;
 };
 
-function checkedDevfileLogoUrl(logoUrl?: string) {
-    if (logoUrl && validator.isURL(logoUrl)) {
-        return DOMPurify.sanitize(logoUrl);
+function checkedDevfileLogoUrl(logoUrl?: string): string {
+    if (!logoUrl || logoUrl.length > 2048) {
+        return DevfileLogo;
     }
-    return DevfileLogo;
+
+    try {
+        const url = new URL(logoUrl);
+
+        if (!['https:', 'http:'].includes(url.protocol)) {
+            return DevfileLogo;
+        }
+
+        if (url.username || url.password) {
+            return DevfileLogo;
+        }
+
+        return url.toString();
+    } catch {
+        return DevfileLogo;
+    }
 }
 
 export function DevfileListItem(props: DevfileListItemProps) {
