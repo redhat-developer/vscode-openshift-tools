@@ -2,13 +2,12 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { Launch } from '@mui/icons-material';
 import { Box, Button, Chip, Link, Stack, SvgIcon, Tooltip, Typography } from '@mui/material';
-import DOMPurify from 'dompurify';
 import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
 import { Chart, ChartResponse } from '../../../helm/helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
-import { Launch } from '@mui/icons-material';
 
 export type HelmListItemProps = {
     helmChart: ChartResponse;
@@ -47,6 +46,28 @@ export function HelmListItem(props: HelmListItemProps) {
     );
 }
 
+function sanitizeLogoUrl(logoUrl?: string): string | undefined {
+    if (!logoUrl || logoUrl.length > 2048) {
+        return undefined;
+    }
+
+    try {
+        const url = new URL(logoUrl);
+
+        if (!['https:', 'http:'].includes(url.protocol)) {
+            return undefined;
+        }
+
+        if (url.username || url.password) {
+            return undefined;
+        }
+
+        return url.toString();
+    } catch {
+        return undefined;
+    }
+}
+
 function HelmChartListContent(props: HelmListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
@@ -83,6 +104,8 @@ function HelmChartListContent(props: HelmListItemProps) {
         );
     }
 
+    const icon = sanitizeLogoUrl(props.selectedVersion?.icon);
+
     return (
         <Stack direction='row' spacing={3} alignItems='center'>
             <Box
@@ -97,8 +120,8 @@ function HelmChartListContent(props: HelmListItemProps) {
                 }}
             >
                 {
-                    props.selectedVersion.icon ?
-                        <img src={DOMPurify.sanitize(props.selectedVersion.icon)} style={{
+                    icon ?
+                        <img src={icon} style={{
                             maxWidth: !props.isDetailedPage ? '3em' : '6em',
                             maxHeight: !props.isDetailedPage ? '3em' : '6em'
                         }} />
