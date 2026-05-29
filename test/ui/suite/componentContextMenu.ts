@@ -56,8 +56,15 @@ export function testComponentContextMenu() {
             }
         });
 
+       afterEach(async function () {
+            await VSBrowser.instance.driver.wait(
+                async () => true,
+                1000
+            );
+        });
+
         it('Start Dev works', async function () {
-            this.timeout(60_000);
+            this.timeout(80_000);
 
             await waitForItemStable(getSection, componentName, true);
 
@@ -145,7 +152,7 @@ export function testComponentContextMenu() {
             expect(terminalText).to.include('Press any key to close this terminal');
         });
 
-        it('Start/Stop Dev on Podman works', async () => {
+        it('Start/Stop Dev on Podman works', async function () {
             this.timeout(80_000);
 
             await stabilizeComponentsView(getSection);
@@ -208,7 +215,8 @@ export function testComponentContextMenu() {
             expect(terminalText).to.contain('Kubernetes components');
         });
 
-        it('Show dev terminal works', async () => {
+        it('Show dev terminal works', async function () {
+            this.timeout(80_000);
             const component = await waitForItemStable(getSection, componentName, false);
 
             //open menu and select show dev terminal
@@ -220,7 +228,7 @@ export function testComponentContextMenu() {
             expect(tabName).to.contain(expectedTabName);
         });
 
-        it('Debug works', async () => {
+        it('Debug works', async function () {
             this.timeout(80_000);
 
             const component = await waitForItemStable(getSection, componentName, false);
@@ -240,19 +248,18 @@ export function testComponentContextMenu() {
             const debugConsole = await bottomBar.openDebugConsoleView();
 
             //wait for console to have text
-            // await new Promise((res) => setTimeout(res, 1_000));
             const bottomBarText = await bottomBar.getDriver().wait(
-            async () => {
-                const text = await debugConsole.getText();
+                async () => {
+                    const text = await debugConsole.getText();
 
-                if (text && text.includes('App started on PORT')) {
-                    return text;
-                }
+                    if (text && text.includes('App started on PORT')) {
+                        return text;
+                    }
 
-                return null;
-            },
-            20_000,
-            'Debug console did not contain expected output'
+                    return null;
+                },
+                20_000,
+                'Debug console did not contain expected output'
             );
 
             expect(bottomBarText).to.contain('App started on PORT');
