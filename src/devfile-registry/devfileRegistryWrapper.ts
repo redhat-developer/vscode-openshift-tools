@@ -5,9 +5,9 @@
 import { get as httpGet } from 'http';
 import { get as httpsGet } from 'https';
 import * as YAML from 'js-yaml';
-import { ExecutionContext } from '../cli';
 import { Registry } from '../odo/componentType';
 import { OdoPreference } from '../odo/odoPreference';
+import { ExecutionContext } from '../util/utils';
 import { DevfileData, DevfileInfo } from './devfileInfo';
 
 export const DEVFILE_VERSION_LATEST: string = 'latest';

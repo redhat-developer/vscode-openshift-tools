@@ -8,14 +8,8 @@ import * as cp from 'child_process';
 import { CommandText } from './base/command';
 import { ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
-import { hash } from './util/utils';
+import { ExecutionContext } from './util/utils';
 import { VsCommandError } from './vscommand';
-
-export class ExecutionContext extends Map<string, any> {
-    public static key(value: string): string {
-        return hash(value);
-    }
-}
 
 export class CliChannel {
 

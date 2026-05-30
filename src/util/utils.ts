@@ -17,6 +17,7 @@ import { access as accessOriginal, rm as rmOriginal } from 'fs/promises';
 import * as path from 'path';
 import { decompress as decompressOriginal } from 'targz';
 import { CreateNodeOptions, DocumentOptions, ParseOptions, SchemaOptions, ToStringOptions } from 'yaml';
+
 /**
  * Returns the absolute path for a specified relative image path
  *
@@ -46,6 +47,12 @@ export function hashFile(filePath, algorithm = 'sha256') {
         stream.on('data', (chunk) => hash.update(chunk));
         stream.on('end', () => resolve(hash.digest('hex')));
     });
+}
+
+export class ExecutionContext extends Map<string, any> {
+    public static key(value: string): string {
+        return hash(value);
+    }
 }
 
 /**

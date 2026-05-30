@@ -104,7 +104,7 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
-            "type": "pwa-chrome",
+            "type": "chrome",
             "request": "launch",
             "name": "Launch 'Cluster Editor' in Chrome",
             "file": "${workspaceFolder}/out/clusterViewer/index.html",
@@ -112,7 +112,7 @@
             "trace": true
         },
         {
-            "type": "pwa-chrome",
+            "type": "chrome",
             "request": "launch",
             "name": "Launch 'Devfile Registry viewer' in Chrome",
             "file": "${workspaceFolder}/out/devFileRegistryViewer/index.html",

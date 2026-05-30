@@ -10,9 +10,9 @@ import * as path from 'path';
 import { QuickPickItem, window } from 'vscode';
 import { stringify } from 'yaml';
 import { CommandText } from '../base/command';
-import { CliChannel, ExecutionContext } from '../cli';
+import { CliChannel } from '../cli';
 import { Platform } from './platform';
-import { YAML_STRINGIFY_OPTIONS } from './utils';
+import { ExecutionContext, YAML_STRINGIFY_OPTIONS } from './utils';
 
 function fileExists(file: string): boolean {
     try {

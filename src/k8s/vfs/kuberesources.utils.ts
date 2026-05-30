@@ -9,9 +9,9 @@ import * as _ from 'lodash';
 import { Diagnostic, DiagnosticSeverity, FileStat, FileType, Range, TextDocument, Uri, workspace } from 'vscode';
 import { Document, isMap, isPair, isScalar, isSeq, Pair, parse, ParsedNode, parseDocument, stringify } from 'yaml';
 import { CommandOption, CommandText } from '../../base/command';
-import { CliChannel, ExecutionContext } from '../../cli';
+import { CliChannel } from '../../cli';
 import { Oc } from '../../oc/ocWrapper';
-import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
+import { ExecutionContext, YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 
 export const K8S_RESOURCE_SCHEME = 'osmsx'; // Changed from 'k8smsx' to 'osmsx' to not make a conflict with k8s extension
 export const K8S_RESOURCE_SCHEME_READONLY = 'osmsxro'; // Changed from 'k8smsxro' to 'osmsxro' to not make a conflict with k8s extension

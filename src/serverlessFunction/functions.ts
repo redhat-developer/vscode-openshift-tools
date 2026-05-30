@@ -6,13 +6,14 @@
 import Dockerode from 'dockerode';
 import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
-import { CliChannel, ExecutionContext } from '../cli';
+import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Odo } from '../odo/odoWrapper';
 import { isTektonAware } from '../tekton/tekton';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { getNamespaceKind, isOpenShiftCluster } from '../util/kubeUtils';
 import { Progress } from '../util/progress';
+import { ExecutionContext } from '../util/utils';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { ServerlessCommand, Utils } from './commands';
 import { GitModel, getGitBranchInteractively, getGitRepoInteractively, getGitStateByPath } from './git/git';

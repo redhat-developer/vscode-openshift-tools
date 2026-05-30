@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ExecutionContext } from '../cli';
 import { K8sResourceKind } from '../k8s/olm/types';
 import { Oc } from '../oc/ocWrapper';
+import { ExecutionContext } from '../util/utils';
 import {
     ClusterServiceVersion,
     CustomResourceDefinitionStub,
