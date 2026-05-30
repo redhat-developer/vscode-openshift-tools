@@ -1131,4 +1131,32 @@ export class Oc {
 
         await this.deleteOdoFiles(componentPath, componentName);
     }
+
+    public async getComponentPod(componentName: string): Promise<string> {
+
+        const selectors = [
+            `app.kubernetes.io/instance=${componentName}`,
+            `app.kubernetes.io/component=${componentName}`,
+            `component=${componentName}`,
+            `app=${componentName}`
+        ];
+
+        for (const selector of selectors) {
+
+            const pods =
+                await this.getKubernetesObjects(
+                    'pods',
+                    undefined,
+                    selector
+                );
+
+            if (pods.length > 0) {
+                return pods[0].metadata.name as string;
+            }
+        }
+
+        throw new Error(
+            `No running pod found for component '${componentName}'`
+        );
+    }
 }
