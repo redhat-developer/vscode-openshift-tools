@@ -5,8 +5,7 @@
 
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { Command } from '../odo/componentTypeDescription';
-import { CommandResolver } from './commandResolver';
-import { ExecCommandExecutor } from './execCommand';
+import { DevfileCommandRunner } from './devfileCommandRunner';
 
 export class CompositeCommand {
 
@@ -15,38 +14,11 @@ export class CompositeCommand {
         command: Command,
     ): Promise<void> {
 
-        const devfile =
-            componentFolder.component.devfileData.devfile;
-
-        const commandMap =
-            CommandResolver.getAllCommandsMap(
-                devfile,
-            );
-
         for (const childId of command.composite.commands) {
-
-            const child =
-                commandMap.get(
-                    childId.toLowerCase(),
-                );
-
-            if (!child) {
-                throw new Error(
-                    `Command '${childId}' not found`,
-                );
-            }
-
-            if (child.exec) {
-                await ExecCommandExecutor.execute(
-                    componentFolder,
-                    child.exec,
-                );
-            } else if (child.composite) {
-                await CompositeCommand.execute(
-                    componentFolder,
-                    child,
-                );
-            }
+            await DevfileCommandRunner.execute(
+                componentFolder,
+                childId,
+            );
         }
     }
 }
