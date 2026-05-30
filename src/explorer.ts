@@ -25,7 +25,6 @@ import {
     workspace
 } from 'vscode';
 import { CommandOption, CommandText } from './base/command';
-import { ExecutionContext } from './cli';
 import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.utils';
@@ -37,7 +36,7 @@ import { getKubeConfigFiles, getNamespaceKind, isOpenShiftCluster, KubeConfigInf
 import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
-import { imagePath } from './util/utils';
+import { ExecutionContext, imagePath } from './util/utils';
 import { FileContentChangeNotifier, WatchUtil } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';

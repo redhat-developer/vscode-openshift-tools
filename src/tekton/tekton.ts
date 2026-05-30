@@ -4,7 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { CommandText } from '../base/command';
-import { CliChannel, ExecutionContext } from '../cli';
+import { CliChannel } from '../cli';
+import { ExecutionContext } from '../util/utils';
 
 /**
  * Returns true if the cluster has the Tekton CRDs, and false otherwise.

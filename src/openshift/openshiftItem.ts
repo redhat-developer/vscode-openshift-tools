@@ -4,12 +4,12 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { commands, QuickPickItem, window } from 'vscode';
-import { ExecutionContext } from '../cli';
 import { Oc } from '../oc/ocWrapper';
 import { Project } from '../oc/project';
 import { ServerlessFunctionView } from '../serverlessFunction/view';
 import { inputValue } from '../util/inputValue';
 import { getNamespaceKind } from '../util/kubeUtils';
+import { ExecutionContext } from '../util/utils';
 import * as NameValidator from './nameValidator';
 
 export class QuickPickCommand implements QuickPickItem {

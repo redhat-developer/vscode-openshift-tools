@@ -189,6 +189,7 @@ export interface Apply {
 
 export type Composite = {
     commands: string[];
+    parallel?: boolean;
     group: Group;
 }
 

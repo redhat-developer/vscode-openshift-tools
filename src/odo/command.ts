@@ -33,8 +33,4 @@ export class Command {
         }
         return command;
     }
-
-    static runComponentCommand(commandId : string): CommandText {
-        return new CommandText('odo', `run ${commandId}`);
-    }
 }
