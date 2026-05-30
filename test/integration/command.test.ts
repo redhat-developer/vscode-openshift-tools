@@ -22,7 +22,7 @@ import { Odo } from '../../src/odo/odoWrapper';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
 import { ComponentWorkspaceFolder } from 'src/odo/workspace';
-import { DevfileCommandRunner } from 'src/devfile/devfileCommandRunner';
+import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
 
 const ODO = Odo.Instance;
 
