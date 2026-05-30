@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from 'src/odo/workspace';
 import { Command } from '../odo/componentTypeDescription';
-import { CommandResolver } from './commandResolver';
-import { CompositeCommand } from './compositeCommand';
-import { ExecCommandExecutor } from './execCommand';
+import { DevfileCommandRunner } from './devfileCommandRunner';
 
 export class ParallelCompositeCommand {
 
@@ -16,46 +14,14 @@ export class ParallelCompositeCommand {
         command: Command,
     ): Promise<void> {
 
-        const devfile =
-            componentFolder.component.devfileData.devfile;
-
-        const commandMap =
-            CommandResolver.getAllCommandsMap(
-                devfile,
-            );
-
-        const promises: Promise<void>[] = [];
-
-        for (const childId of command.composite.commands) {
-
-            const child =
-                commandMap.get(
-                    childId.toLowerCase(),
-                );
-
-            if (!child) {
-                throw new Error(
-                    `Command '${childId}' not found`,
-                );
-            }
-
-            if (child.exec) {
-                promises.push(
-                    ExecCommandExecutor.execute(
+        await Promise.all(
+            command.composite.commands.map(
+                childId =>
+                    DevfileCommandRunner.execute(
                         componentFolder,
-                        child.exec,
+                        childId,
                     ),
-                );
-            } else if (child.composite) {
-                promises.push(
-                    CompositeCommand.execute(
-                        componentFolder,
-                        child,
-                    ),
-                );
-            }
-        }
-
-        await Promise.all(promises);
+            ),
+        );
     }
 }

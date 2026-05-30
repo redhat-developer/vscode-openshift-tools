@@ -20,7 +20,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
-import { DevfileCommandRunner } from '../devfile/execCommand';
+import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
