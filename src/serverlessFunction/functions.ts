@@ -420,22 +420,32 @@ export class Functions {
         });
     }
 
+    private static acceptedRegistries = new Set([
+        'docker.io',
+        'quay.io',
+    ]);
+
     private async isDockerOnPodman(): Promise<DockerStatus> {
         try {
             const resultRaw: CliExitData = await ChildProcessUtil.Instance.execute('podman info -f=json');
-            if (resultRaw.stderr.toLowerCase().indexOf('cannot connect') !== -1) {
+            if (resultRaw.stderr.toLowerCase().includes('cannot connect')) {
                 return ({
                     error: true,
                     message: 'Docker is not running, Please start the docker process'
                 });
             }
-            const resultObj: { registries: { search: string[] } } = JSON.parse(resultRaw.stdout);
-            if (resultObj.registries && !resultObj.registries.search?.includes('docker.io')) {
-                return ({
+            const resultObj: { registries?: { search?: string[] } } = JSON.parse(resultRaw.stdout);
+
+            const hasSupportedRegistry =
+                resultObj.registries?.search?.some(registry => Functions.acceptedRegistries.has(registry)) ?? false;
+
+            if (!hasSupportedRegistry) {
+                return {
                     error: true,
-                    message: 'Docker is not running, Please start the docker process'
-                });
+                    message: `Docker is not configured correctly. One of the following registries must be present in the Podman search registries: ${[...Functions.acceptedRegistries].join(', ')}.`
+                };
             }
+
             return ({
                 error: false,
                 message: ''
