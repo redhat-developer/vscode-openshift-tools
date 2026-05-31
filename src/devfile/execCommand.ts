@@ -39,12 +39,10 @@ export class ExecCommandExecutor {
             `exec ${podName} -c ${resolvedExec.component} -- sh -c "cd ${resolvedExec.workingDir} && ${resolvedExec.commandLine}"`,
         );
 
-        await OpenShiftTerminalManager
-            .getInstance()
-            .createTerminal(
-                command,
-                `Run '${resolvedExec.commandLine}'`,
-                componentFolder.contextPath,
-            );
+        void OpenShiftTerminalManager.getInstance().createTerminal(
+            command,
+            `Component ${componentName}: Run '${resolvedExec.commandLine}' Command`,
+            componentFolder.contextPath
+        );
     }
 }
