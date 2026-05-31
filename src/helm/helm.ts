@@ -107,14 +107,25 @@ export async function unInstallHelmChart(name: string): Promise<CliExitData> {
  * @returns a negative number if the first entry should go first, or a positive number if the second entry should go first
  */
 export function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
-    const oldURLCheck = oldRepo.url.toLowerCase().includes('charts.openshift.io');
-    const newURLCheck = newRepo.url.toLowerCase().includes('charts.openshift.io');
+    const oldURLCheck = isChartsOpenShiftRepo(oldRepo.url);
+    const newURLCheck = isChartsOpenShiftRepo(newRepo.url);
+
     if (oldURLCheck && !newURLCheck) {
         return -1;
     } else if (newURLCheck && !oldURLCheck) {
         return 1;
     }
+
     return oldRepo.name.localeCompare(newRepo.name);
+}
+
+function isChartsOpenShiftRepo(url: string): boolean {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https' && parsed.hostname === 'charts.openshift.io';
+    } catch {
+        return false;
+    }
 }
 
 // This file contains utilities for executing command line tools, notably Helm.

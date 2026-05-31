@@ -525,13 +525,24 @@ export function HelmSearch(props: HelmSearchProps) {
 
 }
 
+function isChartsOpenShiftRepo(url: string): boolean {
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https' && parsed.hostname === 'charts.openshift.io';
+    } catch {
+        return false;
+    }
+}
+
 function ascRepoName(oldRepo: HelmRepo, newRepo: HelmRepo) {
-    const oldURLCheck = oldRepo.url.toLowerCase().includes('charts.openshift.io');
-    const newURLCheck = newRepo.url.toLowerCase().includes('charts.openshift.io');
+    const oldURLCheck = isChartsOpenShiftRepo(oldRepo.url);
+    const newURLCheck = isChartsOpenShiftRepo(newRepo.url);
+
     if (oldURLCheck && !newURLCheck) {
         return -1;
     } else if (newURLCheck && !oldURLCheck) {
         return 1;
     }
+
     return oldRepo.name.localeCompare(newRepo.name);
 }
