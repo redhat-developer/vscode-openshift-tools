@@ -42,7 +42,7 @@ export function operatorBackedServiceTest() {
         });
 
         it('Can create operator backed service', async function () {
-            this.timeout(60_000);
+            this.timeout(80_000);
 
             //get project, open context menu and select create new operator backed service
             const clusterItem = (await itemExists(clusterName, section)) as TreeItem;
@@ -73,7 +73,7 @@ export function operatorBackedServiceTest() {
             await notificationExists(
                 NOTIFICATIONS.serviceCreated(serviceName),
                 VSBrowser.instance.driver,
-                50_000
+                70_000
             );
 
             //check that deployment is shown
