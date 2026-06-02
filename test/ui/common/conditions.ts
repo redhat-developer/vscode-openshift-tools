@@ -38,12 +38,10 @@ export async function notificationExists(
     driver: WebDriver,
     timeout = 10000,
 ): Promise<Notification> {
-    const center = await new Workbench().openNotificationsCenter();
-
-
     let currentNotifications = undefined;
     return driver.wait(async () => {
         try {
+            const center = await new Workbench().openNotificationsCenter();
             const notifications = await center.getNotifications(NotificationType.Any);
             currentNotifications = notifications;
             for (const item of notifications) {
@@ -70,9 +68,9 @@ export async function notificationDoesNotExist(
     driver: WebDriver,
     timeout = 10_000,
 ): Promise<boolean> {
-    const center = await new Workbench().openNotificationsCenter();
     return driver.wait(async () => {
         try {
+            const center = await new Workbench().openNotificationsCenter();
             const notifications = await center.getNotifications(NotificationType.Any);
             const notificationText = [];
             notifications.forEach(
