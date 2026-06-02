@@ -91,7 +91,7 @@ export class OdoPreference {
 
     public async addRegistry(name: string, url: string, token: string): Promise<Registry> {
         const odoPreference = await this.readOdoPreference();
-        odoPreference.OdoSettings.RegistryList.push({
+        odoPreference.OdoSettings.RegistryList.unshift({
             Name: name,
             URL: url,
             secure: !!token

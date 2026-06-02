@@ -69,8 +69,10 @@ export class DevfileRegistry {
         if (this.executionContext && this.executionContext.has(key)) {
             return this.executionContext.get(key);
         }
-        const devfile = DevfileRegistry._get(`${url}/devfiles/${stack}/${version ? version : DEVFILE_VERSION_LATEST}`,
-                abortTimeout, abortController);
+        const devfile = DevfileRegistry._get(
+            `${url}/devfiles/${stack}/${version ? version : DEVFILE_VERSION_LATEST}`,
+            abortTimeout,
+            abortController);
         this.executionContext.set(key, devfile);
         return devfile;
    }
@@ -152,7 +154,7 @@ export class DevfileRegistry {
             }
             const signal = abortController?.signal;
             const timeout = abortTimeout ? abortTimeout : 5000;
-            const options = { rejectUnauthorized: false, signal, timeout };
+            const options = { signal, timeout };
             let result: string = '';
             request(url, options, (response) => {
                 if (response.statusCode < 500) {
