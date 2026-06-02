@@ -39,9 +39,13 @@ export async function notificationExists(
     timeout = 10000,
 ): Promise<Notification> {
     const center = await new Workbench().openNotificationsCenter();
+
+
+    let currentNotifications = undefined;
     return driver.wait(async () => {
         try {
             const notifications = await center.getNotifications(NotificationType.Any);
+            currentNotifications = notifications;
             for (const item of notifications) {
                 if ((await item.getMessage()) === message) {
                     return item;
@@ -50,7 +54,15 @@ export async function notificationExists(
         } catch {
             // workaround for reloadin notifications
         }
-    }, timeout);
+    }, timeout, `
+        Notification wait timeout.
+
+        Expected notification: [${message}]
+
+        Currently visible notifications: [\n
+        ${currentNotifications?.map(n => `\t- [${n.getMessage()}]`).join('\n')}
+        ]
+    `);
 }
 
 export async function notificationDoesNotExist(
