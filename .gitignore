@@ -4,6 +4,7 @@ node_modules
 test/fixtures/workspace/.vscode/
 *.vsix
 coverage/
+.vscode-version
 toFile
 cache
 dist/

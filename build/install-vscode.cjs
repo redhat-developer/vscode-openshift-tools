@@ -7,6 +7,7 @@
 const testElectron = require('@vscode/test-electron');
 const { platform } = require('os');
 const cp = require('child_process');
+const fs = require('fs');
 const path = require('path');
 const packageJson = require('../package.json');
 
@@ -27,6 +28,12 @@ void testElectron.downloadAndUnzipVSCode().then((executable) => {
             )}'`;
         } else {
             vsCodeExecutable = path.join(path.dirname(executable), 'bin', 'code');
+        }
+
+        // Save VSCode executable version for ExTester
+        const match = executable.match(/(\d+\.\d+\.\d+)/);
+        if (match) {
+            fs.writeFileSync('.vscode-version', match[1]);
         }
 
         const extensionRootPath = path.resolve(__dirname, '..');
