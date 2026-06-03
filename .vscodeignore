@@ -9,6 +9,7 @@ doc/**
 .gitattributes
 .github
 .gitignore
+.vscode-version
 header.js
 images/demo-featured-image.png
 images/gif/**
