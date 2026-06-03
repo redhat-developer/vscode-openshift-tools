@@ -1,0 +1,14 @@
+diff --git a/node_modules/vscode-extension-tester/out/browser.js b/node_modules/vscode-extension-tester/out/browser.js
+index f8e667e..5265d27 100644
+--- a/node_modules/vscode-extension-tester/out/browser.js
++++ b/node_modules/vscode-extension-tester/out/browser.js
+@@ -139,7 +139,8 @@ class VSBrowser {
+         else if (process.env.EXTENSION_DEV_PATH) {
+             args.push(`--extensionDevelopmentPath=${process.env.EXTENSION_DEV_PATH}`);
+         }
+-        let options = new chrome_1.Options().setChromeBinaryPath(codePath).addArguments(...args);
++        const extraArgs = [ "--skip-welcome", "--skip-sessions-welcome", "--skip-release-notes" ];
++        let options = new chrome_1.Options().setChromeBinaryPath(codePath).addArguments(...args, ...extraArgs);
+         options['options_'].windowTypes = ['webview'];
+         options = options;
+         const prefs = new page_objects_1.logging.Preferences();
