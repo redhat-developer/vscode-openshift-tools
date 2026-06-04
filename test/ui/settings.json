@@ -1,4 +1,5 @@
 {
     "window.dialogStyle": "custom",
-    "files.simpleDialog.enable": true
+    "files.simpleDialog.enable": true,
+    "workbench.welcomePage.experimentalOnboarding": false
 }
