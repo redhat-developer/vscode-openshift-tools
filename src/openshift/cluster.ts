@@ -683,14 +683,14 @@ export class Cluster extends OpenShiftItem implements Disposable {
             } catch (err) {
                 // continue
             }
+
             const signal = abortController?.signal;
+            const disallowInsecureTLS = process.env.DISABLE_K8S_PING_INSECURE_TLS === 'true';
             const options = {
-                // Intentionally disabled: local and development Kubernetes/OpenShift
-                // clusters frequently use self-signed certificates. This check is
-                // only used to verify cluster availability.
-                rejectUnauthorized: false,
-                signal
+                signal,
+                ...(disallowInsecureTLS ? {} : { rejectUnauthorized: false })
             };
+
             request(
                 `${url}/version`, options, (response) => {
                     if (response.statusCode !== 200) {
