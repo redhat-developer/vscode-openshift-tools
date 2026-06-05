@@ -659,11 +659,21 @@ export class Cluster extends OpenShiftItem implements Disposable {
     }
 
     /**
-     * Checks the availability of a given cluster
+     * Checks whether the provided URL points to a reachable Kubernetes/OpenShift API server.
+     *
+     * The Kubernetes '/version' endpoint is intentionally used because it returns a well-known
+     * JSON document containing Kubernetes version information ('major'/'minor'/'getVersion'),
+     * which significantly reduces false positives compared to merely checking that some HTTP
+     * endpoint responds.
+     *
+     * Certificate validation is intentionally disabled for this probe because many
+     * development and local clusters (Kind, Minikube, CRC/OpenShift Local, etc.)
+     * use self-signed certificates. This method is only used to determine cluster
+     * availability and does not perform authentication or transmit sensitive data.
      *
      * @param url Cluster URL to check
-     * @param abortController if provided, allows cancelling the operation
-     * @returns true if cluster is available, false if cluster is not available or the operation is cancelled
+     * @param abortController Allows cancelling the operation
+     * @returns true if a Kubernetes/OpenShift API server is reachable
      */
     static async pingCluster(url: string, abortController: AbortController): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
@@ -674,19 +684,51 @@ export class Cluster extends OpenShiftItem implements Disposable {
                 // continue
             }
             const signal = abortController?.signal;
-            const options = { rejectUnauthorized: false, signal };
-            request(`${url}/api`, options, (response) => {
-                if (response.statusCode < 500) {
-                    resolve(true);
-                } else {
-                    reject(new Error(`Connect error: ${response.statusMessage}`));
-                }
-            }).on('error', (e) => {
-                reject(new Error(`Connect error: ${e}`));
-            }).on('success', (s) => {
-                resolve(true);
+            const options = {
+                // Intentionally disabled: local and development Kubernetes/OpenShift
+                // clusters frequently use self-signed certificates. This check is
+                // only used to verify cluster availability.
+                rejectUnauthorized: false,
+                signal
+            };
+            request(
+                `${url}/version`, options, (response) => {
+                    if (response.statusCode !== 200) {
+                        reject(
+                            new Error(
+                                `Unexpected response: ${response.statusCode} ${response.statusMessage}`
+                            )
+                        );
+                        return;
+                    }
+
+                    let body = '';
+
+                    response.on('data', (chunk) => {
+                        body += chunk;
+                    });
+
+                    response.on('end', () => {
+                        try {
+                            const version = JSON.parse(body);
+
+                            if (
+                                typeof version?.major === 'string' &&
+                                typeof version?.minor === 'string' &&
+                                typeof version?.gitVersion === 'string'
+                            ) {
+                                resolve(true);
+                            } else {
+                                reject(new Error('Response is not a valid Kubernetes/OpenShift version document'));
+                            }
+                        } catch (err) {
+                            reject(new Error(`Failed to parse Kubernetes version response: ${err}`));
+                        }
+                    });
+                }).on('error', (e) => {
+                    reject(new Error(`Connect error: ${e}`));
+                });
             });
-        });
     }
 
     /**
