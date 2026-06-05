@@ -676,6 +676,22 @@ export class Cluster extends OpenShiftItem implements Disposable {
      * @returns true if a Kubernetes/OpenShift API server is reachable
      */
     static async pingCluster(url: string, abortController: AbortController): Promise<boolean> {
+        try {
+            return await Cluster.pingClusterInternal(url, abortController);
+        } catch (err) {
+            if (!Cluster.isTlsCertificateError(err)) {
+                throw new Error(`Connect error: ${err.message}`);
+            }
+
+            try {
+                return await this.pingClusterInternal(url, abortController, true);
+            } catch (err) {
+                throw new Error(`Connect error: ${err.message}`);
+            }
+        }
+    }
+
+    static async pingClusterInternal(url: string, abortController: AbortController, fallback: boolean = false): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             let request = httpGet;
             try {
@@ -685,50 +701,55 @@ export class Cluster extends OpenShiftItem implements Disposable {
             }
 
             const signal = abortController?.signal;
-            const disallowInsecureTLS = process.env.DISABLE_K8S_PING_INSECURE_TLS === 'true';
             const options = {
                 signal,
-                ...(disallowInsecureTLS ? {} : { rejectUnauthorized: false })
+                rejectUnauthorized: (!fallback)
             };
 
-            request(
-                `${url}/version`, options, (response) => {
-                    if (response.statusCode !== 200) {
-                        reject(
-                            new Error(
-                                `Unexpected response: ${response.statusCode} ${response.statusMessage}`
-                            )
-                        );
-                        return;
-                    }
+            request(`${url}/version`, options, (response) => {
+                if (response.statusCode !== 200) {
+                    reject(new Error(`Unexpected response: ${response.statusCode} ${response.statusMessage}`));
+                    return;
+                }
 
-                    let body = '';
+                let body = '';
 
-                    response.on('data', (chunk) => {
-                        body += chunk;
-                    });
-
-                    response.on('end', () => {
-                        try {
-                            const version = JSON.parse(body);
-
-                            if (
-                                typeof version?.major === 'string' &&
-                                typeof version?.minor === 'string' &&
-                                typeof version?.gitVersion === 'string'
-                            ) {
-                                resolve(true);
-                            } else {
-                                reject(new Error('Response is not a valid Kubernetes/OpenShift version document'));
-                            }
-                        } catch (err) {
-                            reject(new Error(`Failed to parse Kubernetes version response: ${err}`));
-                        }
-                    });
-                }).on('error', (e) => {
-                    reject(new Error(`Connect error: ${e}`));
+                response.on('data', (chunk) => {
+                    body += chunk;
                 });
+
+                response.on('end', () => {
+                    try {
+                        const version = JSON.parse(body);
+
+                        if (
+                            typeof version?.major === 'string' &&
+                            typeof version?.minor === 'string' &&
+                            typeof version?.gitVersion === 'string'
+                        ) {
+                            resolve(true);
+                        } else {
+                            reject(new Error('Response is not a valid Kubernetes/OpenShift version document'));
+                        }
+                    } catch (err) {
+                        reject(new Error(`Failed to parse Kubernetes version response: ${err}`));
+                    }
+                });
+            }).on('error', (e) => {
+                reject(e);
             });
+        });
+    }
+
+    private static isTlsCertificateError(err: unknown): boolean {
+        const code = (err as NodeJS.ErrnoException)?.code;
+        return [
+            'DEPTH_ZERO_SELF_SIGNED_CERT',
+            'SELF_SIGNED_CERT_IN_CHAIN',
+            'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+            'CERT_HAS_EXPIRED',
+            'ERR_TLS_CERT_ALTNAME_INVALID'
+        ].includes(code ?? '');
     }
 
     /**
