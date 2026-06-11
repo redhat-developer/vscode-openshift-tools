@@ -39,6 +39,9 @@ export class ExecCommandExecutor {
             `exec ${podName} -c ${resolvedExec.component} -- sh -c "cd ${resolvedExec.workingDir} && ${resolvedExec.commandLine}"`,
         );
 
+        /* eslint-disable no-console */
+        console.log(`Terminal Tab Name: Component ${componentName}: Run '${resolvedExec.commandLine}' Command`);
+
         void OpenShiftTerminalManager.getInstance().createTerminal(
             command,
             `Component ${componentName}: Run '${resolvedExec.commandLine}' Command`,
