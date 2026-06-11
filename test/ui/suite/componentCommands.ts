@@ -104,6 +104,8 @@ export function testComponentCommands(path: string) {
             //check for openshift terminal tab name
             const terminal = new OpenshiftTerminalWebviewView();
             const terminalTabName = await terminal.getActiveTabName();
+            /* eslint-disable no-console */
+            console.log(`terminalTabName: ${terminalTabName}`);
             expect(terminalTabName).to.contain(
                 `Component ${componentName}: Run '${commandName}' Command`,
             );
