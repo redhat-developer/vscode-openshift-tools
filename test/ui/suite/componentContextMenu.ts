@@ -28,7 +28,7 @@ export function testComponentContextMenu() {
         let openshiftTerminal: OpenshiftTerminalWebviewView;
 
         const componentName = 'nodejs-starter';
-        const expectedTabName = `Run dev: ${componentName}`;
+        const expectedTabName = `odo dev: ${componentName}`;
 
         before(async function context() {
             this.timeout(45_000);

@@ -95,6 +95,7 @@ export function testComponentCommands(path: string) {
             const commandsItem = await component.findChildItem('Commands');
             const commands: TreeItem[] = await commandsItem.getChildren();
 
+            const commandName = await commands[0].getLabel();
             await commands[0].select();
 
             const actionButton = await commands[0].getActionButton('Run Command');
@@ -106,7 +107,7 @@ export function testComponentCommands(path: string) {
             /* eslint-disable no-console */
             console.log(`terminalTabName: ${terminalTabName}`);
             expect(terminalTabName).to.contain(
-                `Run dev: ${componentName}`,
+                `Component ${componentName}: Run '${commandName}' Command`,
             );
 
             //check command run to then end
