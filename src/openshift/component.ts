@@ -272,7 +272,7 @@ export class Component extends OpenShiftItem {
         try {
             cs.devTerminal = await OpenShiftTerminalManager.getInstance().createTerminal(
                 Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn, manualRebuild),
-                `odo dev: ${component.component.devfileData.devfile.metadata.name}`,
+                `${component.component.devfileData.devfile.metadata.name}`,
                 component.contextPath,
                 process.env,
                 {
