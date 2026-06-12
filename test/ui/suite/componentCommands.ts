@@ -26,7 +26,6 @@ export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
         let view: SideBarView;
         let section: ViewSection;
-        let commands: TreeItem[];
 
         const componentName = 'nodejs-starter';
 
@@ -79,7 +78,7 @@ export function testComponentCommands(path: string) {
             const commandsItem = await component.findChildItem('Commands');
 
             //check Commands has children
-            commands = await commandsItem.getChildren();
+            const commands: TreeItem[] = await commandsItem.getChildren();
             const actualCommands = [];
             for (const command of commands) {
                 actualCommands.push(await command.getLabel());
@@ -88,17 +87,25 @@ export function testComponentCommands(path: string) {
         });
 
         it('Command can be ran', async function () {
-            //get first command's label and select it
+            const components = await section.getVisibleItems();
+            const component = components[0] as TreeItem;
+
+            await component.expand();
+
+            const commandsItem = await component.findChildItem('Commands');
+            const commands: TreeItem[] = await commandsItem.getChildren();
+
             const commandName = await commands[0].getLabel();
             await commands[0].select();
 
-            //Check for action button and click it
             const actionButton = await commands[0].getActionButton('Run Command');
             await actionButton.click();
 
             //check for openshift terminal tab name
             const terminal = new OpenshiftTerminalWebviewView();
             const terminalTabName = await terminal.getActiveTabName();
+            /* eslint-disable no-console */
+            console.log(`terminalTabName: ${terminalTabName}`);
             expect(terminalTabName).to.contain(
                 `Component ${componentName}: Run '${commandName}' Command`,
             );
