@@ -20,9 +20,11 @@ import { Endpoint } from '../../odo/componentTypeDescription';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
+import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
 import { ExtensionID } from '../../util/constants';
 import { DevfileConverter } from '../../util/devfileConverter';
 import { DevfileV1 } from '../../util/devfileV1Type';
+import { cloneRepository } from '../../util/git';
 import { YAML_STRINGIFY_OPTIONS } from '../../util/utils';
 import { getInitialWorkspaceFolder, selectWorkspaceFolder } from '../../util/workspace';
 import {
@@ -36,8 +38,7 @@ import {
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
-import { Devfile, TemplateProjectIdentifier } from '../common/devfile';
-import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
+import { TemplateProjectIdentifier } from '../common/devfile';
 
 interface CloneProcess {
     status: boolean;
@@ -302,11 +303,32 @@ export default class CreateComponentLoader {
                 void CreateComponentLoader.panel.webview.postMessage({
                     action: 'cloneStart',
                 });
-                const cloneProcess: CloneProcess = await clone(
-                    message.data.url,
-                    tmpFolder.fsPath,
-                    message.data.branch,
-                );
+
+                const channel = getOpenShiftLogChannel();
+                const cloneProcess = await cloneRepository({
+                    url: message.data.url,
+                    location: tmpFolder.fsPath,
+                    branch: message.data.branch,
+
+                    onStart: () => {
+                        void CreateComponentLoader.panel.webview.postMessage({
+                            action: 'cloneExecution',
+                        });
+                    },
+
+                    onLog: (text) => {
+                        channel.append(text);
+                    },
+
+                    onProgress: (text) => {
+                        void CreateComponentLoader.panel.webview.postMessage({
+                            action: 'cloneProgress',
+                            data: {
+                                completionProgress: text,
+                            }
+                        });
+                    }
+                });
                 if (!cloneProcess.status && cloneProcess.error) {
                     void CreateComponentLoader.panel.webview.postMessage({
                         action: 'cloneFailed',
@@ -513,16 +535,22 @@ export default class CreateComponentLoader {
                 action: 'getRecommendedDevfile'
             });
 
-            const devfile: Devfile = {
-                description: rawDevfile.metadata.description,
-                name: rawDevfile.metadata.displayName ? rawDevfile.metadata.displayName : rawDevfile.metadata.name,
-                id: rawDevfile.metadata.name,
-                starterProjects: rawDevfile.starterProjects,
-                tags: [],
-                yaml: stringify(rawDevfile, YAML_STRINGIFY_OPTIONS),
+            // const devfile: Devfile = {
+            //     description: rawDevfile.metadata.description,
+            //     name: rawDevfile.metadata.displayName ? rawDevfile.metadata.displayName : rawDevfile.metadata.name,
+            //     id: rawDevfile.metadata.name,
+            //     starterProjects: rawDevfile.starterProjects,
+            //     tags: [],
+            //     yaml: stringify(rawDevfile, YAML_STRINGIFY_OPTIONS),
+            //     supportsDebug,
+            //     supportsDeploy,
+            // } as Devfile;
+
+            const devfile = {
+                ...rawDevfile,
                 supportsDebug,
                 supportsDeploy,
-            } as Devfile;
+            };
 
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'recommendedDevfile',
@@ -678,6 +706,8 @@ async function isDevfileExists(uri: vscode.Uri): Promise<boolean> {
     }
 }
 
+// TODO: Deprecated
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
     const gitExtension = vscode.extensions.getExtension('vscode.git').exports;
     const git = gitExtension.getAPI(1).git.path;

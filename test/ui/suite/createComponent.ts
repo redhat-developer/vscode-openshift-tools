@@ -78,8 +78,7 @@ export function testCreateComponent(path: string) {
         it('Create component from git URL', async function test() {
             this.timeout(25_000);
 
-            await stabilizeComponentsView(getSection);
-            await clickCreateComponent();
+            await clickCreateComponentStable();
 
             const createCompView = await initializeEditor();
             await createCompView.createComponentFromGit();
@@ -128,7 +127,7 @@ export function testCreateComponent(path: string) {
             await refreshView();
 
             await step('Click Create Component', async () => {
-                await clickCreateComponent();
+                await clickCreateComponentStable();
             });
 
             const createCompView = await initializeEditor();
@@ -183,8 +182,7 @@ export function testCreateComponent(path: string) {
             this.timeout(25_000);
 
             //Click on create component
-            await stabilizeComponentsView(getSection);
-            await clickCreateComponent();
+            await clickCreateComponentStable();
 
             //Initialize create component editor and select create from template
             const createCompView = await initializeEditor();
@@ -193,7 +191,10 @@ export function testCreateComponent(path: string) {
             //Initialize devfile editor and select stack
             const devfileView = new RegistryWebViewEditor(createCompView.editorName);
             await devfileView.initializeEditor();
-            await devfileView.selectRegistryStack('Node.js Runtime');
+            const stackName = 'Node.js Runtime';
+            const stackFound = await devfileView.selectRegistryStack(stackName);
+            expect(stackFound, `Stack not found: "${stackName}"`).to.be.true;
+
             await new Promise((res) => {
                 setTimeout(res, 1_500);
             });
@@ -201,7 +202,14 @@ export function testCreateComponent(path: string) {
             //Initialize stack window and click Use Devfile
             const devFileWindow = new RegistryWebViewDevfileWindow(createCompView.editorName);
             await devFileWindow.initializeEditor();
-            // await devFileWindow.useDevfile();
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    return await devFileWindow.hasUseDevfileButton();
+                } catch {
+                    return false;
+                }
+            }, 10000, '"Use Devfile" button not found');
+
             await VSBrowser.instance.driver.wait(async () => {
                 try {
                     await devFileWindow.useDevfile();
@@ -343,50 +351,61 @@ export function testCreateComponent(path: string) {
             await stabilizeComponentsView(getSection);
         }
 
-        async function clickCreateComponent() {
-            await VSBrowser.instance.driver.wait(async () => {
-                try {
-                    await stabilizeComponentsView(getSection);
+        async function clickCreateComponentStable() {
+            const MAX_ATTEMPTS = 5;
 
-                    // Try welcome content first
+            for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+
+                await stabilizeComponentsView(getSection);
+
+                let clicked = false;
+                try {
+                    const section = await getSection();
                     try {
-                        const section = await getSection();
                         const welcome = await section.findWelcomeContent();
                         const buttons = await welcome.getButtons();
 
                         for (const btn of buttons) {
-                            if ((await btn.getTitle()) === BUTTONS.newComponent) {
+                            const title = await btn.getTitle();
+                            if (title === BUTTONS.newComponent) {
                                 await btn.safeClick();
-                                return true;
+                                clicked = true;
+                                break;
                             }
                         }
                     } catch {
-                        // ignore → fallback
+                        // ignore and fallback
                     }
 
-                    // Fallback: toolbar action
-                    try {
-                        const section = await getSection();
+                    if (!clicked) {
                         const action = await section.getAction(BUTTONS.newComponent);
                         await action.safeClick();
-                        return true;
+                        clicked = true;
+                    }
+                } catch {
+                    clicked = false;
+                }
+
+                if (!clicked) {
+                    continue; // retry full cycle
+                }
+
+                const opened = await VSBrowser.instance.driver.wait(async () => {
+                    try {
+                        const editor = new EditorView();
+                        const titles = await editor.getOpenEditorTitles();
+                        return titles.some(t => t.includes('Create Component'));
                     } catch {
                         return false;
                     }
-                } catch {
-                    return false;
-                }
-            }, 15_000, 'Failed to click New Component button');
+                }, 5000).catch(() => false);
 
-            await VSBrowser.instance.driver.wait(async () => {
-                try {
-                    const editor = new EditorView();
-                    const titles = await editor.getOpenEditorTitles();
-                    return titles.some(t => t.includes('Create Component'));
-                } catch {
-                    return false;
+                if (opened) {
+                    return; // success
                 }
-            }, 15_000, 'Create Component editor did not open');
+            }
+
+            throw new Error('Failed to open Create Component editor after multiple attempts');
         }
 
         async function getSection(): Promise<ViewSection> {
