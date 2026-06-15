@@ -26,6 +26,7 @@ export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
         let view: SideBarView;
         let section: ViewSection;
+        let commands: TreeItem[];
 
         const componentName = 'nodejs-starter';
 
@@ -78,7 +79,7 @@ export function testComponentCommands(path: string) {
             const commandsItem = await component.findChildItem('Commands');
 
             //check Commands has children
-            const commands: TreeItem[] = await commandsItem.getChildren();
+            commands = await commandsItem.getChildren();
             const actualCommands = [];
             for (const command of commands) {
                 actualCommands.push(await command.getLabel());
@@ -87,15 +88,11 @@ export function testComponentCommands(path: string) {
         });
 
         it('Command can be ran', async function () {
-            const components = await section.getVisibleItems();
-            const component = components[0] as TreeItem;
-
-            await component.expand();
-
-            const commandsItem = await component.findChildItem('Commands');
-            const commands: TreeItem[] = await commandsItem.getChildren();
+            //get first command's label and select it
+            const commandName = await commands[0].getLabel();
             await commands[0].select();
 
+            //Check for action button and click it
             const actionButton = await commands[0].getActionButton('Run Command');
             await actionButton.click();
 
@@ -103,7 +100,7 @@ export function testComponentCommands(path: string) {
             const terminal = new OpenshiftTerminalWebviewView();
             const terminalTabName = await terminal.getActiveTabName();
             expect(terminalTabName).to.contain(
-                `odo dev: ${componentName}`,
+                `Component ${componentName}: Run '${commandName}' Command`,
             );
 
             //check command run to then end

@@ -14,6 +14,7 @@ export class ExecCommandExecutor {
 
     public static async execute(
         componentFolder: ComponentWorkspaceFolder,
+        commandId: string,
         exec: Exec,
     ): Promise<void> {
 
@@ -41,7 +42,7 @@ export class ExecCommandExecutor {
 
         void OpenShiftTerminalManager.getInstance().createTerminal(
             command,
-            `Component ${componentName}: Run '${resolvedExec.commandLine}' Command`,
+            `Component ${componentName}: Run '${commandId}' Command`,
             componentFolder.contextPath
         );
     }

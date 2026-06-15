@@ -37,7 +37,8 @@ export class DevfileCommandRunner {
         if (command.exec) {
             await ExecCommandExecutor.execute(
                 componentFolder,
-                command.exec,
+                command.id,
+                command.exec
             );
 
             return;

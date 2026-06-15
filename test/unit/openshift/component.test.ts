@@ -26,6 +26,7 @@ import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
 import { comp1Folder, comp2Folder } from '../../fixtures';
+import { DevfileCommandRunner } from '../../../src/devfile/devfileCommandRunner';
 
 const { expect } = chai;
 chai.use(sinonChai);
@@ -579,5 +580,30 @@ suite('OpenShift/Component', function () {
             expect(startDebugging).not.called;
             expect(caughtError).not.undefined;
         });
+    });
+
+    suite('runComponentCommand', () => {
+
+        test('executes selected devfile command', async () => {
+            const executeStub = sandbox.stub(
+                DevfileCommandRunner,
+                'execute'
+            ).resolves();
+
+            const commandProvider = {
+                ...componentItem1,
+                getCommand: () => ({
+                    id: 'install'
+                })
+            } as ComponentWorkspaceFolder & CommandProvider;
+
+            await Component.runComponentCommand(commandProvider);
+
+            expect(executeStub).calledOnceWithExactly(
+                commandProvider,
+                'install'
+            );
+        });
+
     });
 });
