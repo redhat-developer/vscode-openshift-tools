@@ -258,6 +258,8 @@ export class Component extends OpenShiftItem {
     }
 
     static async devRunOn(component: ComponentWorkspaceFolder, runOn?: 'podman', manualRebuild: boolean = false) {
+        /* eslint-disable no-console */
+        console.log(`componentName in Component.ts: ${component.component.devfileData.devfile.metadata.name}`);
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;
@@ -607,11 +609,9 @@ export class Component extends OpenShiftItem {
         }
     }
 
-   @vsCommand('openshift.component.commands.command.run', true)
+    @vsCommand('openshift.component.commands.command.run', true)
     static runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
-        /* eslint-disable no-console */
-        console.log(`componentName in Component.ts: ${componentName}`);
         if ('getCommand' in componentFolder) {
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
 

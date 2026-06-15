@@ -109,7 +109,7 @@ export function testComponentCommands(path: string) {
             /* eslint-disable no-console */
             console.log(`commandName: ${commandName}`);
             expect(terminalTabName).to.contain(
-                `Component ${componentName}: Run '${commandName}' Command`,
+                `odo dev: ${componentName}`,
             );
 
             //check command run to then end
