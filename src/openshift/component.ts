@@ -258,8 +258,6 @@ export class Component extends OpenShiftItem {
     }
 
     static async devRunOn(component: ComponentWorkspaceFolder, runOn?: 'podman', manualRebuild: boolean = false) {
-        /* eslint-disable no-console */
-        console.log(`componentName in Component.ts: ${component.component.devfileData.devfile.metadata.name}`);
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;

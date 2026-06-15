@@ -34,9 +34,6 @@ export class DevfileCommandRunner {
         componentFolder: ComponentWorkspaceFolder,
         command: Command,
     ): Promise<void> {
-
-        /* eslint-disable no-console */
-        console.log('command.exec:', command.exec);
         if (command.exec) {
             await ExecCommandExecutor.execute(
                 componentFolder,
