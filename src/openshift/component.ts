@@ -610,6 +610,8 @@ export class Component extends OpenShiftItem {
    @vsCommand('openshift.component.commands.command.run', true)
     static runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
+        /* eslint-disable no-console */
+        console.log(`componentName in Component.ts: ${componentName}`);
         if ('getCommand' in componentFolder) {
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
 

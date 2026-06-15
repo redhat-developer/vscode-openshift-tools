@@ -106,6 +106,8 @@ export function testComponentCommands(path: string) {
             const terminalTabName = await terminal.getActiveTabName();
             /* eslint-disable no-console */
             console.log(`terminalTabName: ${terminalTabName}`);
+            /* eslint-disable no-console */
+            console.log(`commandName: ${commandName}`);
             expect(terminalTabName).to.contain(
                 `Component ${componentName}: Run '${commandName}' Command`,
             );
