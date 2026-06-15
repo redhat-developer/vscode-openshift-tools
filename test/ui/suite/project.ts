@@ -17,7 +17,7 @@ import {
     beforeEach
 } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
-import { itemExists, notificationExists, waitForItem } from '../common/conditions';
+import { itemExists, notificationExists, stabilizeComponentsView, waitForItem } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 
 export function projectTest(isOpenshiftCluster: boolean) {
@@ -45,8 +45,12 @@ export function projectTest(isOpenshiftCluster: boolean) {
                     try { await n.dismiss(); } catch { /* Ignore */ }
                 }
             } catch { /* Ignore */ }
+
+            await stabilizeComponentsView(getExplorer);
+
             const explorer = await getExplorer();
-            await explorer.expand();
+            await explorer.expand(3_000);
+
             await itemExists(clusterName, explorer);
         });
 
