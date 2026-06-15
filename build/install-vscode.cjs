@@ -43,9 +43,11 @@ void testElectron.downloadAndUnzipVSCode().then((executable) => {
         for (const extension of extensionsToInstall) {
             console.log('Installing extension: ', extension );
             try {
+                const options = (process.platform === 'win32' || process.platform === 'darwin') ? { shell: true } : {};
+
                 cp.execFileSync(vsCodeExecutable,
                     ['--install-extension', extension, '--user-data-dir', userDataDir, '--extensions-dir', extDir],
-                    { shell: true }
+                    options
                 );
             } catch (err) {
                 console.error(`❌ Failed to install "${extension}" extension: `, err);
