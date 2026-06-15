@@ -82,15 +82,18 @@ export class RegistryWebViewEditor extends WebViewForm {
         return items;
     }
 
-    public async selectRegistryStack(stackName: string): Promise<void> {
-        await this.enterWebView(async (webView) => {
+    public async selectRegistryStack(stackName: string): Promise<boolean> {
+        return await this.enterWebView(async (webView) => {
             const stacks = await this.getRegistryStacksItems(webView);
             for(const stack of stacks) {
-                if((await stack.getStackName()).includes(stackName)) {
+                const name = await stack.getStackName();
+                if(name.includes(stackName)) {
                     await stack.selectStack();
-                    return;
+                    return true;
                 }
             }
+
+           return false;
         });
     }
 }
@@ -122,5 +125,12 @@ export class RegistryWebViewDevfileWindow extends WebViewForm {
 
     private async getUseDevfileButton(webView: WebView): Promise<WebElement> {
         return await webView.findWebElement(By.xpath('//button[contains(text(), "Use Devfile")]'));
+    }
+
+    public async hasUseDevfileButton(): Promise<boolean> {
+        return await this.enterWebView(async (webView) => {
+            const buttons = await webView.findWebElements(By.xpath('//button[contains(text(), "Use Devfile")]'));
+            return (buttons.length > 0);
+        });
     }
 }
