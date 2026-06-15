@@ -24,6 +24,10 @@ export class DevfileCommandRunner {
                 commandId,
             );
 
+        // eslint-disable-next-line no-console
+        console.log(`Command to run: ${command.id}`); // for telemetry purposes
+        // eslint-disable-next-line no-console
+        console.log(`Command type: ${command.exec ? 'exec' : command.composite ? 'composite' : 'unknown'}`); // for telemetry purposes
         await this.executeCommand(
             componentFolder,
             command,
