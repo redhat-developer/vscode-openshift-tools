@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { which } from 'shelljs';
 import * as vscode from 'vscode';
-import * as configData from './tools.json';
+import configData from './tools.json';
 import { ChildProcessUtil } from './util/childProcessUtil';
 import { Platform } from './util/platform';
 
@@ -37,14 +37,14 @@ export class ToolsConfig {
     }
 
     public static async detect(cmd: string): Promise<string> {
-        if (ToolsConfig.tools[cmd].location === undefined) {
+        if (ToolsConfig.tools[cmd]?.location === undefined) {
             // When running tests, Mocha uses sources, so the `__filename` and `__dirname` usually
             // pont to `out/src` where the transpiled sources got stored, while we always need to
             // use 'out` directory.
             const baseDir = path.parse(__dirname).name === 'src' ? path.dirname(__dirname) : __dirname;
 
-            let toolCacheLocation = path.resolve(baseDir, 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
-            let toolLocations: string[] = [toolCacheLocation];
+            let toolCacheLocation = ToolsConfig.tools[cmd] && path.resolve(baseDir, 'tools', Platform.OS, ToolsConfig.tools[cmd].cmdFileName);
+            let toolLocations: string[] = toolCacheLocation ? [ toolCacheLocation ] : [];
             if (process.env.REMOTE_CONTAINERS === 'true') {
                 const openShiftToolsFolder = path.join(os.homedir(), '.local', 'state', 'vs-openshift-tools');
                 if (fs.existsSync(path.join(openShiftToolsFolder, 'tools', cmd))) {
@@ -52,24 +52,34 @@ export class ToolsConfig {
                     toolCacheLocation = path.join(openShiftToolsFolder, 'tools-cache');
                 }
             }
-            if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
+            if (!ToolsConfig.tools[cmd] || vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
                 const whichLocation = which(cmd);
-                toolLocations.unshift(whichLocation && whichLocation.stdout);
+                if (whichLocation) {
+                    toolLocations.unshift(whichLocation.stdout);
+                }
             }
 
-            ToolsConfig.tools[cmd].location =
-                await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd].versionRange).then(
-                    (location) => {
-                        try {
-                            if (location && Platform.OS !== 'win32') {
-                                fs.chmodSync(location, 0o765);
-                            }
-                            return location;
-                        } catch {
-                            // Ignore
+            if (!ToolsConfig.tools[cmd]) {
+                ToolsConfig.tools[cmd] = {
+                    location: undefined,
+                    cmdFileName: cmd,
+                    versionRange: undefined,
+                    notBundled: true
+                };
+            }
+
+            ToolsConfig.tools[cmd].location = await ToolsConfig.selectTool(toolLocations, ToolsConfig.tools[cmd]?.versionRange).then(
+                (location) => {
+                    try {
+                        if (location && Platform.OS !== 'win32') {
+                            fs.chmodSync(location, 0o765);
                         }
+                    } catch {
+                        // Ignore
                     }
-                );
+                    return location;
+                }
+            );
         }
         return ToolsConfig.tools[cmd].location;
     }
@@ -77,6 +87,22 @@ export class ToolsConfig {
     public static async getVersion(location: string): Promise<string> {
         let detectedVersion: string;
         if (fs.existsSync(location)) {
+            // Special handling for func: use JSON output to get Knative version
+            if (location.indexOf('func') !== -1) {
+                try {
+                    const result = await ChildProcessUtil.Instance.execute(`"${location}" version -o json`);
+                    if (result.stdout) {
+                        const versionData = JSON.parse(result.stdout);
+                        // Use knative version (e.g., "v1.22.2") and strip the 'v' prefix
+                        if (versionData.knative) {
+                            return versionData.knative.replace(/^v/, '');
+                        }
+                    }
+                } catch {
+                    // Fall through to standard version detection
+                }
+            }
+
             let result = await ChildProcessUtil.Instance.execute(`"${location}" version --client`);
             if (result.stderr && result.stderr.indexOf('unknown flag: --client') !== -1) {
                 result = await ChildProcessUtil.Instance.execute(`"${location}" version`);
@@ -100,13 +126,15 @@ export class ToolsConfig {
 
     public static async selectTool(locations: string[], versionRange: string): Promise<string> {
         let result: string;
-        const funcValue = Platform.OS !== 'win32' ? 'func' : 'func.exe';
         const alizerValue = Platform.OS !== 'win32' ? 'alizer' : 'alizer.exe';
         // Array.find cannot be used here because of async calls
         for (const location of locations) {
-            // FIXME: see https://github.com/knative/func/issues/2067
+            // Skip version check for alizer as its version detection is unreliable
             // eslint-disable-next-line no-await-in-loop
-            if (location && (location.endsWith(funcValue) || location.endsWith(alizerValue) || semver.satisfies(await ToolsConfig.getVersion(location), versionRange))) {
+            if (location && (
+                location.endsWith(alizerValue) || !versionRange ||
+                semver.satisfies(await ToolsConfig.getVersion(location), versionRange)
+            )) {
                 result = location;
                 break;
             }
