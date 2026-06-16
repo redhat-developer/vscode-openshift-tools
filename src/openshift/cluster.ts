@@ -12,8 +12,8 @@ import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { OpenShiftExplorer } from '../explorer';
 import { Oc } from '../oc/ocWrapper';
-import { Command } from '../odo/command';
 import * as NameValidator from '../openshift/nameValidator';
+import { AboutInfoProvider } from '../util/aboutInfoProvider';
 import { TokenStore } from '../util/credentialManager';
 import { Filters } from '../util/filters';
 import { inputValue, quickBtn } from '../util/inputValue';
@@ -95,7 +95,9 @@ export class Cluster extends OpenShiftItem implements Disposable {
 
     @vsCommand('openshift.about')
     static async about(): Promise<void> {
-        await OpenShiftTerminalManager.getInstance().executeInTerminal(Command.printOdoVersion(), undefined, 'Show odo Version');
+        const aboutText = await AboutInfoProvider.collect();
+
+        await OpenShiftTerminalManager.getInstance().writeToTerminal(aboutText, undefined, 'About OpenShift Tools');
     }
 
     @vsCommand('openshift.oc.about')

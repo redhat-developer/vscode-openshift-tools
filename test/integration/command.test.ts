@@ -50,10 +50,6 @@ suite('odo commands integration', function () {
         }
     });
 
-    test('printOdoVersion()', async function () {
-        await ODO.execute(Command.printOdoVersion());
-    });
-
     suite('component', function() {
         const componentName = 'my-test-component';
         const componentType = 'go';

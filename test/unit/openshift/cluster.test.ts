@@ -10,7 +10,6 @@ import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { Oc } from '../../../src/oc/ocWrapper';
-import { Command } from '../../../src/odo/command';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { Cluster } from '../../../src/openshift/cluster';
 import { CliExitData } from '../../../src/util/childProcessUtil';
@@ -372,11 +371,22 @@ suite('Openshift/Cluster', function() {
     });
 
     suite('about', () => {
-        test('calls the proper odo command in terminal', () => {
-            const stub = sandbox.stub(OpenShiftTerminalManager.prototype, 'executeInTerminal');
-            void Cluster.about();
+        test('writes about info to terminal', async () => {
+            const stub = sandbox.stub(
+                OpenShiftTerminalManager.prototype,
+                'writeToTerminal',
+            );
 
-            expect(stub).calledOnceWith(Command.printOdoVersion());
+            await Cluster.about();
+
+            expect(stub).calledOnce;
+
+            const arg = stub.getCall(0).args[0];
+
+            expect(arg).to.include('OpenShift Tools');
+            expect(arg).to.include('VS Code');
+            expect(arg).to.include('OpenShift Client');
+            expect(arg).to.include('Container Runtime');
         });
     });
 

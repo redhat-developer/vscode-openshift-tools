@@ -34,10 +34,6 @@ export class Command {
         return command;
     }
 
-    static printOdoVersion(): CommandText {
-        return new CommandText('odo', 'version');
-    }
-
     @verbose
     static createLocalComponent(
         devfileType = '', // will use empty string in case of undefined devfileType passed in
