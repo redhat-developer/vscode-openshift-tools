@@ -88,23 +88,34 @@ export function testComponentCommands(path: string) {
         });
 
         it('Command can be ran', async function () {
-            //get first command's label and select it
+            this.timeout(60000);
+
+            // get first command's label and select it
             const commandName = await commands[0].getLabel();
             await commands[0].select();
 
-            //Check for action button and click it
+            // Check for action button and click it
             const actionButton = await commands[0].getActionButton('Run Command');
+            expect(actionButton).to.not.be.undefined;
+
             await actionButton.click();
 
-            //check for openshift terminal tab name
             const terminal = new OpenshiftTerminalWebviewView();
+
+            // Wait for the terminal created by Run Command
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+
             const terminalTabName = await terminal.getActiveTabName();
+
             expect(terminalTabName).to.contain(
                 `Component ${componentName}: Run '${commandName}' Command`,
             );
 
-            //check command run to then end
+            // Wait for command execution to complete
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+
             const terminalText = await terminal.getTerminalText();
+
             expect(terminalText).to.contain('Press any key to close this terminal');
         });
     });

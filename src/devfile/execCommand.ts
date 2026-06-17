@@ -7,43 +7,37 @@ import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { Exec } from '../odo/componentTypeDescription';
 import { VariableResolver } from './variableResolver';
 import { Oc } from '../oc/ocWrapper';
-import { CommandText } from '../base/command';
+import { CommandOption, CommandText } from '../base/command';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 
 export class ExecCommandExecutor {
-
     public static async execute(
         componentFolder: ComponentWorkspaceFolder,
         commandId: string,
         exec: Exec,
     ): Promise<void> {
+        const devfile = componentFolder.component.devfileData.devfile;
 
-        const devfile =
-            componentFolder.component.devfileData.devfile;
+        const resolvedExec = VariableResolver.resolveExec(devfile, exec);
 
-        const resolvedExec =
-            VariableResolver.resolveExec(
-                devfile,
-                exec,
-            );
+        const componentName = devfile.metadata.name;
 
-        const componentName =
-            devfile.metadata.name;
+        const podName = await Oc.Instance.getComponentPod(componentName);
 
-        const podName =
-            await Oc.Instance.getComponentPod(
-                componentName,
-            );
-
-        const command = new CommandText(
-            'oc',
-            `exec ${podName} -c ${resolvedExec.component} -- sh -c "cd ${resolvedExec.workingDir} && ${resolvedExec.commandLine}"`,
-        );
+        const command = new CommandText('oc', 'exec', [
+            new CommandOption(podName),
+            new CommandOption('-c'),
+            new CommandOption(resolvedExec.component),
+            new CommandOption('--'),
+            new CommandOption('sh'),
+            new CommandOption('-c'),
+            new CommandOption(`cd ${resolvedExec.workingDir} && ${resolvedExec.commandLine}`),
+        ]);
 
         void OpenShiftTerminalManager.getInstance().createTerminal(
             command,
             `Component ${componentName}: Run '${commandId}' Command`,
-            componentFolder.contextPath
+            componentFolder.contextPath,
         );
     }
 }

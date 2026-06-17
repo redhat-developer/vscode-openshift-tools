@@ -9,29 +9,15 @@ import { CommandResolver } from './commandResolver';
 import { ExecCommandExecutor } from './execCommand';
 
 export class DevfileCommandRunner {
-
     public static async execute(
         componentFolder: ComponentWorkspaceFolder,
         commandId: string,
     ): Promise<void> {
+        const devfile = componentFolder.component.devfileData.devfile;
 
-        const devfile =
-            componentFolder.component.devfileData.devfile;
+        const command = CommandResolver.getCommand(devfile, commandId);
 
-        const command =
-            CommandResolver.getCommand(
-                devfile,
-                commandId,
-            );
-
-        // eslint-disable-next-line no-console
-        console.log(`Command to run: ${command.id}`); // for telemetry purposes
-        // eslint-disable-next-line no-console
-        console.log(`Command type: ${command.exec ? 'exec' : command.composite ? 'composite' : 'unknown'}`); // for telemetry purposes
-        await this.executeCommand(
-            componentFolder,
-            command,
-        );
+        await this.executeCommand(componentFolder, command);
     }
 
     private static async executeCommand(
@@ -39,74 +25,46 @@ export class DevfileCommandRunner {
         command: Command,
     ): Promise<void> {
         if (command.exec) {
-            await ExecCommandExecutor.execute(
-                componentFolder,
-                command.id,
-                command.exec
-            );
+            await ExecCommandExecutor.execute(componentFolder, command.id, command.exec);
 
             return;
         }
 
         if (command.composite) {
+            const devfile = componentFolder.component.devfileData.devfile;
 
-            const devfile =
-                componentFolder.component.devfileData.devfile;
+            const commandMap = CommandResolver.getAllCommandsMap(devfile);
 
-            const commandMap =
-                CommandResolver.getAllCommandsMap(
-                    devfile,
-                );
+            const children = command.composite.commands.map((id) => {
+                const child = commandMap.get(id.toLowerCase());
 
-            const children =
-                command.composite.commands.map(id => {
+                if (!child) {
+                    throw new Error(`Command '${id}' not found`);
+                }
 
-                    const child =
-                        commandMap.get(
-                            id.toLowerCase(),
-                        );
-
-                    if (!child) {
-                        throw new Error(
-                            `Command '${id}' not found`,
-                        );
-                    }
-
-                    return child;
-                });
+                return child;
+            });
 
             const isParallel =
-                (command.composite as {
-                    parallel?: boolean;
-                }).parallel === true;
+                (
+                    command.composite as {
+                        parallel?: boolean;
+                    }
+                ).parallel === true;
 
             if (isParallel) {
-
                 await Promise.all(
-                    children.map(child =>
-                        this.executeCommand(
-                            componentFolder,
-                            child,
-                        ),
-                    ),
+                    children.map((child) => this.executeCommand(componentFolder, child)),
                 );
-
             } else {
-
                 for (const child of children) {
-
-                    await this.executeCommand(
-                        componentFolder,
-                        child,
-                    );
+                    await this.executeCommand(componentFolder, child);
                 }
             }
 
             return;
         }
 
-        throw new Error(
-            `Unsupported command '${command.id}'`,
-        );
+        throw new Error(`Unsupported command '${command.id}'`);
     }
 }

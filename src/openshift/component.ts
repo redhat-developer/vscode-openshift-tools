@@ -608,13 +608,10 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.commands.command.run', true)
-    static runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
-        // eslint-disable-next-line no-console
-        console.log(`Running command from component ${componentFolder.component.devfileData.devfile.metadata.name}`); // for telemetry purposes
+    static async runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if ('getCommand' in componentFolder) {
-            // eslint-disable-next-line no-console
-            console.log(`Running command from component ${componentName}`); // for telemetry purposes
+
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
 
             if (!componentCommand) {
@@ -623,9 +620,8 @@ export class Component extends OpenShiftItem {
                 );
                 return;
             }
-            // eslint-disable-next-line no-console
-            console.log(`Command to run: ${componentCommand.id}`); // for telemetry purposes
-            void DevfileCommandRunner.execute(
+
+            await DevfileCommandRunner.execute(
                 componentFolder,
                 componentCommand.id,
             );

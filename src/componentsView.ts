@@ -65,7 +65,7 @@ class ComponentInfoCommands extends ComponentInfo {
             if (thisCommands === undefined) {
                 this.children = [];
             } else {
-                this.children = thisCommands.flatMap(c => new ComponentInfoCommand(this, c) );
+                this.children = thisCommands.filter((command) => command.exec).flatMap(c => new ComponentInfoCommand(this, c));
             }
         }
         return this.children;
