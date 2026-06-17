@@ -63,11 +63,9 @@ export function testComponentCommands(path: string) {
             //get expected commands
             const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
             const parsedDevfile = parse(devfile) as { [key: string]: any };
-            const expectedCommands = [];
-
-            parsedDevfile.commands.forEach((command) => {
-                expectedCommands.push(command.id);
-            });
+            const expectedCommands = parsedDevfile.commands
+                .filter((command: { exec: any; }) => command.exec)
+                .map((command: { id: unknown; }) => command.id);
 
             //get component
             const components = await section.getVisibleItems();
@@ -88,7 +86,6 @@ export function testComponentCommands(path: string) {
         });
 
         it('Command can be ran', async function () {
-            this.timeout(60000);
 
             // get first command's label and select it
             const commandName = await commands[0].getLabel();
