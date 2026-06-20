@@ -20,8 +20,8 @@ import {
     window,
     workspace
 } from 'vscode';
-import { SerializeAddon } from 'xterm-addon-serialize';
-import { Terminal } from 'xterm-headless';
+import { SerializeAddon } from '@xterm/addon-serialize';
+import { Terminal } from '@xterm/headless';
 import { CommandText } from '../../base/command';
 import { CliChannel } from '../../cli';
 import { ToolsConfig } from '../../tools';

@@ -6,11 +6,11 @@
 import { Box, Button, Paper, Stack, Typography, debounce } from '@mui/material';
 import React from 'react';
 import { VSCodeMessage } from './vscodeMessage';
-import { Terminal, ITheme } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import { WebLinksAddon } from 'xterm-addon-web-links';
-import { WebglAddon } from 'xterm-addon-webgl';
-import 'xterm/css/xterm.css';
+import { Terminal, ITheme } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import { WebLinksAddon } from '@xterm/addon-web-links';
+import { WebglAddon } from '@xterm/addon-webgl';
+import '@xterm/xterm/css/xterm.css';
 import '../../common/scrollbar.scss';
 
 /**
