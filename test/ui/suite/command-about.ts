@@ -103,7 +103,9 @@ export function checkAboutCommand(clusterIsSet: boolean) {
 
                     // Check that the tool name and version appear together on the same line
                     // Format: "toolname            : version" or "toolname            : Unknown"
-                    const toolLineRegex = new RegExp(`${toolName}\\s*:\\s*${expectedVersion.replace(/\./g, '\\.')}`);
+                    // Escape special regex characters in version string to prevent regex injection
+                    const escapedVersion = expectedVersion.replace(/[\\.*+?^${}()|[\]]/g, '\\$&');
+                    const toolLineRegex = new RegExp(`${toolName}\\s*:\\s*${escapedVersion}`);
                     const unknownLineRegex = new RegExp(`${toolName}\\s*:\\s*Unknown`);
 
                     const hasExpectedVersion = toolLineRegex.test(terminalText);
