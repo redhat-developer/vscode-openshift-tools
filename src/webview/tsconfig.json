@@ -2,9 +2,12 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
+        "rootDir": "..",
         "outDir": "../../out",
         "target": "es6",
+        "lib": ["es2017", "dom"],
         "jsx": "react",
+        "types": ["node"],
         "typeRoots": [
             "../../node_modules/@types",
             "@types"
@@ -13,8 +16,13 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "incremental": true,
+        "ignoreDeprecations": "6.0",
+        "noImplicitAny": false,
+        "strict": false,
+        "strictNullChecks": false
     },
     "include": [
+        "ambient.d.ts",
         "*/app/**/*.ts",
         "*/app/**/*.tsx",
         "common/*.tsx",
