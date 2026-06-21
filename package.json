@@ -82,7 +82,7 @@
 		"@devfile/api": "^2.2.2-1716821574",
 		"@kubernetes/client-node": "^1.4.0",
 		"@mui/icons-material": "^6.5.0",
-		"@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
+		"@mui/lab": "^6.0.1-beta.36",
 		"@mui/material": "^6.4.12",
 		"@mui/styles": "^6.5.0",
 		"@mui/x-tree-view": "^7.29.10",
