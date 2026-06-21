@@ -3,23 +3,23 @@
     "outDir": "./out",
     "rootDir": ".",
     "paths": {
-      "clipboardy": [ "out/esm/clipboardy.cjs" ],
-      "got": [ "out/esm/got.cjs" ],
-      "uuid": [ "out/esm/uuid.cjs"],
-      "@kubernetes/client-node": [ "out/esm/k8s-client-node.cjs" ],
-      "@apidevtools/json-schema-ref-parser": [ "out/esm/apidevtools-json-schema-ref-parser.cjs" ]
+      "clipboardy": [ "./out/esm/clipboardy.cjs" ],
+      "got": [ "./out/esm/got.cjs" ],
+      "uuid": [ "./out/esm/uuid.cjs"],
+      "@kubernetes/client-node": [ "./out/esm/k8s-client-node.cjs" ],
+      "@apidevtools/json-schema-ref-parser": [ "./out/esm/apidevtools-json-schema-ref-parser.cjs" ]
     },
-    "baseUrl": ".",
     "jsx": "react",
-    "target": "es6",
-    "lib": ["es6", "dom"],
+    "target": "es2015",
+    "lib": ["es2015", "dom"],
     "noEmit": false,
     "module": "CommonJS",
     "esModuleInterop": true,
     "strict": false,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["node", "mocha", "vscode"],
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "noImplicitOverride": false,
@@ -28,7 +28,8 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "typeRoots": [ "./src/@types", "./node_modules/@types", "./out/extension" ],
-    "sourceMap": true
+    "sourceMap": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [ "test/**/*.ts", "src/**/*.ts" ],
   "exclude": [
