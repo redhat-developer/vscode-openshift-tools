@@ -18,7 +18,7 @@
     "strict": false,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "types": ["node", "mocha", "vscode"],
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
