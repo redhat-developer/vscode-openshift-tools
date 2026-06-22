@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "target": "es2015",
         "outDir": "helmChartViewer",
         "lib": ["es2015", "dom"],
