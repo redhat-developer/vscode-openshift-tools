@@ -17,15 +17,16 @@ import {
     Workbench,
 } from 'vscode-extension-tester';
 import { parse } from 'yaml';
-import { itemExists } from '../common/conditions';
+import { waitForItemStable, warn } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { reloadWindow } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentCommands(path: string) {
     describe('Component Commands', function () {
+        this.timeout(30_000);
+
         let view: SideBarView;
-        let section: ViewSection;
         let commands: TreeItem[];
 
         const componentName = 'nodejs-starter';
@@ -46,10 +47,15 @@ export function testComponentCommands(path: string) {
             }
 
             // expect component is running
-            section = await view.getContent().getSection(VIEWS.components);
             try {
-                await itemExists(`${componentName} (dev running)`, section);
-            } catch {
+                const componentInDevName = `${componentName} (dev running)`;
+                const item = await waitForItemStable(getSection, componentInDevName, true, 40_000);
+                if (!item) {
+                    warn(`Component "${componentName}" not found or isn't running in Dev, skipping tests`);
+                    this.skip();
+                }
+            } catch (err) {
+                warn('Error in before hook: "Component Commands":', err);
                 this.skip();
             }
         });
@@ -70,7 +76,13 @@ export function testComponentCommands(path: string) {
             });
 
             //get component
+            const section = await getSection();
+            expect(section).to.exist;
+
             const components = await section.getVisibleItems();
+            expect(components).to.exist;
+            expect(components).to.have.length.greaterThan(0);
+
             const component = components[0] as TreeItem;
             await component.expand();
 
@@ -85,6 +97,11 @@ export function testComponentCommands(path: string) {
                 actualCommands.push(await command.getLabel());
             }
             expect(actualCommands).to.include.members(expectedCommands);
+
+            // The sets of devfile component commands (expectedCommands) and actual component commands (actualCommands)
+            // are to be the same
+            expect(actualCommands).to.have.members(expectedCommands);
+
         });
 
         it('Command can be ran', async function () {
@@ -117,5 +134,9 @@ export function testComponentCommands(path: string) {
 
             expect(terminalText).to.contain('Press any key to close this terminal');
         });
+
+        async function getSection(): Promise<ViewSection> {
+            return await view.getContent().getSection(VIEWS.components);
+        }
     });
 }

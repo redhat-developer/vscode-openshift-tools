@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ComponentWorkspaceFolder } from 'src/odo/workspace';
 import { Command } from '../odo/componentTypeDescription';
+import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { DevfileCommandRunner } from './devfileCommandRunner';
 
 export class ParallelCompositeCommand {

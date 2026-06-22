@@ -15,14 +15,14 @@ import { EventEmitter, Terminal, window, workspace } from 'vscode';
 import { parse, stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
+import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
+import { ComponentWorkspaceFolder } from '../../src/odo/workspace';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
-import { ComponentWorkspaceFolder } from 'src/odo/workspace';
-import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
 
 const ODO = Odo.Instance;
 
