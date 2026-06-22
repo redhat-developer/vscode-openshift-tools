@@ -41,7 +41,7 @@ const CodeTextField = styled(TextField)({
     },
 });
 
-function ShowProgress(props: {size: number}): JSX.Element {
+function ShowProgress(props: {size: number}): React.ReactElement {
     return (
         <CircularProgress
             style={{
@@ -52,7 +52,7 @@ function ShowProgress(props: {size: number}): JSX.Element {
         />);
 }
 
-export default function addSandboxView(): JSX.Element {
+export default function addSandboxView(): React.ReactElement {
     const [currentState, setCurrentState] = React.useState({
         action: 'sandboxPageDetectAuthSession',
         statusInfo: '',

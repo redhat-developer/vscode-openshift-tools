@@ -82,7 +82,7 @@ export const TerminalMultiplexer = () => {
     );
 
     // represents the terminals that the multiplexer manages
-    const [terminals, setTerminals] = React.useState<{ name: string; terminal: JSX.Element }[]>([]);
+    const [terminals, setTerminals] = React.useState<{ name: string; uuid: string; terminal: React.ReactElement }[]>([]);
 
     // represents the index of the terminal that is currently being displayed
     const [activeTerminal, setActiveTerminal] = React.useState(0);
@@ -111,7 +111,7 @@ export const TerminalMultiplexer = () => {
             },
         });
         setTerminals((terms) => {
-            const i: number = terms.findIndex((terminal) => terminal.terminal.props.uuid === uuid);
+            const i: number = terms.findIndex((terminal) => terminal.uuid === uuid);
             return [...terms.slice(0, i), ...terms.slice(i + 1, terms.length)];
         });
     };
@@ -132,6 +132,7 @@ export const TerminalMultiplexer = () => {
 
                 {
                     name: message.data.data.name,
+                    uuid,
                     terminal: (
                         <TerminalInstance
                             uuid={uuid}
@@ -151,7 +152,7 @@ export const TerminalMultiplexer = () => {
             fontSize.current = message.data.data.fontSize;
         } else if (message.data.kind === 'switchToTerminal') {
             for (let i = 0; i < terminals.length; i++) {
-                if (terminals[i].terminal.props.uuid === message.data.data.uuid) {
+                if (terminals[i].uuid === message.data.data.uuid) {
                     setActiveTerminal(i);
                     break;
                 }
@@ -189,7 +190,7 @@ export const TerminalMultiplexer = () => {
 
     function closeTab(tabNum: number) {
         const closedTerminal = terminals[tabNum];
-        closeTerminal(closedTerminal.terminal.props.uuid);
+        closeTerminal(closedTerminal.uuid);
     }
 
     function handleAuxClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>, i: number) {
@@ -253,7 +254,7 @@ export const TerminalMultiplexer = () => {
                                             />
                                         }
                                         value={`${i}`}
-                                        key={terminal.terminal.props.uuid}
+                                        key={terminal.uuid}
                                         onAuxClick={(event) => {
                                             handleAuxClick(event, i);
                                         }}
@@ -266,7 +267,7 @@ export const TerminalMultiplexer = () => {
                         <TabPanel
                             sx={{ margin: '0px', padding: '0px', flex: '1',  height: 'calc(100% - 36px)'}}
                             value={`${i}`}
-                            key={terminal.terminal.props.uuid}
+                            key={terminal.uuid}
                         >
                             {terminal.terminal}
                         </TabPanel>

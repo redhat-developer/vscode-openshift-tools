@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import * as React from 'react';
 import { FeedbackComponent } from './feedback';
 import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 import './index.css';
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root')!);
+root.render(
     <WebviewErrorBoundary webviewName="feedback">
         <FeedbackComponent />
     </WebviewErrorBoundary>,
-    document.getElementById('root'),
 );

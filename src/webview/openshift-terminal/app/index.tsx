@@ -4,13 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { TerminalMultiplexer } from './terminalMultiplexer';
 import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root')!);
+root.render(
     <WebviewErrorBoundary webviewName='openshiftTerminal'>
         <TerminalMultiplexer />
     </WebviewErrorBoundary>,
-    document.getElementById('root'),
 );

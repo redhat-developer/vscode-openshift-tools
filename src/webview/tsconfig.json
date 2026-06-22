@@ -4,9 +4,9 @@
         "moduleResolution": "node",
         "rootDir": "..",
         "outDir": "../../out",
-        "target": "es6",
+        "target": "es2015",
         "lib": ["es2017", "dom"],
-        "jsx": "react",
+        "jsx": "react-jsx",
         "types": ["node"],
         "typeRoots": [
             "../../node_modules/@types",
