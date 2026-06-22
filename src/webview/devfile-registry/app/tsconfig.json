@@ -2,10 +2,10 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
-        "target": "es6",
+        "target": "es2015",
         "outDir": "devFileRegistryViewer",
-        "lib": ["es6", "dom"],
-        "jsx": "react",
+        "lib": ["es2015", "dom"],
+        "jsx": "react-jsx",
         "sourceMap": true,
         "noUnusedLocals": true,
         // "noImplicitReturns": true,
@@ -15,7 +15,8 @@
         "baseUrl": ".",
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "ignoreDeprecations": "6.0"
     },
     "exclude": ["node_modules"]
 }

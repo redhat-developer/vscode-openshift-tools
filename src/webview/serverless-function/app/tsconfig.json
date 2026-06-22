@@ -2,13 +2,13 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
-        "target": "es6",
+        "target": "es2015",
         "outDir": "configViewer",
         "lib": [
-            "es6",
+            "es2015",
             "dom"
         ],
-        "jsx": "react",
+        "jsx": "react-jsx",
         "sourceMap": true,
         "noUnusedLocals": true,
         // "noImplicitReturns": true,
@@ -21,7 +21,8 @@
         "baseUrl": ".",
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "ignoreDeprecations": "6.0"
     },
     "exclude": [
         "node_modules"

@@ -9,7 +9,7 @@
       "@kubernetes/client-node": [ "./out/esm/k8s-client-node.cjs" ],
       "@apidevtools/json-schema-ref-parser": [ "./out/esm/apidevtools-json-schema-ref-parser.cjs" ]
     },
-    "jsx": "react",
+    "jsx": "react-jsx",
     "target": "es2015",
     "lib": ["es2015", "dom"],
     "noEmit": false,
