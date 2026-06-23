@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { V222Devfile } from '@devfile/api';
+import { V230Devfile } from '@devfile/api';
 import { fail } from 'assert';
 import { assert, expect } from 'chai';
 import { ChildProcess } from 'child_process';
@@ -313,7 +313,7 @@ suite('odo commands integration', function () {
             //
             // and then save into the same debfile.yaml
             const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile = parse(file.toString()) as V222Devfile;
+            const devfile = parse(file.toString()) as V230Devfile;
             if (!devfile || !devfile.commands) {
                 fail(`DevFile '${devfilePath}' cannot be read`);
             }
