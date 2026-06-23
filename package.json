@@ -146,6 +146,7 @@
 		"git-up": "^8.1.1",
 		"got": "^15.0.6",
 		"istanbul": "^0.4.5",
+		"js-yaml": "^4.2.0",
 		"json-schema": "^0.4.0",
 		"json-to-ast": "^2.1.0",
 		"leasot": "^14.4.0",
@@ -197,14 +198,14 @@
 		"cookie": "^1.1.1",
 		"cross-spawn": "^7.0.6",
 		"diff": "^9.0.0",
-		"globals": "^17.6.0",
-		"js-cookie": "^3.0.7",
+		"globals": "^17.7.0",
+		"js-cookie": "^3.0.8",
 		"js-yaml": "^4.2.0",
-		"serialize-javascript": "^7.0.5",
+		"serialize-javascript": "^7.0.6",
 		"tar-fs": "^3.1.2",
 		"tough-cookie": "^6.0.1",
 		"typescript": "^6.0.3",
-		"uuid": "^14.0.0"
+		"uuid": "^14.0.1"
 	},
 	"activationEvents": [
 		"onView:openshiftProjectExplorer",
