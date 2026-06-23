@@ -23,6 +23,14 @@ updates:
     versions: [">=7.0.0-0"]
   - dependency-name: "@mui/x-tree-view"
     versions: [">=8.0.0-0"]
+  - dependency-name: "@rjsf/core"
+    versions: [">=6.0.0-0"]
+  - dependency-name: "@rjsf/mui"
+    versions: [">=6.0.0-0"]
+  - dependency-name: "@rjsf/utils"
+    versions: [">=6.0.0-0"]
+  - dependency-name: "@rjsf/validator-ajv8"
+    versions: [">=6.0.0-0"]
   groups:
     typescript-eslint:
       patterns:
