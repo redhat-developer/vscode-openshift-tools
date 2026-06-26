@@ -25,7 +25,8 @@ import * as openShiftComponent from '../../../src/openshift/component';
 import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
 import { OpenShiftTerminalManager } from '../../../src/webview/openshift-terminal/openShiftTerminal';
-import { comp1Folder } from '../../fixtures';
+import { comp1Folder, comp2Folder } from '../../fixtures';
+import { DevfileCommandRunner } from '../../../src/devfile/devfileCommandRunner';
 
 const { expect } = chai;
 chai.use(sinonChai);
@@ -48,6 +49,92 @@ suite('OpenShift/Component', function () {
                     schemaVersion: '2.1.0',
                     metadata: {
                         name: 'comp1',
+                        version: '2.0.1',
+                        displayName: 'React',
+                        description: 'React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It is maintained by Meta and a community of individual developers and companies.',
+                        tags: [
+                            'Node.js',
+                            'React'
+                        ],
+                        icon: 'https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/react.svg',
+                        projectType: 'React',
+                        language: 'Typescript',
+                    },
+                    parent: null,
+                    starterProjects: [
+                        {
+                            name: 'nodejs-react-starter'
+                        }
+                    ],
+                    components: [
+                        {
+                            name: 'runtime',
+                            container: {
+                                image: 'registry.access.redhat.com/ubi8/nodejs-16:latest',
+                                memoryLimit: '1024Mi',
+                                endpoints: [
+                                    {
+                                        name: 'http-react',
+                                        targetPort: 3000
+                                    }
+                                ],
+                                mountSources: false,
+                                volumeMounts: [],
+                            }
+                        }
+                    ],
+                    commands: [
+                        {
+                            id: 'install',
+                            exec: {
+                                group: {
+                                    kind: 'build',
+                                    isDefault: true
+                                },
+                                commandLine: 'npm install',
+                                component: 'runtime',
+                                workingDir: '${PROJECT_SOURCE}'
+                            }
+                        },
+                        {
+                            id: 'run',
+                            exec: {
+                                group: {
+                                    kind: 'run',
+                                    isDefault: true
+                                },
+                                commandLine: 'npm run dev',
+                                component: 'runtime',
+                                workingDir: '${PROJECT_SOURCE}'
+                            }
+                        }
+                    ],
+                    events: {
+                        postStart: []
+                    }
+                },
+                commands: [],
+                supportedOdoFeatures: {
+                    debug: true,
+                    deploy: true,
+                    dev: true
+                }
+            },
+            runningIn: null,
+            runningOn: null,
+            managedBy: 'odo',
+            devForwardedPorts: []
+        }
+    };
+    const componentItem2: ComponentWorkspaceFolder = {
+        contextPath: comp2Folder,
+        component: {
+            devfilePath: `${path.join(fixtureFolder, 'components', 'comp2', 'devfile.yaml')}`,
+            devfileData: {
+                devfile: {
+                    schemaVersion: '2.1.0',
+                    metadata: {
+                        name: 'comp2',
                         version: '2.0.1',
                         displayName: 'React',
                         description: 'React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It is maintained by Meta and a community of individual developers and companies.',
@@ -278,14 +365,14 @@ suite('OpenShift/Component', function () {
         test('calls the correct odo command', async function () {
             // As `odo describe` has removed, now we need to check the OpenShift terminal output
             // instead of stubbing 'executeInTerminal' expecting the command to be invoked on the terminal
-            const compName = componentItem1.component.devfileData.devfile.metadata.name
+            const compName = componentItem2.component.devfileData.devfile.metadata.name
 
             const writeStub = sinon.stub();
             sinon.stub(OpenShiftTerminalManager, 'getInstance').returns({
                 writeToTerminal: writeStub
             } as any);
 
-            await Component.describe(componentItem1);
+            await Component.describe(componentItem2);
 
             const output = writeStub.firstCall.args[0];
             expect(writeStub).calledOnce;
@@ -493,5 +580,30 @@ suite('OpenShift/Component', function () {
             expect(startDebugging).not.called;
             expect(caughtError).not.undefined;
         });
+    });
+
+    suite('runComponentCommand', () => {
+
+        test('executes selected devfile command', async () => {
+            const executeStub = sandbox.stub(
+                DevfileCommandRunner,
+                'execute'
+            ).resolves();
+
+            const commandProvider = {
+                ...componentItem1,
+                getCommand: () => ({
+                    id: 'install'
+                })
+            } as ComponentWorkspaceFolder & CommandProvider;
+
+            await Component.runComponentCommand(commandProvider);
+
+            expect(executeStub).calledOnceWithExactly(
+                commandProvider,
+                'install'
+            );
+        });
+
     });
 });

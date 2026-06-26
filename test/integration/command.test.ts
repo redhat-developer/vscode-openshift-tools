@@ -15,10 +15,12 @@ import { EventEmitter, Terminal, window, workspace } from 'vscode';
 import { parse, stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
+import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
+import { ComponentWorkspaceFolder } from '../../src/odo/workspace';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
 
@@ -273,34 +275,6 @@ suite('odo commands integration', function () {
         const helloWorldCommandOutput = 'Hello, World!';
         const helloWorldCommandExecCommandLine = `echo "${helloWorldCommandOutput}"`;
 
-        async function runComponentCommandInTerminal(commandId: string, cwd?) : Promise<Terminal> {
-            let termOutput = '';
-            let termError = '';
-            const term = executeCommandInTerminal(Command.runComponentCommand(commandId), cwd, {
-                onOutput(data) {
-                    termOutput = termOutput.concat(data);
-                },
-                onError(data) {
-                    termError = termError.concat(data);
-                }
-            });
-
-            let hopesLeft = 30;
-            let commandIdRunning = false;
-            do {
-                hopesLeft--;
-                await new Promise<void>(resolve => setTimeout(resolve, 2000));
-                commandIdRunning = termOutput.indexOf(helloWorldCommandOutput) >= -1;
-            } while (hopesLeft > 0 && !commandIdRunning);
-            if (!commandIdRunning) {
-                if (termError.trim().length > 0) {
-                    fail(`Run Component Command failed: ${termError}`);
-                }
-                fail('Waiting for command to start executing is timed out');
-            }
-            return term;
-        }
-
         async function fixupDevFile(devfilePath: string): Promise<void> {
             // Parse YAML into an Object, add:
             //
@@ -349,7 +323,7 @@ suite('odo commands integration', function () {
         }
 
         test('runComponentCommand()', async function () {
-             await ODO.execute(
+            await ODO.execute(
                 Command.createLocalComponent(
                     componentType,
                     '2.1.1',
@@ -380,20 +354,40 @@ suite('odo commands integration', function () {
                 }
             }
             if (!helloCommand) {
-                fail(`Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`);
+                fail(
+                    `Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`
+                );
             }
 
-            let devTerm : Terminal;
-            let runCommandTerm : Terminal;
+            let devTerm: Terminal;
+
             try {
-                devTerm = await startDevInTerminal(componentLocation);
-                runCommandTerm = await runComponentCommandInTerminal(helloWorldCommandId, componentLocation);
+
+                devTerm =
+                    await startDevInTerminal(
+                        componentLocation
+                    );
+
+                const componentFolder: ComponentWorkspaceFolder = {
+                    contextPath: componentLocation,
+                    component: componentDescription
+                };
+
+                await DevfileCommandRunner.execute(
+                    componentFolder,
+                    helloWorldCommandId
+                );
+
+            } catch (err) {
+
+                fail(
+                    err instanceof Error
+                        ? err.message
+                        : String(err)
+                );
+
             } finally {
-                // we instruct the pseudo terminals to close the dev session when any text is sent
-                if (runCommandTerm) {
-                    runCommandTerm.sendText('exit');
-                    runCommandTerm.dispose();
-                }
+
                 if (devTerm) {
                     devTerm.sendText('exit');
                     devTerm.dispose();

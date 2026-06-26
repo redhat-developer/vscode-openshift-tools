@@ -20,6 +20,7 @@ import { vsCommand, VsCommandError } from '../vscommand';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
+import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -607,19 +608,28 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.commands.command.run', true)
-    static runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
+    static async runComponentCommand(componentFolder: ComponentWorkspaceFolder): Promise<void> {
         const componentName = componentFolder.component.devfileData.devfile.metadata.name;
         if ('getCommand' in componentFolder) {
+
             const componentCommand = (<CommandProvider>componentFolder).getCommand();
-            const command = Command.runComponentCommand(componentCommand.id);
-            void OpenShiftTerminalManager.getInstance().createTerminal(
-                command,
-                `Component ${componentName}: Run '${componentCommand.id}' Command`,
-                componentFolder.contextPath,
+
+            if (!componentCommand) {
+                void window.showErrorMessage(
+                    `No Command found in Component '${componentName}'`,
+                );
+                return;
+            }
+
+            await DevfileCommandRunner.execute(
+                componentFolder,
+                componentCommand.id,
             );
         } else {
-            void window.showErrorMessage(`No Command found in Component '${componentName}`);
+            void window.showErrorMessage(
+                `No Command found in Component '${componentName}'`,
+            );
         }
         return;
-   }
+    }
 }
