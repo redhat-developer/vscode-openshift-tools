@@ -24,6 +24,7 @@ jobs:
     permissions:
       contents: read
       actions: write
+      pull-requests: write
 
     strategy:
       fail-fast: false
@@ -43,6 +44,15 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
+
+      - name: Dependency Review
+        if: github.event_name == 'pull_request' && runner.os == 'Linux'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: moderate
+          fail-on-scopes: runtime, development
+          comment-summary-in-pr: on-failure
+          license-check: false
 
       # Run install dependencies
       - name: Install dependencies
