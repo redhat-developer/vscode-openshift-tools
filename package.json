@@ -107,7 +107,7 @@
 		"@types/react-dom": "^19.2.3",
 		"@types/semver": "^7.7.1",
 		"@types/shelljs": "^0.10.0",
-		"@types/sinon": "^21.0.1",
+		"@types/sinon": "^22.0.0",
 		"@types/sinon-chai": "^4.0.0",
 		"@types/targz": "^1.0.5",
 		"@types/tmp": "^0.2.6",
