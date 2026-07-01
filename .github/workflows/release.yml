@@ -45,7 +45,8 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g typescript "vsce" "ovsx"
-          npm install
+          npm install --ignore-scripts
+          npm rebuild cpu-features ssh2
           echo "EXT_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
       - name: Build And Run Unit Tests
         run: xvfb-run npm run test

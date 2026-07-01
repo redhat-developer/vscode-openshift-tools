@@ -49,7 +49,7 @@
 	"scripts": {
 		"compile": "npm run prebuild-esm && node ./build/esbuild.build.cjs",
 		"build": "npm run prebuild-esm && node ./build/esbuild.build.cjs && npm run bundle-tools",
-		"vscode:prepublish": "npm install && npm run clean && npm run lint && npm run prebuild-esm && node ./build/esbuild.build.cjs --production && npm run bundle-tools && npm prune --omit=dev",
+		"vscode:prepublish": "npm install --ignore-scripts && npm run clean && npm run lint && npm run prebuild-esm && node ./build/esbuild.build.cjs --production && npm run bundle-tools && npm prune --omit=dev",
 		"prebuild-esm": "node ./build/esbuild.transform-esm.cjs",
 		"watch:extension": "tsc -p tsconfig.json --watch",
 		"watch:webviews": "node ./build/esbuild.webviews.cjs --watch",
@@ -61,7 +61,7 @@
 		"check-cycles": "dpdm --no-tree --no-warning --exit-code circular:1 ./src/extension.ts",
 		"todo": "leasot **/*.ts --ignore node_modules -x",
 		"clean": "shx rm -rf out/build out/src out/webview out/test out/tools out/test-resources out/**.tsbuildinfo",
-		"test:prepare": "npm install && npm run test:build-extension && npm run test:build-webviews && shx cp -r test/fixtures out/test/ && npm run bundle-tools",
+		"test:prepare": "npm install --ignore-scripts && npm run test:build-extension && npm run test:build-webviews && shx cp -r test/fixtures out/test/ && npm run bundle-tools",
 		"test:build-extension": "npm run prebuild-esm && tsc -p tsconfig.json",
 		"test:build-webviews": "node ./build/esbuild.webviews.cjs",
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
