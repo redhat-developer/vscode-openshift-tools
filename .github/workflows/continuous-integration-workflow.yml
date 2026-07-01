@@ -56,7 +56,9 @@ jobs:
 
       # Run install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci --ignore-scripts
+          npm rebuild cpu-features ssh2
 
       # Run tests without xvfb, if not running on ubuntu
       - name: Build and Test (non-Linux)
