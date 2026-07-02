@@ -107,7 +107,7 @@ jobs:
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json'));
-            pkg.scripts['vscode:prepublish'] += ' && npm install @secretlint/node';
+            pkg.scripts['vscode:prepublish'] += ' && npm install --ignore-scripts @secretlint/node';
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
           "
           xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-test
