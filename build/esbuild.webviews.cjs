@@ -17,12 +17,14 @@ const isWatch = process.argv.includes('--watch');
 
 // eslint-disable no-console
 
-// Verify the WebViews
-try {
-    execSync('tsc --noEmit -p ./src/webview/tsconfig.json', { stdio: 'inherit' });
-} catch (err) {
-    console.error('❌ TypeScript type-checking failed.');
-    process.exit(1);
+// Verify the WebViews (skip in watch mode - VS Code editor handles this)
+if (!isWatch) {
+    try {
+        execSync('tsc --noEmit -p ./src/webview/tsconfig.json', { stdio: 'inherit' });
+    } catch (err) {
+        console.error('❌ TypeScript type-checking failed.');
+        process.exit(1);
+    }
 }
 
 const baseConfig = {
@@ -53,30 +55,42 @@ async function buildWebviews() {
     };
 
     if (isWatch) {
-        const ctx = await esbuild.context({
-            ...devWebViewConfig,
-            plugins: [
-                ...devWebViewConfig.plugins,
-                {
-                    name: 'rebuild-hook',
-                    setup(build) {
-                        build.onEnd(result => {
-                            if (result.errors.length === 0) {
-                                console.log('🔁 Rebuild succeeded');
-                                copyHtmlFiles().catch(err =>
-                                    console.error('❌ Failed to copy HTML files after rebuild:', err)
-                                );
-                            } else {
-                                console.error('❌ Rebuild errors:', result.errors);
-                            }
-                        });
+        try {
+            const ctx = await esbuild.context({
+                ...devWebViewConfig,
+                plugins: [
+                    ...devWebViewConfig.plugins,
+                    {
+                        name: 'rebuild-hook',
+                        setup(build) {
+                            build.onEnd(result => {
+                                if (result.errors.length === 0) {
+                                    console.log('🔁 Rebuild succeeded');
+                                    copyHtmlFiles().catch(err =>
+                                        console.error('❌ Failed to copy HTML files after rebuild:', err)
+                                    );
+                                } else {
+                                    console.error('❌ Rebuild errors:', result.errors);
+                                }
+                            });
+                        }
                     }
-                }
-            ]
-        });
-        await ctx.watch();
-        await copyHtmlFiles();
-        console.log('👀 Watching the webviews...');
+                ]
+            });
+            await ctx.watch();
+            await copyHtmlFiles().catch(err => {
+                console.error('❌ Failed to copy HTML files on initial watch setup:', err);
+            });
+            console.log('👀 Watching the webviews...');
+
+            // Keep the process alive even if there are errors
+            // esbuild will continue watching and rebuild on changes
+            await new Promise(() => {}); // Never resolves - keeps watch running
+        } catch (err) {
+            console.error('❌ Failed to start webviews watcher:', err);
+            console.error('⚠️  Watch mode failed to start. Please fix errors and restart.');
+            process.exit(1);
+        }
     } else {
         await esbuild.build(devWebViewConfig);
         await copyHtmlFiles();
