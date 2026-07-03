@@ -51,7 +51,7 @@
 		"build": "npm run prebuild-esm && node ./build/esbuild.build.cjs && npm run bundle-tools",
 		"vscode:prepublish": "npm install --ignore-scripts && npm run clean && npm run lint && npm run prebuild-esm && node ./build/esbuild.build.cjs --production && npm run bundle-tools && npm prune --omit=dev",
 		"prebuild-esm": "node ./build/esbuild.transform-esm.cjs",
-		"watch:extension": "tsc -p tsconfig.json --watch",
+		"watch:extension": "node ./build/esbuild.extension.cjs --watch",
 		"watch:webviews": "node ./build/esbuild.webviews.cjs --watch",
 		"bundle-tools": "node ./build/bundle-tools.cjs --platform",
 		"verify-tools": "node ./build/verify-tools.cjs",

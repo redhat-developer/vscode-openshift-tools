@@ -8,7 +8,17 @@
             "type": "npm",
             "script": "watch:extension",
             "isBackground": true,
-            "problemMatcher": "$tsc-watch"
+            "problemMatcher": {
+                "owner": "custom",
+                "pattern": {
+                    "regexp": "."
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*Building the extension.*",
+                    "endsPattern": ".*Watching the extension\\.\\.\\."
+                }
+            }
         },
         {
             "label": "watch:webviews",
@@ -28,12 +38,20 @@
             }
         },
         {
-            "label": "watch",
+            "label": "watch-all",
             "dependsOn": [
                 "watch:extension",
                 "watch:webviews"
             ],
             "dependsOrder": "parallel"
+        },
+        {
+            "label": "watch",
+            "dependsOn": [
+                "compile",
+                "watch-all"
+            ],
+            "dependsOrder": "sequence"
         },
         {
             "label": "compile",
