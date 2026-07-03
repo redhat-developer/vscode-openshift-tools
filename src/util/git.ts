@@ -30,7 +30,16 @@ export async function cloneRepository(options: GitCloneOptions): Promise<CloneRe
         };
     }
 
-    const gitApi = gitExtension.exports.getAPI(1);
+    let gitApi;
+    try {
+        gitApi = gitExtension.exports.getAPI(1);
+    } catch (error) {
+        return {
+            status: false,
+            error: `Failed to get Git API: ${error.message}`
+        };
+    }
+
     if (!gitApi?.git?.path) {
         return {
             status: false,
@@ -39,6 +48,13 @@ export async function cloneRepository(options: GitCloneOptions): Promise<CloneRe
     }
 
     const git = gitApi.git.path;
+
+    if (typeof git !== 'string' || git.trim().length === 0) {
+        return {
+            status: false,
+            error: 'Git executable path is invalid'
+        };
+    }
 
     const args = [
         'clone',

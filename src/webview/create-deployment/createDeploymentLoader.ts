@@ -2,7 +2,6 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import * as cp from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as tmp from 'tmp';
@@ -14,17 +13,13 @@ import { Oc } from '../../oc/ocWrapper';
 import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
+import { cloneRepository, CloneResult } from '../../util/git';
 import { vsCommand } from '../../vscommand';
 import {
     validateName,
     validatePortNumber
 } from '../common-ext/createComponentHelpers';
 import { loadWebviewHtml, validateGitURL } from '../common-ext/utils';
-
-interface CloneProcess {
-    status: boolean;
-    error: string | undefined;
-}
 
 type Message = {
     action: string;
@@ -157,7 +152,7 @@ export default class CreateDeploymentLoader implements Disposable {
                 void CreateDeploymentLoader.panel.webview.postMessage({
                     action: 'cloneStart',
                 });
-                const cloneProcess: CloneProcess = await clone(
+                const cloneProcess: CloneResult = await clone(
                     message.data.url,
                     tmpFolder.fsPath,
                     message.data.branch,
@@ -302,21 +297,17 @@ export default class CreateDeploymentLoader implements Disposable {
     }
 }
 
-function clone(url: string, location: string, branch?: string): Promise<CloneProcess> {
-    const gitExtension = extensions.getExtension('vscode.git').exports;
-    const git = gitExtension.getAPI(1).git.path;
-    let command = `${git} clone ${url} ${location}`;
-    command = branch ? `${command} --branch ${branch}` : command;
+async function clone(url: string, location: string, branch?: string): Promise<CloneResult> {
     void CreateDeploymentLoader.panel.webview.postMessage({
         action: 'cloneExecution'
     });
-    // run 'git clone url location' as external process and return location
-    return new Promise((resolve) =>
-        cp.exec(command, (error: cp.ExecException) => {
-            error
-                ? resolve({ status: false, error: error.message })
-                : resolve({ status: true, error: undefined });
-        }),
-    );
+
+    const result = await cloneRepository({
+        url,
+        location,
+        branch
+    });
+
+    return result;
 }
 
