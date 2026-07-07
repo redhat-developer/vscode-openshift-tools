@@ -17,7 +17,7 @@ import { OpenshiftLogger } from '../util/childProcessUtil';
 import { cloneRepository } from '../util/git';
 import { DevfileResolver } from './devfileResolver';
 
-export async function odoInit(options: OdoInitOptions) {
+export async function initComponent(options: ComponentInitOptions) {
     const ctx = await createInitContext(options);
 
     logInfo(ctx, 'Initializing a new component...');
@@ -54,6 +54,11 @@ export async function odoInit(options: OdoInitOptions) {
     const resolvedDevfile = await resolveDevfile(workingDevfile);
 
     logInfo(ctx, 'Devfile resolved');
+    logInfo(ctx, 'Downloading stack extra files...');
+
+    await downloadStackExtraFiles(resolvedDevfile, acquired, ctx);
+
+    logInfo(ctx, 'Stack extra files downloaded');
     logInfo(ctx, 'Validating devfile...');
 
     // analysis-only copy
@@ -102,7 +107,7 @@ type InitContext = {
     registryDevfileVersion?: string;
 
     name: string;
-    options: OdoInitOptions;
+    options: ComponentInitOptions;
 };
 
 function logInfo(ctx: InitContext, message: string) {
@@ -110,7 +115,7 @@ function logInfo(ctx: InitContext, message: string) {
         ctx.options.logger?.info(message);
     } catch (err) {
         /* eslint-disable-next-line no-console */
-        console.error('[odoInit logger info failed]', err);
+        console.error('[initComponent logger info failed]', err);
     }
 }
 
@@ -119,11 +124,11 @@ function logError(ctx: InitContext, message: string) {
         ctx.options.logger?.error(message);
     } catch (err) {
         /* eslint-disable-next-line no-console */
-        console.error('[odoInit logger error failed]', err);
+        console.error('[initComponent logger error failed]', err);
     }
 }
 
-async function createInitContext(options: OdoInitOptions): Promise<InitContext> {
+async function createInitContext(options: ComponentInitOptions): Promise<InitContext> {
     const projectPath = path.resolve(options.projectPath ?? process.cwd());
     const devfileSource = detectSource(options);
     const sourceDevfilePath = options.devfilePath ? path.resolve(options.devfilePath) : undefined;
@@ -145,7 +150,7 @@ async function createInitContext(options: OdoInitOptions): Promise<InitContext> 
     };
 }
 
-function detectSource(options: OdoInitOptions): InitContext['devfileSource'] {
+function detectSource(options: ComponentInitOptions): InitContext['devfileSource'] {
     if (options.devfilePath) {
         return 'file';
     }
@@ -157,7 +162,7 @@ function detectSource(options: OdoInitOptions): InitContext['devfileSource'] {
     return 'local';
 }
 
-export interface OdoInitOptions {
+export interface ComponentInitOptions {
     name?: string;
     registryDevfile?: string;
     devfileVersion?: string;
@@ -414,7 +419,7 @@ async function writeInitState(readiness: DevfileReadiness, acquired: AcquiredDev
     );
 }
 
-function buildInitResult(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext): OdoInitResult {
+function buildInitResult(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext): ComponentInitResult {
     const created = ctx.workspaceInitiallyEmpty;
 
     return {
@@ -425,7 +430,7 @@ function buildInitResult(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitC
     };
 }
 
-export interface OdoInitResult {
+export interface ComponentInitResult {
     projectPath: string;
     devfilePath: string;
     devfile: Devfile;
@@ -684,7 +689,7 @@ function interpolateDevfileVariables(devfile: Devfile): Devfile {
 }
 
 async function materializeZipStarter(url: string, projectPath: string) {
-    const tmpZip = path.join(projectPath, '.odo-starter.zip');
+    const tmpZip = path.join(projectPath, '.devfile-starter.zip');
 
     try {
         await DownloadUtil.downloadFile(url, tmpZip);
@@ -692,5 +697,33 @@ async function materializeZipStarter(url: string, projectPath: string) {
         await Archive.extractAll(tmpZip, projectPath);
     } finally {
         await fs.unlink(tmpZip).catch(() => undefined);
+    }
+}
+
+async function downloadStackExtraFiles(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext) {
+    // Only download extra files if the devfile came from a registry
+    if (!acquired.provenance) {
+        return;
+    }
+
+    const { url: registryUrl, stack: stackName, version } = acquired.provenance;
+
+    try {
+        logInfo(ctx, `Downloading stack files for ${stackName}:${version}`);
+
+        await DevfileRegistry.Instance.downloadStackExtraFiles(
+            registryUrl,
+            stackName,
+            version,
+            devfile,
+            ctx.projectPath
+        );
+
+        logInfo(ctx, 'Stack files downloaded successfully');
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logError(ctx, `Failed to download stack extra files: ${errorMessage}`);
+        logInfo(ctx, 'Component initialization will continue without extra files');
+        // Don't fail the init - extra files are optional
     }
 }

@@ -8,7 +8,7 @@ import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import * as cliInstance from '../cli';
 import { getComponentDescription } from '../devfile/describe';
-import { odoInit } from '../devfile/init';
+import { initComponent } from '../devfile/init';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData, OdoChannel } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
@@ -78,7 +78,7 @@ export class Odo {
         customDevfilePath = '',
     ): Promise<void> {
 
-        await odoInit({
+        await initComponent({
             name,
             projectPath: location.fsPath,
             registryDevfile:
@@ -135,7 +135,7 @@ export class Odo {
         location: Uri,
     ): Promise<void> {
 
-        await odoInit({
+        await initComponent({
             name: componentName,
             projectPath: location.fsPath,
             registryDevfile: devfileName,
@@ -170,7 +170,7 @@ export class Odo {
         templateProjectName: string,
     ): Promise<void> {
 
-        await odoInit({
+        await initComponent({
             name: componentName,
             projectPath: componentPath,
             registryDevfile: devfileName,
