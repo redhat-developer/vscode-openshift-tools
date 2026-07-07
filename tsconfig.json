@@ -24,7 +24,7 @@
     "useDefineForClassFields": false,
     "noImplicitOverride": false,
     "skipLibCheck": true,
-    "incremental": true,
+    "incremental": false,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "typeRoots": [ "./src/@types", "./node_modules/@types", "./out/extension" ],
