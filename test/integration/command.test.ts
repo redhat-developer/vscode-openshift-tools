@@ -16,7 +16,7 @@ import { parse, stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
 import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
-import { odoInit } from '../../src/devfile/init';
+import { initComponent } from '../../src/devfile/init';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Command } from '../../src/odo/command';
 import { OdoPreference } from '../../src/odo/odoPreference';
@@ -82,7 +82,7 @@ suite('odo commands integration', function () {
         });
 
         test('createLocalComponent()', async function () {
-            await odoInit({
+            await initComponent({
                 projectPath: componentLocation,
                 name: componentName,
 
@@ -322,7 +322,7 @@ suite('odo commands integration', function () {
         }
 
         test('runComponentCommand()', async function () {
-            await odoInit({
+            await initComponent({
                 projectPath: componentLocation,
                 name: componentName,
 
