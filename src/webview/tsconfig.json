@@ -15,7 +15,7 @@
         "experimentalDecorators": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "incremental": true,
+        "incremental": false,
         "ignoreDeprecations": "6.0",
         "noImplicitAny": false,
         "strict": false,
