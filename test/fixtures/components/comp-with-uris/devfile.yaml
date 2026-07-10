@@ -1,0 +1,54 @@
+schemaVersion: 2.2.0
+metadata:
+  name: nodejs-with-uris
+  version: 1.0.0
+  displayName: Node.js with Resource URIs
+  description: Test component with URIs pointing to local resources
+  language: JavaScript
+  projectType: Node.js
+
+components:
+  - name: runtime
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-18:latest
+      memoryLimit: 1Gi
+      endpoints:
+        - name: http
+          targetPort: 3000
+
+  - name: image-build
+    image:
+      imageName: my-nodejs-app:latest
+      dockerfile:
+        uri: docker/Dockerfile  # Relative URI - should read from disk during inline
+        buildContext: .
+
+  - name: kubernetes-deploy
+    kubernetes:
+      uri: k8s/deploy.yaml  # Relative URI - should read from disk during inline
+
+commands:
+  - id: build
+    exec:
+      commandLine: npm install
+      component: runtime
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: true
+
+  - id: run
+    exec:
+      commandLine: npm start
+      component: runtime
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: true
+
+  - id: deploy
+    apply:
+      component: kubernetes-deploy
+    group:
+      kind: deploy
+      isDefault: true
