@@ -344,7 +344,7 @@ export class AboutInfoProvider {
             return undefined;
         }
 
-        // Try guessing its location from the cinfiguration preferences
+        // Try guessing its location from the configuration preferences
         const crcBinary = vscode.workspace.getConfiguration('openshiftToolkit').get<string>('crcBinaryLocation');
 
         return {
