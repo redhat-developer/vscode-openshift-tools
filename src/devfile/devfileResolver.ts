@@ -8,6 +8,47 @@ import * as yaml from 'js-yaml';
 import path from 'path';
 import { DevfileInfo } from '../devfile-registry/devfileInfo';
 import { DevfileRegistry } from '../devfile-registry/devfileRegistryWrapper';
+import { OpenshiftLogger } from '../util/utils';
+import { DevfileUriResolver } from './devfileUriResolver';
+
+/**
+ * Options for processing devfile resources during resolution
+ */
+export interface DevfileResolveOptions {
+    /**
+     * If true, inline resource URIs into the devfile (converting uri → inlined).
+     * Used during `odo dev/deploy` to get a self-contained devfile.
+     * Resources are loaded from disk (if devfilePath provided) or from URLs (if sourceUrl provided).
+     */
+    inlineResources?: boolean;
+
+    /**
+     * Absolute path to the source devfile on disk.
+     * Required for resolving relative URIs to local files.
+     */
+    devfilePath?: string;
+
+    /**
+     * Source URL where the devfile was fetched from (for registry devfiles).
+     * E.g., "https://registry.devfile.io/devfiles/go-basic/1.1.0"
+     * Used to resolve relative URIs to registry resources.
+     */
+    sourceUrl?: string;
+
+    /**
+     * Optional logger for reporting resolution progress and errors.
+     */
+    logger?: OpenshiftLogger;
+}
+
+/**
+ * Represents a devfile with its source URL for proper URI resolution
+ */
+interface DevfileWithSource {
+    devfile: any;
+    sourceUrl?: string;  // e.g., "https://registry.devfile.io/devfiles/go/2.6.0"
+    devfilePath?: string;  // e.g., "/path/to/project/devfile.yaml" (for local devfiles)
+}
 
 export class DevfileResolver {
 
@@ -17,18 +58,190 @@ export class DevfileResolver {
     this.parentCache.clear();
   }
 
-  async resolve(devfile: any): Promise<any> {
-    const chain = await this.resolveParentChain(devfile);
-    const mergedDevfile = this.mergeChain(chain);
+  /**
+   * Resolves a devfile's parent chain and optionally processes resources.
+   *
+   * @param devfile - The devfile to resolve
+   * @param options - Options for resource processing
+   * @returns Resolved devfile (with parents merged and resources processed)
+   */
+  async resolve(devfile: any, options?: DevfileResolveOptions): Promise<any> {
+    const chain = await this.resolveParentChain(devfile, options?.devfilePath, options?.sourceUrl);
+
+    // First, merge the chain to get final component structure
+    const mergedDevfile = this.mergeChain(chain.map(item => item.devfile));
+
+    // Process resources AFTER merging, using source URL context from the chain
+    // This ensures we only process components that survived the merge
+    if (options?.inlineResources) {
+      await this.processResourcesWithContext(mergedDevfile, chain, options);
+    }
 
     return this.normalizeResolvedDevfile(mergedDevfile);
   }
 
+  /**
+   * Process resources for the merged devfile, finding the source context for each component.
+   * Searches the chain backwards (child to parent) to find where each component originated.
+   */
+  private async processResourcesWithContext(
+    mergedDevfile: any,
+    chain: DevfileWithSource[],
+    options: DevfileResolveOptions
+  ): Promise<void> {
+    if (!mergedDevfile.components) {
+      return;
+    }
+
+    // Debug logging
+    if (options.logger) {
+      options.logger.info(`[DevfileResolver] Processing resources for ${mergedDevfile.components.length} components`);
+      options.logger.info(`[DevfileResolver] Chain has ${chain.length} devfiles`);
+      for (let i = 0; i < chain.length; i++) {
+        options.logger.info(`[DevfileResolver] Chain[${i}]: sourceUrl=${chain[i].sourceUrl}, devfilePath=${chain[i].devfilePath}`);
+      }
+    }
+
+    for (const component of mergedDevfile.components) {
+      // Find which devfile in the chain this component came from
+      // Search backwards (child to parent) - child components override parent
+      const sourceItem = this.findComponentSource(component.name, chain);
+      if (!sourceItem) {
+        if (options.logger) {
+          options.logger.warning(`[DevfileResolver] Component '${component.name}' not found in chain - skipping`);
+        }
+        continue;
+      }
+
+      if (options.logger) {
+        options.logger.info(`[DevfileResolver] Component '${component.name}' from sourceUrl=${sourceItem.sourceUrl}`);
+      }
+
+      // Process resources for this component using its source context
+      await this.processComponentResources(
+        component,
+        sourceItem,
+        options
+      );
+    }
+  }
+
+  /**
+   * Find the devfile in the chain that defined a component with the given name.
+   * Searches from child to parent (backwards in chain).
+   */
+  private findComponentSource(componentName: string, chain: DevfileWithSource[]): DevfileWithSource | undefined {
+    // Search backwards: last item (child) to first (root parent)
+    for (let i = chain.length - 1; i >= 0; i--) {
+      const item = chain[i];
+      const hasComponent = item.devfile.components?.some((c: any) => c.name === componentName);
+      if (hasComponent) {
+        return item;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Process resources for a single component using its source context.
+   */
+  private async processComponentResources(
+    component: any,
+    sourceItem: DevfileWithSource,
+    options: DevfileResolveOptions
+  ): Promise<void> {
+    const uriPaths = this.extractComponentUris(component);
+
+    for (const { uriPath, componentType } of uriPaths) {
+      try {
+        // Resolve and download the URI using the source context
+        const resolvedUri = DevfileUriResolver.resolveUri(
+          uriPath,
+          sourceItem.sourceUrl,
+          sourceItem.devfilePath
+        );
+
+        const content = await DevfileUriResolver.downloadContent(resolvedUri);
+
+        // Inline into devfile (only mode supported)
+        this.inlineComponentResource(component, componentType, content);
+      } catch (err) {
+        // Log error but continue with other resources
+        const errorMsg = `Failed to process resource ${uriPath}: ${err.message}`;
+        if (options.logger?.warning) {
+          options.logger.warning(errorMsg);
+        }
+        // If no logger provided, silently continue (tests, headless mode)
+      }
+    }
+  }
+
+  /**
+   * Extract URIs from a single component
+   */
+  private extractComponentUris(component: any): Array<{ uriPath: string; componentType: string }> {
+    const uris: Array<{ uriPath: string; componentType: string }> = [];
+
+    // Check for kubernetes uri
+    if (component.kubernetes?.uri) {
+      uris.push({
+        uriPath: component.kubernetes.uri,
+        componentType: 'kubernetes'
+      });
+    }
+
+    // Check for openshift uri
+    if (component.openshift?.uri) {
+      uris.push({
+        uriPath: component.openshift.uri,
+        componentType: 'openshift'
+      });
+    }
+
+    // Check for dockerfile uri
+    if (component.image?.dockerfile?.uri) {
+      uris.push({
+        uriPath: component.image.dockerfile.uri,
+        componentType: 'dockerfile'
+      });
+    }
+
+    return uris;
+  }
+
+  /**
+   * Inline resource content into a component (converting uri → inlined)
+   */
+  private inlineComponentResource(
+    component: any,
+    componentType: string,
+    content: string
+  ): void {
+    if (componentType === 'kubernetes') {
+      component.kubernetes.inlined = content;
+      delete component.kubernetes.uri;
+    } else if (componentType === 'openshift') {
+      component.openshift.inlined = content;
+      delete component.openshift.uri;
+    } else if (componentType === 'dockerfile') {
+      component.image.dockerfile.inlined = content;
+      delete component.image.dockerfile.uri;
+    }
+  }
+
   private normalizeResolvedDevfile(devfile: any): any {
     const result = { ...devfile };
+
+    // Remove 'parent' reference (already merged into devfile)
     if (result?.parent) {
       delete result.parent;
     }
+
+    // Remove 'yaml' property added by registry client (appears in parent chain too)
+    if (result?.yaml) {
+      delete result.yaml;
+    }
+
     return result;
   }
 
@@ -64,8 +277,11 @@ export class DevfileResolver {
     return undefined;
   }
 
-  private async resolveParentChain(devfile: any): Promise<any[]> {
-    const chain: any[] = [];
+  /**
+   * Resolve parent chain, tracking source URL for each devfile
+   */
+  private async resolveParentChain(devfile: any, devfilePath?: string, sourceUrl?: string): Promise<DevfileWithSource[]> {
+    const chain: DevfileWithSource[] = [];
     const visited = new Set<string>();
 
     let current = devfile;
@@ -78,13 +294,19 @@ export class DevfileResolver {
       }
       visited.add(key);
 
-      const parent = await this.fetchParentDevfile(current.parent);
+      const { devfile: parent, sourceUrl: parentSourceUrl } = await this.fetchParentDevfile(current.parent);
 
-      chain.unshift(parent);
+      chain.unshift({ devfile: parent, sourceUrl: parentSourceUrl });
       current = parent;
     }
 
-    chain.push(devfile);
+    // Add the original devfile
+    // sourceUrl is explicitly provided for registry devfiles, undefined for local devfiles
+    chain.push({
+      devfile,
+      sourceUrl,
+      devfilePath
+    });
 
     return chain;
   }
@@ -128,7 +350,7 @@ export class DevfileResolver {
       );
   }
 
-  private async fetchFromRegistry(parent: any): Promise<any> {
+  private async fetchFromRegistry(parent: any): Promise<{ devfile: any, sourceUrl: string }> {
       const p = this.normalizeParent(parent);
 
       const registry = DevfileRegistry.Instance;
@@ -143,14 +365,19 @@ export class DevfileResolver {
           throw new Error(`Version not found: ${p.id}@${p.version}`);
       }
 
-      return registry.getRegistryDevfile(
+      const devfile = await registry.getRegistryDevfile(
           p.registry,
           p.id,
           versionEntry.version
       );
+
+      // Build source URL for this devfile
+      const sourceUrl = `${p.registry}/devfiles/${p.id}/${versionEntry.version}`;
+
+      return { devfile, sourceUrl };
   }
 
-  private async fetchParentDevfile(parent: any): Promise<any> {
+  private async fetchParentDevfile(parent: any): Promise<{ devfile: any, sourceUrl: string }> {
     const key = this.getParentKey(parent);
 
     const cached = DevfileResolver.parentCache.get(key);
@@ -159,11 +386,11 @@ export class DevfileResolver {
     }
 
     try {
-      const devfile = await this.fetchFromRegistry(parent);
+      const result = await this.fetchFromRegistry(parent);
 
-      DevfileResolver.parentCache.set(key, devfile);
+      DevfileResolver.parentCache.set(key, result);
 
-      return devfile;
+      return result;
     } catch (err: any) {
       throw new Error(` ✗  Failed to fetch parent devfile ${key}: ${err?.message || err}`);
     }
@@ -242,12 +469,8 @@ export class DevfileResolver {
     }
 
     for (const item of child) {
-      if (map.has(item.name)) {
-        const merged = this.mergeComponents(map.get(item.name), item);
-        map.set(item.name, merged);
-      } else {
-        map.set(item.name, item);
-      }
+      const existing = map.get(item.name);
+      map.set(item.name, existing ? this.mergeComponents(existing, item) : item);
     }
 
     return Array.from(map.values());
@@ -272,26 +495,23 @@ export class DevfileResolver {
   }
 
   private deepMerge(target: any, source: any): any {
-    if (!target) return source;
     if (!source) return target;
+    if (!target) return source;
 
-    const result = { ...target };
-
-    for (const key of Object.keys(source)) {
-      const srcVal = source[key];
-      const tgtVal = target[key];
-
-      if (
-        typeof srcVal === 'object' &&
-        srcVal !== null &&
-        !Array.isArray(srcVal)
-      ) {
-        result[key] = this.deepMerge(tgtVal, srcVal);
-      } else {
-        result[key] = srcVal;
-      }
+    if (Array.isArray(target) && Array.isArray(source)) {
+      return [...target, ...source];
     }
 
-    return result;
+    if (typeof target === 'object' && typeof source === 'object') {
+      const result = { ...target };
+      for (const key in source) {
+        if (source[key] !== undefined) {
+          result[key] = source[key];
+        }
+      }
+      return result;
+    }
+
+    return source ?? target;
   }
 }

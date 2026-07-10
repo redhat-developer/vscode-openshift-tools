@@ -13,7 +13,7 @@ import type {
     Data
 } from '../odo/componentTypeDescription';
 import { OdoPreference } from '../odo/odoPreference';
-import { OpenshiftLogger } from '../util/childProcessUtil';
+import { OpenshiftLogger } from '../util/utils';
 import { cloneRepository } from '../util/git';
 import { DevfileResolver } from './devfileResolver';
 
@@ -29,7 +29,12 @@ export async function initComponent(options: ComponentInitOptions) {
 
     logInfo(ctx, `Devfile acquired (${ctx.devfileSource})`);
 
-    let workingDevfile = acquired.devfile;
+    const acquiredDevfile = acquired.devfile;
+
+    // Always resolve devfile to merge parent chain (needed for all sources: registry, file, local)
+    logInfo(ctx, 'Resolving devfile (merging parent chain)...');
+    let workingDevfile = await resolveDevfile(acquiredDevfile, acquired.devfilePath, acquired.provenance);
+    logInfo(ctx, 'Parent chain merged');
 
     logInfo(ctx, 'Processing starter project...');
 
@@ -44,22 +49,16 @@ export async function initComponent(options: ComponentInitOptions) {
 
         assertDevfileObject(parsed);
 
-        workingDevfile = parsed;
-        logInfo(ctx, 'Starter devfile overrides registry devfile');
+        // Resolve the starter's devfile too (merge its parents)
+        // Note: provenance is undefined for starter devfiles (they come from git, not registry)
+        workingDevfile = await resolveDevfile(parsed, starterResult.starterDevfilePath, undefined);
+        logInfo(ctx, 'Starter devfile resolved and overrides registry devfile');
     }
 
-    logInfo(ctx, 'Checking starter projects...');
-    logInfo(ctx, 'Resolving devfile...');
-
-    const resolvedDevfile = await resolveDevfile(workingDevfile);
-
-    logInfo(ctx, 'Devfile resolved');
-    logInfo(ctx, 'Downloading stack extra files...');
-
-    await downloadStackExtraFiles(resolvedDevfile, acquired, ctx);
-
-    logInfo(ctx, 'Stack extra files downloaded');
     logInfo(ctx, 'Validating devfile...');
+
+    // Use working devfile as-is (already resolved above for registry, or from file/local)
+    const resolvedDevfile = workingDevfile;
 
     // analysis-only copy
     const analysisDevfile = interpolateDevfileVariables(structuredClone(resolvedDevfile));
@@ -69,7 +68,13 @@ export async function initComponent(options: ComponentInitOptions) {
     logInfo(ctx, 'Analyzing component readiness...');
 
     const readiness = analyzeDevfileReadiness(analysisDevfile);
-    validateReadinessOrThrow(readiness);
+
+    // Log warnings about missing features (non-blocking)
+    if (readiness.warnings.length > 0) {
+        readiness.warnings.forEach(warning => {
+            logInfo(ctx, `Warning: ${warning}`);
+        });
+    }
 
     logInfo(ctx, 'Readiness check complete');
     logInfo(ctx, 'Normalizing devfile...');
@@ -304,9 +309,22 @@ async function acquireDevfile(ctx: InitContext): Promise<AcquiredDevfile> {
     }
 }
 
-async function resolveDevfile(devfile: Devfile): Promise<Devfile> {
+async function resolveDevfile(
+    devfile: Devfile,
+    devfilePath: string | undefined,
+    provenance?: DevfileProvenance
+): Promise<Devfile> {
     const resolver = new DevfileResolver();
-    return resolver.resolve(devfile);
+
+    // Build sourceUrl from provenance if available (registry devfiles)
+    const sourceUrl = provenance
+        ? `${provenance.url}/devfiles/${provenance.stack}/${provenance.version}`
+        : undefined;
+
+    return resolver.resolve(devfile, {
+        devfilePath,
+        sourceUrl,
+    });
 }
 
 type DevfileReadiness = {
@@ -324,7 +342,7 @@ function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
     );
 
     if (!hasContainer) {
-        throw new Error('Devfile must contain at least one container/image component');
+        warnings.push('No container/image component found - component may not be runnable in dev mode');
     }
 
     const runCmd = devfile.commands?.find(
@@ -332,23 +350,31 @@ function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
     );
 
     if (!runCmd) {
-        warnings.push('No run command (group: run) found');
+        warnings.push('No run command (group: run) found - odo dev will not be available');
+    }
+
+    const debugCmd = devfile.commands?.find(
+        c => c.exec?.group?.kind === 'debug'
+    );
+
+    if (!debugCmd) {
+        warnings.push('No debug command (group: debug) found - odo debug will not be available');
+    }
+
+    const deployCmd = devfile.commands?.find(
+        c => c.apply || c.exec?.group?.kind === 'deploy' || c.composite?.group?.kind === 'deploy'
+    );
+
+    if (!deployCmd) {
+        warnings.push('No deploy command found - odo deploy may not be available');
     }
 
     return {
-        runnable: !!runCmd,
-        deployable: devfile.commands?.some(c => c.apply),
-        debuggable: devfile.commands?.some(
-            c => c.exec?.group?.kind === 'debug'
-        ),
+        runnable: !!runCmd && !!hasContainer,
+        deployable: !!deployCmd,
+        debuggable: !!debugCmd,
         warnings
     };
-}
-
-function validateReadinessOrThrow(readiness: ReturnType<typeof analyzeDevfileReadiness>) {
-    if (!readiness.runnable) {
-        throw new Error('Devfile is not runnable: missing run command (group: run)');
-    }
 }
 
 async function writeWorkspace(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext) {
@@ -383,6 +409,8 @@ type InitState = {
 
     registry?: DevfileProvenance;
 
+    sourceUrl?: string;
+
     originalDevfile?: string;
 
     starterProject?: string;
@@ -399,6 +427,11 @@ type InitState = {
 };
 
 async function writeInitState(readiness: DevfileReadiness, acquired: AcquiredDevfile, ctx: InitContext, starter: StarterMaterialization) {
+    // Build sourceUrl from provenance if available (registry devfiles)
+    const sourceUrl = acquired.provenance
+        ? `${acquired.provenance.url}/devfiles/${acquired.provenance.stack}/${acquired.provenance.version}`
+        : undefined;
+
     const state: InitState = {
         version: 1,
         name: ctx.name,
@@ -407,6 +440,7 @@ async function writeInitState(readiness: DevfileReadiness, acquired: AcquiredDev
         initializedAt: new Date().toISOString(),
         readiness,
         registry: acquired.provenance,
+        sourceUrl,
         originalDevfile: ctx.sourceDevfilePath,
         starterProject: ctx.options.starterProject,
         starter
@@ -529,6 +563,16 @@ async function materializeStarterProjects(devfile: Devfile, ctx: InitContext): P
 
         if (!result.status) {
             throw new Error(`Failed to download starter project: ${result.error}`);
+        }
+
+        // Remove .git directory to disconnect from git history (matches odo behavior)
+        const gitDir = path.join(ctx.projectPath, '.git');
+        try {
+            await fs.rm(gitDir, { recursive: true, force: true });
+            logInfo(ctx, 'Removed .git directory');
+        } catch (err) {
+            // Non-fatal: continue if .git removal fails
+            logInfo(ctx, `Warning: Could not remove .git: ${err.message}`);
         }
 
         logInfo(ctx, `Starter project "${selected.name}" downloaded`);
@@ -700,30 +744,3 @@ async function materializeZipStarter(url: string, projectPath: string) {
     }
 }
 
-async function downloadStackExtraFiles(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext) {
-    // Only download extra files if the devfile came from a registry
-    if (!acquired.provenance) {
-        return;
-    }
-
-    const { url: registryUrl, stack: stackName, version } = acquired.provenance;
-
-    try {
-        logInfo(ctx, `Downloading stack files for ${stackName}:${version}`);
-
-        await DevfileRegistry.Instance.downloadStackExtraFiles(
-            registryUrl,
-            stackName,
-            version,
-            devfile,
-            ctx.projectPath
-        );
-
-        logInfo(ctx, 'Stack files downloaded successfully');
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logError(ctx, `Failed to download stack extra files: ${errorMessage}`);
-        logInfo(ctx, 'Component initialization will continue without extra files');
-        // Don't fail the init - extra files are optional
-    }
-}

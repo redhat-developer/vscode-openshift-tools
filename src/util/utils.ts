@@ -13,7 +13,7 @@ import {
     watch as watchOriginal,
     writeFileSync as writeFileSyncOriginal
 } from 'fs-extra';
-import { access as accessOriginal, rm as rmOriginal } from 'fs/promises';
+import { access as accessOriginal, mkdir as mkdirOriginal, rm as rmOriginal, writeFile as writeFileOriginal } from 'fs/promises';
 import * as path from 'path';
 import { decompress as decompressOriginal } from 'targz';
 import { CreateNodeOptions, DocumentOptions, ParseOptions, SchemaOptions, ToStringOptions } from 'yaml';
@@ -56,6 +56,16 @@ export class ExecutionContext extends Map<string, any> {
 }
 
 /**
+ * Logger interface for operations that need to report progress and errors.
+ * Used across the codebase for consistent logging without VSCode dependencies.
+ */
+export interface OpenshiftLogger {
+    info(message: string): void;
+    warning(message: string): void;
+    error(message: string): void;
+}
+
+/**
  * YAML serialization options tailored for Kubernetes manifests and similar configs:
  * - sortMapEntries: true     → ensures object keys are sorted for consistency (useful for diffs)
  * - indent: 2                → standard YAML indentation, aligns with K8s and Devfile formatting
@@ -73,6 +83,8 @@ export const Util = {
     // Wraps from fs/promises
     rm: rmOriginal,
     access: accessOriginal,
+    mkdir: mkdirOriginal,
+    writeFile: writeFileOriginal,
 
     // Wraps from fs-extra
     ensureDirSync: ensureDirSyncOriginal,
@@ -85,6 +97,6 @@ export const Util = {
     exec: execOriginal,
     spawn: spawnOriginal,
 
-    // Wraps from child_process
+    // Wraps from targz
     decompress: decompressOriginal
 };

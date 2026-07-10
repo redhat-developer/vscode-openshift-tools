@@ -8,6 +8,9 @@ import * as vscode from 'vscode';
 import { Util as cp } from '../util/utils';
 import { Filters } from './filters';
 
+// Re-export OpenshiftLogger for backward compatibility
+export type { OpenshiftLogger } from '../util/utils';
+
 const channel = vscode.window.createOutputChannel('OpenShift');
 
 export function getOpenShiftLogChannel(): vscode.OutputChannel {
@@ -38,12 +41,6 @@ export namespace CliExitData {
         }
         return '';
     }
-}
-
-export interface OpenshiftLogger {
-    info(message: string): void;
-    warning(message: string): void;
-    error(message: string): void;
 }
 
 export class OdoChannel {
