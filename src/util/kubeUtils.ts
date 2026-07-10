@@ -234,7 +234,7 @@ export class KubeConfigInfo {
             }
         }
         if (!mergedCurrentContext) {
-            window.showWarningMessage('Kube cinfiguration doesn\'t define any current context value.');
+            window.showWarningMessage('Kube configuration doesn\'t define any current context value.');
         }
         return new CustomKubeConfig(mergedContexts, mergedCurrentContext, mergedClusters, mergedUsers);
     }

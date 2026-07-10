@@ -37,7 +37,7 @@ import { LoginUtil } from './util/loginUtil';
 import { Platform } from './util/platform';
 import { Progress } from './util/progress';
 import { ExecutionContext, imagePath } from './util/utils';
-import { FileContentChangeNotifier, WatchUtil } from './util/watch';
+import { watchFile } from './util/watch';
 import { vsCommand } from './vscommand';
 import { CustomResourceDefinitionStub, K8sResourceKind } from './webview/common/createServiceTypes';
 import { OpenShiftTerminalManager } from './webview/openshift-terminal/openShiftTerminal';
@@ -105,7 +105,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
 
     private treeView: TreeView<ExplorerItem>;
 
-    private kubeConfigWatchers: FileContentChangeNotifier[];
+    private kubeConfigWatchers: Disposable[];
     private kubeContext: Context;
     private kubeConfigInfo: KubeConfigInfo;
 
@@ -129,28 +129,27 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         try {
             const kubeconfigFiles = getKubeConfigFiles();
             this.kubeConfigWatchers = (!kubeconfigFiles || kubeconfigFiles.length === 0) ? [] :
-                kubeconfigFiles.map(kubeconfigFile => WatchUtil.watchFileForContextChange(path.dirname(kubeconfigFile), path.basename(kubeconfigFile)));
+                kubeconfigFiles.map(kubeconfigFile =>
+                    watchFile(kubeconfigFile, () => {
+                        const kci2 = new KubeConfigInfo();
+                        const kc2 = kci2.getEffectiveKubeConfig();
+                        const newCtx = kc2.getContextObject(kc2.currentContext);
+                        if (Boolean(this.kubeContext) !== Boolean(newCtx)
+                            || (this.kubeContext?.cluster !== newCtx?.cluster
+                                || this.kubeContext?.user !== newCtx?.user
+                                || this.kubeContext?.namespace !== newCtx?.namespace)) {
+                            this.refresh();
+                            this.onDidChangeContextEmitter.fire(newCtx?.name); // newCtx can be 'null'
+                        }
+                        this.kubeContext = newCtx;
+                        this.kubeConfigInfo = kci2;
+                    })
+                );
             if (this.kubeConfigWatchers.length === 0) {
                 void window.showWarningMessage('Kubernetes configuration file(s) not found. Make sure that "${HOME}/.kube/config" file exists or "KUBECONFIG" environment variable is properly configured');
             }
         } catch {
             void window.showWarningMessage('Couldn\'t install watcher for Kubernetes configuration file. OpenShift Application Explorer view won\'t be updated automatically.');
-        }
-        for (const fsw of this.kubeConfigWatchers) {
-            fsw.emitter?.on('file-changed', () => {
-                const kci2 = new KubeConfigInfo();
-                const kc2 = kci2.getEffectiveKubeConfig();
-                const newCtx = kc2.getContextObject(kc2.currentContext);
-                if (Boolean(this.kubeContext) !== Boolean(newCtx)
-                    || (this.kubeContext?.cluster !== newCtx?.cluster
-                        || this.kubeContext?.user !== newCtx?.user
-                        || this.kubeContext?.namespace !== newCtx?.namespace)) {
-                    this.refresh();
-                    this.onDidChangeContextEmitter.fire(newCtx?.name); // newCtx can be 'null'
-                }
-                this.kubeContext = newCtx;
-                this.kubeConfigInfo = kci2;
-            });
         }
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
@@ -804,8 +803,8 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     }
 
     dispose(): void {
-        for (const fsw of this.kubeConfigWatchers) {
-            fsw?.watcher?.close();
+        for (const watcher of this.kubeConfigWatchers) {
+            watcher?.dispose();
         }
         this.treeView.dispose();
     }

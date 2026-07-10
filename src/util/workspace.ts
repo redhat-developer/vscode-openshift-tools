@@ -17,6 +17,16 @@ export const AddWorkspaceFolder: QuickPickItem = {
     description: 'Folder which does not have an OpenShift context',
 };
 
+// Extract devfile patterns as constants
+const DEVFILE_NAMES = ['devfile', '.devfile'] as const;
+const DEVFILE_EXTENSIONS = ['yaml', 'yml', 'json'] as const;
+const DEVFILE_GLOB_PATTERN = `**/{${DEVFILE_NAMES.join(',')}}.{${DEVFILE_EXTENSIONS.join(',')}}`;
+
+// Pre-calculate devfile candidates once at module load
+const DEVFILE_CANDIDATES = DEVFILE_NAMES.flatMap(name =>
+    DEVFILE_EXTENSIONS.map(ext => `${name}.${ext}`)
+);
+
 function isFile(path: string) {
     try {
         return fs.statSync(path).isFile()
@@ -26,9 +36,9 @@ function isFile(path: string) {
 }
 
 function isComponentorFunction(folder: WorkspaceFolder) {
-    return !isFile(path.join(folder.uri.fsPath, 'devfile.yaml'))
-        && !isFile(path.join(folder.uri.fsPath, '.devfile.yaml'))
-        && !isFile(path.join(folder.uri.fsPath, 'func.yaml'));
+    return !DEVFILE_CANDIDATES.some(candidate =>
+        isFile(path.join(folder.uri.fsPath, candidate))
+    ) && !isFile(path.join(folder.uri.fsPath, 'func.yaml'));
 }
 
 function componentAndFuctionFilter(wsFolder: WorkspaceFolder) {
@@ -158,7 +168,7 @@ async function updateDevfileContext(_: unknown) {
  */
 export function setupWorkspaceDevfileContext(): Disposable {
     void updateDevfileContext(undefined);
-    const devfileWatcher = workspace.createFileSystemWatcher('**/{devfile,.devfile}.yaml');
+    const devfileWatcher = workspace.createFileSystemWatcher(DEVFILE_GLOB_PATTERN);
     devfileWatcher.onDidCreate(updateDevfileContext);
     devfileWatcher.onDidDelete(updateDevfileContext);
     workspace.onDidChangeWorkspaceFolders(updateDevfileContext);

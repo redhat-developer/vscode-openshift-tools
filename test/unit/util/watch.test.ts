@@ -7,69 +7,98 @@ import * as chai from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import * as tmp from 'tmp';
-import { Util as fs } from '../../../src/util/utils';
-import { WatchUtil } from '../../../src/util/watch';
+import * as vscode from 'vscode';
+import { watchFile } from '../../../src/util/watch';
 
 const {expect} = chai;
 chai.use(sinonChai);
 
 suite('File Watch Utility', () => {
     let sandbox: sinon.SinonSandbox;
-    let ensureStub: sinon.SinonStub; let watchStub: sinon.SinonStub;
-    const location = 'location';
-    const filename = 'file';
+    let createFileSystemWatcherStub: sinon.SinonStub;
+    let mockWatcher: any;
 
     setup(() => {
         sandbox = sinon.createSandbox();
-        ensureStub = sandbox.stub(fs, 'ensureDirSync');
-        watchStub = sandbox.stub(fs, 'watch');
+
+        // Create a mock FileSystemWatcher
+        mockWatcher = {
+            onDidChange: sandbox.stub(),
+            onDidCreate: sandbox.stub(),
+            onDidDelete: sandbox.stub(),
+            dispose: sandbox.stub(),
+        };
+
+        // Stub workspace.createFileSystemWatcher
+        createFileSystemWatcherStub = sandbox.stub(vscode.workspace, 'createFileSystemWatcher')
+            .returns(mockWatcher);
     });
 
     teardown(() => {
         sandbox.restore();
     });
 
-    test('watchFileForContextChange ensures the location exists', () => {
-        WatchUtil.watchFileForContextChange(location, filename);
+    test('watchFile creates a FileSystemWatcher with correct pattern', () => {
+        const filePath = path.join('home', 'user', '.kube', 'config');
+        const expectedDir = path.dirname(filePath);
+        const expectedFile = path.basename(filePath);
 
-        expect(ensureStub).calledOnceWith(location);
+        watchFile(filePath, () => {});
+
+        expect(createFileSystemWatcherStub).to.have.been.calledOnce;
+
+        // Verify RelativePattern was created - just check it's an instance
+        // We can't reliably check the exact path format cross-platform
+        // because RelativePattern normalizes paths internally
+        const callArg = createFileSystemWatcherStub.firstCall.args[0];
+        expect(callArg).to.be.instanceOf(vscode.RelativePattern);
+        expect(callArg.pattern).to.equal(expectedFile);
+        // The base path might be normalized, just verify it ends with the expected directory
+        expect(callArg.base).to.satisfy((base: string) =>
+            base.endsWith(expectedDir) || base.replace(/\\/g, '/').endsWith(expectedDir.replace(/\\/g, '/'))
+        );
     });
 
-    test('watchFileForContextChange creates a file watcher for the given path', () => {
-        WatchUtil.watchFileForContextChange(location, filename);
+    test('watchFile configures watcher to ignore create and delete events', () => {
+        const filePath = path.join('home', 'user', '.kube', 'config');
 
-        expect(watchStub).calledOnceWith(location, sinon.match.func);
+        watchFile(filePath, () => {});
+
+        expect(createFileSystemWatcherStub).to.have.been.calledWith(
+            sinon.match.instanceOf(vscode.RelativePattern),
+            true,  // ignoreCreateEvents
+            false, // ignoreChangeEvents (we want these)
+            true   // ignoreDeleteEvents
+        );
     });
 
-    test('watchFileForContextChange returns a content change notifier', () => {
-        const result = WatchUtil.watchFileForContextChange(location, filename);
+    test('watchFile registers onChange callback', () => {
+        const filePath = path.join('home', 'user', '.kube', 'config');
+        const callback = sandbox.stub();
 
-        expect(result).has.ownProperty('watcher');
-        expect(result).has.ownProperty('emitter');
+        watchFile(filePath, callback);
+
+        // Verify onDidChange was called (callback is wrapped in debounce logic)
+        expect(mockWatcher.onDidChange).to.have.been.calledOnce;
+        expect(mockWatcher.onDidChange).to.have.been.calledWith(sinon.match.func);
     });
 
-    test('emits change message when context changes', async () => {
-        ensureStub.restore();
-        watchStub.restore();
+    test('watchFile returns a Disposable', () => {
+        const filePath = path.join('home', 'user', '.kube', 'config');
 
-        // Make a temp sub-directory to avoid watching the whole temp directory
-        const tmpFile = tmp.fileSync({dir:`${path.basename(tmp.dirSync().name)}`});
-        const fileToWatch = fs.realpathSync(tmpFile.name);
-        fs.ensureFileSync(fileToWatch);
-        const notifier = WatchUtil.watchFileForContextChange(path.dirname(fileToWatch), path.basename(fileToWatch));
-        setTimeout(() => {
-            fs.writeFileSync(fileToWatch, 'current-context:test2');
-        }, 1000);
-        return new Promise<void>((res) => {
-            notifier.emitter.on('file-changed', (file) => {
-                expect(file).equals(undefined);
-                res();
-            });
-        }).finally(() => {
-            if (notifier && notifier.watcher) {
-                notifier.watcher.close();
-            }
-        });
+        const result = watchFile(filePath, () => {});
+
+        // Verify it returns a Disposable (has dispose method)
+        expect(result).to.have.property('dispose');
+        expect(result.dispose).to.be.a('function');
+    });
+
+    test('returned watcher can be disposed', () => {
+        const filePath = path.join('home', 'user', '.kube', 'config');
+
+        const watcher = watchFile(filePath, () => {});
+        watcher.dispose();
+
+        expect(mockWatcher.dispose).to.have.been.calledOnce;
     });
 });

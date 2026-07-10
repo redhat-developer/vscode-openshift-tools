@@ -5,7 +5,7 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Disposable, Uri, window, workspace } from 'vscode';
+import { Disposable, FileSystemWatcher, Uri, workspace } from 'vscode';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { DeploymentConfig } from '../k8s/deploymentConfig';
@@ -15,19 +15,17 @@ import { DeployedFunction, FunctionContent, FunctionObject, FunctionStatus, Func
 
 export class ServerlessFunctionModel implements Disposable {
 
-    private watchers: fs.FSWatcher[] = [];
+    private funcYamlWatcher: FileSystemWatcher;
     private workspaceWatcher: Disposable;
     private view: FunctionView;
 
     public constructor(view: FunctionView) {
         this.view = view;
-        this.addWatchers();
+        this.setupWatchers();
         this.workspaceWatcher = workspace.onDidChangeWorkspaceFolders((_e) => {
-            for (const watcher of this.watchers) {
-                watcher.close();
-            }
+            this.funcYamlWatcher?.dispose();
             this.view.refresh();
-            this.addWatchers();
+            this.setupWatchers();
         });
     }
 
@@ -101,10 +99,8 @@ export class ServerlessFunctionModel implements Disposable {
     }
 
     public dispose() {
-        for (const watcher of this.watchers) {
-            watcher.close();
-        }
-        this.workspaceWatcher.dispose();
+        this.funcYamlWatcher?.dispose();
+        this.workspaceWatcher?.dispose();
     }
 
     private getDeployFunction(
@@ -132,28 +128,13 @@ export class ServerlessFunctionModel implements Disposable {
         return Functions.imageRegex.test(yamlContent?.image);
     }
 
-    private addWatchers() {
-        if (workspace.workspaceFolders) {
-            for (const workspaceFolder of workspace.workspaceFolders) {
-                let folderExists = false;
-                try {
-                    fs.accessSync(workspaceFolder.uri.fsPath);
-                    folderExists = true;
-                } catch {
-                    // folder doesn't exist
-                    void window.showErrorMessage(`Can't keep track of if '${path.basename(workspaceFolder.uri.fsPath)}' contains a serverless function, since it's been deleted.`);
-                }
-                if (folderExists) {
-                    this.watchers.push(
-                        fs.watch(workspaceFolder.uri.fsPath, (_event, filename) => {
-                            if (filename === 'func.yaml') {
-                                this.view.refresh();
-                            }
-                        }),
-                    );
-                }
-            }
-        }
+    private setupWatchers() {
+        // Watch for func.yaml files across all workspace folders using VS Code's FileSystemWatcher
+        // This is more reliable than fs.watch, especially on Windows
+        this.funcYamlWatcher = workspace.createFileSystemWatcher('**/func.yaml');
+        this.funcYamlWatcher.onDidChange(() => this.view.refresh());
+        this.funcYamlWatcher.onDidCreate(() => this.view.refresh());
+        this.funcYamlWatcher.onDidDelete(() => this.view.refresh());
     }
 
     private async getListItems(command: CommandText, fail = false) {
