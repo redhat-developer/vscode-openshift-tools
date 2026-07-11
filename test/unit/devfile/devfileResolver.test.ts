@@ -26,18 +26,23 @@ suite('devfile/devfileResolver.ts - Resource Processing', () => {
         downloadContentStub = sandbox.stub(DevfileUriResolver, 'downloadContent');
         downloadContentStub.callsFake(async (url: string) => {
             // Return different content based on URL
-            if (url.includes('parent-registry.io')) {
-                return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: parent-deploy';
-            }
-            if (url.includes('child-registry.io')) {
-                return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: child-deploy';
-            }
-            // Handle local file paths (child devfile resources)
-            if (url.includes('/path/to/kubernetes/deploy.yaml')) {
-                return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: child-deploy';
-            }
-            if (url.includes('/path/to/docker/Dockerfile')) {
-                return 'FROM node:18\nWORKDIR /app';
+            // Use proper URL parsing to avoid security warnings
+            try {
+                const parsedUrl = new URL(url);
+                if (parsedUrl.hostname === 'parent-registry.io') {
+                    return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: parent-deploy';
+                }
+                if (parsedUrl.hostname === 'child-registry.io') {
+                    return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: child-deploy';
+                }
+            } catch {
+                // Not a valid URL, check file paths
+                if (url.includes('/path/to/kubernetes/deploy.yaml')) {
+                    return 'apiVersion: v1\nkind: Deployment\nmetadata:\n  name: child-deploy';
+                }
+                if (url.includes('/path/to/docker/Dockerfile')) {
+                    return 'FROM node:18\nWORKDIR /app';
+                }
             }
             return `content-from-${url}`;
         });

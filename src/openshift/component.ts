@@ -13,7 +13,7 @@ import { Command } from '../odo/command';
 import { CommandProvider } from '../odo/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
+import { ChildProcessUtil, CliExitData, OpenshiftChannel } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
 import { Util as fs } from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
@@ -21,6 +21,8 @@ import CreateComponentLoader from '../webview/create-component/createComponentLo
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
 import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
+import { deployComponent } from '../devfile/deploy';
+import { undeployComponent } from '../devfile/undeploy';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -38,7 +40,9 @@ export enum ComponentContextState {
     DEB = 'deb-nrn',
     DEB_RUNNING = 'deb-run',
     DEP = 'dep-nrn',
+    DEP_STARTING = 'dep-str',
     DEP_RUNNING = 'dep-run',
+    DEP_STOPPING = 'dep-stp',
 }
 
 export class ComponentStateRegex {
@@ -547,33 +551,86 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.deploy')
-    public static deploy(context: ComponentWorkspaceFolder) {
-        // TODO: Find out details for deployment workflow
-        // right now just let deploy and redeploy
-        // Undeploy is not provided
-        // --
-        // const cs = Component.getComponentDevState(context);
-        // cs.deployStatus = ComponentContextState.DEP_RUNNING;
-        // Component.stateChanged.fire(context.contextPath);
-        void OpenShiftTerminalManager.getInstance().executeInTerminal(
-            Command.deploy(),
-            context.contextPath,
-            `Deploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    public static async deploy(context: ComponentWorkspaceFolder): Promise<void> {
+        const componentName = context.component.devfileData.devfile.metadata.name;
+
+        try {
+            // Update state
+            const cs = Component.getComponentDevState(context);
+            cs.deployStatus = ComponentContextState.DEP_STARTING;
+            Component.stateChanged.fire(context.contextPath);
+
+            // Execute deployment
+            await deployComponent(
+                {
+                    componentPath: context.contextPath,
+                    logger: {
+                        info: (msg) => OpenshiftChannel.Instance.print(msg),
+                        warning: (msg) => OpenshiftChannel.Instance.print(`[WARNING] ${msg}`),
+                        error: (msg) => OpenshiftChannel.Instance.print(msg),
+                    }
+                },
+                context
+            );
+
+            // Update state
+            cs.deployStatus = ComponentContextState.DEP_RUNNING;
+            Component.stateChanged.fire(context.contextPath);
+
+            void window.showInformationMessage(`Component '${componentName}' deployed successfully`);
+        } catch (err) {
+            // Reset state
+            const cs = Component.getComponentDevState(context);
+            cs.deployStatus = ComponentContextState.DEP;
+            Component.stateChanged.fire(context.contextPath);
+
+            void window.showErrorMessage(
+                `Deploy failed: ${err.message}. You can retry - oc apply is idempotent.`
+            );
+        }
     }
 
     @vsCommand('openshift.component.undeploy')
-    public static undeploy(context: ComponentWorkspaceFolder) {
-        // TODO: Find out details for deployment workflow
-        // right now just let deploy and redeploy
-        // Undeploy is not provided
-        // // --
-        // const cs = Component.getComponentDevState(context);
-        // cs.deployStatus = ComponentContextState.DEP;
-        // Component.stateChanged.fire(context.contextPath);
-        void OpenShiftTerminalManager.getInstance().executeInTerminal(
-            Command.undeploy(context.component.devfileData.devfile.metadata.name),
-            context.contextPath,
-            `Undeploying '${context.component.devfileData.devfile.metadata.name}' Component`);
+    public static async undeploy(context: ComponentWorkspaceFolder): Promise<void> {
+        const componentName = context.component.devfileData.devfile.metadata.name;
+
+        const response = await window.showWarningMessage(
+            `Undeploy component '${componentName}'? This will delete all deployed resources.`,
+            'Undeploy',
+            'Cancel'
+        );
+
+        if (response !== 'Undeploy') return;
+
+        try {
+            const cs = Component.getComponentDevState(context);
+            cs.deployStatus = ComponentContextState.DEP_STOPPING;
+            Component.stateChanged.fire(context.contextPath);
+
+            await undeployComponent(
+                {
+                    componentPath: context.contextPath,
+                    force: true,  // Use label-based cleanup if no state file
+                    logger: {
+                        info: (msg) => OpenshiftChannel.Instance.print(msg),
+                        warning: (msg) => OpenshiftChannel.Instance.print(`[WARNING] ${msg}`),
+                        error: (msg) => OpenshiftChannel.Instance.print(msg),
+                    }
+                },
+                context
+            );
+
+            cs.deployStatus = ComponentContextState.DEP;
+            Component.stateChanged.fire(context.contextPath);
+
+            void window.showInformationMessage(`Component '${componentName}' undeployed`);
+        } catch (err) {
+            const cs = Component.getComponentDevState(context);
+            cs.deployStatus = ComponentContextState.DEP_RUNNING;
+            Component.stateChanged.fire(context.contextPath);
+
+            void window.showErrorMessage(`Undeploy failed: ${err.message}`);
+        }
     }
 
     @vsCommand('openshift.component.deleteConfigurationFiles')

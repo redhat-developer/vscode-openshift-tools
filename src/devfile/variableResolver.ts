@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Container, Data, Exec } from '../odo/componentTypeDescription';
+import { Apply, Container, Data, Exec } from '../odo/componentTypeDescription';
 
 export class VariableResolver {
     private static readonly VARIABLE_REGEX = /\$\{([^}]+)\}/g;
@@ -14,6 +14,17 @@ export class VariableResolver {
             workingDir: this.resolveValue(devfile, exec.workingDir ?? '/projects', exec.component),
             commandLine: this.resolveValue(devfile, exec.commandLine, exec.component),
         };
+    }
+
+    public static resolveApply(devfile: Data, apply: Apply): Apply {
+        return {
+            ...apply,
+            component: this.resolveValue(devfile, apply.component),
+        };
+    }
+
+    public static resolveKubernetesContent(devfile: Data, content: string): string {
+        return this.resolveValue(devfile, content);
     }
 
     public static resolveValue(devfile: Data, value: string, componentName?: string): string {
@@ -33,6 +44,11 @@ export class VariableResolver {
     ): string {
         if (variable === 'PROJECT_SOURCE') {
             return '/projects';
+        }
+
+        // Check devfile.variables (from resolved devfile with merged parents)
+        if (devfile.variables && devfile.variables[variable]) {
+            return devfile.variables[variable];
         }
 
         if (componentName) {

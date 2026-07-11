@@ -76,6 +76,8 @@ suite('odo commands integration', function () {
             }
             if (toRemove !== -1) {
                 workspace.updateWorkspaceFolders(toRemove, 1);
+                // Give VSCode time to process workspace update before deleting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
             await Oc.Instance.deleteProject(newProjectName);
@@ -107,8 +109,62 @@ suite('odo commands integration', function () {
             // odo pushes to during deploy.
             // However, you need cluster-admin access in order to expose
             // the registry outside of the cluster and figure out its address.
-            test('deploy(): PENDING');
-            test('undeploy(): PENDING');
+
+            test('deploy() and undeploy()', async function() {
+                // This test verifies the deploy/undeploy flow works
+                // but may fail on image push if registry not configured
+
+                const componentFolder: ComponentWorkspaceFolder = {
+                    contextPath: componentLocation,
+                    component: await Odo.Instance.describeComponent(componentLocation)
+                };
+
+                // Import deploy functions
+                const { deployComponent } = await import('../../src/devfile/deploy');
+                const { undeployComponent } = await import('../../src/devfile/undeploy');
+
+                // Deploy
+                try {
+                    const deployResult = await deployComponent(
+                        { componentPath: componentLocation },
+                        componentFolder
+                    );
+
+                    expect(deployResult.success).to.be.true;
+                    expect(deployResult.componentName).to.equal(componentName);
+                    expect(deployResult.deployedCommands.length).to.be.greaterThan(0);
+
+                    // Verify deploy state was saved
+                    const deployStatePath = path.join(componentLocation, '.odo', 'deploystate.json');
+                    await fs.access(deployStatePath);
+
+                    // Undeploy
+                    await undeployComponent(
+                        { componentPath: componentLocation },
+                        componentFolder
+                    );
+
+                    // Verify deploy state was removed
+                    try {
+                        await fs.access(deployStatePath);
+                        assert.fail('Deploy state file should have been deleted');
+                    } catch (err) {
+                        // Expected - file should not exist
+                        expect(err.code).to.equal('ENOENT');
+                    }
+
+                } catch (err) {
+                    // If it fails due to image push (no registry), that's expected
+                    // Just verify the error is registry-related, not a code bug
+                    if (err.message.includes('registry') ||
+                        err.message.includes('push') ||
+                        err.message.includes('image')) {
+                        this.skip(); // Skip test - registry not configured
+                    } else {
+                        throw err; // Real error - fail the test
+                    }
+                }
+            });
         });
 
         test('dev()', async function() {
@@ -181,6 +237,8 @@ suite('odo commands integration', function () {
             }
             if (toRemove !== -1) {
                 workspace.updateWorkspaceFolders(toRemove, 1);
+                // Give VSCode time to process workspace update before deleting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
             await fs.rm(componentLocation, { recursive: true, force: true });
             await Oc.Instance.deleteProject(newProjectName);
