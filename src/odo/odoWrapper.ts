@@ -10,7 +10,7 @@ import * as cliInstance from '../cli';
 import { getComponentDescription } from '../devfile/describe';
 import { initComponent } from '../devfile/init';
 import { ToolsConfig } from '../tools';
-import { ChildProcessUtil, CliExitData, OdoChannel } from '../util/childProcessUtil';
+import { ChildProcessUtil, CliExitData, OpenshiftChannel } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
 import { ComponentDescription } from './componentTypeDescription';
 
@@ -98,9 +98,9 @@ export class Odo {
                     )
                     : undefined,
             logger: {
-                info: msg => OdoChannel.Instance.print(msg),
-                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
-                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+                info: msg => OpenshiftChannel.Instance.print(msg),
+                warning: msg => OpenshiftChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OpenshiftChannel.Instance.print(`[ERROR] ${msg}`)
             }
         });
 
@@ -142,9 +142,9 @@ export class Odo {
             devfileVersion,
             runPort: portNumber,
             logger: {
-                info: msg => OdoChannel.Instance.print(msg),
-                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
-                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+                info: msg => OpenshiftChannel.Instance.print(msg),
+                warning: msg => OpenshiftChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OpenshiftChannel.Instance.print(`[ERROR] ${msg}`)
             }
         });
     }
@@ -179,9 +179,9 @@ export class Odo {
             starterProject: templateProjectName,
             runPort: portNumber,
             logger: {
-                info: msg => OdoChannel.Instance.print(msg),
-                warning: msg => OdoChannel.Instance.print(`[WARNING] ${msg}`),
-                error: msg => OdoChannel.Instance.print(`[ERROR] ${msg}`)
+                info: msg => OpenshiftChannel.Instance.print(msg),
+                warning: msg => OpenshiftChannel.Instance.print(`[WARNING] ${msg}`),
+                error: msg => OpenshiftChannel.Instance.print(`[ERROR] ${msg}`)
             }
         });
     }

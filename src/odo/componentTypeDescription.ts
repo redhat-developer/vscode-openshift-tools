@@ -58,6 +58,7 @@ export interface ComponentItem {
     name: string;
     container?: Container;
     kubernetes?: Kubernetes;
+    openshift?: Kubernetes;  // OpenShift uses same structure as Kubernetes
     image?: Image;
 };
 
@@ -89,6 +90,9 @@ export interface Parent {
 
 export interface Kubernetes {
     name: string;
+    inlined?: string;     // Inline YAML content
+    uri?: string;         // Path or URL to YAML file
+    endpoints?: Endpoint[];
 }
 
 export function isStarterProject(prj: any): prj is StarterProject {
@@ -200,4 +204,20 @@ export interface Group {
 
 export interface Events {
     postStart: string[];
+}
+
+export interface DeployedResource {
+    kind: string;
+    name: string;
+    namespace?: string;
+    labels: Record<string, string>;
+    appliedAt: string;  // ISO timestamp
+}
+
+export interface DeployState {
+    version: number;
+    componentName: string;
+    deployedAt: string;
+    platform: 'cluster' | 'podman';
+    resources: DeployedResource[];
 }

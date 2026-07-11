@@ -126,6 +126,8 @@ suite('./odo/odoWrapper.ts', function () {
                 return (fsPath !== tmpFolder1.fsPath && fsPath !== tmpFolder2.fsPath);
             });
             workspace.updateWorkspaceFolders(0, workspace.workspaceFolders.length, ...newWorkspaceFolders);
+            // Give VSCode time to process workspace update before deleting
+            await new Promise(resolve => setTimeout(resolve, 100));
             await fs.rm(tmpFolder1.fsPath, { force: true, recursive: true });
             await fs.rm(tmpFolder2.fsPath, { force: true, recursive: true });
             await Oc.Instance.deleteProject(project1);

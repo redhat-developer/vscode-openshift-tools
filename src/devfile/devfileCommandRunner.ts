@@ -5,6 +5,7 @@
 
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { Command } from '../odo/componentTypeDescription';
+import { ApplyCommandExecutor } from './applyCommand';
 import { CommandResolver } from './commandResolver';
 import { ExecCommandExecutor } from './execCommand';
 
@@ -26,6 +27,12 @@ export class DevfileCommandRunner {
     ): Promise<void> {
         if (command.exec) {
             await ExecCommandExecutor.execute(componentFolder, command.id, command.exec);
+
+            return;
+        }
+
+        if (command.apply) {
+            await ApplyCommandExecutor.execute(componentFolder, command.id, command.apply);
 
             return;
         }

@@ -6,7 +6,7 @@
 import * as fs from 'fs/promises';
 import * as yaml from 'js-yaml';
 import path from 'path';
-import { DevfileRegistry } from '../devfile-registry/devfileRegistryWrapper';
+import { DevfileRegistry, RegistryResourceResolver } from '../devfile-registry/devfileRegistryWrapper';
 import { Archive } from '../downloadUtil/archive';
 import { DownloadUtil } from '../downloadUtil/download';
 import type {
@@ -53,6 +53,16 @@ export async function initComponent(options: ComponentInitOptions) {
         // Note: provenance is undefined for starter devfiles (they come from git, not registry)
         workingDevfile = await resolveDevfile(parsed, starterResult.starterDevfilePath, undefined);
         logInfo(ctx, 'Starter devfile resolved and overrides registry devfile');
+    }
+
+    // Download registry resource files based on FINAL working devfile
+    // (after starter devfile override, if any)
+    // Resource files (docker/Dockerfile, kubernetes/deploy.yaml) come from the registry,
+    // NOT from the starter project git repo
+    if (acquired.provenance) {
+        logInfo(ctx, 'Downloading registry resource files...');
+        await downloadRegistryResources(workingDevfile, acquired.provenance, ctx);
+        logInfo(ctx, 'Registry resources downloaded');
     }
 
     logInfo(ctx, 'Validating devfile...');
@@ -300,7 +310,8 @@ async function acquireDevfile(ctx: InitContext): Promise<AcquiredDevfile> {
 
         return {
             devfile: rawDevfile,
-            devfilePath: outputPath
+            devfilePath: outputPath,
+            provenance: acquired.provenance  // Include provenance for resource downloads
         };
     } catch (err: any) {
         logError(ctx, `Failed to download devfile "${options.registryDevfile}"`);
@@ -742,5 +753,144 @@ async function materializeZipStarter(url: string, projectPath: string) {
     } finally {
         await fs.unlink(tmpZip).catch(() => undefined);
     }
+}
+
+/**
+ * Downloads resource files referenced in the devfile from the registry repository.
+ *
+ * This downloads files like:
+ * - docker/Dockerfile (from image.dockerfile.uri)
+ * - kubernetes/deploy.yaml (from kubernetes.uri)
+ * - Other resource files referenced in components
+ *
+ * Files are cached in ~/.odo/cache/{registryName}/ to avoid repeated downloads.
+ *
+ * @param devfile - The resolved devfile with URIs
+ * @param provenance - Registry provenance (url, stack, version)
+ * @param ctx - Init context
+ */
+async function downloadRegistryResources(
+    devfile: Devfile,
+    provenance: DevfileProvenance,
+    ctx: InitContext
+): Promise<void> {
+    const resolver = new RegistryResourceResolver();
+    const downloadedFiles: string[] = [];
+
+    // Get registry name for caching
+    const registryName = await getRegistryName(provenance.url);
+
+    // Extract URIs from all components
+    const uris = extractResourceUris(devfile);
+
+    if (uris.length === 0) {
+        logInfo(ctx, 'No resource URIs found in devfile');
+        return;
+    }
+
+    logInfo(ctx, `Found ${uris.length} resource URI(s) to download`);
+
+    for (const { uri } of uris) {
+        try {
+            logInfo(ctx, `Downloading ${uri}...`);
+
+            // Download from registry (with caching)
+            const content = await resolver.downloadResourceFile(
+                uri,
+                provenance.url,
+                registryName,
+                provenance.stack,
+                provenance.version
+            );
+
+            if (content === null) {
+                // 404 - file doesn't exist in registry
+                logInfo(ctx, '  → Not found in registry (will need to be user-provided)');
+                continue;
+            }
+
+            // Save to component folder
+            const targetPath = path.join(ctx.projectPath, uri);
+            await fs.mkdir(path.dirname(targetPath), { recursive: true });
+            await fs.writeFile(targetPath, content, 'utf-8');
+
+            downloadedFiles.push(uri);
+            logInfo(ctx, `  → Saved to ${uri}`);
+        } catch (err) {
+            logError(ctx, `  → Failed to download ${uri}: ${err.message}`);
+            // Continue with other files - partial downloads are OK
+        }
+    }
+
+    if (downloadedFiles.length > 0) {
+        logInfo(ctx, `Downloaded ${downloadedFiles.length} resource file(s)`);
+    }
+}
+
+/**
+ * Extract resource URIs from devfile components.
+ *
+ * Looks for:
+ * - kubernetes.uri
+ * - openshift.uri
+ * - image.dockerfile.uri
+ */
+function extractResourceUris(devfile: Devfile): Array<{ uri: string; componentType: string }> {
+    const uris: Array<{ uri: string; componentType: string }> = [];
+
+    if (!devfile.components) {
+        return uris;
+    }
+
+    for (const component of devfile.components) {
+        // Kubernetes component
+        if (component.kubernetes?.uri) {
+            uris.push({
+                uri: component.kubernetes.uri,
+                componentType: 'kubernetes'
+            });
+        }
+
+        // OpenShift component
+        if (component.openshift?.uri) {
+            uris.push({
+                uri: component.openshift.uri,
+                componentType: 'openshift'
+            });
+        }
+
+        // Dockerfile component
+        if (component.image?.dockerfile?.uri) {
+            uris.push({
+                uri: component.image.dockerfile.uri,
+                componentType: 'dockerfile'
+            });
+        }
+    }
+
+    return uris;
+}
+
+/**
+ * Get the registry name from preferences for the given registry URL.
+ * Falls back to sanitized URL if not found in preferences.
+ */
+async function getRegistryName(registryUrl: string): Promise<string> {
+    try {
+        const registries = await OdoPreference.Instance.getRegistries();
+        const registry = registries.find(r => r.url === registryUrl);
+
+        if (registry?.name) {
+            return registry.name;
+        }
+    } catch {
+        // Ignore preference errors
+    }
+
+    // Fallback: sanitize URL to use as folder name
+    // https://registry.devfile.io → registry.devfile.io
+    return registryUrl
+        .replace(/^https?:\/\//, '')
+        .replace(/[^a-zA-Z0-9.-]/g, '_');
 }
 

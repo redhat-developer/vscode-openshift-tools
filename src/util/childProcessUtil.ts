@@ -43,12 +43,12 @@ export namespace CliExitData {
     }
 }
 
-export class OdoChannel {
+export class OpenshiftChannel {
 
-    private static instance = new OdoChannel();
+    private static instance = new OpenshiftChannel();
 
     public static get Instance() {
-        return OdoChannel.instance;
+        return OpenshiftChannel.instance;
     }
 
     public constructor() {
@@ -59,7 +59,7 @@ export class OdoChannel {
     }
 
     print(text: string): void {
-        const textData = OdoChannel.prettifyJson(text);
+        const textData = OpenshiftChannel.prettifyJson(text);
         channel.append(textData);
         if (!textData.endsWith('\n')) {
             channel.append('\n');
@@ -92,15 +92,15 @@ export class OdoChannel {
  */
 export class ChildProcessUtil {
 
-    private static instance = new ChildProcessUtil(OdoChannel.Instance);
+    private static instance = new ChildProcessUtil(OpenshiftChannel.Instance);
 
-    private odoChannel: OdoChannel;
+    private odoChannel: OpenshiftChannel;
 
     public static get Instance() {
         return ChildProcessUtil.instance;
     }
 
-    private constructor(odoChannel: OdoChannel) {
+    private constructor(odoChannel: OpenshiftChannel) {
         this.odoChannel = odoChannel;
     }
 
