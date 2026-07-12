@@ -361,8 +361,14 @@ export class RegistryResourceResolver {
      * Check if this registry is backed by the official GitHub devfile/registry repo.
      */
     private isGitHubBackedRegistry(registryUrl: string): boolean {
-        return registryUrl.includes('registry.devfile.io') ||
-               registryUrl.includes('registry.stage.devfile.io');
+        try {
+            const url = new URL(registryUrl);
+            return url.hostname === 'registry.devfile.io' ||
+                   url.hostname === 'registry.stage.devfile.io';
+        } catch {
+            // Invalid URL, not a GitHub-backed registry
+            return false;
+        }
     }
 
     /**
