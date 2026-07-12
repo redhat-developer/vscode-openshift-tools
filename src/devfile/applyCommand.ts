@@ -7,10 +7,13 @@ import * as fs from 'fs/promises';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
 import { window } from 'vscode';
+import { CommandText } from '../base/command';
 import { DownloadUtil } from '../downloadUtil/download';
 import { Oc } from '../oc/ocWrapper';
 import { Apply, DeployedResource } from '../odo/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ContainerRuntimeDetector } from '../util/containerRuntime';
+import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { VariableResolver } from './variableResolver';
 
 export class ApplyCommandExecutor {
@@ -51,10 +54,11 @@ export class ApplyCommandExecutor {
             );
         }
         if ((component as any).image) {
-            // Image build component - skip for now (requires podman/docker/buildah)
-            // TODO: Implement image building in future PR
-            // Silently skip image builds - they require container runtime integration
-            return []; // No resources deployed for image builds
+            return await this.buildImageComponent(
+                (component as any).image,
+                path.dirname(devfilePath),
+                componentFolder,
+            );
         }
         throw new Error(
             `Component '${resolvedApply.component}' is not a kubernetes, openshift, or image component`,
@@ -137,6 +141,52 @@ export class ApplyCommandExecutor {
             }
             throw new Error(`Failed to download manifest from '${url}': ${err.message}`);
         }
+    }
+
+    private static async buildImageComponent(
+        imageComponent: any,
+        devfileDir: string,
+        componentFolder: ComponentWorkspaceFolder,
+    ): Promise<DeployedResource[]> {
+        const runtime = await ContainerRuntimeDetector.detectBuildRuntime();
+        if (!runtime) {
+            throw new Error(
+                'No container runtime found. Install podman, docker, or buildah to build images.',
+            );
+        }
+
+        const imageName = imageComponent.imageName;
+        const dockerfilePath = imageComponent.dockerfile?.uri || 'Dockerfile';
+        const buildContext = imageComponent.dockerfile?.buildContext || '.';
+
+        // Resolve paths relative to devfile directory
+        const resolvedDockerfile = path.isAbsolute(dockerfilePath)
+            ? dockerfilePath
+            : path.join(devfileDir, dockerfilePath);
+        const resolvedContext = path.isAbsolute(buildContext)
+            ? buildContext
+            : devfileDir;
+
+        const buildArgs = ContainerRuntimeDetector.getBuildCommand(
+            runtime, imageName, resolvedDockerfile, resolvedContext,
+        );
+
+        // Run build in terminal - allows interactive auth for registry push
+        const command = new CommandText(runtime, buildArgs.slice(runtime.length + 1));
+
+        return new Promise<DeployedResource[]>((resolve, reject) => {
+            void OpenShiftTerminalManager.getInstance().createTerminal(
+                command,
+                `Build: ${imageName}`,
+                componentFolder.contextPath,
+                process.env,
+                {
+                    onExit() {
+                        resolve([]);
+                    },
+                },
+            ).catch(reject);
+        });
     }
 
     private static parseDeployedResources(manifestContent: string): DeployedResource[] {
