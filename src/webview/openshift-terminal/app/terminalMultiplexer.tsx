@@ -127,9 +127,8 @@ export const TerminalMultiplexer = () => {
     const respondToMessage = function (message: MessageEvent<VSCodeMessage>) {
         if (message.data.kind === 'createTerminal') {
             const uuid = message.data.data.uuid as string;
-            setTerminals([
-                ...terminals,
-
+            setTerminals((terms) => [
+                ...terms,
                 {
                     name: message.data.data.name,
                     uuid,

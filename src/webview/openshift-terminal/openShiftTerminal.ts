@@ -87,7 +87,7 @@ class OpenShiftTerminal {
     private _sendExitMessage: () => void;
 
     private _onSpawnListener: () => void;
-    private _onExitListener: () => void;
+    private _onExitListener: (exitCode: number) => void;
     private _onTextListener: (text: string) => void;
 
     private _uuid: string;
@@ -129,7 +129,7 @@ class OpenShiftTerminal {
         isKnative: boolean,
         callbacks?: {
             onSpawn?: () => void;
-            onExit?: () => void;
+            onExit?: (exitCode: number) => void;
             onText?: (text: string) => void;
         },
         spawnPty = true
@@ -143,7 +143,7 @@ class OpenShiftTerminal {
             void sendMessage({ kind: 'termExit', data: { uuid } });
         };
         this._onSpawnListener = callbacks?.onSpawn || (() => undefined);
-        this._onExitListener = callbacks?.onExit || (() => undefined);
+        this._onExitListener = callbacks?.onExit || ((_exitCode: number) => undefined);
         this._onTextListener = callbacks?.onText || ((_text: string) => undefined);
 
         this._file = file;
@@ -200,15 +200,15 @@ class OpenShiftTerminal {
             }),
         );
         this._disposables.push(
-            this._pty.onExit((_e) => {
-                this.onExit();
+            this._pty.onExit((e) => {
+                this.onExit(e.exitCode);
             }),
         );
         this._onSpawnListener();
     }
 
-    private onExit() {
-        this._onExitListener();
+    private onExit(exitCode = -1) {
+        this._onExitListener(exitCode);
         const msg = '\r\n\r\nPress any key to close this terminal\r\n';
         this._sendTerminalData(msg);
         this._headlessTerm.write(msg);
@@ -659,7 +659,7 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         env = process.env,
         callbacks?: {
             onSpawn?: () => void;
-            onExit?: () => void;
+            onExit?: (exitCode: number) => void;
             onText?: (text: string) => void;
         },
         isKnative = false

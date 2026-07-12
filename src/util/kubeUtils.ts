@@ -11,6 +11,7 @@ import { QuickPickItem, window } from 'vscode';
 import { stringify } from 'yaml';
 import { CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import { KubernetesVariant } from '../oc/types';
 import { Platform } from './platform';
 import { ExecutionContext, YAML_STRINGIFY_OPTIONS } from './utils';
 
@@ -426,6 +427,27 @@ export async function isOpenShiftCluster(executionContext?: ExecutionContext): P
     }
   }
 
+export async function detectKubernetesVariant(executionContext?: ExecutionContext): Promise<KubernetesVariant> {
+    const configInfo = new KubeConfigInfo();
+    const contextName = configInfo.getEffectiveKubeConfig().currentContext;
+
+    if (contextName?.startsWith('kind-')) {
+        try {
+            await CliChannel.getInstance().executeSyncTool(
+                new CommandText('kind', 'version'), { timeout: 3000 }, executionContext);
+            return KubernetesVariant.Kind;
+        } catch {
+            // kind CLI not available, fall through
+        }
+    }
+
+    if (contextName === 'minikube' || contextName?.startsWith('minikube-')) {
+        return KubernetesVariant.Minikube;
+    }
+
+    return KubernetesVariant.Generic;
+}
+
 export async function getNamespaceKind(executionContext?: ExecutionContext): Promise<string> {
     if (executionContext && executionContext.has(getNamespaceKind.name)) {
         return executionContext.get(getNamespaceKind.name);
@@ -435,6 +457,29 @@ export async function getNamespaceKind(executionContext?: ExecutionContext): Pro
         executionContext.set(getNamespaceKind.name, result);
     }
     return result;
+}
+
+export async function getOpenShiftRegistryUrl(): Promise<string | undefined> {
+    try {
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'registry info'), undefined, false,
+        );
+        const url = result.stdout?.trim();
+        if (url && !url.includes('error')) return url;
+    } catch {
+        // fall through
+    }
+    try {
+        const result = await CliChannel.getInstance().executeTool(
+            new CommandText('oc', 'get route default-route -n openshift-image-registry -o jsonpath=\'{.spec.host}\''),
+            undefined, false,
+        );
+        const host = result.stdout?.trim().replace(/'/g, '');
+        if (host) return host;
+    } catch {
+        // registry route not exposed
+    }
+    return undefined;
 }
 
 export function extractProjectNameFromContextName(contextName: string):string {
