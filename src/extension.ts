@@ -310,6 +310,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     OpenShiftExplorer.getInstance().onDidChangeContextEmitter.event((context) => {
         void updateContextAndProjectStatusBarItems(context);
+        Component.onContextChanged();
     });
 
     void updateContextAndProjectStatusBarItems();

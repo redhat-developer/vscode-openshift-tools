@@ -129,18 +129,20 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentIn
         this.odoWorkspace.onDidChangeComponents(() => {
             this.refresh();
         });
-        Component.onDidStateChanged(() => this.refresh());
+        Component.onDidStateChanged((ctx) => this.refresh(ctx));
     }
 
     private refresh(contextPath?: string): void {
-        if (contextPath) {
-            const folder = this.odoWorkspace.findComponent(vsc.workspace.getWorkspaceFolder(vsc.Uri.parse(contextPath)));
-            this.onDidChangeTreeDataEmitter.fire(new ComponentInfoRoot(folder));
-        } else {
-            this.children = undefined; // Invalidate children cache so they wll be re-created
-            this.odoWorkspace.reset();
-            this.onDidChangeTreeDataEmitter.fire(undefined);
+        if (contextPath && this.children) {
+            const node = this.children.find(c => c.contextPath === contextPath);
+            if (node) {
+                this.onDidChangeTreeDataEmitter.fire(node);
+                return;
+            }
         }
+        this.children = undefined;
+        this.odoWorkspace.reset();
+        this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
     @vsCommand('openshift.componentsView.refresh')
