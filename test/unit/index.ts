@@ -74,13 +74,17 @@ export async function run(): Promise<void> {
     return new Promise((resolve, reject) => {
         let failed = 0;
         try {
-            mocha.run(failures => {
+            const runner = mocha.run(failures => {
                 console.log('Mocha reported failures:', failures);
 
                 if (failures > 0) {
                     failed = failures;
                 }
             }).on('end', () => {
+                const { passes, failures, pending, duration } = runner.stats;
+                const total = passes + failures + pending;
+                const summary = `  Test Results: ${total} total, ${passes} passing, ${failures} failing, ${pending} skipped (${duration}ms)`;
+                console.error(summary);
                 let coverageReported = Promise.resolve();
                 if (coverageRunner) {
                     coverageReported = coverageRunner.reportCoverage();

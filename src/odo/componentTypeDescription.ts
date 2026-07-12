@@ -218,6 +218,13 @@ export interface DeployState {
     version: number;
     componentName: string;
     deployedAt: string;
-    platform: 'cluster' | 'podman';
+    platform: 'openshift' | 'kubernetes' | 'podman';
+    cluster: string;
+    namespace: string;
     resources: DeployedResource[];
+}
+
+export interface DeployStateFile {
+    version: number;
+    deployments: Record<string, DeployState>;
 }
