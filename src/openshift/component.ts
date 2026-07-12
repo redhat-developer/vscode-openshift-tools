@@ -3,30 +3,31 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { KubeConfig, KubernetesObject } from '@kubernetes/client-node';
+import { readFile } from 'fs/promises';
 import { platform } from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
+import { deployComponent, deployContextKey } from '../devfile/deploy';
 import { describeComponentYAML } from '../devfile/describe';
+import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
+import { undeployComponent } from '../devfile/undeploy';
+import { BindableService } from '../k8s/servicebinding/bindableService';
 import { Oc } from '../oc/ocWrapper';
 import { Command } from '../odo/command';
-import { CommandProvider } from '../odo/componentTypeDescription';
+import { CommandProvider, DeployState } from '../odo/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
+import sendTelemetry from '../telemetry';
 import { ChildProcessUtil, CliExitData, OpenshiftChannel } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
 import { Util as fs } from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
+import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
 import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
-import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
-import { deployComponent } from '../devfile/deploy';
-import { undeployComponent } from '../devfile/undeploy';
-import { KubernetesObject } from '@kubernetes/client-node';
-import { BindableService } from '../k8s/servicebinding/bindableService';
-import sendTelemetry from '../telemetry';
-import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingLoader';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -87,6 +88,57 @@ export class Component extends OpenShiftItem {
         Component.stateChanged.event(listener);
     }
 
+    public static onContextChanged(): void {
+        let kc: KubeConfig;
+        try {
+            kc = new KubeConfig();
+            kc.loadFromDefault();
+        } catch {
+            return;
+        }
+        const currentCluster = kc.getCurrentCluster()?.server;
+        const currentContext = kc.getContextObject(kc.getCurrentContext());
+        const currentNamespace = currentContext?.namespace || 'default';
+
+        for (const [contextPath, state] of Component.componentStates) {
+            if (state.deployStatus === ComponentContextState.DEP_RUNNING
+                || state.deployStatus === ComponentContextState.DEP) {
+                void Component.reconcileDeployState(contextPath, state, currentCluster, currentNamespace);
+            }
+        }
+    }
+
+    private static async reconcileDeployState(
+        contextPath: string, state: ComponentDevState,
+        currentCluster: string, currentNamespace: string,
+    ): Promise<void> {
+        let shouldBeRunning = false;
+        try {
+            const stateFile = path.join(contextPath, '.odo', 'deploystate.json');
+            const raw = await readFile(stateFile, 'utf-8');
+            const parsed = JSON.parse(raw);
+            if (parsed.version === 1 && !parsed.deployments) {
+                const deployState = parsed as DeployState;
+                shouldBeRunning = deployState.cluster === currentCluster
+                    && deployState.namespace === currentNamespace;
+            } else if (parsed.deployments) {
+                const key = deployContextKey(currentCluster, currentNamespace);
+                shouldBeRunning = !!parsed.deployments[key];
+            }
+        } catch {
+            // no state file — not deployed
+        }
+
+        const newStatus = shouldBeRunning
+            ? ComponentContextState.DEP_RUNNING
+            : ComponentContextState.DEP;
+
+        if (state.deployStatus !== newStatus) {
+            state.deployStatus = newStatus;
+            Component.stateChanged.fire(contextPath);
+        }
+    }
+
     public static init(): Disposable[] {
         return [
             debug.onDidStartDebugSession((session) => {
@@ -114,9 +166,29 @@ export class Component extends OpenShiftItem {
             };
             if (folder.component?.devfileData?.supportedOdoFeatures !== undefined) {
                 Component.componentStates.set(folder.contextPath, state);
+                if (state.deployStatus === ComponentContextState.DEP) {
+                    void Component.detectDeployedState(folder);
+                }
             }
         }
         return state;
+    }
+
+    private static detectDeployedState(folder: ComponentWorkspaceFolder): void {
+        let kc: KubeConfig;
+        try {
+            kc = new KubeConfig();
+            kc.loadFromDefault();
+        } catch {
+            return;
+        }
+        const currentCluster = kc.getCurrentCluster()?.server;
+        const currentContext = kc.getContextObject(kc.getCurrentContext());
+        const currentNamespace = currentContext?.namespace || 'default';
+        const state = Component.componentStates.get(folder.contextPath);
+        if (state) {
+            void Component.reconcileDeployState(folder.contextPath, state, currentCluster, currentNamespace);
+        }
     }
 
     public static generateContextStateSuffixValue(folder: ComponentWorkspaceFolder): string {
@@ -155,6 +227,13 @@ export class Component extends OpenShiftItem {
             label = ` (dev running${runningOnSuffix})`;
         } else if(state.devStatus === ComponentContextState.DEV_STOPPING) {
             label = ` (dev stopping${runningOnSuffix})`;
+        }
+        if (state.deployStatus === ComponentContextState.DEP_STARTING) {
+            label += ' (deploying)';
+        } else if (state.deployStatus === ComponentContextState.DEP_RUNNING) {
+            label += ' (deployed)';
+        } else if (state.deployStatus === ComponentContextState.DEP_STOPPING) {
+            label += ' (undeploying)';
         }
         return label;
     }

@@ -20,7 +20,7 @@ const isWatch = process.argv.includes('--watch');
 // Verify the WebViews (skip in watch mode - VS Code editor handles this)
 if (!isWatch) {
     try {
-        execSync('tsc --noEmit -p ./src/webview/tsconfig.json', { stdio: 'inherit' });
+        execSync(`node "${require.resolve('typescript/bin/tsc')}" --noEmit -p ./src/webview/tsconfig.json`, { stdio: 'inherit' });
     } catch (err) {
         console.error('❌ TypeScript type-checking failed.');
         process.exit(1);
