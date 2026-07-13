@@ -55,7 +55,7 @@ jobs:
           license-check: false
 
       - name: Restore cached tool binaries
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: out/tools-cache
           key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/tools.json') }}
@@ -144,7 +144,7 @@ jobs:
 
       - name: Save tool binaries cache
         if: github.event_name == 'push' && (success() || failure())
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: out/tools-cache
           key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/tools.json') }}
