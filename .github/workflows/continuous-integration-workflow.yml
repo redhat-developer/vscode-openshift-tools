@@ -54,6 +54,12 @@ jobs:
           comment-summary-in-pr: on-failure
           license-check: false
 
+      - name: Restore cached tool binaries
+        uses: actions/cache/restore@v5
+        with:
+          path: out/tools-cache
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/tools.json') }}
+
       # Run install dependencies
       - name: Install dependencies
         run: |
@@ -135,3 +141,10 @@ jobs:
         if: (success() || failure()) && runner.os == 'Linux'
         with:
           files: ./coverage/unit/coverage-final.json,./coverage/integration/coverage-final.json
+
+      - name: Save tool binaries cache
+        if: github.event_name == 'push' && (success() || failure())
+        uses: actions/cache/save@v5
+        with:
+          path: out/tools-cache
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/tools.json') }}
