@@ -13,6 +13,7 @@ import {
     Event,
     EventEmitter,
     extensions,
+    ProgressLocation,
     TextDocumentShowOptions,
     ThemeIcon,
     TreeDataProvider,
@@ -893,25 +894,52 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     @vsCommand('openshift.resource.watchLogs')
     public static async watchLogs(component: KubernetesObject) {
         const namespace: string = await Oc.Instance.getActiveProject();
-        // wait until logs are available before starting to stream them
-        await Progress.execFunctionWithProgress(`Opening ${component.kind}/${component.metadata.name} logs...`, (_) => {
-            return new Promise<void>(resolve => {
+        const resourceRef = `${component.kind}/${component.metadata.name}`;
+        const timeoutMs = 120_000;
 
-                let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
+        const logsAvailable = await window.withProgress(
+            {
+                cancellable: true,
+                location: ProgressLocation.Notification,
+                title: `Opening ${resourceRef} logs...`,
+            },
+            (_progress, token) => {
+                return new Promise<boolean>((resolve) => {
+                    const startTime = Date.now();
 
-                function checkForPod() {
-                    void Oc.Instance.getLogs(`${component.kind}`, component.metadata.name, namespace).then((logs) => {
+                    const intervalId = setInterval(() => {
+                        if (token.isCancellationRequested) {
+                            clearInterval(intervalId);
+                            resolve(false);
+                            return;
+                        }
+                        if (Date.now() - startTime > timeoutMs) {
+                            clearInterval(intervalId);
+                            resolve(false);
+                            return;
+                        }
+                        void Oc.Instance.getLogs(component.kind, component.metadata.name, namespace)
+                            .then(() => {
+                                clearInterval(intervalId);
+                                resolve(true);
+                            })
+                            .catch(() => { /* retry next interval */ });
+                    }, 2000);
+
+                    token.onCancellationRequested(() => {
                         clearInterval(intervalId);
-                        resolve();
-                    }).catch(_e => { });
-                }
+                        resolve(false);
+                    });
+                });
+            },
+        );
 
-                intervalId = setInterval(checkForPod, 200);
-            });
-        });
+        if (!logsAvailable) {
+            return;
+        }
 
         void OpenShiftTerminalManager.getInstance().createTerminal(
-            new CommandText('oc', `logs -f ${component.kind}/${component.metadata.name}`,
+            new CommandText('oc', `logs -f ${resourceRef}`,
                 [new CommandOption('--namespace', namespace)]),
             `Watching '${component.metadata.name}' logs`);
     }
