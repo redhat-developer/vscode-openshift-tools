@@ -6,7 +6,7 @@
 import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
 import { CommandText } from './base/command';
-import { ToolsConfig } from './tools';
+import { ToolNotFoundError, ToolsConfig } from './tools';
 import { ChildProcessUtil, CliExitData } from './util/childProcessUtil';
 import { ExecutionContext } from './util/utils';
 import { VsCommandError } from './vscommand';
@@ -128,6 +128,9 @@ export class CliChannel {
         }
 
         const toolLocation = await ToolsConfig.detect(cmd.command);
+        if (!toolLocation) {
+            throw new ToolNotFoundError(cmd.command);
+        }
         const optWithTelemetryEnv = CliChannel.applyEnv(options, CliChannel.createTelemetryEnv()) as cp.ExecFileSyncOptionsWithStringEncoding;
 
         const result: string = cp.execFileSync(toolLocation, [cmd.parameter, ...cmd.options.map((o)=>o.toString())], optWithTelemetryEnv);

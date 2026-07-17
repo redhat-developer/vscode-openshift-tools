@@ -6,6 +6,7 @@
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
+import { ToolNotFoundError } from '../tools';
 import { isOpenShiftCluster } from './kubeUtils';
 
 export class LoginUtil {
@@ -37,9 +38,15 @@ export class LoginUtil {
                 return await CliChannel.getInstance().executeSyncTool(
                         new CommandText('oc', 'api-versions'), { timeout: 5000 })
                     .then((response) => !response || response.trim().length === 0) // Active user is set - no need to login
-                    .catch((error) => true);
+                    .catch((error) => {
+                        if (error instanceof ToolNotFoundError) throw error;
+                        return true;
+                    });
             })
-            .catch((error) => true); // Can't get server - require to login
+            .catch((error) => {
+                if (error instanceof ToolNotFoundError) throw error;
+                return true;
+            });
     }
 
     /**
