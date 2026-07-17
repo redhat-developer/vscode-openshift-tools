@@ -13,6 +13,13 @@ import configData from './tools.json';
 import { ChildProcessUtil } from './util/childProcessUtil';
 import { Platform } from './util/platform';
 
+export class ToolNotFoundError extends Error {
+    constructor(public readonly toolName: string) {
+        super(`'${toolName}' tool not found. Install it or enable 'openshiftToolkit.searchForToolsInPath' setting.`);
+        this.name = 'ToolNotFoundError';
+    }
+}
+
 export class ToolsConfig {
 
     public static tools: any = ToolsConfig.loadMetadata(configData, Platform.OS);

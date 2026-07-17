@@ -15,6 +15,7 @@ import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ChildProcessUtil, CliExitData } from '../../src/util/childProcessUtil';
 import { Platform } from '../../src/util/platform';
+import { ToolNotFoundError } from '../../src/tools';
 import * as utils from '../../src/util/utils';
 
 chai.use(sinonChai);
@@ -150,6 +151,30 @@ suite('tools configuration', () => {
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
             assert.ok(!config.odo);
+        });
+    });
+
+    suite('ToolNotFoundError', () => {
+        test('extends Error', () => {
+            const error = new ToolNotFoundError('oc');
+            assert.ok(error instanceof Error);
+            assert.ok(error instanceof ToolNotFoundError);
+        });
+
+        test('has correct name property', () => {
+            const error = new ToolNotFoundError('oc');
+            assert.equal(error.name, 'ToolNotFoundError');
+        });
+
+        test('stores toolName', () => {
+            const error = new ToolNotFoundError('oc');
+            assert.equal(error.toolName, 'oc');
+        });
+
+        test('message includes tool name and setting hint', () => {
+            const error = new ToolNotFoundError('oc');
+            assert.ok(error.message.includes('\'oc\''));
+            assert.ok(error.message.includes('searchForToolsInPath'));
         });
     });
 });
