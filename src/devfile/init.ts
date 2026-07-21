@@ -31,14 +31,17 @@ export async function initComponent(options: ComponentInitOptions) {
 
     const acquiredDevfile = acquired.devfile;
 
-    // Always resolve devfile to merge parent chain (needed for all sources: registry, file, local)
+    // Keep the unresolved devfile — this is what gets saved to disk (preserves parent references)
+    let devfileToSave: Devfile = acquiredDevfile;
+
+    // Resolve devfile for internal use (validation, analysis, starter project lookup)
     logInfo(ctx, 'Resolving devfile (merging parent chain)...');
-    let workingDevfile = await resolveDevfile(acquiredDevfile, acquired.devfilePath, acquired.provenance);
+    let resolvedDevfile = await resolveDevfile(acquiredDevfile, acquired.devfilePath, acquired.provenance);
     logInfo(ctx, 'Parent chain merged');
 
     logInfo(ctx, 'Processing starter project...');
 
-    const starterResult = await materializeStarterProjects(workingDevfile, ctx);
+    const starterResult = await materializeStarterProjects(resolvedDevfile, ctx);
 
     if (starterResult.starterDevfilePath) {
         logInfo(ctx, `Using starter devfile: ${starterResult.starterDevfilePath}`);
@@ -49,28 +52,24 @@ export async function initComponent(options: ComponentInitOptions) {
 
         assertDevfileObject(parsed);
 
-        // Resolve the starter's devfile too (merge its parents)
-        // Note: provenance is undefined for starter devfiles (they come from git, not registry)
-        workingDevfile = await resolveDevfile(parsed, starterResult.starterDevfilePath, undefined);
-        logInfo(ctx, 'Starter devfile resolved and overrides registry devfile');
+        // Starter's devfile becomes what we save (unresolved, preserving its parent reference)
+        devfileToSave = parsed;
+
+        // Resolve the starter's devfile for validation/analysis
+        resolvedDevfile = await resolveDevfile(parsed, starterResult.starterDevfilePath, undefined);
+        logInfo(ctx, 'Starter devfile overrides registry devfile');
     }
 
-    // Download registry resource files based on FINAL working devfile
-    // (after starter devfile override, if any)
-    // Resource files (docker/Dockerfile, kubernetes/deploy.yaml) come from the registry,
-    // NOT from the starter project git repo
+    // Download registry resource files based on resolved devfile
     if (acquired.provenance) {
         logInfo(ctx, 'Downloading registry resource files...');
-        await downloadRegistryResources(workingDevfile, acquired.provenance, ctx);
+        await downloadRegistryResources(resolvedDevfile, acquired.provenance, ctx);
         logInfo(ctx, 'Registry resources downloaded');
     }
 
     logInfo(ctx, 'Validating devfile...');
 
-    // Use working devfile as-is (already resolved above for registry, or from file/local)
-    const resolvedDevfile = workingDevfile;
-
-    // analysis-only copy
+    // Validate and analyze using the resolved devfile (has all components/commands from parent)
     const analysisDevfile = interpolateDevfileVariables(structuredClone(resolvedDevfile));
     validateDevfileStructure(analysisDevfile);
 
@@ -89,8 +88,8 @@ export async function initComponent(options: ComponentInitOptions) {
     logInfo(ctx, 'Readiness check complete');
     logInfo(ctx, 'Normalizing devfile...');
 
-    // The following creates a structured copy of working devfile
-    const normalizedDevfile = normalizeDevfile(workingDevfile, ctx);
+    // Normalize and save the UNRESOLVED devfile (preserves parent reference)
+    const normalizedDevfile = normalizeDevfile(devfileToSave, ctx);
 
     await writeWorkspace(normalizedDevfile, acquired, ctx);
 
