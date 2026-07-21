@@ -28,7 +28,7 @@ const baseConfig = {
 };
 
 async function copyJsonFiles() {
-    const jsonFiles = sync('src/**/*.json', { absolute: false });
+    const jsonFiles = sync('src/**/*.json', { absolute: false, ignore: ['src/webview/**'] });
     for (const file of jsonFiles) {
         const dest = path.join('out', file);
         await cp(file, dest, { recursive: false, force: true });
