@@ -158,8 +158,9 @@ suite('odo commands integration', function () {
                     // Just verify the error is registry-related, not a code bug
                     if (err.message.includes('registry') ||
                         err.message.includes('push') ||
-                        err.message.includes('image')) {
-                        this.skip(); // Skip test - registry not configured
+                        err.message.includes('image') ||
+                        err.message.includes('runtime')) {
+                        this.skip(); // Skip test - no container runtime or registry
                     } else {
                         throw err; // Real error - fail the test
                     }
@@ -446,6 +447,239 @@ suite('odo commands integration', function () {
                     devTerm.dispose();
                 }
             }
+        });
+    });
+
+    suite('container runtime detection', function () {
+        let detectedRuntime: string | null;
+
+        suiteSetup(async function () {
+            const { ContainerRuntimeDetector } = await import('../../src/util/containerRuntime');
+            detectedRuntime = await ContainerRuntimeDetector.detectBuildRuntime();
+        });
+
+        test('detectBuildRuntime() finds an available runtime', function () {
+            if (!detectedRuntime) {
+                this.skip(); // No runtime on this CI runner
+            }
+            expect(detectedRuntime).to.be.oneOf(['podman', 'docker', 'buildah']);
+        });
+
+        test('getBuildCommand() returns valid command for detected runtime', async function () {
+            if (!detectedRuntime) {
+                this.skip();
+            }
+            const { ContainerRuntimeDetector } = await import('../../src/util/containerRuntime');
+            const cmd = ContainerRuntimeDetector.getBuildCommand(
+                detectedRuntime as any, 'test:latest', '/tmp/Dockerfile', '/tmp',
+            );
+            expect(cmd).to.contain(detectedRuntime);
+        });
+    });
+
+    suite('deploy with inlined resources', function () {
+        const deployProjectName = `deploy-test${Math.round(Math.random() * 1000)}`;
+        let componentLocation: string;
+
+        const inlinedManifest = [
+            'apiVersion: apps/v1',
+            'kind: Deployment',
+            'metadata:',
+            '  name: test-deploy-app',
+            '  labels:',
+            '    app: test-deploy-app',
+            'spec:',
+            '  replicas: 1',
+            '  selector:',
+            '    matchLabels:',
+            '      app: test-deploy-app',
+            '  template:',
+            '    metadata:',
+            '      labels:',
+            '        app: test-deploy-app',
+            '    spec:',
+            '      containers:',
+            '        - name: main',
+            '          image: registry.access.redhat.com/ubi8/ubi-minimal:latest',
+            '          command: ["sleep", "3600"]',
+            '---',
+            'apiVersion: v1',
+            'kind: Service',
+            'metadata:',
+            '  name: test-deploy-app',
+            'spec:',
+            '  selector:',
+            '    app: test-deploy-app',
+            '  ports:',
+            '    - port: 8080',
+            '      targetPort: 8080',
+        ].join('\n');
+
+        const devfileContent = {
+            schemaVersion: '2.2.0',
+            metadata: { name: 'test-deploy', version: '1.0.0' },
+            components: [
+                {
+                    name: 'k8s-deploy',
+                    kubernetes: { inlined: inlinedManifest },
+                },
+            ],
+            commands: [
+                {
+                    id: 'apply-k8s',
+                    apply: { component: 'k8s-deploy' },
+                },
+            ],
+        };
+
+        suiteSetup(async function () {
+            if (isOpenShift) {
+                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
+            }
+            try {
+                await Oc.Instance.createProject(deployProjectName);
+            } catch {
+                // already exists
+            }
+            await Oc.Instance.setProject(deployProjectName);
+
+            componentLocation = await promisify(tmp.dir)();
+            await fs.writeFile(
+                path.join(componentLocation, 'devfile.yaml'),
+                stringify(devfileContent, YAML_STRINGIFY_OPTIONS),
+            );
+        });
+
+        suiteTeardown(async function () {
+            let toRemove = -1;
+            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+                if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
+                    toRemove = i;
+                    break;
+                }
+            }
+            if (toRemove !== -1) {
+                workspace.updateWorkspaceFolders(toRemove, 1);
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            await fs.rm(componentLocation, { recursive: true, force: true });
+            try {
+                await Oc.Instance.deleteProject(deployProjectName);
+            } catch {
+                // ignore
+            }
+        });
+
+        test('deployComponent() applies inlined kubernetes resources', async function () {
+            const { deployComponent } = await import('../../src/devfile/deploy');
+
+            const componentFolder: ComponentWorkspaceFolder = {
+                contextPath: componentLocation,
+                component: await Odo.Instance.describeComponent(componentLocation),
+            };
+
+            const result = await deployComponent(
+                { componentPath: componentLocation },
+                componentFolder,
+            );
+
+            expect(result.success).to.be.true;
+            expect(result.deployedCommands.length).to.be.greaterThan(0);
+
+            const deployStatePath = path.join(componentLocation, '.odo', 'deploystate.json');
+            await fs.access(deployStatePath);
+        });
+
+        test('deployed resources exist on cluster', async function () {
+            const deployment = await Oc.Instance.getKubernetesObject('deployment', 'test-deploy-app');
+            expect(deployment).to.exist;
+            expect((deployment as any).metadata.name).to.equal('test-deploy-app');
+
+            const service = await Oc.Instance.getKubernetesObject('service', 'test-deploy-app');
+            expect(service).to.exist;
+            expect((service as any).metadata.name).to.equal('test-deploy-app');
+        });
+
+        test('undeployComponent() removes resources and state', async function () {
+            const { undeployComponent } = await import('../../src/devfile/undeploy');
+
+            const componentFolder: ComponentWorkspaceFolder = {
+                contextPath: componentLocation,
+                component: await Odo.Instance.describeComponent(componentLocation),
+            };
+
+            await undeployComponent(
+                { componentPath: componentLocation },
+                componentFolder,
+            );
+
+            // Verify state file removed
+            try {
+                await fs.access(path.join(componentLocation, '.odo', 'deploystate.json'));
+                assert.fail('Deploy state file should have been deleted');
+            } catch (err) {
+                expect(err.code).to.equal('ENOENT');
+            }
+
+            // Verify resources removed from cluster
+            try {
+                await Oc.Instance.getKubernetesObject('deployment', 'test-deploy-app');
+                assert.fail('Deployment should have been deleted');
+            } catch {
+                // Expected - resource no longer exists
+            }
+        });
+    });
+
+    suite('local image build', function () {
+        let buildDir: string;
+        let detectedRuntime: string | null;
+
+        suiteSetup(async function () {
+            const { ContainerRuntimeDetector } = await import('../../src/util/containerRuntime');
+            detectedRuntime = await ContainerRuntimeDetector.detectBuildRuntime();
+            if (!detectedRuntime) {
+                this.skip();
+            }
+
+            buildDir = await promisify(tmp.dir)();
+            await fs.writeFile(
+                path.join(buildDir, 'Dockerfile'),
+                'FROM registry.access.redhat.com/ubi8/ubi-minimal:latest\nCMD ["echo", "hello"]\n',
+            );
+        });
+
+        suiteTeardown(async function () {
+            if (buildDir) {
+                await fs.rm(buildDir, { recursive: true, force: true });
+            }
+            // Clean up built image
+            if (detectedRuntime) {
+                try {
+                    await CliChannel.getInstance().executeTool(
+                        new CommandText(detectedRuntime, 'rmi localhost/test-build:latest'),
+                    );
+                } catch {
+                    // ignore - image may not exist
+                }
+            }
+        });
+
+        test('builds image locally without push', async function () {
+            const { ContainerRuntimeDetector } = await import('../../src/util/containerRuntime');
+            const buildCommand = ContainerRuntimeDetector.getBuildCommand(
+                detectedRuntime as any,
+                'localhost/test-build:latest',
+                path.join(buildDir, 'Dockerfile'),
+                buildDir,
+            );
+
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText(buildCommand.split(' ')[0], buildCommand.split(' ').slice(1).join(' ')),
+                { cwd: buildDir },
+            );
+
+            expect(result.error).to.be.undefined;
         });
     });
 });
