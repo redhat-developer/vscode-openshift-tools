@@ -65,6 +65,7 @@
 		"test:build-extension": "npm run prebuild-esm && tsc -p tsconfig.json",
 		"test:build-webviews": "node ./build/esbuild.webviews.cjs",
 		"test:instrument": "shx rm -rf out/src-orig && shx mv out/src out/src-orig && istanbul instrument --complete-copy --embed-source --output out/src out/src-orig",
+		"pretest": "pkill -f 'esbuild\\.(extension|webviews)\\.cjs --watch' 2>/dev/null; true",
 		"test": "npm run test:prepare && node ./build/install-vscode.cjs && node ./build/run-tests.cjs unit",
 		"test:coverage": "npm run test:prepare && npm run test:instrument && node ./build/install-vscode.cjs && node ./build/run-tests.cjs unit",
 		"test-integration": "npm run test:prepare && node ./build/run-tests.cjs integration",
