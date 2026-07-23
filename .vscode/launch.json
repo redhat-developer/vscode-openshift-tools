@@ -17,6 +17,7 @@
                 "${workspaceFolder}/out/src/**/*.js"
             ],
             "preLaunchTask": "watch",
+            "postDebugTask": "kill-watchers",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
             }
