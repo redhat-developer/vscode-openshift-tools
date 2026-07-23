@@ -11,12 +11,12 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import { Box, Checkbox, FormControlLabel, Icon, Stack, SvgIcon, Typography } from '@mui/material';
 import React from 'react';
 import ScrollToTop from 'react-scroll-to-top';
+import OpenShhiftLocal from '../../../../images/openshift-local.png';
 import OpenShiftExtensionIcon from '../../../../images/openshift_extension.png';
 import OpenShiftLogo from '../../../../images/title/logo.svg';
 import OpenShiftBranding from '../../../../images/welcome/OpenShift-Branding-box.png';
 import CloudBranding from '../../../../images/welcome/cloud.svg';
 import ComponentBranding from '../../../../images/welcome/component.png';
-import OpenShhiftLocal from '../../../../images/openshift-local.png';
 import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
 import OdoLogo from '../../../../images/welcome/odo.png';
 import { VSCodeMessage } from './vsCodeMessage';
@@ -249,7 +249,7 @@ export class Welcome extends React.Component<DefaultProps, {
                             <div className='section__header'>
                                 <p className='section__header-hint'>
                                     OpenShift Toolkit for VS Code brings the power and convenience of Kubernetes and Red Hat OpenShift to developers. The extension allows developers to create, test, debug and deploy cloud-native applications on OpenShift in simple steps.
-                                    With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free(30 days) <a>Red Hat Developer Sandbox</a> instance.
+                                    With the extension, users can provision a new OpenShift cluster, either using <a>OpenShift Local</a> or using a free (30 days) <a>Red Hat Developer Sandbox</a> instance.
                                 </p>
                                 <div className='setting__input setting__input--big' style={{ paddingBottom: '0px', borderBottom: '0px', marginBottom: '0px' }}>
                                     <label style={{ display: 'flex', flexDirection: 'row' }}>
