@@ -23,6 +23,7 @@ import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem
 import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
 import { deployComponent } from '../devfile/deploy';
 import { undeployComponent } from '../devfile/undeploy';
+import { KubernetesObject } from '@kubernetes/client-node';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -245,6 +246,13 @@ export class Component extends OpenShiftItem {
                 });
         }
         return false;
+    }
+
+    @vsCommand('openshift.component.binding.add')
+    static async addBinding(_component: ComponentWorkspaceFolder) {
+        const bindableKinds: KubernetesObject[] = await Oc.Instance.getBindableServices();
+        // eslint-disable-next-line no-console
+        console.log('Bindable kinds:', bindableKinds);
     }
 
     @vsCommand('openshift.component.dev')

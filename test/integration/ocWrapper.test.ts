@@ -17,6 +17,7 @@ import { Project } from '../../src/oc/project';
 import { ClusterType } from '../../src/oc/types';
 import { isOpenShiftCluster } from '../../src/util/kubeUtils';
 import { LoginUtil } from '../../src/util/loginUtil';
+import sinon from 'sinon';
 
 suite('./oc/ocWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -396,6 +397,80 @@ suite('./oc/ocWrapper.ts', function () {
         const actual: boolean = await Oc.Instance.canIGetCRDs();
 
         expect(actual).to.equal(expected);
+    });
+
+    suite('Oc#getBindableServices', () => {
+
+        teardown(() => sinon.restore());
+
+        test('returns empty when no bindable kinds exist', async () => {
+            sinon.stub(Oc.Instance as any, 'getBindableKinds')
+                .resolves({ status: [] });
+
+            const result = await Oc.Instance.getBindableServices();
+
+            expect(result).to.deep.equal([]);
+        });
+
+        test('returns resources', async () => {
+            sinon.stub(Oc.Instance as any, 'getBindableKinds')
+                .resolves({
+                    status: [
+                        {
+                            group: 'postgresql.k8s.enterprisedb.io',
+                            version: 'v1',
+                            kind: 'Cluster'
+                        }
+                    ]
+                });
+
+            sinon.stub(Oc.Instance as any, 'getBindableKindRestMappings')
+                .resolves([
+                    {
+                        group: 'postgresql.k8s.enterprisedb.io',
+                        version: 'v1',
+                        kind: 'Cluster',
+                        resource: 'clusters'
+                    }
+                ]);
+
+            sinon.stub(Oc.Instance as any, 'listDynamicResources')
+                .resolves([
+                    {
+                        apiVersion: 'postgresql.k8s.enterprisedb.io/v1',
+                        kind: 'Cluster',
+                        metadata: {
+                            name: 'postgres'
+                        }
+                    } as any
+                ]);
+
+            const result = await Oc.Instance.getBindableServices();
+
+            expect(result).to.have.length(1);
+            expect(result[0].metadata?.name).to.equal('postgres');
+        });
+
+        test('returns empty when no REST mappings exist', async () => {
+            sinon.stub(Oc.Instance as any, 'getBindableKinds')
+                .resolves({
+                    status: [
+                        {
+                            group: 'group',
+                            version: 'v1',
+                            kind: 'Kind'
+                        }
+                    ]
+                });
+
+            sinon.stub(Oc.Instance as any, 'getBindableKindRestMappings')
+                .resolves([]);
+
+            const result = await Oc.Instance.getBindableServices();
+
+            expect(result).to.deep.equal([]);
+        });
+
     });
 
 });
