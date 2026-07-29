@@ -1860,8 +1860,8 @@
 				},
 				{
 					"command": "openshift.component.binding.add",
-					"when": "view == openshiftProjectExplorer && viewItem == openshift.k8sContext",
-					"group": "c6"
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"group": "c2@2"
 				},
 				{
 					"command": "openshift.component.showDevTerminal",

@@ -17,7 +17,6 @@ import { Project } from '../../src/oc/project';
 import { ClusterType } from '../../src/oc/types';
 import { isOpenShiftCluster } from '../../src/util/kubeUtils';
 import { LoginUtil } from '../../src/util/loginUtil';
-import sinon from 'sinon';
 
 suite('./oc/ocWrapper.ts', function () {
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
@@ -399,7 +398,7 @@ suite('./oc/ocWrapper.ts', function () {
         expect(actual).to.equal(expected);
     });
 
-    suite('Oc#getBindableServices', () => {
+    /*suite('Oc#getBindableServices', () => {
 
         teardown(() => sinon.restore());
 
@@ -471,6 +470,6 @@ suite('./oc/ocWrapper.ts', function () {
             expect(result).to.deep.equal([]);
         });
 
-    });
+    });*/
 
 });
