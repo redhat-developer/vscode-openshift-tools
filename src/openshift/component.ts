@@ -24,6 +24,10 @@ import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
 import { deployComponent } from '../devfile/deploy';
 import { undeployComponent } from '../devfile/undeploy';
 import { KubernetesObject } from '@kubernetes/client-node';
+import { BindableService } from '../k8s/servicebinding/bindableService';
+import sendTelemetry from '../telemetry';
+import { ServiceBindingFormResponse } from '../webview/serverless-function/serverlessFunctionLoader';
+import AddServiceBindingViewLoader from '../webview/add-service-binding/addServiceBindingLoader';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -249,10 +253,94 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.binding.add')
-    static async addBinding(_component: ComponentWorkspaceFolder) {
-        const bindableKinds: KubernetesObject[] = await Oc.Instance.getBindableServices();
-        // eslint-disable-next-line no-console
-        console.log('Bindable kinds:', bindableKinds);
+    static async addBinding(component: ComponentWorkspaceFolder) {
+        let bindableServices: KubernetesObject[] = [];
+        await Progress.execFunctionWithProgress('Getting bindable services', async () => {
+            bindableServices = await BindableService.Instance.getBindableServices();
+        }).then(() => {
+            if (bindableServices.length === 0) {
+                void window
+                    .showErrorMessage(
+                        'No bindable services are available',
+                        'Open Service Catalog in OpenShift Console',
+                    )
+                    .then((result) => {
+                        if (result === 'Open Service Catalog in OpenShift Console') {
+                            void commands.executeCommand(
+                                'openshift.open.operatorBackedServiceCatalog',
+                            );
+                        }
+                    });
+                return;
+            }
+        });
+
+        void sendTelemetry('startAddBindingWizard');
+
+        let formResponse: ServiceBindingFormResponse = undefined;
+        try {
+            formResponse = await new Promise<ServiceBindingFormResponse>(
+                (resolve, reject) => {
+                    void AddServiceBindingViewLoader.loadView(
+                        component.contextPath,
+                        bindableServices.map(
+                            (service) => `${service.metadata.namespace}/${service.metadata.name}`,
+                        ),
+                        (panel) => {
+                            panel.onDidDispose((_e) => {
+                                reject(new Error('The \'Add Service Binding\' wizard was closed'));
+                            });
+                            return async (eventData) => {
+                                if (eventData.action === 'addServiceBinding') {
+                                    resolve(eventData.params);
+                                    await panel.dispose();
+                                }
+                            };
+                        },
+                    ).then(view => {
+                        if (!view) {
+                            // the view was already created
+                            reject(undefined as Error);
+                        }
+                    });
+                },
+            );
+        } catch {
+            // The form was closed without submitting,
+            // or the form already exists for this component.
+            // stop the command.
+            return;
+        }
+
+        const selectedServiceObject = bindableServices.filter(
+            (service) =>
+                `${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
+        )[0];
+
+        void sendTelemetry('finishAddBindingWizard');
+
+        await Progress.execFunctionWithProgress(
+            `Adding binding service ${formResponse.bindingName}`,
+            async () => {
+                await BindableService.Instance.addBinding(
+                    component.contextPath,
+                    selectedServiceObject,
+                    formResponse.bindingName,
+                );
+            },
+        )
+            .then(() => {
+                void window.showInformationMessage(
+                    `Service binding '${formResponse.bindingName}' was created successfully.`,
+                );
+            })
+            .catch((error) => {
+                void window.showErrorMessage(
+                    `Failed to create service binding: ${
+                        error instanceof Error ? error.message : String(error)
+                    }`,
+                );
+            });
     }
 
     @vsCommand('openshift.component.dev')

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { AppsV1Api, Cluster, Context, CustomObjectsApi, DiscoveryApi, User } from '@kubernetes/client-node';
+import { Cluster, Context, User } from '@kubernetes/client-node';
 import { KubernetesObject } from '@kubernetes/client-node/dist/types';
 import * as fs from 'fs/promises';
 import path from 'path';
@@ -17,23 +17,7 @@ import { ExecutionContext } from '../util/utils';
 import { findDevfiles, getComponentName } from './devfileUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
-
-interface BindableKindStatus {
-    group: string;
-    version: string;
-    kind: string;
-}
-
-interface BindableKinds {
-    status: BindableKindStatus[];
-}
-
-interface RestMapping {
-    group: string;
-    version: string;
-    kind: string;
-    resource: string;
-}
+import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -46,26 +30,6 @@ export class Oc {
 
     static get Instance() {
         return Oc.INSTANCE;
-    }
-
-    private readonly kubeConfigInfo = new KubeConfigInfo();
-    private readonly kc = this.kubeConfigInfo.getEffectiveKubeConfig();
-
-    private getAppsClient(): AppsV1Api {
-        return this.kc.makeApiClient(AppsV1Api);
-    }
-
-    private getDiscoveryClient(): DiscoveryApi {
-        return this.kc.makeApiClient(DiscoveryApi);
-    }
-
-    private getCustomObjectsClient(): CustomObjectsApi {
-        return this.kc.makeApiClient(CustomObjectsApi);
-    }
-
-    private getCurrentNamespace(): string {
-        const currentContext = this.kubeConfigInfo.findContext(this.kc.currentContext);
-        return currentContext.namespace ?? 'default';
     }
 
     /**
@@ -1174,7 +1138,7 @@ export class Oc {
      * Returns the list of bindable kinds available in the cluster.
      * @returns the list of bindable kinds available in the cluster, or an empty list if none are found
      */
-    private async getBindableKinds(): Promise<BindableKinds> {
+    public async getBindableKinds(): Promise<BindableKinds> {
         try {
             const result = await CliChannel.getInstance().executeTool(
                 new CommandText(
@@ -1193,123 +1157,53 @@ export class Oc {
             return bindableKinds;
         } catch (error) {
             if (error instanceof Error) {
-                if (
-                    error.message.includes('NotFound') ||
-                    error.message.includes('not found')
-                ) {
-                    return { status: [] };
-                }
+                return { status: [] };
             }
 
             throw error;
         }
     }
 
-    /**
-     * Returns the list of REST mappings for the given bindable kinds.
-     * @param bindableKinds The bindable kinds to map.
-     * @returns The list of REST mappings for the given bindable kinds.
-     */
-    private async getBindableKindRestMappings(bindableKinds: BindableKinds): Promise<RestMapping[]> {
-        const discovery = this.getDiscoveryClient();
+    public async getApiResourceList(group: string, version: string): Promise<APIResourceList> {
+        try {
+            // Call /apis/{group}/{version} and get the JSON
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText(
+                    'oc',
+                    `get --raw /apis/${group}/${version}`,
+                ),
+            );
 
-        const mappings: RestMapping[] = [];
-        const visited = new Set<string>();
-
-        for (const bindableKind of bindableKinds.status ?? []) {
-            const key = `${bindableKind.group}/${bindableKind.kind}`;
-
-            if (visited.has(key)) {
-                continue;
+            return JSON.parse(result.stdout) as APIResourceList;
+        } catch (error) {
+            if (error instanceof Error) {
+                return { resources: [] };
             }
-            visited.add(key);
 
-            try {
-                const apiResourceList = await discovery.getAPIResources(
-                    bindableKind.group,
-                    bindableKind.version,
-                );
-
-                const resources = apiResourceList.body.resources ?? [];
-
-                const apiResource = resources.find(
-                    resource => resource.kind === bindableKind.kind,
-                );
-
-                if (!apiResource) {
-                    continue;
-                }
-
-                mappings.push({
-                    group: bindableKind.group,
-                    version: bindableKind.version,
-                    kind: bindableKind.kind,
-                    resource: apiResource.name,
-                });
-            } catch {
-                // Ignore CRDs that are unavailable or inaccessible
-            }
+            throw error;
         }
-
-        return mappings;
     }
 
-    /**
-     * Returns the list of dynamic resources for the bindable kinds.
-     * @param mappings The list of REST mappings for the bindable kinds.
-     * @returns The list of dynamic resources for the bindable kinds.
-     */
-    private async listDynamicResources(mappings: RestMapping[]): Promise<KubernetesObject[]> {
-        const api = this.getCustomObjectsClient();
-
-        const kc = this.kubeConfigInfo.getEffectiveKubeConfig();
-        const currentContext = this.kubeConfigInfo.findContext(kc.currentContext);
-        const namespace = currentContext?.namespace ?? 'default';
-
-        const resources: KubernetesObject[] = [];
-
-        for (const mapping of mappings) {
-            try {
-                const response = await api.listNamespacedCustomObject(
-                    mapping.group,
-                    mapping.version,
-                    namespace,
-                    mapping.resource,
-                );
-
-                const items = (response.body as { items?: KubernetesObject[] }).items;
-
-                if (items?.length) {
-                    resources.push(...items);
-                }
-            } catch {
-                // Ignore CRDs that are unavailable or inaccessible
-                continue;
+    public async addBinding(contextPath: string, namespace: any, name: any, bindingName: string): Promise<void> {
+        try {
+            await CliChannel.getInstance().executeTool(
+                new CommandText(
+                    'oc',
+                    'create servicebinding',
+                    [
+                        new CommandOption('-n', namespace),
+                        new CommandOption(bindingName),
+                        new CommandOption('--from', name),
+                    ],
+                ),
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Failed to create service binding: ${error.message}`);
             }
+
+            throw error;
         }
-
-        return resources;
-    }
-
-    /**
-     * Returns the list of bindable services available in the cluster, or an empty list if none are found.
-     * @returns the list of bindable services available in the cluster, or an empty list if none are found
-     */
-    public async getBindableServices(): Promise<KubernetesObject[]> {
-        const bindableKinds = await this.getBindableKinds();
-
-        if (!bindableKinds.status?.length) {
-            return [];
-        }
-
-        const mappings =
-            await this.getBindableKindRestMappings(bindableKinds);
-
-        if (!mappings.length) {
-            return [];
-        }
-
-        return this.listDynamicResources(mappings);
     }
 
     public async getComponentPod(componentName: string): Promise<string> {
