@@ -1184,28 +1184,6 @@ export class Oc {
         }
     }
 
-    public async addBinding(contextPath: string, namespace: any, name: any, bindingName: string): Promise<void> {
-        try {
-            await CliChannel.getInstance().executeTool(
-                new CommandText(
-                    'oc',
-                    'create servicebinding',
-                    [
-                        new CommandOption('-n', namespace),
-                        new CommandOption(bindingName),
-                        new CommandOption('--from', name),
-                    ],
-                ),
-            );
-        } catch (error) {
-            if (error instanceof Error) {
-                throw new Error(`Failed to create service binding: ${error.message}`);
-            }
-
-            throw error;
-        }
-    }
-
     public async getComponentPod(componentName: string): Promise<string> {
 
         const selectors = [
