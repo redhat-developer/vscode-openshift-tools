@@ -153,7 +153,7 @@
 		"git-up": "^8.1.1",
 		"got": "^15.1.0",
 		"istanbul": "^0.4.5",
-		"js-yaml": "^5.2.2",
+		"js-yaml": "^5.2.3",
 		"json-schema": "^0.4.0",
 		"json-to-ast": "^2.1.0",
 		"leasot": "^14.4.0",
@@ -202,7 +202,7 @@
 		"diff": "^9.0.0",
 		"globals": "^17.7.0",
 		"js-cookie": "^3.0.8",
-		"js-yaml": "^5.2.2",
+		"js-yaml": "^5.2.3",
 		"@kubernetes/client-node": {
 			"js-yaml": "^4.3.0"
 		},
