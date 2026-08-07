@@ -8,7 +8,6 @@ import {
     ActivityBar,
     BottomBarPanel,
     DebugView,
-    EditorView,
     Key,
     NotificationType,
     SideBarView,
@@ -18,7 +17,7 @@ import {
 } from 'vscode-extension-tester';
 import { findItemFuzzy, itemDoesNotExist, notificationDoesNotExist, stabilizeComponentsView, waitForItem, waitForItemStable, waitForItemToDisappear, warn } from '../common/conditions';
 import { MENUS, VIEWS } from '../common/constants';
-import { collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentContextMenu() {
@@ -32,7 +31,7 @@ export function testComponentContextMenu() {
 
         before(async function context() {
             this.timeout(45_000);
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
             for (const item of [

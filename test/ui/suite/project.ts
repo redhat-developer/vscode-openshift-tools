@@ -5,7 +5,6 @@
 
 import {
     ActivityBar,
-    EditorView,
     InputBox,
     SideBarView,
     TreeItem,
@@ -19,6 +18,7 @@ import {
 import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists, stabilizeComponentsView, waitForItem } from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
+import { closeAllOpenEditors } from '../common/overdrives';
 
 export function projectTest(isOpenshiftCluster: boolean) {
     describe('Work with project', function () {
@@ -55,7 +55,7 @@ export function projectTest(isOpenshiftCluster: boolean) {
         });
 
         beforeEach(async function () {
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
         });
 
         //Switch back to existing project/namespace

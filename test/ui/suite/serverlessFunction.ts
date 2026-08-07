@@ -6,14 +6,13 @@ import * as fs from 'fs-extra';
 import * as pth from 'path';
 import {
     ActivityBar,
-    EditorView,
     NotificationType,
     SideBarView,
     ViewSection,
     Workbench,
 } from 'vscode-extension-tester';
 import { VIEWS } from '../common/constants';
-import { collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse } from '../common/overdrives';
 import { ServerlessFunctionWebView } from '../common/ui/webview/ServerlessFunctionWebViewEditor';
 import { expect } from 'chai';
 
@@ -25,7 +24,7 @@ export function testCreateServerlessFunction(path: string) {
 
         before(async function context() {
             this.timeout(10_000);
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             fs.ensureDirSync(pth.join(path, 'function'), 0o6777);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             for (const item of [
@@ -44,7 +43,7 @@ export function testCreateServerlessFunction(path: string) {
             if (notifications.length > 0) {
                 await notificationCenter.close();
             }
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
         });
 
         it('Create a new Serverless Function', async function test() {

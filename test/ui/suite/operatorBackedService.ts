@@ -5,7 +5,6 @@
 
 import {
     ActivityBar,
-    EditorView,
     SideBarView,
     TreeItem,
     VSBrowser,
@@ -15,7 +14,7 @@ import {
 } from 'vscode-extension-tester';
 import { itemExists, notificationExists } from '../common/conditions';
 import { MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
-import { reloadWindow } from '../common/overdrives';
+import { closeAllOpenEditors, reloadWindow } from '../common/overdrives';
 import { CreateServiceWebView, ServiceSetupPage } from '../common/ui/webview/createServiceWebView';
 
 export function operatorBackedServiceTest() {
@@ -33,7 +32,7 @@ export function operatorBackedServiceTest() {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             section = await view.getContent().getSection(VIEWS.appExplorer);
 
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
         });
 
