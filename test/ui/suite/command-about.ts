@@ -4,8 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { By, EditorView, WebviewView, Workbench } from 'vscode-extension-tester';
+import { By, WebviewView, Workbench } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
+import { closeAllOpenEditors } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 import bundledTools from '../../../src/tools.json';
 
@@ -19,7 +20,7 @@ export function checkAboutCommand(clusterIsSet: boolean) {
         let openshiftTerminal: OpenshiftTerminalWebviewView;
 
         before(async () => {
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             await activateCommand(command);
         });
 

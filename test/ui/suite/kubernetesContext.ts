@@ -6,7 +6,6 @@ import { expect } from 'chai';
 import * as fs from 'fs-extra';
 import {
     ActivityBar,
-    EditorView,
     InputBox,
     NotificationType,
     QuickPickItem,
@@ -25,7 +24,7 @@ import { activateCommand } from '../common/command-activator';
 import { itemExists, notificationExists } from '../common/conditions';
 import { ACTIONS, INPUTS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { addKubeContext, getKubeConfigContent, getKubeConfigPath } from '../common/kubeConfigUtils';
-import { collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse } from '../common/overdrives';
 
 export function kubernetesContextTest(isOpenshiftCluster: boolean) {
     describe('Kubernetes Context', function () {
@@ -88,7 +87,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
             if (notifications.length > 0) {
                 await notificationCenter.close();
             }
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
         });
 
         it('Select kubernetes context', async function () {

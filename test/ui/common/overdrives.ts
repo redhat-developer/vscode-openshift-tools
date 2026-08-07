@@ -2,9 +2,15 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ViewSection, By, waitForAttributeValue, BottomBarPanel, VSBrowser, ActivityBar } from 'vscode-extension-tester';
+import { ViewSection, By, EditorView, waitForAttributeValue, BottomBarPanel, VSBrowser, ActivityBar } from 'vscode-extension-tester';
 import { activateCommand } from './command-activator';
 import { VIEWS } from './constants';
+
+export async function closeAllOpenEditors(): Promise<void> {
+    try {
+        await new EditorView().closeAllEditors();
+    } catch { /* best effort */ }
+}
 
 export async function collapse(section: ViewSection) {
     try {

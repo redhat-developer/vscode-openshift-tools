@@ -8,6 +8,7 @@ import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, View
 import { OdoPreference } from '../../../src/odo/odoPreference';
 import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
+import { closeAllOpenEditors } from '../common/overdrives';
 import { RegistryWebViewEditor } from '../common/ui/webview/registryWebViewEditor';
 
 export function testDevfileRegistries() {
@@ -22,6 +23,10 @@ export function testDevfileRegistries() {
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await new Promise(res => setTimeout(res, 5_000));
             registrySection = await view.getContent().getSection(VIEWS.compRegistries);
+        });
+
+        beforeEach(async function () {
+            await closeAllOpenEditors();
         });
 
         it('registry actions are available', async function test() {
@@ -106,7 +111,6 @@ export function testDevfileRegistries() {
         it('open Devfile registry view from Section action', async function test() {
             this.timeout(10_000);
             await (await registrySection.getAction('Open Registry View')).click();
-            // open editor tab by title
             const editorView = new EditorView();
             const editor = await editorView.openEditor('Devfile Registry');
             expect(await editor.getTitle()).to.include('Devfile Registry');
@@ -114,26 +118,25 @@ export function testDevfileRegistries() {
 
         it('open Devfile registry view from item\'s context menu and verify the content of the registry', async function test() {
             this.timeout(10_000);
-            await new EditorView().closeAllEditors();
             const devfileRegistry = await registrySection.findItem(OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME);
+            expect(devfileRegistry, 'DefaultDevfileRegistry not found in registry section').to.not.be.undefined;
             await devfileRegistry.select();
             const menu = await devfileRegistry.openContextMenu();
-            await (await menu.getItem('Open in Editor')).select();
+            const openInEditorItem = await menu.getItem('Open in Editor');
+            expect(openInEditorItem, '\'Open in Editor\' not found in context menu').to.not.be.undefined;
+            await openInEditorItem.select();
             await new Promise((res) => { setTimeout(res, 3_000); });
-            // check opened editor tab by title
             const editorView = new EditorView();
             const editor = await editorView.openEditor('Devfile Registry - DefaultDevfileRegistry');
             expect(await editor.getTitle()).to.include('Devfile Registry - DefaultDevfileRegistry');
-            // initialize web view editor
             const webView = new RegistryWebViewEditor('Devfile Registry - DefaultDevfileRegistry');
             await webView.initializeEditor();
-            // Expect these components to be available on the first page
             expect(await webView.getRegistryStackNames()).to.include.members(['Quarkus Java', 'Django', 'Go Runtime', 'Maven Java', 'Node.js Runtime', 'Open Liberty Gradle', 'Open Liberty Maven', 'Python', 'Vert.x Java']);
         });
 
         after(async function context() {
             this.timeout(10_000);
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
         });
 
     });

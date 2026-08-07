@@ -1,5 +1,7 @@
 {
     "window.dialogStyle": "custom",
     "files.simpleDialog.enable": true,
-    "workbench.welcomePage.experimentalOnboarding": false
+    "workbench.welcomePage.experimentalOnboarding": false,
+    "workbench.editor.tabActionLocation": "right",
+    "workbench.editor.showTabs": "multiple"
 }

@@ -2,9 +2,9 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ActivityBar, EditorView, SideBarView, VSBrowser } from 'vscode-extension-tester';
+import { ActivityBar, SideBarView, VSBrowser } from 'vscode-extension-tester';
 import { VIEWS } from '../common/constants';
-import { collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse } from '../common/overdrives';
 import { AddClusterWebView, DevSandboxWebViewPage, LocalClusterWebViewPage } from '../common/ui/webview/addClusterWebView';
 import { webViewIsOpened, welcomeContentButtonsAreLoaded } from '../common/conditions';
 
@@ -17,7 +17,7 @@ export function testAddCluster() {
         before(async function context() {
             this.timeout(30_000)
             //await new Promise((res) => {setTimeout(res, 20_000)});
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             for (const item of [VIEWS.components, VIEWS.compRegistries, VIEWS.serverlessFunctions, VIEWS.debugSessions]) {
                 await collapse(await view.getContent().getSection(item))

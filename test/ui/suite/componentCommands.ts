@@ -10,7 +10,6 @@ import {
     ActivityBar,
     after,
     before,
-    EditorView,
     SideBarView,
     TreeItem,
     ViewSection,
@@ -20,7 +19,7 @@ import { parse } from 'yaml';
 import { DevfileResolver } from '../../../src/devfile/devfileResolver';
 import { waitForItemStable, warn } from '../common/conditions';
 import { VIEWS } from '../common/constants';
-import { reloadWindow } from '../common/overdrives';
+import { closeAllOpenEditors, reloadWindow } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentCommands(path: string) {
@@ -34,7 +33,7 @@ export function testComponentCommands(path: string) {
 
         before(async function context() {
             this.timeout(30_000);
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
 

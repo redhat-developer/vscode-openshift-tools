@@ -19,7 +19,7 @@ import {
 } from 'vscode-extension-tester';
 import { notificationExists, stabilizeComponentsView, step, waitForItemStable, waitForItemToDisappearStable, warn, withStableItem } from '../common/conditions';
 import { BUTTONS, INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
-import { collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse } from '../common/overdrives';
 import {
     CreateComponentWebView,
     GitProjectPage,
@@ -40,7 +40,7 @@ export function testCreateComponent(path: string) {
 
         before(async function context() {
             this.timeout(10_000);
-            await new EditorView().closeAllEditors();
+            await closeAllOpenEditors();
             fs.ensureDirSync(path, 0o6777);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             for (const item of [
@@ -253,7 +253,7 @@ export function testCreateComponent(path: string) {
             }
 
             // Close all editors
-            try { await new EditorView().closeAllEditors(); } catch { /* Ignore */ }
+            await closeAllOpenEditors();
 
             // Close any remaining notifications
             try {
