@@ -204,7 +204,7 @@
 		"js-cookie": "^3.0.8",
 		"js-yaml": "^5.2.3",
 		"@kubernetes/client-node": {
-			"js-yaml": "^4.3.0"
+			"js-yaml": "^4.3.1"
 		},
 		"serialize-javascript": "^7.0.7",
 		"tar-fs": "^3.1.3",
