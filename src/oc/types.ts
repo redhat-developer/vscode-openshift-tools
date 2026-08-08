@@ -6,7 +6,13 @@
 export enum ClusterType {
     OpenShift,
     Kubernetes
-};
+}
+
+export enum KubernetesVariant {
+    Generic,
+    Kind,
+    Minikube
+}
 
 export type KubernetesConsole = {
     kind: ClusterType,

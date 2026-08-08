@@ -56,6 +56,8 @@ export const MENUS = {
     showLog: 'Show Log',
     followLog: 'Follow Log',
     debug: 'Debug',
+    deploy: 'Deploy',
+    undeploy: 'Undeploy',
     deleteConfiguration: 'Delete Component Configuration',
     deleteSourceCodeFolder: 'Delete Source Code Folder',
     create: 'Create...',

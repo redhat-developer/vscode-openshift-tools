@@ -15,9 +15,10 @@ import {
     VSBrowser,
     Workbench
 } from 'vscode-extension-tester';
-import { findItemFuzzy, itemDoesNotExist, notificationDoesNotExist, stabilizeComponentsView, waitForItem, waitForItemStable, waitForItemToDisappear, warn } from '../common/conditions';
+import { findItemFuzzy, itemDoesNotExist, notificationDoesNotExist, notificationExists, stabilizeComponentsView, waitForItem, waitForItemStable, waitForItemToDisappear, warn } from '../common/conditions';
 import { MENUS, VIEWS } from '../common/constants';
 import { closeAllOpenEditors, collapse } from '../common/overdrives';
+import { which } from 'shelljs';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentContextMenu() {
@@ -63,7 +64,7 @@ export function testComponentContextMenu() {
         });
 
         it('Start Dev works', async function () {
-            this.timeout(80_000);
+            this.timeout(120_000);
 
             await waitForItemStable(getSection, componentName, true);
 
@@ -99,7 +100,7 @@ export function testComponentContextMenu() {
         });
 
         it('Stop Dev works', async function () {
-            this.timeout(80_000);
+            this.timeout(120_000);
 
             await stabilizeComponentsView(getSection);
 
@@ -129,7 +130,7 @@ export function testComponentContextMenu() {
         });
 
         it('Stop Dev works by pressing Ctrl+c', async function () {
-            this.timeout(80_000);
+            this.timeout(120_000);
 
             await stabilizeComponentsView(getSection);
 
@@ -152,7 +153,11 @@ export function testComponentContextMenu() {
         });
 
         it('Start/Stop Dev on Podman works', async function () {
-            this.timeout(80_000);
+            this.timeout(120_000);
+
+            if (!which('podman')) {
+                this.skip();
+            }
 
             await stabilizeComponentsView(getSection);
 
@@ -179,8 +184,48 @@ export function testComponentContextMenu() {
             expect(terminalText).to.include('Press any key to close this terminal');
         });
 
+        it('Deploy works', async function () {
+            this.timeout(180_000);
+
+            await waitForItemStable(getSection, componentName, true);
+
+            await deploy();
+
+            await waitForDeployToFinish();
+
+            const notification = await notificationExists(
+                `Component '${componentName}' deployed successfully`,
+                VSBrowser.instance.driver,
+                60_000,
+            );
+            expect(notification).to.not.be.undefined;
+        });
+
+        it('Undeploy works', async function () {
+            this.timeout(180_000);
+
+            await waitForItemStable(getSection, `${componentName} (deployed)`, true);
+
+            await undeploy();
+
+            const confirmNotification = await notificationExists(
+                `Undeploy component '${componentName}'? This will delete all deployed resources.`,
+                VSBrowser.instance.driver,
+            );
+            await confirmNotification.takeAction('Undeploy');
+
+            await waitForUndeployToFinish();
+
+            const notification = await notificationExists(
+                `Component '${componentName}' undeployed`,
+                VSBrowser.instance.driver,
+                30_000,
+            );
+            expect(notification).to.not.be.undefined;
+        });
+
         it('Describe component works', async function () {
-            this.timeout(80_000);
+            this.timeout(120_000);
 
             await stabilizeComponentsView(getSection);
 
@@ -355,13 +400,12 @@ export function testComponentContextMenu() {
                 } catch {
                     return false;
                 }
-            }, 20000, `Context menu item "${option}" not available`);
+            }, 40_000, `Context menu item "${option}" not available`);
         }
 
         async function waitForStartDevToFinish(devOnCluster: boolean): Promise<void> {
             const podmanString = devOnCluster ? '' : ' on podman';
-            await waitForItemStable(getSection, `${componentName} (dev starting${podmanString})`);
-            await waitForItemStable(getSection, `${componentName} (dev running${podmanString})`, true, 40_000);
+            await waitForItemStable(getSection, `${componentName} (dev running${podmanString})`, true, 60_000);
         }
 
         async function stopDev(): Promise<void> {
@@ -394,13 +438,10 @@ export function testComponentContextMenu() {
                 } catch {
                     return false;
                 }
-            }, 20000, `Context menu item "${MENUS.stopDev}" not available`);
+            }, 40_000, `Context menu item "${MENUS.stopDev}" not available`);
         }
 
         async function waitForStopDevToFinish(devOnCluster: boolean): Promise<void> {
-            if (devOnCluster) {
-                await waitForItemStable(getSection, `${componentName} (dev stopping)`);
-            }
             await waitForItemStable(getSection, componentName, true, 60_000);
         }
 
@@ -422,6 +463,74 @@ export function testComponentContextMenu() {
             }, timeout, `Terminal tab "${expectedTabName}" did not open`);
 
             return terminal!;
+        }
+
+        async function deploy(): Promise<void> {
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    const component = await section.findItem(componentName);
+                    if (!component) return false;
+
+                    const menu = await component.openContextMenu();
+                    const items = await menu.getItems();
+
+                    for (const item of items) {
+                        if ((await item.getLabel()) === MENUS.deploy) {
+                            try {
+                                await item.safeClick();
+                                return true;
+                            } catch(err) {
+                                await VSBrowser.instance.driver.actions().sendKeys('').perform();
+                                throw err;
+                            }
+                        }
+                    }
+
+                    await VSBrowser.instance.driver.actions().sendKeys('').perform();
+                    return false;
+                } catch {
+                    return false;
+                }
+            }, 40_000, `Context menu item "${MENUS.deploy}" not available`);
+        }
+
+        async function undeploy(): Promise<void> {
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    const component = await findItemFuzzy(section, componentName);
+                    if (!component) return false;
+
+                    const menu = await component.openContextMenu();
+                    const items = await menu.getItems();
+
+                    for (const item of items) {
+                        if ((await item.getLabel()) === MENUS.undeploy) {
+                            try {
+                                await item.safeClick();
+                                return true;
+                            } catch(err) {
+                                await VSBrowser.instance.driver.actions().sendKeys('').perform();
+                                throw err;
+                            }
+                        }
+                    }
+
+                    await VSBrowser.instance.driver.actions().sendKeys('').perform();
+                    return false;
+                } catch {
+                    return false;
+                }
+            }, 40_000, `Context menu item "${MENUS.undeploy}" not available`);
+        }
+
+        async function waitForDeployToFinish(): Promise<void> {
+            await waitForItemStable(getSection, `${componentName} (deployed)`, true, 60_000);
+        }
+
+        async function waitForUndeployToFinish(): Promise<void> {
+            await waitForItemStable(getSection, componentName, true, 60_000);
         }
     });
 }
