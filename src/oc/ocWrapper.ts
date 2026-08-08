@@ -17,6 +17,7 @@ import { ExecutionContext } from '../util/utils';
 import { findDevfiles, getComponentName } from './devfileUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
+import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -1131,6 +1132,56 @@ export class Oc {
         }
 
         await this.deleteOdoFiles(componentPath, componentName);
+    }
+
+    /**
+     * Returns the list of bindable kinds available in the cluster.
+     * @returns the list of bindable kinds available in the cluster, or an empty list if none are found
+     */
+    public async getBindableKinds(): Promise<BindableKinds> {
+        try {
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText(
+                    'oc',
+                    'get bindablekinds.binding.operators.coreos.com bindable-kinds',
+                    [new CommandOption('-o', 'json')],
+                ),
+            );
+
+            const bindableKinds = JSON.parse(result.stdout) as BindableKinds;
+
+            if (!bindableKinds.status) {
+                return { status: [] };
+            }
+
+            return bindableKinds;
+        } catch (error) {
+            if (error instanceof Error) {
+                return { status: [] };
+            }
+
+            throw error;
+        }
+    }
+
+    public async getApiResourceList(group: string, version: string): Promise<APIResourceList> {
+        try {
+            // Call /apis/{group}/{version} and get the JSON
+            const result = await CliChannel.getInstance().executeTool(
+                new CommandText(
+                    'oc',
+                    `get --raw /apis/${group}/${version}`,
+                ),
+            );
+
+            return JSON.parse(result.stdout) as APIResourceList;
+        } catch (error) {
+            if (error instanceof Error) {
+                return { resources: [] };
+            }
+
+            throw error;
+        }
     }
 
     public async getComponentPod(componentName: string): Promise<string> {
