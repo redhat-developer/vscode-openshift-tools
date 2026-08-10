@@ -26,8 +26,7 @@ import { undeployComponent } from '../devfile/undeploy';
 import { KubernetesObject } from '@kubernetes/client-node';
 import { BindableService } from '../k8s/servicebinding/bindableService';
 import sendTelemetry from '../telemetry';
-import { ServiceBindingFormResponse } from '../webview/serverless-function/serverlessFunctionLoader';
-import AddServiceBindingViewLoader from '../webview/add-service-binding/addServiceBindingLoader';
+import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingLoader';
 
 function createStartDebuggerResult(language: string, message = '') {
     const result: any = new String(message);
@@ -253,27 +252,28 @@ export class Component extends OpenShiftItem {
     }
 
     @vsCommand('openshift.component.binding.add')
+    @clusterRequired()
     static async addBinding(component: ComponentWorkspaceFolder) {
         let bindableServices: KubernetesObject[] = [];
         await Progress.execFunctionWithProgress('Getting bindable services', async () => {
             bindableServices = await BindableService.Instance.getBindableServices();
-        }).then(() => {
-            if (bindableServices.length === 0) {
-                void window
-                    .showErrorMessage(
-                        'No bindable services are available',
-                        'Open Service Catalog in OpenShift Console',
-                    )
-                    .then((result) => {
-                        if (result === 'Open Service Catalog in OpenShift Console') {
-                            void commands.executeCommand(
-                                'openshift.open.operatorBackedServiceCatalog',
-                            );
-                        }
-                    });
-                return;
-            }
         });
+
+        if (bindableServices.length === 0) {
+            void window
+                .showErrorMessage(
+                    'No bindable services are available',
+                    'Open Service Catalog in OpenShift Console',
+                )
+                .then((result) => {
+                    if (result === 'Open Service Catalog in OpenShift Console') {
+                        void commands.executeCommand(
+                            'openshift.open.operatorBackedServiceCatalog',
+                        );
+                    }
+                });
+            return;
+        }
 
         void sendTelemetry('startAddBindingWizard');
 
@@ -286,6 +286,7 @@ export class Component extends OpenShiftItem {
                         bindableServices.map(
                             (service) => `${service.metadata.namespace}/${service.metadata.name}`,
                         ),
+                        component.component.devfileData.devfile.metadata.name,
                         (panel) => {
                             panel.onDidDispose((_e) => {
                                 reject(new Error('The \'Add Service Binding\' wizard was closed'));

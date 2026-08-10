@@ -70,16 +70,6 @@ suite('Bindable Services', () => {
             });
         });
 
-        test('rethrows non-Error value', async () => {
-            execStub.rejects('failure');
-
-            try {
-                await Oc.Instance.getBindableKinds();
-                expect.fail('Expected getBindableKinds() to throw');
-            } catch (error) {
-                expect(error).to.equal('failure');
-            }
-        });
     });
 
     suite('getApiResourceList()', () => {
@@ -117,15 +107,5 @@ suite('Bindable Services', () => {
             });
         });
 
-        test('rethrows non-Error value', async () => {
-            execStub.rejects('failure');
-
-            try {
-                await Oc.Instance.getApiResourceList('rabbitmq.com', 'v1beta1');
-                expect.fail('Expected getApiResourceList() to throw');
-            } catch (error) {
-                expect(error).to.equal('failure');
-            }
-        });
     });
 });

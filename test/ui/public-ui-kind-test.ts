@@ -15,7 +15,7 @@ import { testComponentCommands } from './suite/componentCommands';
 import { checkExtension } from './suite/extension';
 import { kubernetesContextTest } from './suite/kubernetesContext';
 import { projectTest } from './suite/project';
-import { operatorBackedServiceTest } from './suite/operatorBackedService';
+import { bindableServiceTest } from './suite/bindableService';
 
 import * as sourceMapSupport from 'source-map-support';
 
@@ -115,5 +115,5 @@ describe('Extension public-facing UI tests with Kind cluster', function() {
     testComponentCommands(contextFolder);
     projectTest(false)
     kubernetesContextTest(false);
-    operatorBackedServiceTest();
+    bindableServiceTest();
 });
