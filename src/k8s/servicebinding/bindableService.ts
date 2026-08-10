@@ -30,23 +30,18 @@ export class BindableService {
         return BindableService.INSTANCE;
     }
 
-    private readonly kubeConfigInfo = new KubeConfigInfo();
-    private readonly kc = this.kubeConfigInfo.getEffectiveKubeConfig();
-
-    /**
-     * Returns the CustomObjectsApi client for interacting with custom resources in the Kubernetes clusters
-     * @returns the CustomObjectsApi client for interacting with custom resources in the Kubernetes cluster
-     */
-    private getCustomObjectsClient(): CustomObjectsApi {
-        return this.kc.makeApiClient(CustomObjectsApi);
+    private getKubeConfig() {
+        const kubeConfigInfo = new KubeConfigInfo();
+        return { kubeConfigInfo, kc: kubeConfigInfo.getEffectiveKubeConfig() };
     }
 
-    /**
-     * Returns the current namespace from the kubeconfig, or 'default' if not set
-     * @returns the current namespace from the kubeconfig, or 'default' if not set
-     */
+    private getCustomObjectsClient(): CustomObjectsApi {
+        return this.getKubeConfig().kc.makeApiClient(CustomObjectsApi);
+    }
+
     private getCurrentNamespace(): string {
-        const currentContext = this.kubeConfigInfo.findContext(this.kc.currentContext);
+        const { kubeConfigInfo, kc } = this.getKubeConfig();
+        const currentContext = kubeConfigInfo.findContext(kc.currentContext);
         return currentContext.namespace ?? 'default';
     }
 
@@ -268,7 +263,7 @@ export class BindableService {
      */
     private async getServiceBindingResource(): Promise<ServiceBindingResource> {
         try {
-            const api: ApiextensionsV1Api = this.kc.makeApiClient(ApiextensionsV1Api);
+            const api: ApiextensionsV1Api = this.getKubeConfig().kc.makeApiClient(ApiextensionsV1Api);
 
             const response = await api.listCustomResourceDefinition();
 
@@ -360,8 +355,8 @@ export class BindableService {
     private async getWorkloadByComponent(componentName: string): Promise<WorkloadReference> {
         const namespace = this.getCurrentNamespace();
 
-        const coreApi: CoreV1Api = this.kc.makeApiClient(CoreV1Api);
-        const appsApi: AppsV1Api = this.kc.makeApiClient(AppsV1Api);
+        const coreApi: CoreV1Api = this.getKubeConfig().kc.makeApiClient(CoreV1Api);
+        const appsApi: AppsV1Api = this.getKubeConfig().kc.makeApiClient(AppsV1Api);
 
         // Find the pod created for the component
         const podList = await coreApi.listNamespacedPod({

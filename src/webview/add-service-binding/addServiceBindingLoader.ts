@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Odo } from '../../odo/odoWrapper';
 import { ExtensionID } from '../../util/constants';
 import { loadWebviewHtml } from '../common-ext/utils';
 
@@ -27,12 +26,14 @@ export default class AddServiceBindingViewLoader {
      *
      * @param contextPath the path to the component that's being binded to a service
      * @param availableServices the list of all bindable services on the cluster
+     * @param componentName the name of the component to display in the form
      * @param listenerFactory the listener function to receive and process messages from the webview
      * @returns the webview as a promise
      */
     static async loadView(
         contextPath: string,
         availableServices: string[],
+        componentName: string,
         listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>,
     ): Promise<vscode.WebviewPanel | null> {
 
@@ -44,12 +45,13 @@ export default class AddServiceBindingViewLoader {
             return null;
         }
 
-        return this.createView(contextPath, availableServices, listenerFactory);
+        return this.createView(contextPath, availableServices, componentName, listenerFactory);
     }
 
     private static async createView(
         contextPath: string,
         availableServices: string[],
+        componentName: string,
         listenerFactory: (panel: vscode.WebviewPanel) => (event) => Promise<void>,
     ): Promise<vscode.WebviewPanel> {
         const localResourceRoot = vscode.Uri.file(
@@ -99,7 +101,7 @@ export default class AddServiceBindingViewLoader {
         });
         void panel.webview.postMessage({
             action: 'setComponentName',
-            componentName: (await Odo.Instance.describeComponent(contextPath)).devfileData.devfile.metadata.name,
+            componentName,
         });
 
         return Promise.resolve(panel);

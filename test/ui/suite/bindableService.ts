@@ -12,18 +12,20 @@ import {
     Workbench,
     before,
 } from 'vscode-extension-tester';
-import { itemExists, notificationExists } from '../common/conditions';
+import { itemExists, notificationExists, warn, webViewIsOpened } from '../common/conditions';
 import { MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
-import { closeAllOpenEditors, reloadWindow } from '../common/overdrives';
+import { closeAllOpenEditors, collapseViews, reloadWindow } from '../common/overdrives';
+import { AddServiceBindingWebView } from '../common/ui/webview/addServiceBinding';
 import { CreateServiceWebView, ServiceSetupPage } from '../common/ui/webview/createServiceWebView';
 
-export function operatorBackedServiceTest() {
-    describe('Operator-Backed Service', function () {
+export function bindableServiceTest() {
+    describe('Bindable Services', function () {
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
         const clusterName = cluster;
 
         let view: SideBarView;
         let section: ViewSection;
+        let projectName: string;
         let serviceName: string;
 
         before(async function () {
@@ -61,6 +63,7 @@ export function operatorBackedServiceTest() {
             await clusterItem.getDriver().wait(async () => await clusterItem.hasChildren());
             const children = await clusterItem.getChildren();
             const project = children[0];
+            projectName = await project.getLabel();
             const contextMenu = await project.openContextMenu();
             await contextMenu.select(MENUS.create, MENUS.createOperatorBackedService);
 
@@ -101,6 +104,53 @@ export function operatorBackedServiceTest() {
             const deployments = (await itemExists('Deployments', section)) as TreeItem;
             await deployments.expand();
             await itemExists(serviceName, section);
+        });
+
+        it('Can bind service to a component', async function () {
+            this.timeout(75_000);
+            const componentName = 'nodejs-starter';
+            const bindingName = 'test-binding';
+            section = await view.getContent().getSection(VIEWS.components);
+
+            try {
+                await itemExists(componentName, section);
+            } catch {
+                warn(`Component "${componentName}" not found, skipping test`);
+                this.skip();
+            }
+
+            const component = await section.findItem(componentName);
+            let contextMenu = await component.openContextMenu();
+            await contextMenu.select(MENUS.bindService);
+
+            const outcome = await Promise.race([
+                webViewIsOpened('Add service binding', VSBrowser.instance.driver, 30_000)
+                    .then(() => 'webview' as const),
+                notificationExists('No bindable services are available', VSBrowser.instance.driver, 30_000)
+                    .then(() => 'no-services' as const),
+            ]);
+
+            if (outcome === 'no-services') {
+                warn('No bindable services are available, skipping test');
+                this.skip();
+            }
+
+            const addServiceBinding = new AddServiceBindingWebView();
+            await addServiceBinding.initializeEditor();
+            await addServiceBinding.clickComboBox();
+            await addServiceBinding.selectItemFromComboBox(`${projectName}/${serviceName}`);
+            await addServiceBinding.setBindingName(bindingName);
+            await addServiceBinding.clickAddServiceBindingButton();
+
+            contextMenu = await component.openContextMenu();
+            await contextMenu.select(MENUS.startDev);
+
+            await itemExists(`${componentName} (dev starting)`, section);
+            await itemExists(`${componentName} (dev running)`, section, 35_000);
+
+            await collapseViews(view, [VIEWS.components]);
+            section = await view.getContent().getSection(VIEWS.appExplorer);
+            await itemExists(bindingName, section);
         });
     });
 }
