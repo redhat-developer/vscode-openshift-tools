@@ -45,19 +45,19 @@ export class AddClusterWebView extends WebViewForm {
     }
 
     private async getCreateRefreshClusterButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[contains(text(),"Create/Refresh cluster")]'));
+        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Create/Refresh cluster")]'));
     }
 
     private async getStartYourOpenshiftExperienceButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[contains(text(),"Start your OpenShift experience")]'));
+        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Start your OpenShift experience")]'));
     }
 
     private async getStartLearningButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[contains(text(),"Start Learning")]'));
+        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Start Learning")]'));
     }
 
     private async getRosaButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[contains(text(),"Create a ROSA cluster")]'));
+        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Create a ROSA cluster")]'));
     }
 }
 
