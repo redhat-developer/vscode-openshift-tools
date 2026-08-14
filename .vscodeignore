@@ -10,6 +10,7 @@ doc/**
 .gitattributes
 .github
 .gitignore
+.nvmrc
 .vscode-version
 header.js
 images/demo-featured-image.png
