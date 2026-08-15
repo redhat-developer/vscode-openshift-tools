@@ -41,6 +41,8 @@ tsconfig.json
 tsconfig.tsbuildinfo
 tslint.json
 vsc-extension-quickstart.md
+.npmrc
+.nvmrc
 .vscode/**
 .vscode-test/**
 *.vsix
