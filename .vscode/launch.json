@@ -105,6 +105,31 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
+            "name": "Debug UI Kind Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/extest",
+            "args": [
+                "run-tests",
+                "${workspaceFolder}/out/test/ui/public-ui-kind-test.js",
+                "-o",
+                "${workspaceFolder}/test/ui/settings.json",
+                "-m",
+                "${workspaceFolder}/test/ui/.mocharc.js",
+                "-e",
+                "${workspaceFolder}/test-resources/extensions",
+                "-c",
+                "max"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMaps": true,
+            "preLaunchTask": "setup-tests",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch 'Cluster Editor' in Chrome",

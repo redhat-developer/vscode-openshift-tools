@@ -186,7 +186,11 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
     // eslint-disable-next-line class-methods-use-this
     async getTreeItem(element: ExplorerItem): Promise<TreeItem> {
         try {
-            return await this._getTreeItem(element);
+            const item = await this._getTreeItem(element);
+            if (item.id === undefined) {
+                item.id = OpenShiftExplorer.computeElementId(element);
+            }
+            return item;
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error('getTreeItem failed:', err, element);
@@ -198,6 +202,19 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
                 collapsibleState: TreeItemCollapsibleState.None
             };
         }
+    }
+
+    // Without a stable id, VS Code correlates tree nodes across refreshes by object
+    // reference; since getChildren() constructs fresh objects on every call, any refresh
+    // racing a pending context-menu command invalidates its argument to undefined.
+    private static computeElementId(element: ExplorerItem): string | undefined {
+        const withKind = element as { kind?: string; metadata?: { name?: string; uid?: string } };
+        if (typeof withKind?.kind !== 'string' || typeof withKind.metadata?.name !== 'string') {
+            return undefined;
+        }
+        return withKind.metadata.uid
+            ? `${withKind.kind}:${withKind.metadata.uid}`
+            : `${withKind.kind}:${withKind.metadata.name}`;
     }
 
     // eslint-disable-next-line class-methods-use-this

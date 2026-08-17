@@ -71,7 +71,9 @@
 		"test-integration": "npm run test:prepare && node ./build/run-tests.cjs integration",
 		"test-integration:coverage": "npm run test:prepare && npm run test:instrument && node ./build/run-tests.cjs integration",
 		"cluster-ui-test": ". test/ui/extester.env && extest setup-tests -e ./test-resources/extensions -i && npm run test:prepare && extest run-tests out/test/ui/cluster-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions",
-		"public-ui-test": ". test/ui/extester.env && extest setup-tests -e ./test-resources/extensions -i && npm run test:prepare && extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions"
+		"ui-test:prepare": ". test/ui/extester.env && extest setup-tests -e ./test-resources/extensions -i && npm run test:prepare",
+		"public-ui-test": "extest run-tests out/test/ui/public-ui-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions",
+		"public-ui-kind-test": "extest run-tests out/test/ui/public-ui-kind-test.js -o test/ui/settings.json -m test/ui/.mocharc.js -e ./test-resources/extensions"
 	},
 	"dependencies": {
 		"jsonc-parser": "^3.3.1",

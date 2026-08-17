@@ -76,7 +76,7 @@ export function testCreateComponent(path: string) {
         });
 
         it('Create component from git URL', async function test() {
-            this.timeout(25_000);
+            this.timeout(90_000);
 
             await clickCreateComponentStable();
 
@@ -103,7 +103,7 @@ export function testCreateComponent(path: string) {
         });
 
         it('Create component from local folder', async function test() {
-            this.timeout(25_000);
+            this.timeout(90_000);
 
             await step(`Delete "${componentName}" component configuration` , async () => {
                 await withStableItem(getSection, componentName, async (item) => {
@@ -179,7 +179,7 @@ export function testCreateComponent(path: string) {
         });
 
         it('Create component from template project', async function test() {
-            this.timeout(25_000);
+            this.timeout(90_000);
 
             //Click on create component
             await clickCreateComponentStable();

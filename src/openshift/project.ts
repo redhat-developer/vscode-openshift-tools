@@ -125,11 +125,15 @@ export class Project extends OpenShiftItem implements Disposable {
     @vsCommand('openshift.project.delete', false)
     @vsCommand('openshift.namespace.delete', false)
     static async del(project: KubernetesObject, context?: { oc?: Oc }): Promise<string> {
+        const kind = await getNamespaceKind();
+        if (!project?.metadata?.name) {
+            throw new VsCommandError(`Failed to delete ${kind}: no ${kind.toLowerCase()} selected`, `Failed to delete ${kind}`);
+        }
+
         let result: Promise<string> = null;
         const oc = context?.oc ?? Oc.Instance;
         const projectObjects = await oc.getAllKubernetesObjects(project.metadata.name);
         const isProjectEmpty = !projectObjects || projectObjects.length === 0;
-        const kind = await getNamespaceKind();
         const value = await window.showWarningMessage(`Do you want to delete ${kind} '${project.metadata.name}'${!isProjectEmpty ? ' and all its contents' : ''}?`, 'Yes', 'Cancel');
         if (value === 'Yes') {
             result = Progress.execFunctionWithProgress(

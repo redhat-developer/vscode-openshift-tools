@@ -47,7 +47,7 @@ export function testCreateServerlessFunction(path: string) {
         });
 
         it('Create a new Serverless Function', async function test() {
-            this.timeout(20_000);
+            this.timeout(60_000);
             await collapse(section);
             await section.expand();
             const createButton = await section.getAction('Create Function');

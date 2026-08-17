@@ -1,0 +1,17 @@
+{
+  "name": "nodejs-starter",
+  "version": "3.0.0",
+  "description": "Simple Node.js application",
+  "license": "EPL-2.0",
+  "scripts": {
+    "start": "node server.js",
+    "debug": "node --inspect=${DEBUG_PORT} server.js",
+    "test": "node test/test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "pino": "^8.5.0",
+    "pino-http": "^8.2.0",
+    "prom-client": "^14.1.0"
+  }
+}

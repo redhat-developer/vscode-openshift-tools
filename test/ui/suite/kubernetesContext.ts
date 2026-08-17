@@ -41,6 +41,7 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         const kubeCopy = `${getKubeConfigPath()}-cp`;
 
         before(async function () {
+            this.timeout(30_000);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             explorer = await view.getContent().getSection(VIEWS.appExplorer);
 
@@ -75,18 +76,33 @@ export function kubernetesContextTest(isOpenshiftCluster: boolean) {
         });
 
         //put original kubeconfig back
-        after(async () => {
-            fs.moveSync(kubeCopy, getKubeConfigPath(), { overwrite: true });
+        after(async function () {
+            this.timeout(15_000);
+
+            // fs.moveSync() is a rename (delete+create) - the extension's kube-context cache
+            // is only refreshed by its file watcher's onDidChange handler, which explicitly
+            // ignores create/delete events, so a rename can be silently missed and leave the
+            // cached context stale for whatever test runs next. Overwrite the file content
+            // in place instead, which the watcher reliably picks up as a genuine change (same
+            // as addKubeContext() above does via writeFileSync), then give its ~500ms debounce
+            // time to actually process it before forcing a tree refresh.
+            const kubeContent = fs.readFileSync(kubeCopy, 'utf-8');
+            fs.writeFileSync(getKubeConfigPath(), kubeContent);
+            fs.removeSync(kubeCopy);
+            await new Promise((res) => setTimeout(res, 1_500));
+
             const actions = await explorer.getActions();
             await actions[3].click();
         });
 
         beforeEach(async function () {
+            // openNotificationsCenter() always opens the panel, so it must always be closed
+            // again here too - closing only "if notifications.length > 0" leaves it open
+            // (and able to interfere with later command palette/webview rendering) whenever
+            // there happen to be none.
             const notificationCenter = await new Workbench().openNotificationsCenter();
-            const notifications = await notificationCenter.getNotifications(NotificationType.Any);
-            if (notifications.length > 0) {
-                await notificationCenter.close();
-            }
+            await notificationCenter.getNotifications(NotificationType.Any);
+            await notificationCenter.close();
             await closeAllOpenEditors();
         });
 

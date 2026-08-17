@@ -17,7 +17,7 @@ import {
 } from 'vscode-extension-tester';
 import { findItemFuzzy, itemDoesNotExist, notificationDoesNotExist, stabilizeComponentsView, waitForItem, waitForItemStable, waitForItemToDisappear, warn } from '../common/conditions';
 import { MENUS, VIEWS } from '../common/constants';
-import { closeAllOpenEditors, collapse } from '../common/overdrives';
+import { closeAllOpenEditors, collapse, collapseViews } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentContextMenu() {
@@ -34,14 +34,12 @@ export function testComponentContextMenu() {
             await closeAllOpenEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
-            for (const item of [
+            await collapseViews(view, [
                 VIEWS.appExplorer,
                 VIEWS.compRegistries,
                 VIEWS.serverlessFunctions,
                 VIEWS.debugSessions,
-            ]) {
-                await (await view.getContent().getSection(item)).collapse();
-            }
+            ]);
 
             try {
                 const item = await waitForItemStable(getSection, componentName, true, 40_000);

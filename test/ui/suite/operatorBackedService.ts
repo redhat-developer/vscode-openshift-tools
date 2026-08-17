@@ -33,15 +33,27 @@ export function operatorBackedServiceTest() {
             section = await view.getContent().getSection(VIEWS.appExplorer);
 
             await closeAllOpenEditors();
-            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+            // clearAllNotifications() only clicks "clear all" inside the panel - it doesn't
+            // close it, so a left-open Notifications Center can go on to interfere with
+            // context menus/quick-picks/webviews rendering for the rest of the suite.
+            const notificationsCenter = await new Workbench().openNotificationsCenter();
+            await notificationsCenter.clearAllNotifications();
+            await notificationsCenter.close();
         });
 
         after(async function () {
+            this.timeout(30_000);
+            try {
+                const notificationsCenter = await new Workbench().openNotificationsCenter();
+                await notificationsCenter.clearAllNotifications();
+                await notificationsCenter.close();
+            } catch { /* Ignore */ }
+            await closeAllOpenEditors();
             await reloadWindow();
         });
 
         it('Can create operator backed service', async function () {
-            this.timeout(80_000);
+            this.timeout(150_000);
 
             //get project, open context menu and select create new operator backed service
             const clusterItem = (await itemExists(clusterName, section)) as TreeItem;
@@ -54,7 +66,14 @@ export function operatorBackedServiceTest() {
 
             //select service to be created
             const createServiceWebView = new CreateServiceWebView();
-            await createServiceWebView.initializeEditor();
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await createServiceWebView.initializeEditor();
+                    return true;
+                } catch {
+                    return false;
+                }
+            }, 35_000, 'Create Service webview not initialized');
             await createServiceWebView.clickComboBox();
             await createServiceWebView.selectItemFromComboBox(
                 'Cluster',
@@ -68,11 +87,13 @@ export function operatorBackedServiceTest() {
             serviceName = await serviceSetupPage.getName();
             await serviceSetupPage.clickSubmit();
 
-            //wait for notification about successful service creation
+            //wait for notification about successful service creation - bootstrapping a
+            //PostgreSQL cluster (image pull, initdb, pod startup) can genuinely take well
+            //over a minute on a loaded CI Kind cluster.
             await notificationExists(
                 NOTIFICATIONS.serviceCreated(serviceName),
                 VSBrowser.instance.driver,
-                70_000
+                130_000
             );
 
             //check that deployment is shown

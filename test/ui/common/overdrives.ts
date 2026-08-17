@@ -2,7 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-import { ViewSection, By, EditorView, waitForAttributeValue, BottomBarPanel, VSBrowser, ActivityBar } from 'vscode-extension-tester';
+import { ViewSection, By, EditorView, waitForAttributeValue, BottomBarPanel, VSBrowser, ActivityBar, SideBarView } from 'vscode-extension-tester';
 import { activateCommand } from './command-activator';
 import { VIEWS } from './constants';
 
@@ -23,6 +23,19 @@ export async function collapse(section: ViewSection) {
             await section
                 .getDriver()
                 .wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
+        }
+    }
+}
+
+// Collapses each named section of the given view, best-effort: a section that fails to
+// collapse (stale reference, click intercepted by a hover, not currently found, etc.)
+// is skipped rather than failing the whole suite.
+export async function collapseViews(view: SideBarView, sectionTitles: string[]): Promise<void> {
+    for (const sectionTitle of sectionTitles) {
+        try {
+            await collapse(await view.getContent().getSection(sectionTitle));
+        } catch {
+            // best-effort - a section failing to collapse shouldn't fail the whole suite
         }
     }
 }

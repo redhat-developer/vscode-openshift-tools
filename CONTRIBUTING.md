@@ -173,6 +173,11 @@ then run:
 npm run public-ui-test
 ```
 
+There's also `npm run public-ui-kind-test`, which covers the subset of public-facing
+UI tests that need a cluster but don't need real OpenShift-specific features (e.g.
+operator-backed services, component commands). CI runs this against a local `kind`
+cluster; it's separate from `cluster-ui-test` below, which needs a real OpenShift login.
+
 In order to run the cluster-dependant UI tests,
 you need an OpenShift cluster where you can create and delete projects.
 This means that OpenShift Developer Sandbox won't work.
