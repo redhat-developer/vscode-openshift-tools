@@ -13,13 +13,14 @@ import {
     SideBarView,
     TreeItem,
     ViewSection,
+    VSBrowser,
     Workbench,
 } from 'vscode-extension-tester';
 import { parse } from 'yaml';
 import { DevfileResolver } from '../../../src/devfile/devfileResolver';
 import { waitForItemStable, warn } from '../common/conditions';
 import { VIEWS } from '../common/constants';
-import { closeAllOpenEditors, reloadWindow } from '../common/overdrives';
+import { closeAllOpenEditors, collapseViews, reloadWindow } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
 
 export function testComponentCommands(path: string) {
@@ -32,19 +33,17 @@ export function testComponentCommands(path: string) {
         const componentName = 'nodejs-starter';
 
         before(async function context() {
-            this.timeout(30_000);
+            this.timeout(65_000);
             await closeAllOpenEditors();
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
 
-            for (const item of [
+            await collapseViews(view, [
                 VIEWS.appExplorer,
                 VIEWS.compRegistries,
                 VIEWS.serverlessFunctions,
                 VIEWS.debugSessions,
-            ]) {
-                await (await view.getContent().getSection(item)).collapse();
-            }
+            ]);
 
             // expect component is running
             try {
@@ -94,8 +93,14 @@ export function testComponentCommands(path: string) {
             expect(await component.hasChildren()).to.be.true;
             const commandsItem = await component.findChildItem('Commands');
 
-            //check Commands has children
-            commands = await commandsItem.getChildren();
+            //check Commands has children - expanding the item alone doesn't guarantee the
+            //child rows have rendered yet, so poll until getChildren() actually reports them.
+            await commandsItem.expand();
+            await VSBrowser.instance.driver.wait(async () => {
+                commands = await commandsItem.getChildren();
+                return commands.length > 0;
+            }, 15_000, 'Commands node children did not populate');
+
             const actualCommands = [];
             for (const command of commands) {
                 actualCommands.push(await command.getLabel());

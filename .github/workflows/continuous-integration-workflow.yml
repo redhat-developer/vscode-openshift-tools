@@ -80,6 +80,28 @@ jobs:
             NODE_OPTIONS: --max_old_space_size=16384
         run: xvfb-run npm run test:coverage --silent
 
+      # Non-cluster UI tests don't need Kind - run them before it starts so they
+      # don't have to share the runner with an already-running local cluster.
+      - name: Prepare UI Tests
+        env:
+            NODE_OPTIONS: --max_old_space_size=16384
+        if: runner.os == 'Linux'
+        run: |
+          # Patch vscode:prepublish to reinstall secretlint AFTER prune
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json'));
+            pkg.scripts['vscode:prepublish'] += ' && npm install --ignore-scripts @secretlint/node';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+          npm run ui-test:prepare
+
+      - name: Run Non-Cluster UI Tests
+        env:
+            NODE_OPTIONS: --max_old_space_size=16384
+        if: runner.os == 'Linux'
+        run: xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-test
+
       - name: Start KinD cluster
         if: (success() || failure()) && runner.os == 'Linux'
         uses: helm/kind-action@v1.14.0
@@ -102,21 +124,15 @@ jobs:
             nb=`kubectl get pods -n operators --no-headers --ignore-not-found | grep Running | wc -l`
           done
           echo CLUSTER_URL=`kubectl cluster-info | sed -n -e "s/\x1B\[[0-9;]*[a-zA-Z]//g" -e '1s/.*running at \(.*\)$/\1/p'` >> $GITHUB_ENV
-      # UI tests fail under linux
-      # Run UI tests
-      - name: Run UI Tests
+
+      # Runs regardless of whether the non-cluster UI tests passed - each npm script
+      # launches its own fresh VS Code/browser session, so a crash or failure in the
+      # non-cluster suite doesn't take the cluster suite's results down with it.
+      - name: Run Cluster UI Tests
         env:
             NODE_OPTIONS: --max_old_space_size=16384
-        if: runner.os == 'Linux'
-        run: |
-          # Patch vscode:prepublish to reinstall secretlint AFTER prune
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json'));
-            pkg.scripts['vscode:prepublish'] += ' && npm install --ignore-scripts @secretlint/node';
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-          "
-          xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-test
+        if: (success() || failure()) && runner.os == 'Linux'
+        run: xvfb-run --server-args="-screen 0 1920x1080x24" npm run public-ui-kind-test
 
       - name: Build and run integration tests
         if: (success() || failure()) && runner.os == 'Linux'

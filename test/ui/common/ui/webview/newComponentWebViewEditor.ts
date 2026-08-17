@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { expect } from 'chai';
 import { By, EditorView, Key, VSBrowser, WebElement, WebView } from 'vscode-extension-tester';
 import { debugClick } from '../../conditions';
 import { WebViewForm } from './WebViewForm';
@@ -20,36 +21,23 @@ export class CreateComponentWebView extends WebViewForm {
     }
 
     private async getCreateFromTemplateButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//div[..//h6[contains(text(),"From Template Project")]]/button'));
+        return this.findElementSparse(webView, '//div[..//h6[contains(text(),"From Template Project")]]/button', 35_000);
     }
 
     private async getCreateFromGitButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//div[..//h6[contains(text(),"From Existing Remote Git Repository")]]/button'));
+        return this.findElementSparse(webView, '//div[..//h6[contains(text(),"From Existing Remote Git Repository")]]/button', 35_000);
     }
 
     private async getCreateFromLocalButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//div[..//h6[contains(text(),"From Existing Local Codebase")]]/button'));
+        return this.findElementSparse(webView, '//div[..//h6[contains(text(),"From Existing Local Codebase")]]/button', 35_000);
     }
 
     public async createComponentFromTemplate(): Promise<void> {
-        await VSBrowser.instance.driver.wait(async () => {
-            try {
-                return await this.enterWebView(async (webView) => {
-                    const button = await this.getCreateFromTemplateButton(webView);
-                    if (!button) return false;
-
-                    const visible = await button.isDisplayed();
-                    const enabled = await button.isEnabled();
-
-                    if (!visible || !enabled) return false;
-
-                    await button.click();
-                    return true;
-                });
-            } catch {
-                return false;
-            }
-        }, 10000, 'Create Component from Template button not clickable');
+        await this.enterWebView(async (webView) => {
+            const button = await this.getCreateFromTemplateButton(webView);
+            expect(button, 'Create Component from Template button should be found').to.exist;
+            await button.click();
+        });
 
         await VSBrowser.instance.driver.wait(async () => {
             const editors = await new EditorView().getOpenEditorTitles();
@@ -60,24 +48,11 @@ export class CreateComponentWebView extends WebViewForm {
     }
 
     public async createComponentFromGit(): Promise<void> {
-        await VSBrowser.instance.driver.wait(async () => {
-            try {
-                return await this.enterWebView(async (webView) => {
-                    const button = await this.getCreateFromGitButton(webView);
-                    if (!button) return false;
-
-                    const visible = await button.isDisplayed();
-                    const enabled = await button.isEnabled();
-
-                    if (!visible || !enabled) return false;
-
-                    await button.click();
-                    return true;
-                });
-            } catch {
-                return false;
-            }
-        }, 10000, 'Create Component from Git button not clickable');
+        await this.enterWebView(async (webView) => {
+            const button = await this.getCreateFromGitButton(webView);
+            expect(button, 'Create Component from Git button should be found').to.exist;
+            await button.click();
+        });
 
         await VSBrowser.instance.driver.wait(async () => {
             const editors = await new EditorView().getOpenEditorTitles();
@@ -86,24 +61,11 @@ export class CreateComponentWebView extends WebViewForm {
     }
 
     public async createComponentFromLocalCodebase(): Promise<void> {
-        await VSBrowser.instance.driver.wait(async () => {
-            try {
-                return await this.enterWebView(async (webView) => {
-                    const button = await this.getCreateFromLocalButton(webView);
-                    if (!button) return false;
-
-                    const visible = await button.isDisplayed();
-                    const enabled = await button.isEnabled();
-
-                    if (!visible || !enabled) return false;
-
-                    await button.click();
-                    return true;
-                });
-            } catch {
-                return false;
-            }
-        }, 10000, 'Create Component from Local Folder button not clickable');
+        await this.enterWebView(async (webView) => {
+            const button = await this.getCreateFromLocalButton(webView);
+            expect(button, 'Create Component from Local Folder button should be found').to.exist;
+            await button.click();
+        });
 
         await VSBrowser.instance.driver.wait(async () => {
             const editors = await new EditorView().getOpenEditorTitles();
@@ -219,26 +181,13 @@ export class GitProjectPage extends Page {
      */
     public async clickContinueButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const button = await this.continueButtonExists(webView);
+            const button = await this.getContinueButton(webView);
             await debugClick(button, 'Continue');
         });
     }
 
-    private async continueButtonExists(webView: WebView, timeout = 60_000): Promise<WebElement> {
-        return webView.getDriver().wait(async () => {
-            try {
-                const button = await this.getContinueButton(webView);
-                if (button) {
-                    return button;
-                }
-            } catch {
-                return null;
-            }
-        }, timeout);
-    }
-
     private async getContinueButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//button[contains(text(), "CONTINUE WITH THIS DEVFILE")]'));
+        return this.findElementSparse(webView, '//button[contains(text(), "CONTINUE WITH THIS DEVFILE")]', 60_000);
     }
 
     private async getGitRepositoryLinkField(webView: WebView): Promise<WebElement> {
@@ -268,7 +217,7 @@ export class LocalCodeBasePage extends Page {
 
     public async clickCreateComponent(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            const button = await this.createButtonExists(webView);
+            const button = await this.getCreateComponentButton(webView);
             await debugClick(button, 'Create Component');
         });
     }
@@ -281,20 +230,7 @@ export class LocalCodeBasePage extends Page {
         return await webView.findWebElement(By.xpath('//button[contains(text(), "Select Folder")]'));
     }
 
-    private async createButtonExists(webView: WebView, timeout = 60_000): Promise<WebElement> {
-        return webView.getDriver().wait(async () => {
-            try {
-                const button = await this.getCreateComponentButton(webView);
-                if (button) {
-                    return button;
-                }
-            } catch {
-                return null;
-            }
-        }, timeout);
-    }
-
     private async getCreateComponentButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//span[contains(text(), "Create Component")]'));
+        return this.findElementSparse(webView, '//span[contains(text(), "Create Component")]', 60_000);
     }
 }

@@ -4,9 +4,10 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { expect } from 'chai';
-import { ActivityBar, By, SideBarView, waitForAttributeValue } from 'vscode-extension-tester';
+import { ActivityBar, SideBarView } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
 import { VIEWS } from '../common/constants';
+import { collapseViews } from '../common/overdrives';
 
 export function checkFocusOnCommands() {
     describe('Focus on Commands', () => {
@@ -16,20 +17,7 @@ export function checkFocusOnCommands() {
         before('Open OpenShift View', async function(){
             this.timeout(10_000);
             view = await (await new ActivityBar().getViewControl('OpenShift')).openView();
-            for(const sectionName of sections){
-                const section = await view.getContent().getSection(sectionName);
-                try{
-                    await section.collapse()
-                } catch {
-                    if(await section.isExpanded()){
-                        const mainPanel = await section.findElement(By.className('pane-header'));
-                        const arrowPanel = await section.findElement(By.className('codicon'));
-                        await arrowPanel.click();
-                        await section.getDriver().wait(waitForAttributeValue(mainPanel, 'aria-expanded', 'false'), 2_000);
-                    }
-
-                }
-            }
+            await collapseViews(view, sections);
         })
 
         sections.forEach(section =>

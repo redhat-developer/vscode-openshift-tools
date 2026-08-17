@@ -59,14 +59,42 @@ export function projectTest(isOpenshiftCluster: boolean) {
         });
 
         //Switch back to existing project/namespace
-        after(async () => {
+        after(async function () {
+            this.timeout(30_000);
+            try {
+                const notifications = await new Workbench().getNotifications();
+                for (const n of notifications) {
+                    try { await n.dismiss(); } catch { /* Ignore */ }
+                }
+            } catch { /* Ignore */ }
+            try {
+                // "Delete a project" calls notificationExists() (common/conditions.ts), which
+                // opens the Notifications Center to poll for a message but never closes it -
+                // a left-open center can interfere with activateCommand()'s command palette
+                // rendering right below.
+                await (await new Workbench().openNotificationsCenter()).close();
+            } catch { /* Ignore */ }
+            await closeAllOpenEditors();
+
             const option = isOpenshiftCluster ? 'Set Active Project' : 'Set Active Namespace';
             const command = `>OpenShift: ${option}`;
-            await activateCommand(command);
 
-            const input = await InputBox.create();
-            await input.setText(anotherProjectName);
-            await input.confirm();
+            // The previous test just deleted the currently-active project, so the extension
+            // may still be mid-transition (updating its own state/notifications) when this
+            // runs - this exact "activate a command, then grab a fresh InputBox for its
+            // follow-up prompt" sequence isn't used successfully anywhere else in the suite,
+            // so retry the whole thing rather than trust a single attempt.
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await activateCommand(command);
+                    const input = await InputBox.create();
+                    await input.setText(anotherProjectName);
+                    await input.confirm();
+                    return true;
+                } catch {
+                    return false;
+                }
+            }, 20_000, `Could not switch back to project "${anotherProjectName}"`);
 
             const explorer = await getExplorer();
             (await itemExists(anotherProjectName, explorer)) as TreeItem;

@@ -3,5 +3,9 @@
     "files.simpleDialog.enable": true,
     "workbench.welcomePage.experimentalOnboarding": false,
     "workbench.editor.tabActionLocation": "right",
-    "workbench.editor.showTabs": "multiple"
+    "workbench.editor.showTabs": "multiple",
+    "openshiftToolkit.showWelcomePage": false,
+    "security.workspace.trust.enabled": false,
+    "git.openRepositoryInParentFolders": "never",
+    "git.autoRepositoryDetection": false
 }

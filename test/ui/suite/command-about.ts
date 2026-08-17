@@ -36,10 +36,16 @@ export function checkAboutCommand(clusterIsSet: boolean) {
             );
             webviewView = new WebviewView();
             await webviewView.switchToFrame(6_500);
-            await webviewView.findWebElement(
-                By.xpath('//textarea[@aria-label = "Terminal input"]'),
-            );
-            await webviewView.switchBack();
+            try {
+                await webviewView.findWebElement(
+                    By.xpath('//textarea[@aria-label = "Terminal input"]'),
+                );
+            } finally {
+                // Always switch back, even if the element isn't found - otherwise the
+                // driver stays parked inside this iframe and every subsequent test
+                // fails to find top-level elements like the workbench itself.
+                await webviewView.switchBack();
+            }
         });
 
         it('Terminal shows according information', async function() {

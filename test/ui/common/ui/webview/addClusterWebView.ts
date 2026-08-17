@@ -2,6 +2,7 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import { expect } from 'chai';
 import { By, WebElement, WebView } from 'vscode-extension-tester';
 import { WebViewForm } from './WebViewForm';
 
@@ -21,6 +22,7 @@ export class AddClusterWebView extends WebViewForm {
     public async addLocalCluster(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getCreateRefreshClusterButton(webView);
+            expect(button, 'Create/Refresh cluster button should be found').to.exist;
             await button.click();
         });
     }
@@ -28,36 +30,43 @@ export class AddClusterWebView extends WebViewForm {
     public async addDevSandbox(): Promise<void> {
         await this.enterWebView(async (webView) => {
             const button = await this.getStartYourOpenshiftExperienceButton(webView);
+            expect(button, 'Start your OpenShift experience button should be found').to.exist;
             await button.click();
         });
     }
 
     public async checkLearningButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            await this.getStartLearningButton(webView);
+            const button = await this.getStartLearningButton(webView);
+            expect(button, 'Start Learning button should be found').to.exist;
         });
     }
 
     public async checkRosaButton(): Promise<void> {
         await this.enterWebView(async (webView) => {
-            await this.getRosaButton(webView);
+            const button = await this.getRosaButton(webView);
+            expect(button, 'Create a ROSA cluster button should be found').to.exist;
         });
     }
 
     private async getCreateRefreshClusterButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Create/Refresh cluster")]'));
+        return this.findButton(webView, 'Create/Refresh cluster');
     }
 
     private async getStartYourOpenshiftExperienceButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Start your OpenShift experience")]'));
+        return this.findButton(webView, 'Start your OpenShift experience');
     }
 
     private async getStartLearningButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Start Learning")]'));
+        return this.findButton(webView, 'Start Learning');
     }
 
     private async getRosaButton(webView: WebView): Promise<WebElement> {
-        return await webView.findWebElement(By.xpath('//*[@role="button" and contains(normalize-space(),"Create a ROSA cluster")]'));
+        return this.findButton(webView, 'Create a ROSA cluster');
+    }
+
+    private async findButton(webView: WebView, searchText: string, timeout = 35_000): Promise<WebElement> {
+        return this.findElementSparse(webView, `//*[@role="button" and contains(normalize-space(),"${searchText}")]`, timeout);
     }
 }
 
