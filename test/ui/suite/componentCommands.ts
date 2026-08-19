@@ -93,12 +93,13 @@ export function testComponentCommands(path: string) {
             expect(await component.hasChildren()).to.be.true;
             const commandsItem = await component.findChildItem('Commands');
 
-            //check Commands has children - expanding the item alone doesn't guarantee the
-            //child rows have rendered yet, so poll until getChildren() actually reports them.
+            //check Commands has children - expanding the item alone doesn't guarantee all
+            //child rows have rendered yet, so poll until at least as many as the devfile
+            //declares actually show up (checking for any one row is not enough).
             await commandsItem.expand();
             await VSBrowser.instance.driver.wait(async () => {
                 commands = await commandsItem.getChildren();
-                return commands.length > 0;
+                return commands.length >= expectedCommands.length;
             }, 15_000, 'Commands node children did not populate');
 
             const actualCommands = [];
