@@ -65,7 +65,8 @@ export function testComponentCommands(path: string) {
         });
 
         it('Commands are listed', async function () {
-            //get expected commands
+
+            // Get expected commands
             const devfile = fs.readFileSync(pth.join(path, componentName, 'devfile.yaml'), 'utf-8');
             const parsedDevfile = parse(devfile) as { [key: string]: any };
 
@@ -78,28 +79,27 @@ export function testComponentCommands(path: string) {
                 expectedCommands.push(command.id);
             });
 
-            //get component
-            const section = await getSection();
-            expect(section).to.exist;
-
-            const components = await section.getVisibleItems();
-            expect(components).to.exist;
-            expect(components).to.have.length.greaterThan(0);
-
-            const component = components[0] as TreeItem;
-            await component.expand();
-
-            //check component has child with label Commands
-            expect(await component.hasChildren()).to.be.true;
-
-            //check Commands has children - expanding the item alone doesn't guarantee all
-            //child rows have rendered yet, so poll until at least as many as the devfile
-            //declares actually show up (checking for any one row is not enough).
+            // Get component Commands tree item and check if it has children - expanding the item alone
+            // doesn't guarantee all child rows have rendered yet, so poll until at least as many as the devfile
+            // declares actually show up (checking for any one row is not enough).
             await VSBrowser.instance.driver.wait(async () => {
-                const commandsItem = await component.findChildItem('Commands');
-                await commandsItem.expand();
-                commands = await commandsItem.getChildren();
-                return commands.length >= expectedCommands.length;
+                try {
+                    const section = await getSection();
+                    if (!section) return false;  // ← Explicit check
+
+                    const components = await section.getVisibleItems();
+                    if (!components?.length) return false;  // ← Explicit check
+
+                    const freshComponent = components[0] as TreeItem;
+                    const commandsItem = await freshComponent.findChildItem('Commands');
+                    if (!commandsItem) return false;  // ← Explicit check
+
+                    await commandsItem.expand();
+                    commands = await commandsItem.getChildren();
+                    return commands.length >= expectedCommands.length;
+                } catch (err) {
+                    return false;  // ← Treat errors as "not ready yet"
+                }
             }, 15_000, 'Commands node children did not populate');
 
             const actualCommands = [];
