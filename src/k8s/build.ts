@@ -105,7 +105,8 @@ export class Build implements Disposable {
                 'Select a BuildConfig to see the builds',
             );
             if (buildConfig) {
-                const selBuild = await window.showQuickPick(this.getBuildNames(buildConfig), {
+                const builds = await this.getBuildNames(buildConfig);
+                const selBuild = await window.showQuickPick(builds, {
                     placeHolder: text,
                     ignoreFocusOut: true,
                 });

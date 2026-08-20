@@ -203,6 +203,7 @@ suite('K8s/build', () => {
 
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
+            sandbox.stub(Build, 'getBuildNames').resolves([{label: 'nodejs-copm-nodejs-comp-8'}]);
             const buidConfig = {label: 'nodejs-copm-nodejs-comp'};
             sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
@@ -231,6 +232,8 @@ suite('K8s/build', () => {
 
         setup(() => {
             sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            const buidConfig = {label: 'nodejs-copm-nodejs-comp'};
+            sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
 
@@ -263,6 +266,8 @@ suite('K8s/build', () => {
         setup(() => {
             execStub.resolves({ error: null, stdout: buildData, stderr: '' });
             sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            const buidConfig = {label: 'nodejs-copm-nodejs-comp'};
+            sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
         });
@@ -288,6 +293,8 @@ suite('K8s/build', () => {
         setup(() => {
             execToolStub.resolves({ error: null, stdout: buildData, stderr: '' });
             sandbox.stub<any, any>(Build, 'getBuildNames').resolves('nodejs-copm-nodejs-comp');
+            const buidConfig = {label: 'nodejs-copm-nodejs-comp'};
+            sandbox.stub(Build, 'getBuildConfigNames').resolves([buidConfig]);
             quickPickStub = sandbox.stub(vscode.window, 'showQuickPick');
             quickPickStub.resolves({label: 'nodejs-copm-nodejs-comp-8'});
         });
