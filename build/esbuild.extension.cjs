@@ -41,7 +41,7 @@ async function buildExtension() {
     if (!isWatch) {
         console.log('🔍 Running TypeScript type-checking...');
         try {
-            execSync('tsc --noEmit -p tsconfig.json', { stdio: 'inherit' });
+            execSync(`node "${require.resolve('typescript/bin/tsc')}" --noEmit -p tsconfig.json`, { stdio: 'inherit' });
         } catch (err) {
             console.error('❌ TypeScript type-checking failed.');
             process.exit(1);

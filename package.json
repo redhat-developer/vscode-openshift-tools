@@ -1820,27 +1820,27 @@
 				},
 				{
 					"command": "openshift.component.dev",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/ && !(viewItem =~ /.*\\.dep-(?:str|run|stp).*/)",
 					"group": "c1@1"
 				},
 				{
 					"command": "openshift.component.dev.manual",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/ && !(viewItem =~ /.*\\.dep-(?:str|run|stp).*/)",
 					"group": "c1@2"
 				},
 				{
 					"command": "openshift.component.dev.onPodman",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/ && !(viewItem =~ /.*\\.dep-(?:str|run|stp).*/)",
 					"group": "c1@3"
 				},
 				{
 					"command": "openshift.component.dev.onPodman.manual",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-nrn.*/ && !(viewItem =~ /.*\\.dep-(?:str|run|stp).*/)",
 					"group": "c1@4"
 				},
 				{
 					"command": "openshift.component.exitDevMode",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-(?:str)|(?:run).*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-(?:str|run).*/",
 					"group": "c1@5"
 				},
 				{
@@ -1850,12 +1850,12 @@
 				},
 				{
 					"command": "openshift.component.deploy",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ && viewItem =~ /.*\\.dev-nrn.*/",
 					"group": "c2@0"
 				},
 				{
 					"command": "openshift.component.undeploy",
-					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-run.*/ && viewItem =~ /.*\\.dev-nrn.*/",
 					"group": "c2@1"
 				},
 				{
@@ -2242,6 +2242,16 @@
 						"type": "boolean",
 						"default": false,
 						"description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
+					},
+					"openshiftToolkit.containerRegistryUrl": {
+						"type": "string",
+						"default": "",
+						"description": "Default container image registry URL for deploying components (e.g. quay.io, docker.io, ghcr.io)."
+					},
+					"openshiftToolkit.containerRegistryUsername": {
+						"type": "string",
+						"default": "",
+						"description": "Default username for the container image registry."
 					},
 					"openshiftToolkit.stopDevModeTimeout": {
 						"type": "number",

@@ -5,10 +5,12 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { KubeConfig } from '@kubernetes/client-node';
 import { OpenshiftLogger } from '../util/childProcessUtil';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { DeployState } from '../odo/componentTypeDescription';
 import { Oc } from '../oc/ocWrapper';
+import { deployContextKey } from './deploy';
 
 export interface ComponentUndeployOptions {
     componentPath: string;
@@ -35,12 +37,12 @@ export async function undeployComponent(
         // 2. Delete tracked resources in reverse order (idempotent)
         await deleteTrackedResources(deployState, ctx);
 
-        // 3. Delete deploy state file
+        // 3. Remove this context's entry from deploy state
         try {
-            await fs.unlink(stateFile);
-            logInfo(ctx, 'Deployment state file removed');
+            await removeDeployStateEntry(stateFile);
+            logInfo(ctx, 'Deployment state entry removed');
         } catch (err) {
-            logWarning(ctx, `Failed to remove deployment state file: ${err.message}`);
+            logWarning(ctx, `Failed to update deployment state file: ${err.message}`);
         }
     } else {
         if (options.force) {
@@ -143,12 +145,47 @@ function isDevResource(resource: any): boolean {
     );
 }
 
+async function currentContextKey(): Promise<string> {
+    const kc = new KubeConfig();
+    kc.loadFromDefault();
+    const server = kc.getCurrentCluster()?.server || '';
+    const namespace = await Oc.Instance.getActiveProject() || 'default';
+    return deployContextKey(server, namespace);
+}
+
 async function loadDeployState(stateFile: string): Promise<DeployState | null> {
     try {
         const content = await fs.readFile(stateFile, 'utf-8');
-        return JSON.parse(content) as DeployState;
+        const parsed = JSON.parse(content);
+        if (parsed.version === 1 && !parsed.deployments) {
+            return parsed as DeployState;
+        }
+        if (parsed.deployments) {
+            const key = await currentContextKey();
+            return parsed.deployments[key] || null;
+        }
+        return null;
     } catch {
         return null;
+    }
+}
+
+async function removeDeployStateEntry(stateFile: string): Promise<void> {
+    const content = await fs.readFile(stateFile, 'utf-8');
+    const parsed = JSON.parse(content);
+
+    if (parsed.version === 1 && !parsed.deployments) {
+        await fs.unlink(stateFile);
+        return;
+    }
+
+    const key = await currentContextKey();
+    delete parsed.deployments[key];
+
+    if (Object.keys(parsed.deployments).length === 0) {
+        await fs.unlink(stateFile);
+    } else {
+        await fs.writeFile(stateFile, JSON.stringify(parsed, null, 2), 'utf-8');
     }
 }
 
