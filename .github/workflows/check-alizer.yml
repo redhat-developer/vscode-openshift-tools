@@ -6,7 +6,15 @@ on:
   workflow_dispatch:
 
 jobs:
+  guard:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/fork-guard.yml
+
   check-alizer-repo:
+    needs: guard
+
+    if: needs.guard.outputs.is_fork == 'false'
 
     runs-on: ubuntu-latest
 

@@ -10,7 +10,15 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  guard:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/fork-guard.yml
+
   check-odo:
+    needs: guard
+
+    if: needs.guard.outputs.is_fork == 'false'
 
     runs-on: ubuntu-latest
 

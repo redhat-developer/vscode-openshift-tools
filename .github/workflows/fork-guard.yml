@@ -1,0 +1,24 @@
+name: fork-guard
+
+on:
+  workflow_call:
+    outputs:
+      is_fork:
+        description: "Whether the calling repository is a fork"
+        value: ${{ jobs.check.outputs.is_fork }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    outputs:
+      is_fork: ${{ steps.check.outputs.is_fork }}
+
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "is_fork=$(gh api repos/${{ github.repository }} --jq .fork)" >> "$GITHUB_OUTPUT"
