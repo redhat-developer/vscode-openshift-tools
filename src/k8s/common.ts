@@ -27,7 +27,8 @@ export async function getQuickPicks(cmd: CommandText, errorMessage: string, conv
 }
 
 export async function selectResourceByName(config: Promise<QuickPickItem[]> | QuickPickItem[], placeHolderText: string): Promise<string> {
-    const resource: any = await window.showQuickPick(config, {placeHolder: placeHolderText, ignoreFocusOut: true});
+    const items: QuickPickItem[] = await config;
+    const resource: any = await window.showQuickPick(items, {placeHolder: placeHolderText, ignoreFocusOut: true});
     return resource ? resource.label : null;
 }
 
