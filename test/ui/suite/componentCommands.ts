@@ -18,7 +18,7 @@ import {
 } from 'vscode-extension-tester';
 import { parse } from 'yaml';
 import { DevfileResolver } from '../../../src/devfile/devfileResolver';
-import { waitForItemStable, warn } from '../common/conditions';
+import { stabilizeComponentsView, waitForItemStable, warn } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { closeAllOpenEditors, collapseViews, reloadWindow } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
@@ -79,28 +79,69 @@ export function testComponentCommands(path: string) {
                 expectedCommands.push(command.id);
             });
 
-            // Get component Commands tree item and check if it has children - expanding the item alone
-            // doesn't guarantee all child rows have rendered yet, so poll until at least as many as the devfile
-            // declares actually show up (checking for any one row is not enough).
+            // First, collapse the component to clear any stale cached state from previous tests
+            // (e.g., from componentContextMenu.ts which runs before this suite)
             await VSBrowser.instance.driver.wait(async () => {
                 try {
                     const section = await getSection();
-                    if (!section) return false;  // ← Explicit check
+                    const components = await section.getVisibleItems();
+                    if (components?.length) {
+                        const comp = components[0] as TreeItem;
+                        if (await comp.isExpanded()) {
+                            await comp.collapse();
+                            await new Promise((res) => setTimeout(res, 300));
+                            return true;
+                        }
+                    }
+                    return false;
+                } catch {
+                    return false;
+                }
+            }, 5_000);
+
+            // Expand the component again to get fresh tree data
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    const components = await section.getVisibleItems();
+                    if (components?.length) {
+                        const comp = components[0] as TreeItem;
+                        if (!(await comp.isExpanded())) {
+                            await comp.expand();
+                            await stabilizeComponentsView(getSection, 5_000);
+                            return true;
+                        }
+                    }
+                    return false;
+                } catch {
+                    return false;
+                }
+            }, 10_000);
+
+            // Now get the Commands tree item and wait for children to populate
+            // Expanding the item alone doesn't guarantee all child rows have rendered yet,
+            // so poll until at least as many as the devfile declares actually show up.
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    const section = await getSection();
+                    if (!section) return false;
 
                     const components = await section.getVisibleItems();
-                    if (!components?.length) return false;  // ← Explicit check
+                    if (!components?.length) return false;
 
                     const freshComponent = components[0] as TreeItem;
                     const commandsItem = await freshComponent.findChildItem('Commands');
-                    if (!commandsItem) return false;  // ← Explicit check
+                    if (!commandsItem) return false;
 
                     await commandsItem.expand();
+                    // Wait a brief moment for the tree to render children after expand
+                    await new Promise((res) => setTimeout(res, 500));
                     commands = await commandsItem.getChildren();
                     return commands.length >= expectedCommands.length;
-                } catch (err) {
-                    return false;  // ← Treat errors as "not ready yet"
+                } catch {
+                    return false;
                 }
-            }, 15_000, 'Commands node children did not populate');
+            }, 20_000, 'Commands node children did not populate');
 
             const actualCommands = [];
             for (const command of commands) {
