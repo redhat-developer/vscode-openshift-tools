@@ -18,7 +18,7 @@ import {
 } from 'vscode-extension-tester';
 import { parse } from 'yaml';
 import { DevfileResolver } from '../../../src/devfile/devfileResolver';
-import { stabilizeComponentsView, waitForItemStable, warn } from '../common/conditions';
+import { waitForItemStable, warn } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { closeAllOpenEditors, collapseViews, reloadWindow } from '../common/overdrives';
 import { OpenshiftTerminalWebviewView } from '../common/ui/webviewView/openshiftTerminalWebviewView';
@@ -79,69 +79,48 @@ export function testComponentCommands(path: string) {
                 expectedCommands.push(command.id);
             });
 
-            // First, collapse the component to clear any stale cached state from previous tests
-            // (e.g., from componentContextMenu.ts which runs before this suite)
+            // Single polling loop: locate our specific component by label, find/expand its
+            // "Commands" subtree, and retry until enough child nodes appear.
+            //
+            // Rationale: waitForItemStable only guarantees the top-level component row
+            // exists — nothing about lazy-loaded children (the Commands node). A single
+            // loop that re-queries DOM fresh each iteration handles both staleness and
+            // left-over components from other test suites. We match by label so we never
+            // grab the wrong component just because it happens to be first.
             await VSBrowser.instance.driver.wait(async () => {
                 try {
                     const section = await getSection();
-                    const components = await section.getVisibleItems();
-                    if (components?.length) {
-                        const comp = components[0] as TreeItem;
-                        if (await comp.isExpanded()) {
-                            await comp.collapse();
-                            await new Promise((res) => setTimeout(res, 300));
-                            return true;
+                    const allComponents = await section.getVisibleItems();
+                    if (!allComponents?.length) return false;
+
+                    // Find the correct component by label (index 0 is unreliable — other
+                    // suites may leave leftover items on the tree).
+                    let myComp: TreeItem | undefined;
+                    for (const candidate of allComponents) {
+                        const label = await candidate.getText();
+                        // The item text varies depending on dev state: "nodejs-starter",
+                        // "nodejs-starter (dev running)", etc.
+                        if (label === componentName || label.startsWith(`${componentName} `)) {
+                            myComp = candidate as TreeItem;
+                            break;
                         }
                     }
-                    return false;
-                } catch {
-                    return false;
-                }
-            }, 5_000);
+                    if (!myComp) return false;
 
-            // Expand the component again to get fresh tree data
-            await VSBrowser.instance.driver.wait(async () => {
-                try {
-                    const section = await getSection();
-                    const components = await section.getVisibleItems();
-                    if (components?.length) {
-                        const comp = components[0] as TreeItem;
-                        if (!(await comp.isExpanded())) {
-                            await comp.expand();
-                            await stabilizeComponentsView(getSection, 5_000);
-                            return true;
-                        }
-                    }
-                    return false;
-                } catch {
-                    return false;
-                }
-            }, 10_000);
-
-            // Now get the Commands tree item and wait for children to populate
-            // Expanding the item alone doesn't guarantee all child rows have rendered yet,
-            // so poll until at least as many as the devfile declares actually show up.
-            await VSBrowser.instance.driver.wait(async () => {
-                try {
-                    const section = await getSection();
-                    if (!section) return false;
-
-                    const components = await section.getVisibleItems();
-                    if (!components?.length) return false;
-
-                    const freshComponent = components[0] as TreeItem;
-                    const commandsItem = await freshComponent.findChildItem('Commands');
+                    const commandsItem = await myComp.findChildItem('Commands');
                     if (!commandsItem) return false;
 
                     await commandsItem.expand();
-                    // Wait a brief moment for the tree to render children after expand
+                    // Give the tree renderer time to materialize <tr> rows for command children
                     await new Promise((res) => setTimeout(res, 500));
+
                     commands = await commandsItem.getChildren();
-                    return commands.length >= expectedCommands.length;
+                    return commands?.length >= expectedCommands.length;
                 } catch {
+                    // StaleElementReferenceError, NoSuchElementError, etc. → keep polling
                     return false;
                 }
-            }, 20_000, 'Commands node children did not populate');
+            }, 30_000, 'Commands node children did not populate');
 
             const actualCommands = [];
             for (const command of commands) {
