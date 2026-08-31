@@ -448,6 +448,33 @@ export async function detectKubernetesVariant(executionContext?: ExecutionContex
     return KubernetesVariant.Generic;
 }
 
+export type ClusterPlatformLabel = 'OpenShift' | 'Kubernetes' | 'Kind' | 'Minikube';
+
+export interface ClusterPlatformInfo {
+    isOpenShift: boolean;
+    variant: KubernetesVariant;
+    label: ClusterPlatformLabel;
+}
+
+/**
+ * Resolves which specific Kubernetes/OpenShift distribution the current context targets,
+ * for display purposes (e.g. describe's "Running on" field).
+ */
+export async function resolveClusterPlatform(executionContext?: ExecutionContext): Promise<ClusterPlatformInfo> {
+    const isOpenShift = await isOpenShiftCluster(executionContext);
+    const variant = isOpenShift ? KubernetesVariant.Generic : await detectKubernetesVariant(executionContext);
+
+    const label: ClusterPlatformLabel = isOpenShift
+        ? 'OpenShift'
+        : variant === KubernetesVariant.Kind
+            ? 'Kind'
+            : variant === KubernetesVariant.Minikube
+                ? 'Minikube'
+                : 'Kubernetes';
+
+    return { isOpenShift, variant, label };
+}
+
 export async function getNamespaceKind(executionContext?: ExecutionContext): Promise<string> {
     if (executionContext && executionContext.has(getNamespaceKind.name)) {
         return executionContext.get(getNamespaceKind.name);
