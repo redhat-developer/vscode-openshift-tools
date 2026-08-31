@@ -12,7 +12,7 @@ import { initComponent } from '../devfile/init';
 import { ToolsConfig } from '../tools';
 import { ChildProcessUtil, CliExitData, OpenshiftChannel } from '../util/childProcessUtil';
 import { VsCommandError } from '../vscommand';
-import { ComponentDescription } from './componentTypeDescription';
+import { ComponentDescription } from '../devfile/componentTypeDescription';
 
 /**
  * Wraps the `odo` cli tool.

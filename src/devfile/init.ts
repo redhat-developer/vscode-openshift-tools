@@ -11,7 +11,7 @@ import { Archive } from '../downloadUtil/archive';
 import { DownloadUtil } from '../downloadUtil/download';
 import type {
     Data
-} from '../odo/componentTypeDescription';
+} from './componentTypeDescription';
 import { OdoPreference } from '../odo/odoPreference';
 import { OpenshiftLogger } from '../util/utils';
 import { cloneRepository } from '../util/git';

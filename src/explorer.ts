@@ -30,7 +30,7 @@ import * as Helm from './helm/helm';
 import { HelmRepo } from './helm/helmChartType';
 import { getOutputFormat, helmfsUri, kubefsUri } from './k8s/vfs/kuberesources.utils';
 import { Oc } from './oc/ocWrapper';
-import { Component } from './openshift/component';
+import { getComponentStateByContext, onComponentStateChanged } from './openshift/componentStateFile';
 import { getServiceKindStubs, getServices } from './openshift/serviceHelpers';
 import { PortForward } from './port-forward';
 import { getKubeConfigFiles, getNamespaceKind, isOpenShiftCluster, KubeConfigInfo } from './util/kubeUtils';
@@ -155,7 +155,12 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
         this.treeView = window.createTreeView<ExplorerItem>('openshiftProjectExplorer', {
             treeDataProvider: this,
         });
-        Component.onDidStateChanged((_context) => {
+        onComponentStateChanged((context) => {
+            // Skip refresh for podman dev sessions (they don't create cluster resources)
+            const componentState = getComponentStateByContext(context);
+            if (componentState?.runOn === 'podman') {
+                return;
+            }
             this.refresh();
         });
     }
