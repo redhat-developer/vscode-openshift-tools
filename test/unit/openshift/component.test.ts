@@ -18,7 +18,7 @@ import { DevfileInfo } from '../../../src/devfile-registry/devfileInfo';
 import { DevfileRegistry } from '../../../src/devfile-registry/devfileRegistryWrapper';
 import { Oc } from '../../../src/oc/ocWrapper';
 import { Project } from '../../../src/oc/project';
-import { CommandProvider } from '../../../src/odo/componentTypeDescription';
+import { CommandProvider } from '../../../src/devfile/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
@@ -605,5 +605,133 @@ suite('OpenShift/Component', function () {
             );
         });
 
+    });
+
+    suite('dev mode', () => {
+        let DevModeComponent: typeof openShiftComponent.Component;
+        let startDevSessionStub: sinon.SinonStub;
+        let stopDevSessionStub: sinon.SinonStub;
+        let forceStopDevSessionStub: sinon.SinonStub;
+        let createDevTerminalBridgeStub: sinon.SinonStub;
+        let fakeTerminal: { focusTerminal: sinon.SinonStub; kill: sinon.SinonStub; forceKill: sinon.SinonStub; sendText: sinon.SinonStub; id: string };
+        let onStopRequested: () => void;
+
+        setup(() => {
+            startDevSessionStub = sandbox.stub().resolves();
+            stopDevSessionStub = sandbox.stub().resolves();
+            forceStopDevSessionStub = sandbox.stub().resolves();
+
+            fakeTerminal = {
+                focusTerminal: sandbox.stub(),
+                kill: sandbox.stub().callsFake(() => onStopRequested()),
+                forceKill: sandbox.stub(),
+                sendText: sandbox.stub(),
+                id: 'fake-terminal-id',
+            };
+
+            createDevTerminalBridgeStub = sandbox.stub().callsFake(
+                async (_name: string, _cwd: string, stopCallback: () => void) => {
+                    onStopRequested = stopCallback;
+                    return { output: { onOutput: sandbox.stub() }, terminal: fakeTerminal };
+                },
+            );
+
+            DevModeComponent = pq('../../../src/openshift/component', {
+                '../devfile/dev': {
+                    startDevSession: startDevSessionStub,
+                    stopDevSession: stopDevSessionStub,
+                    forceStopDevSession: forceStopDevSessionStub,
+                },
+                '../devfile/inner-loop/devTerminalBridge': {
+                    createDevTerminalBridge: createDevTerminalBridgeStub,
+                },
+            }).Component as typeof openShiftComponent.Component;
+        });
+
+        suite('devRunOn()', () => {
+            test('starts a dev session and transitions to DEV_RUNNING', async () => {
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                expect(createDevTerminalBridgeStub).calledOnce;
+                expect(startDevSessionStub).calledOnceWith(
+                    componentItem1.component.devfileData.devfile,
+                    componentItem1,
+                    { debug: true, runOn: undefined, manualRebuild: false },
+                );
+                expect(DevModeComponent.getComponentDevState(componentItem1).devStatus)
+                    .to.equal(openShiftComponent.ComponentContextState.DEV_RUNNING);
+            });
+
+            test('passes runOn and manualRebuild through to startDevSession', async () => {
+                await DevModeComponent.devRunOn(componentItem1, 'podman', true);
+
+                expect(startDevSessionStub).calledOnceWith(
+                    componentItem1.component.devfileData.devfile,
+                    componentItem1,
+                    { debug: true, runOn: 'podman', manualRebuild: true },
+                );
+            });
+
+            test('reverts to DEV and shows an error message when startDevSession fails', async () => {
+                startDevSessionStub.rejects(new Error('boom'));
+                const errorStub = sandbox.stub(vscode.window, 'showErrorMessage').resolves();
+
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                expect(DevModeComponent.getComponentDevState(componentItem1).devStatus)
+                    .to.equal(openShiftComponent.ComponentContextState.DEV);
+                expect(errorStub).calledOnce;
+            });
+        });
+
+        suite('exitDevMode()', () => {
+            test('sends the stop signal through the terminal, stopping the session gracefully', async () => {
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                await DevModeComponent.exitDevMode(componentItem1);
+                // the stop flow is kicked off but not awaited by exitDevMode() itself
+                await new Promise(resolve => setImmediate(resolve));
+
+                expect(fakeTerminal.focusTerminal).calledOnce;
+                expect(fakeTerminal.kill).calledOnce;
+                expect(stopDevSessionStub).calledOnceWith(componentItem1.contextPath);
+                expect(DevModeComponent.getComponentDevState(componentItem1).devStatus)
+                    .to.equal(openShiftComponent.ComponentContextState.DEV);
+            });
+
+            test('does not stop a session twice if triggered again while already stopping', async () => {
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                fakeTerminal.kill();
+                fakeTerminal.kill();
+                await new Promise(resolve => setImmediate(resolve));
+
+                expect(stopDevSessionStub).calledOnce;
+            });
+        });
+
+        suite('forceExitDevMode()', () => {
+            test('force-kills the terminal and force-stops the session', async () => {
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                await DevModeComponent.forceExitDevMode(componentItem1);
+
+                expect(fakeTerminal.focusTerminal).calledOnce;
+                expect(fakeTerminal.forceKill).calledOnce;
+                expect(forceStopDevSessionStub).calledOnceWith(componentItem1.contextPath);
+                expect(DevModeComponent.getComponentDevState(componentItem1).devStatus)
+                    .to.equal(openShiftComponent.ComponentContextState.DEV);
+            });
+        });
+
+        suite('showDevTerminal()', () => {
+            test('focuses the dev terminal', async () => {
+                await DevModeComponent.devRunOn(componentItem1, undefined, false);
+
+                DevModeComponent.showDevTerminal(componentItem1);
+
+                expect(fakeTerminal.focusTerminal).calledOnce;
+            });
+        });
     });
 });

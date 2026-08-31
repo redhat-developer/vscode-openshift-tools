@@ -3,24 +3,19 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { V230Devfile } from '@devfile/api';
-import { fail } from 'assert';
 import { assert, expect } from 'chai';
-import { ChildProcess } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
-import { EventEmitter, Terminal, window, workspace } from 'vscode';
-import { parse, stringify } from 'yaml';
+import { workspace } from 'vscode';
+import { stringify } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
-import { DevfileCommandRunner } from '../../src/devfile/devfileCommandRunner';
+import { getComponentDescription } from '../../src/devfile/describe';
 import { initComponent } from '../../src/devfile/init';
 import { Oc } from '../../src/oc/ocWrapper';
-import { Command } from '../../src/odo/command';
 import { OdoPreference } from '../../src/odo/odoPreference';
-import { Odo } from '../../src/odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../../src/odo/workspace';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
@@ -116,7 +111,7 @@ suite('odo commands integration', function () {
 
                 const componentFolder: ComponentWorkspaceFolder = {
                     contextPath: componentLocation,
-                    component: await Odo.Instance.describeComponent(componentLocation)
+                    component: await getComponentDescription(componentLocation)
                 };
 
                 // Import deploy functions
@@ -169,287 +164,13 @@ suite('odo commands integration', function () {
             });
         });
 
-        test('dev()', async function() {
-            const outputEmitter = new EventEmitter<string>();
-            let devProcess: ChildProcess;
-            function failListener(_error) {
-                assert.fail('odo dev errored before it was closed');
-            }
-            const term = window.createTerminal({
-                name: 'test terminal',
-                pty: {
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(Command.dev(false)) //
-                            .then(childProcess => {
-                                devProcess = childProcess
-                                devProcess.on('error', failListener);
-                            });
-                    },
-                    close: () => {
-                        if (devProcess) {
-                            devProcess.removeListener('error', failListener);
-                            devProcess.kill('SIGINT');
-                        }
-                    },
-                    handleInput: (data: string) => {
-                        if (data.length) {
-                            if (devProcess) {
-                                devProcess.removeListener('error', failListener);
-                                devProcess.kill('SIGINT');
-                            }
-                        }
-                    },
-                    onDidWrite: outputEmitter.event
-                }
-            });
-            await new Promise<void>(resolve => setTimeout(resolve, 3000));
-            // we instruct the pseudo terminal to close the dev session when any text is sent
-            term.sendText('a');
-            term.dispose();
-        });
+        // Dev mode tests removed - now using native TypeScript implementation
+        // See test/integration/dev.test.ts for comprehensive dev mode test coverage
 
     });
 
-    suite('component dev', function() {
-        const componentName = 'my-test-component';
-        const componentType = 'nodejs';
-        const componentStarterProject = 'nodejs-starter';
-        let componentLocation: string;
-
-        suiteSetup(async function () {
-            if (isOpenShift) {
-                await Oc.Instance.loginWithUsernamePassword(clusterUrl, username, password);
-            }
-            try {
-                await Oc.Instance.createProject(newProjectName);
-            } catch {
-                // do nothing; already exists
-            }
-            await Oc.Instance.setProject(newProjectName);
-            componentLocation = await promisify(tmp.dir)();
-        });
-
-        suiteTeardown(async function () {
-            let toRemove = -1;
-            for (let i = 0; i < workspace.workspaceFolders.length; i++) {
-                if (workspace.workspaceFolders[i].uri.fsPath === componentLocation) {
-                    toRemove = i;
-                    break;
-                }
-            }
-            if (toRemove !== -1) {
-                workspace.updateWorkspaceFolders(toRemove, 1);
-                // Give VSCode time to process workspace update before deleting
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            await fs.rm(componentLocation, { recursive: true, force: true });
-            await Oc.Instance.deleteProject(newProjectName);
-        });
-
-        interface TerminalListener {
-            onOutput(data: string): void;
-            onError(data:string): void;
-        }
-
-        function executeCommandInTerminal(commandText: CommandText, cwd: string, listener?: TerminalListener) : Terminal {
-            const outputEmitter = new EventEmitter<string>();
-            outputEmitter.event(data => {
-                if (listener) listener.onOutput(data);
-            });
-            let devProcess: ChildProcess;
-            function failListener(_error) {
-                assert.fail('odo dev errored before it was closed');
-            }
-            return window.createTerminal({
-                name: 'test terminal',
-                pty: {
-                    open: () => {
-                        void CliChannel.getInstance().spawnTool(Command.dev(true),
-                            {
-                                cwd
-                            })
-                            .then(childProcess => {
-                                devProcess = childProcess
-                                devProcess.on('error', failListener);
-                                devProcess.stdout.on('data', data => {
-                                    if (listener) listener.onOutput(data);
-                                });
-                                devProcess.stderr.on('data', data => {
-                                    if (listener) listener.onError(data);
-                                });
-                            });
-                    },
-                    close: () => {
-                        if (devProcess) {
-                            devProcess.removeListener('error', failListener);
-                            devProcess.kill('SIGINT');
-                        }
-                    },
-                    handleInput: (data: string) => {
-                        // Close terminal on any input
-                        if (data.length) {
-                            if (devProcess) {
-                                devProcess.removeListener('error', failListener);
-                                devProcess.kill('SIGINT');
-                            }
-                        }
-                    },
-                    onDidWrite: outputEmitter.event
-                }
-            });
-        }
-
-        async function startDevInTerminal(cwd?) : Promise<Terminal> {
-            let termOutput = '';
-            let termError = '';
-            const term = executeCommandInTerminal(Command.dev(true), cwd, {
-                onOutput(data) {
-                    termOutput = termOutput.concat(data);
-                },
-                onError(data) {
-                    termError = termError.concat(data);
-                }
-            });
-
-            let hopesLeft = 30;
-            let devIsRunning;
-            do {
-                hopesLeft--;
-                await new Promise<void>(resolve => setTimeout(resolve, 2000));
-                let index = termOutput.indexOf(`Developing using the "${componentName}" Devfile`);
-                if (index >= 0) index = termOutput.indexOf('✓  Pod is Running', index);
-                if (index >= 0) index = termOutput.indexOf('↪ Dev mode', index);
-                devIsRunning = (index >= 0);
-            } while (hopesLeft > 0 && !devIsRunning);
-            if (!devIsRunning) {
-                if (termError.trim().length > 0) {
-                    fail(`Start Dev failed: ${termError}`);
-                }
-                fail('Waiting for pod to start is timed out');
-            }
-            return term;
-        }
-
-        const helloWorldCommandId = 'hello-world';
-        const helloWorldCommandOutput = 'Hello, World!';
-        const helloWorldCommandExecCommandLine = `echo "${helloWorldCommandOutput}"`;
-
-        async function fixupDevFile(devfilePath: string): Promise<void> {
-            // Parse YAML into an Object, add:
-            //
-            // - exec:
-            //     group:
-            //       kind: run
-            //     commandLine: echo "Hello, World!"
-            //     component: runtime
-            //   id: hello-world
-            //
-            // and then save into the same debfile.yaml
-            const file = await fs.readFile(devfilePath, 'utf8');
-            const devfile = parse(file.toString()) as V230Devfile;
-            if (!devfile || !devfile.commands) {
-                fail(`DevFile '${devfilePath}' cannot be read`);
-            }
-            const devfileCommands = devfile.commands;
-            let helloWorldCommand;
-            for (let i = 0; i < devfileCommands.length; i++) {
-                if(devfileCommands[i].id === helloWorldCommandId) {
-                    helloWorldCommand = devfileCommands[i];
-                    break;
-                }
-            }
-            if (helloWorldCommand) {
-                helloWorldCommand.exec = {
-                    group:{
-                        kind: 'run'
-                    },
-                    commandLine: helloWorldCommandExecCommandLine,
-                    component: 'runtime'
-                }
-            } else {
-                devfileCommands.push({
-                    exec: {
-                        group:{
-                            kind: 'run'
-                        },
-                        commandLine: helloWorldCommandExecCommandLine,
-                        component: 'runtime'
-                    },
-                    id: helloWorldCommandId
-                })
-            }
-            await fs.writeFile(devfilePath, stringify(devfile, YAML_STRINGIFY_OPTIONS));
-        }
-
-        test('runComponentCommand()', async function () {
-            await initComponent({
-                projectPath: componentLocation,
-                name: componentName,
-
-                registryDevfile: componentType,
-                devfileVersion: '2.1.1',
-                registry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
-
-                starterProject: componentStarterProject
-            });
-
-            const devfilePath = path.join(componentLocation, 'devfile.yaml')
-            await fs.access(devfilePath);
-
-            await fixupDevFile(devfilePath);
-
-            const componentDescription = await Odo.Instance.describeComponent(componentLocation);
-
-            expect(componentDescription.devfileData.devfile.commands[0]?.id).exist;
-
-            const commands = componentDescription.devfileData.devfile.commands
-            let helloCommand: Command;
-            for (let i = 0; i < commands.length; i++) {
-                if (commands[i].id && helloWorldCommandId === commands[i].id) {
-                    helloCommand = commands[i];
-                    break;
-                }
-            }
-            if (!helloCommand) {
-                fail(`Command '${helloWorldCommandId}' doesn't exist in Component '${componentName}'`);
-            }
-
-            let devTerm: Terminal;
-
-            try {
-
-                devTerm =
-                    await startDevInTerminal(
-                        componentLocation
-                    );
-
-                const componentFolder: ComponentWorkspaceFolder = {
-                    contextPath: componentLocation,
-                    component: componentDescription
-                };
-
-                await DevfileCommandRunner.execute(
-                    componentFolder,
-                    helloWorldCommandId
-                );
-
-            } catch (err) {
-
-                fail(
-                    err instanceof Error
-                        ? err.message
-                        : String(err)
-                );
-
-            } finally {
-
-                if (devTerm) {
-                    devTerm.sendText('exit');
-                    devTerm.dispose();
-                }
-            }
-        });
-    });
+    // "component dev" suite removed - tested old odo CLI-based dev mode
+    // Dev mode is now native TypeScript - see test/integration/dev.test.ts for coverage
 
     suite('container runtime detection', function () {
         let detectedRuntime: string | null;
@@ -576,7 +297,7 @@ suite('odo commands integration', function () {
 
             const componentFolder: ComponentWorkspaceFolder = {
                 contextPath: componentLocation,
-                component: await Odo.Instance.describeComponent(componentLocation),
+                component: await getComponentDescription(componentLocation),
             };
 
             const result = await deployComponent(
@@ -606,7 +327,7 @@ suite('odo commands integration', function () {
 
             const componentFolder: ComponentWorkspaceFolder = {
                 contextPath: componentLocation,
-                component: await Odo.Instance.describeComponent(componentLocation),
+                component: await getComponentDescription(componentLocation),
             };
 
             await undeployComponent(

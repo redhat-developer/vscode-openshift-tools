@@ -7,7 +7,7 @@ import React from 'react';
 import { Uri } from 'vscode';
 import { ChartResponse } from '../../helm/helmChartType';
 import { ComponentTypeDescription, Registry } from '../../odo/componentType';
-import { StarterProject } from '../../odo/componentTypeDescription';
+import { StarterProject } from '../../devfile/componentTypeDescription';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;

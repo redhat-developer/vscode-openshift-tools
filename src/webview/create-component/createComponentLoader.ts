@@ -15,7 +15,7 @@ import { Alizer } from '../../alizer/alizerWrapper';
 import { AlizerDevfileResponse, Version } from '../../alizer/types';
 import { DevfileInfo, DevfileInfoExt, DevfileVersionInfo } from '../../devfile-registry/devfileInfo';
 import { DevfileRegistry } from '../../devfile-registry/devfileRegistryWrapper';
-import { Endpoint } from '../../odo/componentTypeDescription';
+import { Endpoint } from '../../devfile/componentTypeDescription';
 import { Odo } from '../../odo/odoWrapper';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';

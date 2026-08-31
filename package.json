@@ -159,6 +159,7 @@
 		"git-up": "^8.1.1",
 		"globals": "^17.11.0",
 		"got": "^16.0.0",
+		"ignore": "^7.0.9",
 		"istanbul": "^0.4.5",
 		"js-yaml": "^5.4.1",
 		"json-schema": "^0.4.0",
@@ -544,7 +545,7 @@
 			},
 			{
 				"command": "openshift.component.dev.manual",
-				"title": "Start Dev (manually trigger rebuild)",
+				"title": "Start Dev (Manual Sync)",
 				"category": "OpenShift"
 			},
 			{
@@ -560,6 +561,11 @@
 			{
 				"command": "openshift.component.forceExitDevMode",
 				"title": "Force Stop Dev",
+				"category": "OpenShift"
+			},
+			{
+				"command": "openshift.component.dev.sync",
+				"title": "Sync Files & Rebuild",
 				"category": "OpenShift"
 			},
 			{
@@ -890,7 +896,7 @@
 			},
 			{
 				"command": "openshift.component.dev.onPodman.manual",
-				"title": "Start Dev on Podman (manually trigger rebuild)",
+				"title": "Start Dev on Podman (Manual Sync)",
 				"category": "OpenShift"
 			},
 			{
@@ -1850,6 +1856,11 @@
 					"command": "openshift.component.forceExitDevMode",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-stp.*/",
 					"group": "c1@6"
+				},
+				{
+					"command": "openshift.component.dev.sync",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dev-run.*/",
+					"group": "c1@7"
 				},
 				{
 					"command": "openshift.component.deploy",

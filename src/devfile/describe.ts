@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { AppsV1Api, NetworkingV1Api } from '@kubernetes/client-node';
-import * as fs from 'fs/promises';
 import path from 'path';
 import {
   CommandInfo,
@@ -12,12 +11,16 @@ import {
   ComponentItem,
   Container,
   Data,
+  DeployedResource,
   DevControlPlaneInfo,
+  DevState,
   ForwardedPort,
   StarterProject
-} from '../odo/componentTypeDescription';
-import { KubeConfigInfo } from '../util/kubeUtils';
+} from './componentTypeDescription';
+import { KubeConfigInfo, resolveClusterPlatform } from '../util/kubeUtils';
+import { loadDeployState } from './deployStateFile';
 import { DevfileResolver } from './devfileResolver';
+import { loadDevState } from './inner-loop/devStateFile';
 
 /* ===========================================================
  * Exported functions
@@ -40,14 +43,16 @@ export async function getComponentDescription(
   const normalizedCommands = normalizeCommands(mergedDevfile);
   const supportedOdoFeatures = detectSupportedFeatures(normalizedCommands);
 
-  let runningIn: string[] = [];
-  let runningOn: string[] = [];
-  let managedBy = undefined;
-  let warnings: string[] = [];
+  const runningIn: string[] = [];
+  const runningOn: string[] = [];
+  let managedBy: string | undefined;
+  const warnings: string[] = [];
   let devForwardedPorts:  ForwardedPort[] = [];
   const devControlPlane: ComponentDescription['devControlPlane'] = [];
 
-  const devstate = await readDevState(resolvedDevfilePath);
+  // Dev-mode status — evaluated independently of deploy status below, so a component can be
+  // reported as running in both Dev and Deploy at once.
+  const devstate = await loadDevState(path.dirname(resolvedDevfilePath));
   if (devstate) {
     const runtime = devstate.platform ?? 'unknown';
 
@@ -72,12 +77,24 @@ export async function getComponentDescription(
           webInterfacePath: '/'
         });
     }
+  }
+
+  // Deploy status — prefer the local deploystate.json this extension's own deploy.ts
+  // maintains; only fall back to a live cluster query if that file has no entry for the
+  // current cluster/namespace (e.g. component deployed by something else, or state lost).
+  const deployState = await loadDeployState(path.dirname(resolvedDevfilePath));
+  if (deployState) {
+    const { label: platformLabel } = await resolveClusterPlatform();
+
+    runningIn.push('Deploy');
+    runningOn.push(`${platformLabel}: Deploy`);
+    managedBy = findManagedBy(deployState.resources) ?? 'openshift-toolkit';
   } else {
-    const clusterInfo = await checkClusterInfo(opts.namespace, opts.componentName, opts.timeoutMs ?? 3000)
-    runningIn = clusterInfo.runningIn
-    runningOn = clusterInfo.runningOn
-    managedBy = clusterInfo.managedBy && clusterInfo.managedBy.length > 0 ? clusterInfo.managedBy : devfile ? 'odo' : 'Unknown';
-    warnings = clusterInfo.warnings
+    const clusterInfo = await checkClusterInfo(opts?.namespace, opts?.componentName, opts?.timeoutMs ?? 3000)
+    runningIn.push(...clusterInfo.runningIn);
+    runningOn.push(...clusterInfo.runningOn);
+    managedBy = clusterInfo.managedBy?.length ? clusterInfo.managedBy : (clusterInfo.runningIn.length ? 'Unknown' : undefined);
+    warnings.push(...(clusterInfo.warnings ?? []));
   }
 
   return {
@@ -203,16 +220,17 @@ async function checkClusterInfo(namespace: string, componentName: string, timeou
       )
     ]);
 
-    const runningIn = (ing.items ?? [])
-      .map(i => i.metadata?.name)
-      .filter(Boolean);
+    const isRunning = (ing.items?.length ?? 0) > 0 || (dep.items?.length ?? 0) > 0;
 
-    const runningOn = runningIn.length > 0 ? ['cluster: Deploy'] : [];
+    const runningIn = isRunning ? ['Deploy'] : [];
 
-    const managedBy =
-      dep.items?.[0]?.metadata?.labels?.[
-        'app.kubernetes.io/managed-by'
-      ];
+    const runningOn = isRunning
+      ? [`${(await resolveClusterPlatform()).label}: Deploy`]
+      : [];
+
+    const managedBy = isRunning
+      ? dep.items?.[0]?.metadata?.labels?.['app.kubernetes.io/managed-by']
+      : undefined;
 
     return {
       runningIn,
@@ -241,28 +259,12 @@ async function checkClusterInfo(namespace: string, componentName: string, timeou
   }
 }
 
-type DevState = {
-  pid: number;
-  platform: 'cluster' | 'podman' | 'docker' | string;
-  forwardedPorts?: {
-    containerName: string;
-    portName?: string;
-    isDebug?: boolean;
-    localAddress: string;
-    localPort: number;
-    containerPort: number;
-    exposure?: string;
-  }[];
-  apiServerPort?: number;
-};
-
-async function readDevState(devfilePath: string): Promise< DevState | null> {
-  try {
-    const file = path.join(path.dirname(devfilePath), '.odo', 'devstate.json');
-    return JSON.parse(await fs.readFile(file, 'utf-8'));
-  } catch {
-    return null;
+function findManagedBy(resources: DeployedResource[]): string | undefined {
+  for (const resource of resources) {
+    const value = resource.labels?.['app.kubernetes.io/managed-by'];
+    if (value) return value;
   }
+  return undefined;
 }
 
 function extractK8sErrorMessage(err: unknown): string {
@@ -472,11 +474,17 @@ function appendContainerComponents(lines: string[], components: ComponentItem[],
   for (const comp of containers) {
     const cont = comp.container as Container;
     lines.push(` •  ${comp.name}`);
-    lines.push(`    ${bold('Source Mapping:')} /projects`);
+    lines.push(`    ${bold('Source Mapping:')} ${cont.sourceMapping ?? '/projects'}`);
     if (cont.endpoints?.length) {
       lines.push(`    ${bold('Endpoints:')}`);
       for (const ep of cont.endpoints) {
         lines.push(`      - ${ep.name} (${ep.targetPort})`);
+      }
+    }
+    if (cont.env?.length) {
+      lines.push(`    ${bold('Environment Variables:')}`);
+      for (const envVar of cont.env) {
+        lines.push(`      - ${envVar.name}=${envVar.value}`);
       }
     }
 
@@ -616,7 +624,7 @@ function detectSupportedFeatures(commands: any[]) {
   };
 }
 
-function extractForwardedPortsFromDevState(devState): ForwardedPort[] {
+function extractForwardedPortsFromDevState(devState: DevState): ForwardedPort[] {
   if (!devState?.forwardedPorts) return [];
 
   const runtime = devState.platform ?? 'unknown';
