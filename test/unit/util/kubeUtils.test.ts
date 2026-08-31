@@ -183,3 +183,100 @@ suite('getOpenShiftRegistryUrl()', () => {
         expect(result).to.be.undefined;
     });
 });
+
+suite('resolveClusterPlatform()', () => {
+    let sandbox: sinon.SinonSandbox;
+    let executeSyncToolStub: sinon.SinonStub;
+    let resolveClusterPlatform: any;
+    const fixtureDir = path.resolve(__dirname, '..', '..', '..', '..', 'test', 'fixtures');
+    const configDir = path.resolve(fixtureDir, '.kube');
+
+    setup(() => {
+        sandbox = sinon.createSandbox();
+        executeSyncToolStub = sandbox.stub();
+
+        const mod = pq('../../../src/util/kubeUtils', {
+            '../cli': {
+                CliChannel: {
+                    getInstance: () => ({
+                        executeSyncTool: executeSyncToolStub,
+                        executeTool: sandbox.stub(),
+                    }),
+                },
+            },
+        });
+        resolveClusterPlatform = mod.resolveClusterPlatform;
+    });
+
+    teardown(() => {
+        sandbox.restore();
+    });
+
+    test('returns OpenShift without checking the Kubernetes variant', async () => {
+        sandbox.stub(process, 'env').value({
+            KUBECONFIG: path.join(configDir, 'config-generic'),
+        });
+        executeSyncToolStub.resolves('apps.openshift.io/v1');
+
+        const result = await resolveClusterPlatform();
+
+        expect(result).to.deep.equal({
+            isOpenShift: true,
+            variant: KubernetesVariant.Generic,
+            label: 'OpenShift',
+        });
+        // Only the 'oc api-versions' check should run — no kind/minikube CLI probing needed
+        // once the cluster is already known to be OpenShift.
+        expect(executeSyncToolStub).calledOnce;
+    });
+
+    test('returns Kind for a non-OpenShift Kind cluster', async () => {
+        sandbox.stub(process, 'env').value({
+            KUBECONFIG: path.join(configDir, 'config-kind'),
+        });
+        executeSyncToolStub.callsFake(async (cmd: any) => {
+            if (cmd.toString().includes('api-versions')) {
+                return 'v1';
+            }
+            return 'kind v0.20.0';
+        });
+
+        const result = await resolveClusterPlatform();
+
+        expect(result).to.deep.equal({
+            isOpenShift: false,
+            variant: KubernetesVariant.Kind,
+            label: 'Kind',
+        });
+    });
+
+    test('returns Minikube for a non-OpenShift Minikube cluster', async () => {
+        sandbox.stub(process, 'env').value({
+            KUBECONFIG: path.join(configDir, 'config-minikube'),
+        });
+        executeSyncToolStub.resolves('v1');
+
+        const result = await resolveClusterPlatform();
+
+        expect(result).to.deep.equal({
+            isOpenShift: false,
+            variant: KubernetesVariant.Minikube,
+            label: 'Minikube',
+        });
+    });
+
+    test('returns generic Kubernetes for an unrecognized non-OpenShift cluster', async () => {
+        sandbox.stub(process, 'env').value({
+            KUBECONFIG: path.join(configDir, 'config-generic'),
+        });
+        executeSyncToolStub.resolves('v1');
+
+        const result = await resolveClusterPlatform();
+
+        expect(result).to.deep.equal({
+            isOpenShift: false,
+            variant: KubernetesVariant.Generic,
+            label: 'Kubernetes',
+        });
+    });
+});

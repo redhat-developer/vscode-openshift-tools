@@ -6,7 +6,7 @@
 import * as chai from 'chai';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { Data } from '../../../src/odo/componentTypeDescription';
+import { Data } from '../../../src/devfile/componentTypeDescription';
 
 const { expect } = chai;
 chai.use(sinonChai);

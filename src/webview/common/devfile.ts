@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { StarterProject } from '../../odo/componentTypeDescription';
+import { StarterProject } from '../../devfile/componentTypeDescription';
 
 export type Devfile = {
     name: string;

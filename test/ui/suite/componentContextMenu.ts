@@ -28,7 +28,7 @@ export function testComponentContextMenu() {
         let openshiftTerminal: OpenshiftTerminalWebviewView;
 
         const componentName = 'nodejs-starter';
-        const expectedTabName = `odo dev: ${componentName}`;
+        const expectedTabName = `Dev Mode: ${componentName}`;
 
         before(async function context() {
             this.timeout(45_000);
@@ -93,8 +93,10 @@ export function testComponentContextMenu() {
             expect(terminalText).to.contain(`Developing using the "${componentName}" Devfile`);
             expect(terminalText).to.contain('Running on the cluster in Dev mode');
             expect(terminalText).to.contain('Pod is Running');
-            expect(terminalText).to.contain('Waiting for the application to be ready');
-            expect(terminalText).to.contain('Keyboard Commands');
+            expect(terminalText).to.contain('Syncing files into the container');
+            expect(terminalText).to.contain('Building your application in container (command: build)');
+            expect(terminalText).to.contain('Executing the application (command: debug)');
+            expect(terminalText).to.contain('Press Ctrl-C to stop dev mode');
         });
 
         it('Stop Dev works', async function () {
@@ -119,11 +121,11 @@ export function testComponentContextMenu() {
 
             //check for terminal content
             const terminalText = await openshiftTerminal.getTerminalText();
-            expect(terminalText).to.include('Finished executing the application');
-            expect(terminalText).to.include('Press any key to close this terminal');
+            expect(terminalText).to.include('Stopping dev mode...');
+            expect(terminalText).to.include('Dev mode stopped. Press Ctrl-C to close terminal.');
 
             //close tab and check
-            await openshiftTerminal.sendKeysToTerminal([Key.ENTER]);
+            await openshiftTerminal.sendKeysToTerminal([`${Key.CONTROL}c`]);
             expect(await openshiftTerminal.isAnyTabOpened()).to.be.false;
         });
 
@@ -146,8 +148,8 @@ export function testComponentContextMenu() {
 
             //check for terminal content
             const terminalText = await openshiftTerminal.getTerminalText();
-            expect(terminalText).to.include('Finished executing the application');
-            expect(terminalText).to.include('Press any key to close this terminal');
+            expect(terminalText).to.include('Stopping dev mode...');
+            expect(terminalText).to.include('Dev mode stopped. Press Ctrl-C to close terminal.');
         });
 
         it('Start/Stop Dev on Podman works', async function () {
@@ -177,9 +179,8 @@ export function testComponentContextMenu() {
 
             //check for terminal content
             terminalText = await openshiftTerminal.getTerminalText();
-            expect(terminalText).to.include('context canceled');
-            expect(terminalText).to.include('Cleaning up resources');
-            expect(terminalText).to.include('Press any key to close this terminal');
+            expect(terminalText).to.include('Stopping dev mode...');
+            expect(terminalText).to.include('Dev mode stopped. Press Ctrl-C to close terminal.');
         });
 
         it('Deploy works', async function () {
@@ -240,9 +241,8 @@ export function testComponentContextMenu() {
             const contextMenu = await component.openContextMenu();
             await contextMenu.select(MENUS.describe);
 
-            //check tab name
-            const tabName = await openshiftTerminal.getActiveTabName();
-            expect(tabName).to.contain(`Describe '${componentName}' Component`);
+            //wait for describe terminal tab to appear
+            openshiftTerminal = await waitForTerminalWithActiveTab(`Describe '${componentName}' Component`);
 
             //Check for terminal content
             const terminalText = await openshiftTerminal.getTerminalText();

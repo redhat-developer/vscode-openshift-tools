@@ -14,7 +14,7 @@ import { DevfileRegistry } from './devfile-registry/devfileRegistryWrapper';
 import {
     Registry
 } from './odo/componentType';
-import { StarterProject } from './odo/componentTypeDescription';
+import { StarterProject } from './devfile/componentTypeDescription';
 import { OdoPreference } from './odo/odoPreference';
 import { Odo } from './odo/odoWrapper';
 import { inputValue, quickBtn } from './util/inputValue';
