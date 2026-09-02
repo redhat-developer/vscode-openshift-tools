@@ -8,5 +8,8 @@
 			"name": "comp2",
 			"path": "comp2"
 		}
-	]
+	],
+	"settings": {
+		"chat.disableAIFeatures": true
+	}
 }

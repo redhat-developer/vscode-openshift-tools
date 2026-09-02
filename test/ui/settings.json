@@ -1,5 +1,6 @@
 {
     "window.dialogStyle": "custom",
+    "chat.disableAIFeatures": true,
     "files.simpleDialog.enable": true,
     "workbench.welcomePage.experimentalOnboarding": false,
     "workbench.editor.tabActionLocation": "right",

@@ -1,6 +1,7 @@
 {
 	"folders": [],
 	"settings": {
-		"redhat.telemetry.enabled": false
+		"redhat.telemetry.enabled": false,
+		"chat.disableAIFeatures": true
 	}
 }
