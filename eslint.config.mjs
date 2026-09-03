@@ -1,10 +1,11 @@
 // eslint.config.mjs (without defineConfig)
 import eslint from '@eslint/js';
+import { fixupPluginRules } from '@eslint/compat';
 import tsEslintPlugin from "@typescript-eslint/eslint-plugin";
 import tsEslintParser from "@typescript-eslint/parser";
 import prettierPlugin from 'eslint-config-prettier';
 import headerPlugin from 'eslint-plugin-header';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import jsdocPlugin from 'eslint-plugin-jsdoc';
 import globals from "globals";
 import tseslint from 'typescript-eslint';
@@ -38,17 +39,17 @@ export default [
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
       'prettier': prettierPlugin,
-      'header': headerPlugin,
-      'import': importPlugin,
+      'header': fixupPluginRules(headerPlugin),
+      'import-x': importPlugin,
       'jsdoc': jsdocPlugin
     },
     settings: {
-      "import/core-modules": [ "vscode", "react" ],
-      "import/extensions": [ ".js", ".jsx", ".tsx", ".ts" ],
-      "import/parsers": {
+      "import-x/core-modules": [ "vscode", "react" ],
+      "import-x/extensions": [ ".js", ".jsx", ".tsx", ".ts" ],
+      "import-x/parsers": {
         "@typescript-eslint/parser": [".ts", ".tsx"]
       },
-      "import/resolver": {
+      "import-x/resolver": {
         "typescript": {},
         "node": {
           "extensions": [
@@ -72,9 +73,9 @@ export default [
       'header/header': ['error', './header.js'],
 
       // Import rules
-      'import/no-duplicates': ['error'],
-      'import/prefer-default-export': 'off',
-      'import/extensions': [
+      'import-x/no-duplicates': ['error'],
+      'import-x/prefer-default-export': 'off',
+      'import-x/extensions': [
         'error',
         'ignorePackages',
         {
@@ -84,7 +85,7 @@ export default [
           tsx: 'never'
         }
       ],
-      'import/no-unresolved': [
+      'import-x/no-unresolved': [
         'error',
         {
           ignore: ['^src/'], // Ignore specific paths, like `src/` in your project
