@@ -120,7 +120,7 @@ export class DeploymentConfig implements Disposable {
     }
 
     static async selectReplica(context: { impl: any }, replicaPlaceHolder: string): Promise<string> {
-        let replica: string = null;
+        let replica: string;
         if (context) {
             replica = context.impl.name;
         } else {

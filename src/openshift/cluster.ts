@@ -640,9 +640,8 @@ export class Cluster extends OpenShiftItem implements Disposable {
      */
     private static async checkOngoingOperation(abortController: AbortController): Promise<boolean> {
         if (Cluster.ongoingOperationCanceller && Cluster.ongoingOperationCanceller !== abortController) {
-            let response = 'Yes';
             const cluster = new KubeConfigInfo().getEffectiveKubeConfig().getCurrentCluster();
-            response = await window.showInformationMessage(
+            const response = await window.showInformationMessage(
                 `You are already trying to login to ${cluster ? cluster.server : ''} cluster. Do you want to login to cancel and try again?`,
                 'Yes',
                 'No',
@@ -823,7 +822,7 @@ export class Cluster extends OpenShiftItem implements Disposable {
             }
             switch (step) {
                 case Step.selectCluster: {
-                    let clusterIsUp = false;
+                    let clusterIsUp;
                     do {
                         if (!clusterURL) {
                             clusterURL = await Cluster.getUrl(abortController);

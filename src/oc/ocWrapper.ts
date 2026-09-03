@@ -11,13 +11,13 @@ import * as tmp from 'tmp';
 import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
+import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 import { CliExitData } from '../util/childProcessUtil';
 import { isOpenShiftCluster, KubeConfigInfo, loadKubeConfig, serializeKubeConfig } from '../util/kubeUtils';
 import { ExecutionContext } from '../util/utils';
 import { findDevfiles, getComponentName } from './devfileUtils';
 import { Project } from './project';
 import { ClusterType, KubernetesConsole } from './types';
-import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 
 /**
  * A wrapper around the `oc` CLI tool.
@@ -742,7 +742,7 @@ export class Oc {
         const currentContext = k8sConfigInfo.findContext(k8sConfig.currentContext);
 
         let fixedProjects = projects.length ? projects : [];
-        let activeProject = undefined;
+        let activeProject;
 
         if (currentContext) {
             // Try Kube Config current context to find existing active project
@@ -986,7 +986,7 @@ export class Oc {
         /**
          *  Get all pods with the component label to find dynamic labels (like devworkspace_id) that we can use for safe deletion
          */
-        let podJson: any = {};
+        let podJson: any;
         try {
             const podResult = await cli.executeTool(
             new CommandText('oc', 'get', [

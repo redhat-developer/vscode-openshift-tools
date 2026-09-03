@@ -318,7 +318,7 @@ export function HelmSearch(props: HelmSearchProps) {
 
     function getFilteredCharts(): ChartResponse[] {
         const filteredCharts: ChartResponse[] = [];
-        let helmResponse: ChartResponse[] = [];
+        let helmResponse: ChartResponse[];
         if (treeFindStrs.length === 0) {
             helmResponse = helmCharts.filter((helmChart: ChartResponse) => {
                 const searchTerms = searchText.split(/\s+/);
