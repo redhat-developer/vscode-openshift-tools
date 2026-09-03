@@ -41,7 +41,7 @@ export class Console implements Disposable {
         const consoleInfo = await Oc.Instance.getConsoleInfo();
         const project = Console.getCurrentProject();
 
-        let url: string = undefined;
+        let url: string;
         switch (consoleInfo.kind) {
             case ClusterType.Kubernetes: {
                 url = `${consoleInfo.url}/project/${project}/browse/builds/${context.name}?tab=history`;
@@ -65,7 +65,7 @@ export class Console implements Disposable {
         }
         const project = Console.getCurrentProject();
         const consoleInfo = await Oc.Instance.getConsoleInfo();
-        let url = '';
+        let url;
         switch (consoleInfo.kind) {
             case ClusterType.Kubernetes: {
                 url = `${consoleInfo.url}/project/${project}/browse/dc/${context.name}?tab=history`;
@@ -89,7 +89,7 @@ export class Console implements Disposable {
         }
         const project = Console.getCurrentProject();
         const consoleInfo = await Oc.Instance.getConsoleInfo();
-        let url = '';
+        let url;
         switch (consoleInfo.kind) {
             case ClusterType.Kubernetes: {
                 url = `${consoleInfo.url}/project/${project}/browse/images/${context.name}`;
@@ -113,7 +113,7 @@ export class Console implements Disposable {
         }
         const project = Console.getCurrentProject();
         const consoleInfo = await Oc.Instance.getConsoleInfo();
-        let url = '';
+        let url;
         switch (consoleInfo.kind) {
             case ClusterType.Kubernetes: {
                 url = `${consoleInfo.url}/project/${project}/overview`;

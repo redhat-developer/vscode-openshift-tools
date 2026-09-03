@@ -312,7 +312,7 @@ suite('odo commands integration', function () {
             });
 
             let hopesLeft = 30;
-            let devIsRunning = false;
+            let devIsRunning;
             do {
                 hopesLeft--;
                 await new Promise<void>(resolve => setTimeout(resolve, 2000));

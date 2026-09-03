@@ -176,14 +176,13 @@ function parentKey(node: Node): string | undefined {
     }
     if (parent.parent) {
         let parentPair = undefined;
-        let parentKey = undefined;
         if (yl.isMapping(parent.parent as yl.YamlNode)) {
             parentPair = (parent.parent as yl.YamlMap).mappings.find((mi) => mi.value === parent);  // safe because we are looking for our own mapping
         } else if (jl.isProperty(parent.parent as jl.JsonNode)) {
             parentPair = (parent.parent as jl.JsonProperty).value === parent ? parent.parent : undefined;
         }
 
-        parentKey = key(parentPair);
+        const parentKey = key(parentPair);
         if (parentKey) {
             return parentKey;
         }

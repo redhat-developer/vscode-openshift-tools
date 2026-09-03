@@ -56,6 +56,7 @@ export class ToolsConfig {
                 const openShiftToolsFolder = path.join(os.homedir(), '.local', 'state', 'vs-openshift-tools');
                 if (fs.existsSync(path.join(openShiftToolsFolder, 'tools', cmd))) {
                     toolLocations = [path.join(openShiftToolsFolder, 'tools', cmd, cmd)];
+                    // eslint-disable-next-line no-useless-assignment
                     toolCacheLocation = path.join(openShiftToolsFolder, 'tools-cache');
                 }
             }

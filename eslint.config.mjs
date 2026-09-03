@@ -1,6 +1,6 @@
 // eslint.config.mjs (without defineConfig)
-import eslint from '@eslint/js';
 import { fixupPluginRules } from '@eslint/compat';
+import eslint from '@eslint/js';
 import tsEslintPlugin from "@typescript-eslint/eslint-plugin";
 import tsEslintParser from "@typescript-eslint/parser";
 import prettierPlugin from 'eslint-config-prettier';
@@ -121,6 +121,7 @@ export default [
       'no-var': 'error',
       'object-shorthand': ['error', 'properties'],
       'prefer-const': ['error', { 'destructuring': 'all' }],
+      'preserve-caught-error': 'off',
       'prefer-template': 'error',
       'radix': 'error',
       'no-trailing-spaces': 'error',
@@ -199,6 +200,7 @@ export default [
   {
     files: ['**/*.test.ts'],
     rules: {
+      'preserve-caught-error': 'off',
       'no-unused-expressions': 'off',
       'max-nested-callbacks': 'off',
       '@typescript-eslint/unbound-method': 'off',

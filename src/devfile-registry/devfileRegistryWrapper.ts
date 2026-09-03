@@ -2,17 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
+import * as fs from 'fs/promises';
 import { get as httpGet } from 'http';
 import { get as httpsGet } from 'https';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as YAML from 'js-yaml';
+import * as path from 'path';
+import { DevfileUriResolver } from '../devfile/devfileUriResolver';
 import { Registry } from '../odo/componentType';
 import { OdoPreference } from '../odo/odoPreference';
-import { ExecutionContext } from '../util/utils';
 import { Platform } from '../util/platform';
+import { ExecutionContext } from '../util/utils';
 import { DevfileData, DevfileInfo } from './devfileInfo';
-import { DevfileUriResolver } from '../devfile/devfileUriResolver';
 
 export const DEVFILE_VERSION_LATEST: string = 'latest';
 
@@ -90,7 +90,7 @@ export class DevfileRegistry {
         // Return only registries registered for user (from ODO preferences)
         // and filter by registryUrl (if provided)
 
-        let registries: Registry[] = [];
+        let registries: Registry[];
         const key = ExecutionContext.key('getRegistries');
         if (this.executionContext && !this.executionContext.has(key)) {
             registries = await OdoPreference.Instance.getRegistries();

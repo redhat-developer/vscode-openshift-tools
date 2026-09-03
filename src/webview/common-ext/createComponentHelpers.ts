@@ -58,7 +58,7 @@ export async function isValidProjectFolder(
         }
     }
 
-    let validationMessage: string = undefined;
+    let validationMessage: string;
     let validationStatus: ValidationStatus = ValidationStatus.ok;
     if (!projectFolderExists) {
         if (await canRecursivelyCreateProjectFolder(folder)) {
