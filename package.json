@@ -194,7 +194,7 @@
 		"typescript-eslint": "8.69.0",
 		"unzip-stream": "^0.3.4",
 		"validator": "^13.15.35",
-		"vscode-extension-tester": "^8.24.0",
+		"vscode-extension-tester": "^8.25.0",
 		"vscode-kubernetes-tools-api": "^1.3.0",
 		"yaml": "^2.9.0"
 	},
