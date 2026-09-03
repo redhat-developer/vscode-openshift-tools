@@ -11,8 +11,6 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
   ignore:
-  - dependency-name: "typescript"
-    versions: [">=7.0.0"]
   - dependency-name: "@types/node"
     versions: [">=21.0.0"]
   - dependency-name: "@mui/icons-material"
