@@ -46,6 +46,7 @@ async function buildWebviews() {
         outdir: `${outDir}`,
         loader: {
             '.png': 'file',
+            '.woff2': 'file'
         },
         plugins: [
             sassPlugin(),
