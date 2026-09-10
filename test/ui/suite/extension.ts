@@ -37,8 +37,12 @@ export function checkExtension() {
             const desc = await item.getDescription();
 
             expect(version).equals(pjson.version);
-            expect(author).equals(pjson.author);
             expect(desc).equals(pjson.description);
+
+            // getAuthor() returns either author name or publisher ID depending on VS Code version.
+            // Accept both to maintain compatibility across versions.
+            expect(author).oneOf([pjson.author, pjson.publisher]);
+
         });
 
         async function getItem(): Promise<ExtensionsViewItem> {
