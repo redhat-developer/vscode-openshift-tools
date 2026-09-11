@@ -5,12 +5,11 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { KubeConfig } from '@kubernetes/client-node';
 import { OpenshiftLogger } from '../util/childProcessUtil';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import { DeployState } from '../odo/componentTypeDescription';
+import { DeployState } from './componentTypeDescription';
 import { Oc } from '../oc/ocWrapper';
-import { deployContextKey } from './deploy';
+import { getCurrentDeployContextKey, loadDeployState } from './deployStateFile';
 
 export interface ComponentUndeployOptions {
     componentPath: string;
@@ -29,7 +28,7 @@ export async function undeployComponent(
     const stateFile = path.join(ctx.componentPath, '.odo', 'deploystate.json');
 
     // 1. Try to load deploy state
-    const deployState = await loadDeployState(stateFile);
+    const deployState = await loadDeployState(ctx.componentPath);
 
     if (deployState) {
         logInfo(ctx, `Found deployment state with ${deployState.resources.length} tracked resources`);
@@ -145,31 +144,6 @@ function isDevResource(resource: any): boolean {
     );
 }
 
-async function currentContextKey(): Promise<string> {
-    const kc = new KubeConfig();
-    kc.loadFromDefault();
-    const server = kc.getCurrentCluster()?.server || '';
-    const namespace = await Oc.Instance.getActiveProject() || 'default';
-    return deployContextKey(server, namespace);
-}
-
-async function loadDeployState(stateFile: string): Promise<DeployState | null> {
-    try {
-        const content = await fs.readFile(stateFile, 'utf-8');
-        const parsed = JSON.parse(content);
-        if (parsed.version === 1 && !parsed.deployments) {
-            return parsed as DeployState;
-        }
-        if (parsed.deployments) {
-            const key = await currentContextKey();
-            return parsed.deployments[key] || null;
-        }
-        return null;
-    } catch {
-        return null;
-    }
-}
-
 async function removeDeployStateEntry(stateFile: string): Promise<void> {
     const content = await fs.readFile(stateFile, 'utf-8');
     const parsed = JSON.parse(content);
@@ -179,7 +153,7 @@ async function removeDeployStateEntry(stateFile: string): Promise<void> {
         return;
     }
 
-    const key = await currentContextKey();
+    const key = await getCurrentDeployContextKey();
     delete parsed.deployments[key];
 
     if (Object.keys(parsed.deployments).length === 0) {

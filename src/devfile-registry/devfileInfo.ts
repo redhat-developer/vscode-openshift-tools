@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Registry } from '../odo/componentType';
-import { Data } from '../odo/componentTypeDescription';
+import { Data } from '../devfile/componentTypeDescription';
 
 export type DevfileRegistryInfo = Registry;
 

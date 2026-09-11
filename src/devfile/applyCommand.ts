@@ -13,8 +13,8 @@ import { DownloadUtil } from '../downloadUtil/download';
 import { Oc } from '../oc/ocWrapper';
 import { KubernetesVariant } from '../oc/types';
 import { ToolsConfig } from '../tools';
-import { Apply, DeployedResource } from '../odo/componentTypeDescription';
-import { detectKubernetesVariant, getOpenShiftRegistryUrl, isOpenShiftCluster } from '../util/kubeUtils';
+import { Apply, DeployedResource } from './componentTypeDescription';
+import { getOpenShiftRegistryUrl, resolveClusterPlatform } from '../util/kubeUtils';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import { TokenStore } from '../util/credentialManager';
 import { ContainerRuntimeDetector } from '../util/containerRuntime';
@@ -161,6 +161,8 @@ export class ApplyCommandExecutor {
             resolvedManifest = resolvedManifest.replaceAll(original, retagged);
         }
 
+        resolvedManifest = this.ensureManagedByLabel(resolvedManifest);
+
         let patchedContainers: string[] = [];
         if (this.locallyLoadedImages.size > 0) {
             const result = this.patchImagePullPolicy(resolvedManifest);
@@ -265,10 +267,7 @@ export class ApplyCommandExecutor {
             ? buildContext
             : devfileDir;
 
-        const isOpenShift = await isOpenShiftCluster();
-        const k8sVariant = isOpenShift
-            ? undefined
-            : await detectKubernetesVariant();
+        const { isOpenShift, variant: k8sVariant } = await resolveClusterPlatform();
 
         const buildCmd = ContainerRuntimeDetector.getBuildCommand(
             runtime, imageName, resolvedDockerfile, resolvedContext,
@@ -521,6 +520,26 @@ export class ApplyCommandExecutor {
             registryKey: registryKey || undefined,
             pullSecretWarning: pullSecretWarning || undefined,
         };
+    }
+
+    public static ensureManagedByLabel(manifestContent: string): string {
+        try {
+            const docs = yaml.loadAll(manifestContent);
+            const patched = docs.map(doc => {
+                if (!doc || typeof doc !== 'object') return doc;
+
+                const d = doc as any;
+                d.metadata ??= {};
+                d.metadata.labels ??= {};
+                d.metadata.labels['app.kubernetes.io/managed-by'] ??= 'openshift-toolkit';
+
+                return doc;
+            });
+
+            return patched.map(doc => yaml.dump(doc, { noRefs: true })).join('---\n');
+        } catch {
+            return manifestContent;
+        }
     }
 
     public static patchImagePullPolicy(manifestContent: string): { manifest: string; patchedContainers: string[] } {

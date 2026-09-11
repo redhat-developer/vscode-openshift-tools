@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
-import { ComponentDescription } from '../../../src/odo/componentTypeDescription';
+import { ComponentDescription } from '../../../src/devfile/componentTypeDescription';
 import { Odo } from '../../../src/odo/odoWrapper';
 import { OdoWorkspace } from '../../../src/odo/workspace';
 import * as fixtures from '../../fixtures';

@@ -8,7 +8,7 @@ import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { DeployedResource } from '../../../src/odo/componentTypeDescription';
+import { DeployedResource } from '../../../src/devfile/componentTypeDescription';
 import { ApplyCommandExecutor, debugEcho } from '../../../src/devfile/applyCommand';
 
 const { expect } = chai;
