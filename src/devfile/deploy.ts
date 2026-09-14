@@ -12,14 +12,13 @@ import { CommandText } from '../base/command';
 import { OpenshiftLogger } from '../util/childProcessUtil';
 import { TokenStore } from '../util/credentialManager';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import { Data, Command, DeployedResource, DeployState, DeployStateFile } from '../odo/componentTypeDescription';
-import { KubeConfig } from '@kubernetes/client-node';
-import { Oc } from '../oc/ocWrapper';
+import { Data, Command, DeployedResource } from './componentTypeDescription';
 import { isOpenShiftCluster } from '../util/kubeUtils';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { DevfileResolver } from './devfileResolver';
 import { DevfileCommandRunner } from './devfileCommandRunner';
 import { ApplyCommandExecutor, DeployScriptContribution } from './applyCommand';
+import { getCurrentClusterAndNamespace, saveDeployState } from './deployStateFile';
 
 export interface ComponentDeployOptions {
     componentPath: string;
@@ -196,10 +195,7 @@ export async function deployComponent(
     }
 
     // 9. Save deployment state
-    const kc = new KubeConfig();
-    kc.loadFromDefault();
-    const clusterServer = kc.getCurrentCluster()?.server || 'unknown';
-    const namespace = await Oc.Instance.getActiveProject() || 'default';
+    const { cluster: clusterServer, namespace } = await getCurrentClusterAndNamespace();
 
     await saveDeployState({
         version: 1,
@@ -270,33 +266,5 @@ function logError(ctx: DeployContext, message: string) {
     }
 }
 
-export function deployContextKey(clusterServer: string, namespace: string): string {
-    return `${clusterServer}/${namespace}`;
-}
-
-async function saveDeployState(state: DeployState, componentPath: string): Promise<void> {
-    const odoDir = path.join(componentPath, '.odo');
-    await fs.mkdir(odoDir, { recursive: true });
-
-    const stateFile = path.join(odoDir, 'deploystate.json');
-
-    let file: DeployStateFile = { version: 2, deployments: {} };
-    try {
-        const raw = await fs.readFile(stateFile, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (parsed.version === 1 && !parsed.deployments) {
-            const key = deployContextKey(parsed.cluster, parsed.namespace);
-            file = { version: 2, deployments: { [key]: parsed } };
-        } else if (parsed.deployments) {
-            file = parsed;
-        }
-    } catch {
-        // no existing file
-    }
-
-    const key = deployContextKey(state.cluster, state.namespace);
-    file.deployments[key] = state;
-    file.version = 2;
-
-    await fs.writeFile(stateFile, JSON.stringify(file, null, 2), 'utf-8');
-}
+// saveDeployState is now private - only this file can write deploy state
+// Other files should import from deployStateFile.ts for reading

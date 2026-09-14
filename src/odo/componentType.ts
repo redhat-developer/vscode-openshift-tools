@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Url } from 'url';
-import { Data } from './componentTypeDescription';
+import { Data } from '../devfile/componentTypeDescription';
 
 export interface RegistryList {
     registries: Registry[];

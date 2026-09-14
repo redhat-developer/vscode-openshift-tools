@@ -5,7 +5,7 @@
 
 import * as chai from 'chai';
 import { VariableResolver } from '../../../src/devfile/variableResolver';
-import { Data, Apply } from '../../../src/odo/componentTypeDescription';
+import { Data, Apply } from '../../../src/devfile/componentTypeDescription';
 
 const { expect } = chai;
 
