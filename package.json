@@ -200,7 +200,7 @@
 		"validator": "^13.15.35",
 		"vscode-extension-tester": "^8.26.1",
 		"vscode-kubernetes-tools-api": "^1.3.0",
-		"yaml": "^2.9.0"
+		"yaml": "^2.9.1"
 	},
 	"overrides": {
 		"brace-expansion": "^5.0.9",
