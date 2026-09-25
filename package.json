@@ -155,7 +155,7 @@
 		"express": "^5.2.1",
 		"fast-glob": "^3.3.3",
 		"file-loader": "^6.2.0",
-		"fs-extra": "^11.4.0",
+		"fs-extra": "^11.4.1",
 		"git-up": "^8.1.1",
 		"globals": "^17.12.0",
 		"got": "^16.0.0",
