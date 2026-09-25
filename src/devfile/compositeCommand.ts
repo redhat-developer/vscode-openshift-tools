@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import { Command } from '../odo/componentTypeDescription';
+import { Command } from './componentTypeDescription';
 import { DevfileCommandRunner } from './devfileCommandRunner';
 
 export class CompositeCommand {

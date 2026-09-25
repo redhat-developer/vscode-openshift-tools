@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Apply, Container, Data, Exec } from '../odo/componentTypeDescription';
+import { Apply, Container, Data, Exec } from './componentTypeDescription';
 
 export class VariableResolver {
     private static readonly VARIABLE_REGEX = /\$\{([^}]+)\}/g;
@@ -13,6 +13,10 @@ export class VariableResolver {
             ...exec,
             workingDir: this.resolveValue(devfile, exec.workingDir ?? '/projects', exec.component),
             commandLine: this.resolveValue(devfile, exec.commandLine, exec.component),
+            env: exec.env?.map(e => ({
+                name: e.name,
+                value: this.resolveValue(devfile, e.value, exec.component),
+            })),
         };
     }
 
@@ -43,7 +47,8 @@ export class VariableResolver {
         componentName?: string,
     ): string {
         if (variable === 'PROJECT_SOURCE') {
-            return '/projects';
+            const container = devfile.components?.find((c) => c.name === componentName)?.container;
+            return container?.sourceMapping ?? '/projects';
         }
 
         // Check devfile.variables (from resolved devfile with merged parents)

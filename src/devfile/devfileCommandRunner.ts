@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { ComponentWorkspaceFolder } from '../odo/workspace';
-import { Command } from '../odo/componentTypeDescription';
+import { Command } from './componentTypeDescription';
 import { ApplyCommandExecutor } from './applyCommand';
 import { CommandResolver } from './commandResolver';
 import { ExecCommandExecutor } from './execCommand';

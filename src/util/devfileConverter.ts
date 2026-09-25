@@ -12,7 +12,7 @@ import {
     V230DevfileMetadata,
     V230DevfileProjects
 } from '@devfile/api';
-import { Data, Endpoint, Metadata } from '../odo/componentTypeDescription';
+import { Data, Endpoint, Metadata } from '../devfile/componentTypeDescription';
 import { ComponentV1, DevfileCommandV1, DevfileV1, DevfileVolumeV1, EndpointV1, EnvV1, MetadataV1, ProjectV1 } from './devfileV1Type';
 
 export type DevfileMetadataLike = V230DevfileMetadata & object;

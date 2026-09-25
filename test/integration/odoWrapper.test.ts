@@ -11,6 +11,7 @@ import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
+import { getComponentDescription } from '../../src/devfile/describe';
 import { Oc } from '../../src/oc/ocWrapper';
 import { OdoPreference } from '../../src/odo/odoPreference';
 import { Odo } from '../../src/odo/odoWrapper';
@@ -134,13 +135,16 @@ suite('./odo/odoWrapper.ts', function () {
         });
 
         test('describeComponent()', async function () {
-            const componentDescription1 = await Odo.Instance.describeComponent(tmpFolder1.fsPath);
+            // These components are only created locally, never deployed, so managedBy should be
+            // unset (matches odo's own behavior of not reporting a manager for non-deployed
+            // components) rather than defaulting to a blind guess.
+            const componentDescription1 = await getComponentDescription(tmpFolder1.fsPath);
             expect(componentDescription1).to.exist;
-            expect(componentDescription1.managedBy).to.equal('odo');
+            expect(componentDescription1.managedBy).to.be.undefined;
 
-            const componentDescription2 = await Odo.Instance.describeComponent(tmpFolder2.fsPath);
+            const componentDescription2 = await getComponentDescription(tmpFolder2.fsPath);
             expect(componentDescription2).to.exist;
-            expect(componentDescription2.managedBy).to.equal('odo');
+            expect(componentDescription2.managedBy).to.be.undefined;
         });
     });
 

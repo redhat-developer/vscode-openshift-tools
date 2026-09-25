@@ -6,7 +6,7 @@
 import * as vsc from 'vscode';
 import { ThemeIcon } from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
-import { Command, CommandProvider, ComponentDescription } from './odo/componentTypeDescription';
+import { Command, CommandProvider, ComponentDescription } from './devfile/componentTypeDescription';
 import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
 import { Component } from './openshift/component';
 import { imagePath } from './util/utils';

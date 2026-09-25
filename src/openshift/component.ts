@@ -8,15 +8,18 @@ import { readFile } from 'fs/promises';
 import { platform } from 'os';
 import * as path from 'path';
 import { which } from 'shelljs';
-import { commands, debug, DebugConfiguration, DebugSession, Disposable, EventEmitter, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
-import { deployComponent, deployContextKey } from '../devfile/deploy';
+import { commands, debug, DebugConfiguration, DebugSession, Disposable, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
+import { deployComponent } from '../devfile/deploy';
+import { deployContextKey } from '../devfile/deployStateFile';
 import { describeComponentYAML } from '../devfile/describe';
+import { forceStopDevSession, startDevSession, stopDevSession, syncDevSession } from '../devfile/dev';
 import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
+import { createDevTerminalBridge } from '../devfile/inner-loop/devTerminalBridge';
 import { undeployComponent } from '../devfile/undeploy';
+import { OpenShiftExplorer } from '../explorer';
 import { BindableService } from '../k8s/servicebinding/bindableService';
 import { Oc } from '../oc/ocWrapper';
-import { Command } from '../odo/command';
-import { CommandProvider, DeployState } from '../odo/componentTypeDescription';
+import { CommandProvider, DeployState } from '../devfile/componentTypeDescription';
 import { Odo } from '../odo/odoWrapper';
 import { ComponentWorkspaceFolder } from '../odo/workspace';
 import sendTelemetry from '../telemetry';
@@ -26,7 +29,15 @@ import { Util as fs } from '../util/utils';
 import { vsCommand, VsCommandError } from '../vscommand';
 import AddServiceBindingViewLoader, { ServiceBindingFormResponse } from '../webview/add-service-binding/addServiceBindingLoader';
 import CreateComponentLoader from '../webview/create-component/createComponentLoader';
-import { OpenShiftTerminalApi, OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
+import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
+import {
+    componentStates,
+    ComponentContextState,
+    ComponentDevState,
+    DevProcessStopRequest,
+    fireComponentStateChanged,
+    onComponentStateChanged,
+} from './componentStateFile';
 import OpenShiftItem, { clusterRequired, projectRequired } from './openshiftItem';
 
 function createStartDebuggerResult(language: string, message = '') {
@@ -37,18 +48,9 @@ function createStartDebuggerResult(language: string, message = '') {
     return result;
 }
 
-export enum ComponentContextState {
-    DEV = 'dev-nrn',
-    DEV_STARTING = 'dev-str',
-    DEV_RUNNING = 'dev-run',
-    DEV_STOPPING = 'dev-stp',
-    DEB = 'deb-nrn',
-    DEB_RUNNING = 'deb-run',
-    DEP = 'dep-nrn',
-    DEP_STARTING = 'dep-str',
-    DEP_RUNNING = 'dep-run',
-    DEP_STOPPING = 'dep-stp',
-}
+// Re-export for backward compatibility
+export { ComponentContextState } from './componentStateFile';
+export type { ComponentDevState, DevProcessStopRequest } from './componentStateFile';
 
 export class ComponentStateRegex {
     public static readonly COMPONENT_DEV_STARTING = /openshift\.component\.dev-str.*/;
@@ -62,30 +64,11 @@ export class ComponentStateRegex {
     public static readonly COMPONENT_DEP_STOPPING = /openshift\.component.*\.dep-stp.*/;
 }
 
-interface ComponentDevState {
-    // dev state
-    devTerminal?: OpenShiftTerminalApi;
-    devStatus?: ComponentContextState;
-    contextValue?: string;
-    devProcessStopRequest?: DevProcessStopRequest;
-    // debug state
-    debugStatus?: string;
-    // deploy state
-    deployStatus?: string;
-    runOn?: undefined | 'podman';
-}
-
-interface DevProcessStopRequest extends Disposable {
-    isSigabrtSent: () => boolean;
-    sendSigabrt: () => void;
-}
-
 export class Component extends OpenShiftItem {
     private static debugSessions = new Map<string, DebugSession>();
-    private static stateChanged = new EventEmitter<string>();
 
     public static onDidStateChanged(listener: (context: string) => any) {
-        Component.stateChanged.event(listener);
+        return onComponentStateChanged(listener);
     }
 
     public static onContextChanged(): void {
@@ -100,7 +83,7 @@ export class Component extends OpenShiftItem {
         const currentContext = kc.getContextObject(kc.getCurrentContext());
         const currentNamespace = currentContext?.namespace || 'default';
 
-        for (const [contextPath, state] of Component.componentStates) {
+        for (const [contextPath, state] of componentStates) {
             if (state.deployStatus === ComponentContextState.DEP_RUNNING
                 || state.deployStatus === ComponentContextState.DEP) {
                 void Component.reconcileDeployState(contextPath, state, currentCluster, currentNamespace);
@@ -135,7 +118,7 @@ export class Component extends OpenShiftItem {
 
         if (state.deployStatus !== newStatus) {
             state.deployStatus = newStatus;
-            Component.stateChanged.fire(contextPath);
+            fireComponentStateChanged(contextPath);
         }
     }
 
@@ -144,20 +127,31 @@ export class Component extends OpenShiftItem {
             debug.onDidStartDebugSession((session) => {
                 if (session.configuration.contextPath) {
                     Component.debugSessions.set(session.configuration.contextPath, session);
+                    // Update debug state when VS Code debugger attaches
+                    const componentState = componentStates.get(session.configuration.contextPath);
+                    if (componentState) {
+                        componentState.debugStatus = ComponentContextState.DEB_RUNNING;
+                        fireComponentStateChanged(session.configuration.contextPath);
+                    }
                 }
             }),
             debug.onDidTerminateDebugSession((session) => {
                 if (session.configuration.contextPath) {
                     Component.debugSessions.delete(session.configuration.contextPath);
+                    // Restore debug state when VS Code debugger detaches (but dev might still be running)
+                    const componentState = componentStates.get(session.configuration.contextPath);
+                    if (componentState && componentState.devStatus === ComponentContextState.DEV_RUNNING) {
+                        // Reset to DEB (debugger available but not attached)
+                        componentState.debugStatus = ComponentContextState.DEB;
+                        fireComponentStateChanged(session.configuration.contextPath);
+                    }
                 }
             })
         ];
     }
 
-    private static readonly componentStates = new Map<string, ComponentDevState>();
-
     static getComponentDevState(folder: ComponentWorkspaceFolder): ComponentDevState {
-        let state = Component.componentStates.get(folder.contextPath);
+        let state = componentStates.get(folder.contextPath);
         if (!state) {
             state = {
                 devStatus: folder.component?.devfileData?.supportedOdoFeatures?.dev ? ComponentContextState.DEV : undefined,
@@ -165,7 +159,7 @@ export class Component extends OpenShiftItem {
                 deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? ComponentContextState.DEP : undefined,
             };
             if (folder.component?.devfileData?.supportedOdoFeatures !== undefined) {
-                Component.componentStates.set(folder.contextPath, state);
+                componentStates.set(folder.contextPath, state);
                 if (state.deployStatus === ComponentContextState.DEP) {
                     void Component.detectDeployedState(folder);
                 }
@@ -185,14 +179,14 @@ export class Component extends OpenShiftItem {
         const currentCluster = kc.getCurrentCluster()?.server;
         const currentContext = kc.getContextObject(kc.getCurrentContext());
         const currentNamespace = currentContext?.namespace || 'default';
-        const state = Component.componentStates.get(folder.contextPath);
+        const state = componentStates.get(folder.contextPath);
         if (state) {
             void Component.reconcileDeployState(folder.contextPath, state, currentCluster, currentNamespace);
         }
     }
 
     public static generateContextStateSuffixValue(folder: ComponentWorkspaceFolder): string {
-        const state = Component.componentStates.get(folder.contextPath);
+        const state = componentStates.get(folder.contextPath);
         let contextSuffix = '';
         if (state.devStatus) {
             contextSuffix = contextSuffix.concat('.').concat(state.devStatus);
@@ -240,7 +234,7 @@ export class Component extends OpenShiftItem {
 
     @vsCommand('openshift.component.showDevTerminal')
     static showDevTerminal(context: ComponentWorkspaceFolder) {
-        Component.componentStates.get(context.contextPath)?.devTerminal.focusTerminal();
+        componentStates.get(context.contextPath)?.devTerminal.focusTerminal();
     }
 
     static devModeExitTimeout(): number {
@@ -250,7 +244,7 @@ export class Component extends OpenShiftItem {
     }
 
     private static exitDevelopmentMode(componentContextPath: string) : DevProcessStopRequest {
-        const componentState = Component.componentStates.get(componentContextPath);
+        const componentState = componentStates.get(componentContextPath);
         if (componentState) {
             let sigAbortSent = false;
             let devCleaningTimeout = setTimeout( () => {
@@ -264,6 +258,7 @@ export class Component extends OpenShiftItem {
                             } else if (action === 'Force exit') {
                                 sigAbortSent = true;
                                 componentState.devTerminal.forceKill();
+                                void Component.stopDevSessionAndUpdateState(componentContextPath, true);
                             }
                         }
                     });
@@ -278,8 +273,54 @@ export class Component extends OpenShiftItem {
                 sendSigabrt: () => {
                     sigAbortSent = true;
                     componentState.devTerminal.forceKill();
+                    void Component.stopDevSessionAndUpdateState(componentContextPath, true);
                 }
             }
+        }
+    }
+
+    /**
+     * Tears down the running dev session (via `dev.ts`) and updates the tree/context-menu state
+     * to reflect it. `force: true` uses `forceStopDevSession()` (never throws, best-effort) for
+     * the "user already chose force exit, move on regardless" path; `force: false` uses
+     * `stopDevSession()`, which propagates a platform teardown failure to the user.
+     */
+    private static async stopDevSessionAndUpdateState(componentContextPath: string, force: boolean): Promise<void> {
+        const componentState = componentStates.get(componentContextPath);
+        if (!componentState) {
+            return;
+        }
+
+        // Output to the dev terminal if it exists
+        const sendOutput = (text: string) => {
+            if (componentState.devTerminal) {
+                componentState.devTerminal.sendText(text.endsWith('\r\n') ? text : `${text}\r\n`);
+            }
+        };
+
+        try {
+            sendOutput(force ? 'Force stopping dev mode...' : 'Stopping dev mode...');
+            if (force) {
+                await forceStopDevSession(componentContextPath);
+            } else {
+                await stopDevSession(componentContextPath);
+            }
+            sendOutput('Dev mode stopped. Press Ctrl-C to close terminal.');
+            // Refresh only for cluster mode (podman creates no cluster resources)
+            if (!componentState.runOn) {
+                OpenShiftExplorer.getInstance().refresh();
+            }
+        } catch (err) {
+            sendOutput(`Error stopping dev mode: ${err.toString()}`);
+            void window.showErrorMessage(err.toString());
+        } finally {
+            if (componentState.devProcessStopRequest) {
+                componentState.devProcessStopRequest.dispose();
+                componentState.devProcessStopRequest = undefined;
+            }
+            componentState.devStatus = ComponentContextState.DEV;
+            componentState.debugStatus = undefined; // Clear debug state when dev stops
+            fireComponentStateChanged(componentContextPath);
         }
     }
 
@@ -441,66 +482,99 @@ export class Component extends OpenShiftItem {
         const cs = Component.getComponentDevState(component);
         cs.devStatus = ComponentContextState.DEV_STARTING;
         cs.runOn = runOn;
-        Component.stateChanged.fire(component.contextPath)
-        if (!runOn) {
-            try {
-                await Oc.Instance.deleteDeploymentByComponentLabel(component.component.devfileData.devfile.metadata.name);
-            } catch {
-                // do nothing, it probably was already deleted
-            }
-        }
+        fireComponentStateChanged(component.contextPath)
+
+        const componentName = component.component.devfileData.devfile.metadata.name;
+
         try {
-            cs.devTerminal = await OpenShiftTerminalManager.getInstance().createTerminal(
-                Command.dev(component.component.devfileData.supportedOdoFeatures.debug, runOn, manualRebuild),
-                `odo dev: ${component.component.devfileData.devfile.metadata.name}`,
+            const terminalTitle = runOn === 'podman'
+                ? `Dev Mode: ${componentName} (Podman)`
+                : `Dev Mode: ${componentName}`;
+
+            const bridge = await createDevTerminalBridge(
+                terminalTitle,
                 component.contextPath,
-                process.env,
-                {
-                    onExit() {
-                        if (cs.devProcessStopRequest) {
-                            cs.devProcessStopRequest.dispose();
-                            cs.devProcessStopRequest = undefined;
-                        }
-                        cs.devStatus = ComponentContextState.DEV;
-                        Component.stateChanged.fire(component.contextPath);
-                    },
-                    onText(text: string) {
-                        if (cs.devStatus === ComponentContextState.DEV_STARTING  && text.includes('[p]')) {
-                            Component.stateChanged.fire(component.contextPath)
-                            cs.devStatus = ComponentContextState.DEV_RUNNING;
-                        }
-                        if (text.includes('^C')) {
-                            cs.devStatus = ComponentContextState.DEV_STOPPING;
-                            cs.devProcessStopRequest = Component.exitDevelopmentMode(component.contextPath);
-                            Component.stateChanged.fire(component.contextPath);
-                        }
+                () => {
+                    // Fires on a user-typed Ctrl-C in the terminal, or on our own kill() call from
+                    // exitDevMode() below — both funnel through the same terminal input path.
+                    if (cs.devStatus === ComponentContextState.DEV_STOPPING) {
+                        return;
                     }
+
+                    // If dev mode is already stopped, close this terminal
+                    if (cs.devStatus === ComponentContextState.DEV) {
+                        if (bridge.terminal) {
+                            bridge.terminal.forceKill();
+                            if (cs.devTerminal === bridge.terminal) {
+                                cs.devTerminal = undefined;
+                            }
+                        }
+                        return;
+                    }
+
+                    cs.devStatus = ComponentContextState.DEV_STOPPING;
+                    cs.devProcessStopRequest = Component.exitDevelopmentMode(component.contextPath);
+                    fireComponentStateChanged(component.contextPath);
+                    void Component.stopDevSessionAndUpdateState(component.contextPath, false);
                 },
             );
+            cs.devTerminal = bridge.terminal;
+
+            const debugEnabled = component.component.devfileData.supportedOdoFeatures.debug;
+            await startDevSession(
+                component.component.devfileData.devfile,
+                component,
+                {
+                    debug: debugEnabled,
+                    runOn,
+                    manualRebuild,
+                },
+                bridge.output,
+            );
+
+            cs.devStatus = ComponentContextState.DEV_RUNNING;
+            // Set debug state if dev started with debugger support
+            if (debugEnabled) {
+                cs.debugStatus = ComponentContextState.DEB;
+            }
+            fireComponentStateChanged(component.contextPath);
         } catch (err) {
+            cs.devStatus = ComponentContextState.DEV;
+            cs.debugStatus = undefined;
+            fireComponentStateChanged(component.contextPath);
             void window.showErrorMessage(err.toString());
         }
     }
 
     @vsCommand('openshift.component.exitDevMode')
     static exitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
-        const componentState = Component.componentStates.get(component.contextPath)
-        if (componentState) {
+        const componentState = componentStates.get(component.contextPath)
+        if (componentState?.devTerminal) {
             componentState.devTerminal.focusTerminal();
+            // Sends the same raw Ctrl-C byte a user typing into the terminal would — triggers the
+            // devTerminalBridge's onStopRequested callback wired in devRunOn() above.
             componentState.devTerminal.kill();
         }
         return;
     }
 
     @vsCommand('openshift.component.forceExitDevMode')
-    static forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
-        const componentState = Component.componentStates.get(component.contextPath)
-        if (componentState && componentState.devTerminal) {
+    static async forceExitDevMode(component: ComponentWorkspaceFolder): Promise<void> {
+        const componentState = componentStates.get(component.contextPath)
+        if (componentState?.devTerminal) {
             componentState.devTerminal.focusTerminal();
             componentState.devTerminal.forceKill();
-            Component.stateChanged.fire(component.contextPath)
         }
-        return;
+        await Component.stopDevSessionAndUpdateState(component.contextPath, true);
+    }
+
+    @vsCommand('openshift.component.dev.sync')
+    static async syncDevFiles(component: ComponentWorkspaceFolder): Promise<void> {
+        try {
+            await syncDevSession(component.contextPath);
+        } catch (err) {
+            void window.showErrorMessage(`Failed to sync files: ${err.message || err.toString()}`);
+        }
     }
 
     @vsCommand('openshift.component.openInBrowser')
@@ -593,8 +667,9 @@ export class Component extends OpenShiftItem {
         const isJava = component.component.devfileData.devfile.metadata.tags.includes('Java') ;
         const isNode = component.component.devfileData.devfile.metadata.tags.includes('Node.js');
         const isPython = component.component.devfileData.devfile.metadata.tags.includes('Python');
+        const isGo = component.component.devfileData.devfile.metadata.tags.includes('Go');
 
-        if (isJava || isNode || isPython) {
+        if (isJava || isNode || isPython || isGo) {
             if (isJava) {
                 const JAVA_EXT = 'redhat.java';
                 const JAVA_DEBUG_EXT = 'vscjava.vscode-java-debug';
@@ -658,6 +733,35 @@ export class Component extends OpenShiftItem {
                         projectName: path.basename(component.contextPath)
                     });
                 }
+            } else if (isGo) {
+                const GO_EXT = 'golang.go';
+                const goExtIsInstalled = extensions.getExtension(GO_EXT);
+                if (!goExtIsInstalled) {
+                    const response = await window.showWarningMessage('Go extension (Publisher: Go Team at Google) is required to support debugging.', 'Install');
+                    if (response === 'Install') {
+                        await window.withProgress({ location: ProgressLocation.Notification }, async (progress) => {
+                            progress.report({ message: 'Installing extensions required to debug Go Component ...' });
+                            await commands.executeCommand('workbench.extensions.installExtension', GO_EXT);
+                        });
+                        await window.showInformationMessage('Please reload the window to activate installed extension.', 'Reload');
+                        await commands.executeCommand('workbench.action.reloadWindow');
+                    }
+                }
+                if (goExtIsInstalled) {
+                    result = Component.startOdoAndConnectDebugger(component, {
+                        name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
+                        type: 'go',
+                        request: 'attach',
+                        mode: 'remote',
+                        cwd: component.contextPath,
+                        substitutePath: [
+                            {
+                                from: component.contextPath,
+                                to: '/projects'
+                            }
+                        ]
+                    });
+                }
             } else {
                 result = Component.startOdoAndConnectDebugger(component, {
                     name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
@@ -669,7 +773,7 @@ export class Component extends OpenShiftItem {
                 });
             }
         } else {
-            void window.showWarningMessage('Debug command currently supports local components with Java, Node.Js and Python component types.');
+            void window.showWarningMessage('Debug command currently supports local components with Java, Node.js, Python, and Go component types.');
         }
         return result;
     }
@@ -706,6 +810,10 @@ export class Component extends OpenShiftItem {
                 if (config.type === 'python') {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     config.connect.port = port.fp.localPort;
+                } else if (config.type === 'go') {
+                    // Go debugger needs host and port separately for remote mode
+                    config.host = 'localhost';
+                    config.port = port.fp.localPort;
                 } else {
                     config.port = port.fp.localPort;
                 }
@@ -734,7 +842,7 @@ export class Component extends OpenShiftItem {
             // Update state
             const cs = Component.getComponentDevState(context);
             cs.deployStatus = ComponentContextState.DEP_STARTING;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             // Execute deployment
             await deployComponent(
@@ -751,14 +859,14 @@ export class Component extends OpenShiftItem {
 
             // Update state
             cs.deployStatus = ComponentContextState.DEP_RUNNING;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             void window.showInformationMessage(`Component '${componentName}' deployed successfully`);
         } catch (err) {
             // Reset state
             const cs = Component.getComponentDevState(context);
             cs.deployStatus = ComponentContextState.DEP;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             void window.showErrorMessage(
                 `Deploy failed: ${err.message}. You can retry - oc apply is idempotent.`
@@ -781,7 +889,7 @@ export class Component extends OpenShiftItem {
         try {
             const cs = Component.getComponentDevState(context);
             cs.deployStatus = ComponentContextState.DEP_STOPPING;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             await undeployComponent(
                 {
@@ -797,13 +905,13 @@ export class Component extends OpenShiftItem {
             );
 
             cs.deployStatus = ComponentContextState.DEP;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             void window.showInformationMessage(`Component '${componentName}' undeployed`);
         } catch (err) {
             const cs = Component.getComponentDevState(context);
             cs.deployStatus = ComponentContextState.DEP_RUNNING;
-            Component.stateChanged.fire(context.contextPath);
+            fireComponentStateChanged(context.contextPath);
 
             void window.showErrorMessage(`Undeploy failed: ${err.message}`);
         }
