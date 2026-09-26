@@ -4,17 +4,13 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import { Button, Card, CardActions, CardContent, List, ListItem, ListItemText, ThemeProvider, Tooltip, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import clsx from 'clsx';
+import { Box, Button, Card, CardActions, CardContent, List, ListItem, ListItemText, ThemeProvider, Tooltip, Typography, useTheme } from '@mui/material';
 import * as React from 'react';
 import clusterStyle, { ClusterTheme } from './cluster.style';
 import AddClusterView from './clusterView';
 import OpenShiftLogo from './images/logo.png';
 import AddSandboxView from './sandboxView';
 import OpenShiftLocal from '../../../../images/openshift-local.png';
-
-const useStyles = makeStyles(clusterStyle);
 
 const clusterTypes = [
     {
@@ -55,7 +51,7 @@ const vscodeApi = window.vscodeApi;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
-    const classes = useStyles();
+    const classes = clusterStyle(useTheme());
     const [showWizard, setShowWizard] = React.useState('');
     const [crcLatest, setCrcLatest] = React.useState('');
     const [crcOpenShift, setCrcOpenShift] = React.useState('');
@@ -107,18 +103,18 @@ export default function Header() {
         <>
             {clusterTypes.map((list, index) => (
                 <Card className='cardTransform' key={index}>
-                    <div className={classes.cardHeader}>
+                    <Box sx={classes.cardHeader}>
                         <Typography variant='caption' display='block'>
                             {list.heading}
                         </Typography>
-                    </div>
+                    </Box>
                     <CardContent>
                         <Typography className={index === 2 ? 'cardImageTableContainer' : 'cardImageContainer'}>
                             {list.imageUrl.map((url: string, index: string | number) => (
-                                <img src={url} key={index} className={classes.image} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative' }}></img>
+                                <img src={url} key={index} style={{ marginLeft: '.625rem', marginRight: '.625rem', position: 'relative', maxHeight: '100%', maxWidth: '100%' }}></img>
                             ))}
                         </Typography>
-                        <div className={index === 2 ? clsx(classes.cardBody, classes.cardBodyMargin) : classes.cardBody}>
+                        <Box sx={index === 2 ? [classes.cardBody, classes.cardBodyMargin] : classes.cardBody}>
                             <List>
                                 <ListItem>
                                     <ListItemText
@@ -126,7 +122,7 @@ export default function Header() {
                                         secondary={list.smallInfo} />
                                 </ListItem>
                             </List>
-                        </div>
+                        </Box>
                     </CardContent>
                     <div>
                         <CardActions className='cardButton'>
@@ -162,31 +158,31 @@ export default function Header() {
 
     return (
         <ThemeProvider theme={ClusterTheme}>
-            <div className={classes.App}>
+            <Box sx={classes.App}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', margin: '0 auto' }}>
-                    <div className={classes.backButtonContainer}>
+                    <Box sx={classes.backButtonContainer}>
                         {showWizard?.length > 0 &&
                             <Button variant='text' onClick={() => moveBack()} color='info' margin-top='20px' margin-left='20px' startIcon={<ArrowBackRoundedIcon />}>
                                 Back
                             </Button>
                         }
-                    </div>
-                    <div className={classes.iconContainer}>
-                        <img className={classes.image} src={OpenShiftLogo} alt='redhat-openshift'></img>
-                    </div>
+                    </Box>
+                    <Box sx={classes.iconContainer}>
+                        <img style={{ maxHeight: '100%', maxWidth: '100%' }} src={OpenShiftLogo} alt='redhat-openshift'></img>
+                    </Box>
                 </div>
                 {showWizard === 'crc' && (
-                    <div className={classes.rowBody}>
+                    <Box sx={classes.rowBody}>
                         <Card className='cardContent'>
                             <Typography variant='body2' component='p'>
                                 Red Hat OpenShift Local brings a minimal OpenShift 4 cluster to your local computer.<br></br>You can use this guided workflow to create OpenShift cluster locally. Cluster take approximately 15 minutes to provision.
                             </Typography>
                             <AddClusterView vscode={vscodeApi} crc={crcLatest} openshiftCrc={crcOpenShift} />
                         </Card>
-                    </div>
+                    </Box>
                 )}
                 {showWizard === 'sandbox' && (
-                    <div className={classes.rowBody}>
+                    <Box sx={classes.rowBody}>
                         <Card className='cardContent'>
                             <Typography variant='body2' component='p'>
                                 The sandbox provides you with a private OpenShift environment in a shared, multi-tenant OpenShift cluster that is pre-configured with a set of developer tools. <br></br>Discover the rich capabilities of the full developer experience on OpenShift with the sandbox.
@@ -195,14 +191,14 @@ export default function Header() {
                             <Button variant='contained' href='mailto:devsandbox@redhat.com' className='sandboxButton'>Contact Us</Button>
                             <AddSandboxView />
                         </Card>
-                    </div>
+                    </Box>
                 )}
                 {!showWizard && (
-                    <div className={classes.cardContainer}>
+                    <Box sx={classes.cardContainer}>
                         <InfrastructureLayout clusterTypes={clusterTypes}></InfrastructureLayout>
-                    </div>
+                    </Box>
                 )}
-            </div>
+            </Box>
         </ThemeProvider>
     );
 }
