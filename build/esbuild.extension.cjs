@@ -68,15 +68,14 @@ async function buildExtension() {
         await copyJsonFiles();
         console.log('✅ Extension build completed');
     } else {
-        // Build the Extension for development (individual files)
-        const srcFiles = sync(`${srcDir}/**/*.{js,ts}`, { absolute: false });
+        // Build the Extension for development (single bundle, same layout as
+        // production - only minify/sourcemap differ)
         const devExtConfig = {
             ...baseConfig,
             platform: 'node',
             format: 'cjs',
-            entryPoints: srcFiles.map(f => `./${f}`),
-            outbase: srcDir,
-            outdir: `${outDir}/${srcDir}`,
+            entryPoints: [`./${srcDir}/extension.ts`],
+            outfile: `${outDir}/${srcDir}/extension.js`,
             external: ['vscode', 'shelljs', 'jsonc-parser', '@aws-sdk/client-s3'],
             plugins: [
                 esmAliasPlugin(),

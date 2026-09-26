@@ -48,7 +48,7 @@
 	"main": "./out/src/extension",
 	"scripts": {
 		"compile": "npm run prebuild-esm && node ./build/esbuild.build.cjs",
-		"build": "npm run prebuild-esm && node ./build/esbuild.build.cjs && npm run bundle-tools",
+		"build": "npm run compile && npm run bundle-tools",
 		"vscode:prepublish": "npm install --ignore-scripts && npm rebuild cpu-features ssh2 && npm run clean && npm run lint && npm run prebuild-esm && node ./build/esbuild.build.cjs --production && npm run bundle-tools && npm prune --omit=dev",
 		"prebuild-esm": "node ./build/esbuild.transform-esm.cjs",
 		"watch:extension": "node ./build/esbuild.extension.cjs --watch",
