@@ -38,33 +38,47 @@ function SearchBar(props: {
     builderImagesLength: number;
 }) {
     return (
-        <Stack direction="row" alignItems="center" width="100%" justifyContent="space-between">
+        <Stack
+            direction="row"
+            sx={{
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between'
+            }}>
             <TextField
                 variant="outlined"
                 placeholder='Search'
                 margin='normal'
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start" sx={{ marginTop: '0px !important' }}>
-                            <Search color="textSecondary" fontSize='small' />
-                        </InputAdornment>
-                    ),
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <IconButton onClick={() => props.setSearchText('')}>
-                                <Close color="textSecondary" fontSize='small' />
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                    disableUnderline: true
-                }}
                 value={props.searchText}
                 sx={{ flexGrow: '1', maxWidth: '650px', py: 0, background: 'rgba(127, 127, 127, 8%)' }}
                 onChange={(event) => {
                     props.setSearchText(event.target.value.toLowerCase());
                 }}
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start" sx={{ marginTop: '0px !important' }}>
+                                <Search color="textSecondary" fontSize='small' />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => props.setSearchText('')}>
+                                    <Close color="textSecondary" fontSize='small' />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                        disableUnderline: true
+                    }
+                }}
             />
-            <Stack direction="column" justifyContent="space-between" marginTop={0.5} gap={0.5}>
+            <Stack
+                direction="column"
+                sx={{
+                    justifyContent: 'space-between',
+                    marginTop: 0.5,
+                    gap: 0.5
+                }}>
                 <Pagination
                     count={props.numPages}
                     page={props.currentPage}
@@ -72,7 +86,9 @@ function SearchBar(props: {
                         props.setCurrentPage(value);
                     }}
                 />
-                <Typography align="center" flexGrow="1">
+                <Typography align="center" sx={{
+                    flexGrow: '1'
+                }}>
                     Showing items {(props.currentPage - 1) * props.perPageCount + 1} -{' '}
                     {Math.min(props.currentPage * props.perPageCount, props.builderImagesLength)} of{' '}
                     {props.builderImagesLength}
@@ -136,9 +152,19 @@ export function SelectBuilderImage(props: BuilderImageProps) {
 
     return (
         <>
-            <Stack direction="column" height="100%" spacing={0.5}>
-                <Stack direction="row" spacing={1} width={'100%'}>
-                    <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
+            <Stack direction="column" spacing={0.5} sx={{
+                height: '100%'
+            }}>
+                <Stack direction="row" spacing={1} sx={{
+                    width: '100%'
+                }}>
+                    <Stack
+                        direction="column"
+                        spacing={1}
+                        sx={{
+                            width: '70%',
+                            flexGrow: '1'
+                        }}>
                         <SearchBar
                             searchText={searchText}
                             setSearchText={setSearchText}
@@ -154,10 +180,12 @@ export function SelectBuilderImage(props: BuilderImageProps) {
                         <Stack
                             id="buildImageList"
                             direction="column"
-                            sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
                             divider={<Divider />}
-                            width={'100%'}
-                        >
+                            sx={{
+                                width: '100%',
+                                height: 'calc(100vh - 140px)',
+                                overflow: 'scroll'
+                            }}>
                             {builderImages
                                 .slice(
                                     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -177,7 +205,12 @@ export function SelectBuilderImage(props: BuilderImageProps) {
                         </Stack>
                     </Stack>
                 </Stack>
-                <Stack direction="row-reverse" justifyContent="space-between" alignItems="center">
+                <Stack
+                    direction="row-reverse"
+                    sx={{
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
                     {props.goBack && (
                         <Button
                             variant="outlined"

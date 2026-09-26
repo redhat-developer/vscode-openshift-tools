@@ -360,8 +360,14 @@ export class InvokeFunction extends React.Component<
                         color: 'var(--vscode-settings-textInputForeground)',
                     }}
                 >
-                    <Box display='flex' flexDirection={'column'}>
-                        <Stack direction='column' spacing={2} margin={5}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                        <Stack direction='column' spacing={2} sx={{
+                            margin: 5
+                        }}>
                             {multiInstance && (
                                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
                                     <Button
@@ -453,21 +459,23 @@ export class InvokeFunction extends React.Component<
                                     id='contet-type-dropdown'
                                     options={contentTypes}
                                     onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                                    PaperComponent={({ children }) => (
-                                        <Paper
-                                            sx={{
-                                                backgroundColor:
-                                                    'var(--vscode-settings-textInputBackground)',
-                                                color: 'var(--vscode-settings-textInputForeground)',
-                                            }}
-                                        >
-                                            {children}
-                                        </Paper>
-                                    )}
                                     renderOption={(props, option) => <li {...props}>{option}</li>}
                                     fullWidth
                                     disableClearable
                                     renderInput={(params) => <TextField {...params} />}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper
+                                                sx={{
+                                                    backgroundColor:
+                                                        'var(--vscode-settings-textInputBackground)',
+                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                }}
+                                            >
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
@@ -485,21 +493,23 @@ export class InvokeFunction extends React.Component<
                                     id='format-dropdown'
                                     options={this.props.basicTemplates}
                                     onChange={(e, v) => this.handleDropDownChange(e, v)}
-                                    PaperComponent={({ children }) => (
-                                        <Paper
-                                            sx={{
-                                                backgroundColor:
-                                                    'var(--vscode-settings-textInputBackground)',
-                                                color: 'var(--vscode-settings-textInputForeground)',
-                                            }}
-                                        >
-                                            {children}
-                                        </Paper>
-                                    )}
                                     renderOption={(props, option) => <li {...props}>{option}</li>}
                                     fullWidth
                                     disableClearable
                                     renderInput={(params) => <TextField {...params} />}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper
+                                                sx={{
+                                                    backgroundColor:
+                                                        'var(--vscode-settings-textInputBackground)',
+                                                    color: 'var(--vscode-settings-textInputForeground)',
+                                                }}
+                                            >
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>

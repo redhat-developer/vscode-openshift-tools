@@ -18,7 +18,7 @@ const isWatch = process.argv.includes('--watch');
 
 const baseConfig = {
     bundle: true,
-    target: 'chrome108',
+    target: 'chrome117',
     minify: production,
     sourcemap: !production,
     logLevel: 'warning',

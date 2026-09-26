@@ -113,7 +113,9 @@ export function AddServiceBindingForm() {
             {availableServices && componentName ? (
                 <Container maxWidth="md">
                     <form onSubmit={handleSubmit}>
-                        <Stack spacing={3} marginTop={3}>
+                        <Stack spacing={3} sx={{
+                            marginTop: 3
+                        }}>
                             <FormLabel>
                                 Bind Service to <code>{componentName}</code>
                             </FormLabel>
@@ -201,15 +203,16 @@ export function AddServiceBindingForm() {
                 </Container>
             ) : (
                 <Box
-                    position="fixed"
-                    top="0"
-                    left="0"
-                    width="100vw"
-                    height="100vh"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                >
+                    sx={{
+                        position: 'fixed',
+                        top: '0',
+                        left: '0',
+                        width: '100vw',
+                        height: '100vh',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
                     <CircularProgress />
                 </Box>
             )}

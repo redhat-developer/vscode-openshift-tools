@@ -5,8 +5,8 @@
 
 import { Close, Search } from '@mui/icons-material';
 import { Alert, Box, Checkbox, Divider, FormControlLabel, FormGroup, IconButton, InputAdornment, Modal, Pagination, Stack, TextField, Theme, Tooltip, Typography } from '@mui/material';
-import { useTreeViewApiRef } from '@mui/x-tree-view/hooks/useTreeViewApiRef'; // Import the API hook
-import { TreeViewBaseItem } from '@mui/x-tree-view/models';
+import { useRichTreeViewApiRef } from '@mui/x-tree-view/hooks'; // Import the API hook
+import { TreeViewDefaultItemModelProperties } from '@mui/x-tree-view/models';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { every } from 'lodash';
 import React from 'react';
@@ -122,31 +122,45 @@ function SearchBar(props: {
     chartsLength: number;
 }) {
     return (
-        <Stack direction='row' alignItems='center' width='100%' justifyContent='space-between'>
+        <Stack
+            direction='row'
+            sx={{
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between'
+            }}>
             <TextField
                 variant="outlined"
                 placeholder='Search Helm Charts'
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position='start' sx={{ marginTop: '0px !important' }}>
-                            <Search color='textSecondary' fontSize='small' />
-                        </InputAdornment>
-                    ),
-                    endAdornment: (
-                        <InputAdornment position='end'>
-                            <IconButton onClick={() => props.setSearchText('')}>
-                                <Close color='textSecondary' fontSize='small' />
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                }}
                 value={props.searchText}
                 sx={{ flexGrow: '1', maxWidth: '650px', py: 0, background: 'rgba(127, 127, 127, 8%)' }}
                 onChange={(event) => {
                     props.setSearchText(event.target.value.toLowerCase());
                 }}
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position='start' sx={{ marginTop: '0px !important' }}>
+                                <Search color='textSecondary' fontSize='small' />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position='end'>
+                                <IconButton onClick={() => props.setSearchText('')}>
+                                    <Close color='textSecondary' fontSize='small' />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }
+                }}
             />
-            <Stack direction="column" justifyContent="space-between" marginTop={0.5} gap={0.5}>
+            <Stack
+                direction="column"
+                sx={{
+                    justifyContent: 'space-between',
+                    marginTop: 0.5,
+                    gap: 0.5
+                }}>
                 <Pagination
                     count={props.numPages}
                     page={props.currentPage}
@@ -154,7 +168,9 @@ function SearchBar(props: {
                         props.setCurrentPage(value);
                     }}
                 />
-                <Typography align="center" flexGrow="1">
+                <Typography align="center" sx={{
+                    flexGrow: '1'
+                }}>
                     Showing items {(props.currentPage - 1) * props.perPageCount + 1} -{' '}
                     {Math.min(props.currentPage * props.perPageCount, props.chartsLength)} of{' '}
                     {props.chartsLength}
@@ -187,7 +203,7 @@ export function HelmSearch(props: HelmSearchProps) {
     const [isFindInChartName, setFindInChartName] = React.useState(false);
     const [isOtherTreeElementSelected, setOtherTreeElementSelected] = React.useState(false);
 
-    const treeViewItems: TreeViewBaseItem[] = [
+    const treeViewItems: TreeViewDefaultItemModelProperties[] = [
         {
             id: 'allitems',
             label: 'All Items',
@@ -227,7 +243,7 @@ export function HelmSearch(props: HelmSearchProps) {
         },
     ];
 
-    const treeViewRef = useTreeViewApiRef();
+    const treeViewRef = useRichTreeViewApiRef();
 
     function ascName(oldChart: ChartResponse, newChart: ChartResponse) {
         const oldChartName = oldChart.displayName || oldChart.chartName;
@@ -300,7 +316,7 @@ export function HelmSearch(props: HelmSearchProps) {
                 // Focus the first node manually by using the nodeId of the first item
                 const firstNodeId = treeViewItems[0].id; // Accessing the first item's id
                 api.focusItem(undefined, firstNodeId); // Focus the first node
-                api.selectItem({
+                api.setItemSelection({
                     event: undefined, itemId: firstNodeId,
                     keepExistingSelection: false, shouldBeSelected: true
                 }); //select the first node
@@ -371,7 +387,7 @@ export function HelmSearch(props: HelmSearchProps) {
 
     function handleTreeViewClick(_event: React.MouseEvent<Element, MouseEvent>, itemId: string): void {
         setOtherTreeElementSelected((_flag) => true);
-        let languagesTreeNodes: TreeViewBaseItem[] = [];
+        let languagesTreeNodes: TreeViewDefaultItemModelProperties[] = [];
         switch (itemId) {
             case 'allitems':
                 setTreeFindStrs((_oldVal) => []);
@@ -387,7 +403,7 @@ export function HelmSearch(props: HelmSearchProps) {
                 break;
             case 'languages':
                 languagesTreeNodes = treeViewItems[0].children.filter((treeViewItem) => treeViewItem.id === 'languages').map((treeItem) => treeItem.children)[0];
-                setTreeFindStrs((_oldVal) => languagesTreeNodes.map((childItem: TreeViewBaseItem) => childItem.id));
+                setTreeFindStrs((_oldVal) => languagesTreeNodes.map((childItem: TreeViewDefaultItemModelProperties) => childItem.id));
                 setFindInChartName((_oldVal) => false);
                 break;
             default:
@@ -403,16 +419,22 @@ export function HelmSearch(props: HelmSearchProps) {
 
     return (
         <>
-            <Stack direction='column' height='100%' spacing={0.5}>
+            <Stack direction='column' spacing={0.5} sx={{
+                height: '100%'
+            }}>
                 {
                     !isSomeHelmChartsRetrieved ?
                         <LoadScreen title='Retrieving Helm Charts...' /> :
-                        <Stack direction="row" spacing={1} width={'100%'}>
+                        <Stack direction="row" spacing={1} sx={{
+                            width: '100%'
+                        }}>
                             {
                                 (helmCharts.length >= 1) &&
                                 <>
                                     <Stack direction='column' sx={{ height: '100vh', overflow: 'scroll', maxWidth: '30%' }} spacing={0}>
-                                        <Typography variant="body2" marginBottom={1}>
+                                        <Typography variant="body2" sx={{
+                                            marginBottom: 1
+                                        }}>
                                             Filter by
                                         </Typography>
                                         {
@@ -434,10 +456,21 @@ export function HelmSearch(props: HelmSearchProps) {
                                         }
                                         {helmRepos.length > 1 && (
                                             <>
-                                                <Typography variant='body2' marginTop={1} marginBottom={1}>
+                                                <Typography
+                                                    variant='body2'
+                                                    sx={{
+                                                        marginTop: 1,
+                                                        marginBottom: 1
+                                                    }}>
                                                     Repositories
                                                 </Typography>
-                                                <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                <Stack
+                                                    direction='column'
+                                                    spacing={0}
+                                                        sx={{
+                                                            width: '100%',
+                                                            marginBottom: 3
+                                                        }}>
                                                     <RepoPicker
                                                         repoEnabled={helmChartEnabled}
                                                         setRepoEnabled={setHelmChartEnabled} />
@@ -447,10 +480,18 @@ export function HelmSearch(props: HelmSearchProps) {
                                         )}
                                         {providerTypes.length > 1 && (
                                             <>
-                                                <Typography variant='body2' marginBottom={1}>
+                                                <Typography variant='body2' sx={{
+                                                    marginBottom: 1
+                                                }}>
                                                     Provider Types
                                                 </Typography>
-                                                <Stack direction='column' sx={{ width: '100%' }} width='100%' spacing={0} marginBottom={3}>
+                                                <Stack
+                                                    direction='column'
+                                                    spacing={0}
+                                                        sx={{
+                                                            width: '100%',
+                                                            marginBottom: 3
+                                                        }}>
                                                     <ProviderTypePicker
                                                         providerTypeEnabled={providerTypeEnabled}
                                                         setProviderTypeEnabled={setProviderTypeEnabled} />
@@ -463,7 +504,13 @@ export function HelmSearch(props: HelmSearchProps) {
                                     <Divider orientation='vertical' sx={{ height: 'calc(100vh - 40px)' }} />
                                 </>
                             }
-                            <Stack direction='column' sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
+                            <Stack
+                                direction='column'
+                                spacing={1}
+                                sx={{
+                                    width: '70%',
+                                    flexGrow: '1'
+                                }}>
                                 <SearchBar
                                     searchText={searchText}
                                     setSearchText={setSearchText}
@@ -474,17 +521,25 @@ export function HelmSearch(props: HelmSearchProps) {
                                     perPageCount={ITEMS_PER_PAGE}
                                     chartsLength={getFilteredCharts().length} />
                                 {helmRepos.length === 0 ?
-                                    <Stack direction='row' justifyContent='center' alignItems='center' paddingTop='2rem'>
+                                    <Stack
+                                        direction='row'
+                                        sx={{
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            paddingTop: '2rem'
+                                        }}>
                                         <Alert severity='info'>No Helm repos are configured. Please configure a Helm repo to view its charts.</Alert>
                                     </Stack>
                                     :
                                     <Stack
                                         id='devfileList'
                                         direction='column'
-                                        sx={{ height: 'calc(100vh - 100px)', overflow: 'scroll' }}
                                         divider={<Divider />}
-                                        width='100%'
-                                    >
+                                        sx={{
+                                            width: '100%',
+                                            height: 'calc(100vh - 100px)',
+                                            overflow: 'scroll'
+                                        }}>
                                         {getFilteredCharts()
                                             .slice(
                                                 (currentPage - 1) * ITEMS_PER_PAGE,

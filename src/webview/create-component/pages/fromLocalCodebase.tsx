@@ -227,7 +227,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                         <div style={{ position: 'relative' }}>
                             <Typography variant="h5">From Existing Local Codebase</Typography>
                         </div>
-                        <Stack direction="column" spacing={2} marginTop={4}>
+                        <Stack direction="column" spacing={2} sx={{
+                            marginTop: 4
+                        }}>
                             <ComponentNameInput
                                 isComponentNameFieldValid={isComponentNameFieldValid}
                                 componentNameErrorMessage={componentNameErrorMessage}
@@ -243,7 +245,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                     setPortNumber={setPortNumber}
                                 />
                             }
-                            <Stack direction="row" spacing={1} marginTop={1}>
+                            <Stack direction="row" spacing={1} sx={{
+                                marginTop: 1
+                            }}>
                                 <FormControl
                                     fullWidth
                                     error={recommendedDevfile.isDevfileExistsInFolder}
@@ -300,7 +304,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                             </Stack>
                             {!isLoaded ? (
                                 <>
-                                    <Stack direction="row" spacing={1} marginTop={2}>
+                                    <Stack direction="row" spacing={1} sx={{
+                                        marginTop: 2
+                                    }}>
                                         {(!props.rootFolder || props.rootFolder.length === 0) &&
                                             <Button variant='text' onClick={() => { props.setCurrentView('home') }}>
                                                 BACK
@@ -320,7 +326,9 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                         </Button>
                                     </Stack>
                                     {recommendedDevfile.isLoading && (
-                                        <Stack direction="column" spacing={3} alignItems="center">
+                                        <Stack direction="column" spacing={3} sx={{
+                                            alignItems: 'center'
+                                        }}>
                                             <Divider variant="middle" sx={{ marginTop: '2em' }} />
                                             <CircularProgress />
                                             <Typography variant="body2">
@@ -336,10 +344,13 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                         <>
                                             <Stack
                                                 direction="row"
-                                                justifyContent="space-between"
-                                                marginTop={1}
-                                            >
-                                                <Typography variant="h6" paddingBottom={1}>
+                                                sx={{
+                                                    justifyContent: 'space-between',
+                                                    marginTop: 1
+                                                }}>
+                                                <Typography variant="h6" sx={{
+                                                    paddingBottom: 1
+                                                }}>
                                                     {selectedDevfile
                                                         ? 'Selected Devfile'
                                                         : 'Recommended Devfile'}
@@ -356,10 +367,11 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                         </>
                                         <Stack
                                             direction="row"
-                                            justifyContent="flex-end"
                                             spacing={1}
-                                            marginTop={2}
-                                        >
+                                            sx={{
+                                                justifyContent: 'flex-end',
+                                                marginTop: 2
+                                            }}>
                                             <Button
                                                 variant="text"
                                                 onClick={() => {
@@ -411,10 +423,11 @@ export function FromLocalCodebase(props: FromLocalCodebaseProps) {
                                         <NoSuitableWarning />
                                         <Stack
                                             direction="row"
-                                            justifyContent="flex-end"
                                             spacing={1}
-                                            marginTop={2}
-                                        >
+                                            sx={{
+                                                justifyContent: 'flex-end',
+                                                marginTop: 2
+                                            }}>
                                             <Button
                                                 variant="text"
                                                 onClick={() => {

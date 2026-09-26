@@ -171,14 +171,24 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                 <Typography variant="h5">Set Component Name and Folder</Typography>
             </div>
 
-            <Stack direction="column" spacing={2} marginTop={2}>
+            <Stack direction="column" spacing={2} sx={{
+                marginTop: 2
+            }}>
                 {props.devfile ? (
                 <Paper elevation={4}>
-                        <Stack margin={2} spacing={2}>
+                        <Stack spacing={2} sx={{
+                            margin: 2
+                        }}>
                             <DevfileListItem devfileInfo={props.devfileInfo} devfile={props.devfile} />
                             {/* padding here is to match the padding build into the devfile list component */}
                             {props.templateProject && (
-                                <Stack direction="row" alignItems="center" spacing={1} paddingX={1}>
+                                <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    sx={{
+                                        alignItems: 'center',
+                                        paddingX: 1
+                                    }}>
                                     <Typography variant="body1">Project:</Typography>
                                     <code>{props.templateProject}</code>
                                 </Stack>
@@ -255,7 +265,9 @@ export function SetNameAndFolder(props: SetNameAndFolderProps) {
                     label="Add component to workspace"
                 />
 
-                <Stack direction="row" justifyContent="space-between">
+                <Stack direction="row" sx={{
+                    justifyContent: 'space-between'
+                }}>
                     <Button variant="text" onClick={props.goBack}>
                         {props.templateProject ? 'Use Different Template Project' : 'Back'}
                     </Button>

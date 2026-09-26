@@ -135,7 +135,9 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                 <Typography variant="h5">General</Typography>
             </div>
 
-            <Stack direction="column" spacing={2} marginTop={2}>
+            <Stack direction="column" spacing={2} sx={{
+                marginTop: 2
+            }}>
                 <ComponentNameInput
                     label='Application Name'
                     isComponentNameFieldValid={isAppNameFieldValid}
@@ -223,7 +225,9 @@ export function BuilderConfiguration(props: BuilderConfigurationProps) {
                         })}
                     </Select>
                 </FormControl>
-                <Stack direction="row" justifyContent="space-between">
+                <Stack direction="row" sx={{
+                    justifyContent: 'space-between'
+                }}>
                     <Button variant="text" onClick={props.goBack}>
                         Back
                     </Button>

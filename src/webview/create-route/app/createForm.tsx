@@ -57,8 +57,12 @@ function SelectService(props: {
                 event.preventDefault();
             }}
         >
-            <Stack direction='column' spacing={2} marginTop={3}>
-                <Box paddingBottom={1}>
+            <Stack direction='column' spacing={2} sx={{
+                marginTop: 3
+            }}>
+                <Box sx={{
+                    paddingBottom: 1
+                }}>
                     <Typography variant='h5'>Create Route</Typography>
                 </Box>
                 <TextField fullWidth
@@ -184,7 +188,9 @@ function SelectService(props: {
                     />
                     <FormHelperText>Routes can be secured using several TLS termination types for serving certificates.</FormHelperText>
                 </FormControl>
-                <Stack direction='row' spacing={2} marginTop={3}>
+                <Stack direction='row' spacing={2} sx={{
+                    marginTop: 3
+                }}>
                     <Button
                         variant='contained'
                         onClick={() => {
@@ -349,7 +355,9 @@ export function CreateService() {
             <Container maxWidth='lg'>
                 {pageElement}
                 {error?.trim().length > 0 &&
-                    <Stack direction='row' spacing={2} marginTop={3}>
+                    <Stack direction='row' spacing={2} sx={{
+                        marginTop: 3
+                    }}>
                         <Button
                             variant='contained'
                             onClick={() => {

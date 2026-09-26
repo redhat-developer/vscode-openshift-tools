@@ -138,13 +138,16 @@ export const HelmModal = React.forwardRef(
                     padding: 2,
                 }}
             >
-                <Stack direction='column' spacing={1} justifyContent='space-between'>
+                <Stack direction='column' spacing={1} sx={{
+                    justifyContent: 'space-between'
+                }}>
                     <Stack
                         direction='row'
-                        justifyContent='space-between'
-                        alignItems='flex-start'
-                        marginBottom={1}
-                    >
+                        sx={{
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: 1
+                        }}>
                         <HelmListItem helmChart={props.helmChart} selectedVersion={selectedVersion} isDetailedPage={true} />
                         <IconButton onClick={() => {
                             props.closeModal()
@@ -205,15 +208,19 @@ export const HelmModal = React.forwardRef(
                                 <Typography
                                     variant='caption'
                                     component='div'
-                                    color='inherit'
                                     style={{ marginTop: '3px', marginLeft: '5px', fontSize: '1em' }}
+                                    sx={{
+                                        color: 'inherit'
+                                    }}
                                 >Retrieving helm values</Typography>
                             </>
                             :
                             <>
                                 {
                                     yamlValues !== 'noVal' &&
-                                    <Stack direction='column' spacing={1} justifyContent='space-between'>
+                                    <Stack direction='column' spacing={1} sx={{
+                                        justifyContent: 'space-between'
+                                    }}>
                                         <InputLabel id='values'>Values:</InputLabel>
                                         <CodeMirror
                                             value={yamlValues}
@@ -231,7 +238,9 @@ export const HelmModal = React.forwardRef(
                                 }
                             </>
                     }
-                    <Stack direction='row' marginTop={1} spacing={2}>
+                    <Stack direction='row' spacing={2} sx={{
+                        marginTop: 1
+                    }}>
                         <LoadingButton
                             variant='contained'
                             onClick={() => {

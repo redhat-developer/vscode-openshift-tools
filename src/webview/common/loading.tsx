@@ -30,8 +30,10 @@ export const LoadScreen: React.FC<LoadProps> = ({
                 <Typography
                     variant='caption'
                     component='div'
-                    color='inherit'
                     style={{ marginTop: isCircular ? '3px' : '0.5rem', marginLeft: isCircular ? '5px' : '0', fontSize: '1em' }}
+                    sx={{
+                        color: 'inherit'
+                    }}
                 >{title}</Typography>
             </div>
         </Box>

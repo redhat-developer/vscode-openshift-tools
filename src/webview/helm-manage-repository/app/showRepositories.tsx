@@ -227,17 +227,23 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                     borderRadius: '1rem'
                 }}>
                     <Box
-                        display='flex'
-                        flexDirection={'row'}
-                        sx={{ width: '100%', margin: '20px' }}>
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            width: '100%',
+                            margin: '20px'
+                        }}>
                         <>
                             {
                                 repositories.length > 0 ?
                                     <>
                                         <Box
-                                            display='flex'
-                                            flexDirection={'column'}
-                                            sx={{ width: '70%', margin: 'auto' }}>
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                width: '70%',
+                                                margin: 'auto'
+                                            }}>
                                             <TableContainer>
                                                 <Table size='small' aria-label='customized table'>
                                                     <TableHead>
@@ -418,6 +424,6 @@ export class ShowRepositories extends React.Component<DefaultProps, {
                     </DialogContent>
                 </Dialog>
             </div>
-        )
+        );
     }
 }

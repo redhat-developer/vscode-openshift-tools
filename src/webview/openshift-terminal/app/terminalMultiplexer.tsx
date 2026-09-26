@@ -39,16 +39,20 @@ const TabLabel = (props: { name: string; closeTab: () => void }) => {
 
     return (
         <Stack
-            color="inherit"
-            sx={{ paddingLeft: '10px', paddingBottom: '0px', paddingTop: '0px' }}
             direction="row"
             spacing={1}
-            alignItems="center"
-            justifyContent="space-evenly"
-        >
-            <TerminalIcon sx={{ fontSize: 'var(--vscode-font-size)' }} color="inherit" />
+            sx={{
+                color: 'inherit',
+                alignItems: 'center',
+                justifyContent: 'space-evenly',
+                paddingLeft: '10px',
+                paddingBottom: '0px',
+                paddingTop: '0px'
+            }}>
+            <TerminalIcon data-testid="TerminalIcon" sx={{ fontSize: 'var(--vscode-font-size)' }} color="inherit" />
             <TabText color="inherit">{props.name}</TabText>
             <CloseIcon
+                data-testid="CloseIcon"
                 sx={{ fontSize: 'var(--vscode-font-size)' }}
                 color="inherit"
                 onClick={(_e) => {
@@ -201,8 +205,18 @@ export const TerminalMultiplexer = () => {
 
     if (!terminals.length) {
         return (
-            <Stack justifyContent="center" width="100%" direction="column">
-                <Stack direction="row" justifyContent="center" alignItems="center">
+            <Stack
+                direction="column"
+                sx={{
+                    justifyContent: 'center',
+                    width: '100%'
+                }}>
+                <Stack
+                    direction="row"
+                    sx={{
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
                     <SvgIcon
                         component={OpenShiftIcon}
                         htmlColor="red"
@@ -215,7 +229,12 @@ export const TerminalMultiplexer = () => {
                     />
                     <Typography>No terminals opened.</Typography>
                 </Stack>
-                <Stack direction="row" justifyContent="center" alignItems="center">
+                <Stack
+                    direction="row"
+                    sx={{
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
                     <Typography variant='caption'>Terminals related to operations performed on the OpenShift cluster will appear here</Typography>
                 </Stack>
             </Stack>
@@ -229,7 +248,11 @@ export const TerminalMultiplexer = () => {
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <Stack direction="row">
                             <TabList onChange={handleTabChange} sx={{ minHeight: '36px' }}>
-                                <Stack justifyContent="center" width="100%">
+                                <Stack
+                                    sx={{
+                                        justifyContent: 'center',
+                                        width: '100%'
+                                    }}>
                                     <SvgIcon
                                         component={ !isKnative  ? OpenShiftIcon : KnativeIcon}
                                         htmlColor={ !isKnative  ? 'red' : 'inherit'}
