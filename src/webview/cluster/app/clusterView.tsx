@@ -9,9 +9,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import StopIcon from '@mui/icons-material/Stop';
-import { Alert } from '@mui/lab';
 import {
-    Accordion, AccordionActions, AccordionDetails, AccordionSummary, Avatar,
+    Accordion, AccordionActions, AccordionDetails, AccordionSummary, Alert, Avatar,
+    Box,
     Button,
     Chip,
     Divider,
@@ -23,15 +23,13 @@ import {
     Paper, Step, StepContent, StepLabel, Stepper, TextField,
     ThemeProvider,
     Tooltip,
-    Typography
+    Typography,
+    useTheme
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import * as React from 'react';
 import * as ClusterViewStyles from './clusterView.style';
 import { ClusterViewProps } from '../../common/propertyTypes';
 import prettyBytes from 'pretty-bytes';
-
-const useStyles = makeStyles(ClusterViewStyles.useStyles);
 
 const crcDefaults = {
 	DefaultCPUs: 4,
@@ -49,7 +47,8 @@ function getSteps() {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props: ClusterViewProps) {
-  const classes = useStyles();
+  const theme = useTheme();
+  const classes = ClusterViewStyles.getStyles(theme);
   const [fileName, setBinaryPath] = React.useState('');
   const [pullSecretPath, setSecret] = React.useState('');
   const [cpuSize, setCpuSize] = React.useState(crcDefaults.DefaultCPUs);
@@ -308,18 +307,18 @@ export default function addClusterView(props: ClusterViewProps) {
           aria-controls='panel1c-content'
           id='panel1c-header'
         >
-          <div className={classes.column}>
+          <Box sx={classes.column}>
             <span style={{ marginRight: 10 }}>OpenShift Status</span>
             <Chip label={status.openshiftStatus} size='small' color={ status.openshiftStatus === 'Stopped' ? 'error' : 'success'} />
-          </div>
-          <div className={classes.column}>
+          </Box>
+          <Box sx={classes.column}>
             <span style={{ marginRight: 10 }}>CRC Version: {status.crcVer}</span>
-          </div>
-          <div className={classes.column}>
+          </Box>
+          <Box sx={classes.column}>
             <span>OpenShift Version: {status.openshiftVer}</span>
-          </div>
+          </Box>
         </AccordionSummary><AccordionDetails className='details'>
-            <div className={classes.column}>
+            <Box sx={classes.column}>
               <List dense>
                 <ListItem>
                   <ListItemText primary={<span>OpenShift Local Status: {status.crcStatus}</span>} />
@@ -337,7 +336,7 @@ export default function addClusterView(props: ClusterViewProps) {
                   <ListItemText primary={<span>Cache Directory: {status.cacheDir}</span>} />
                 </ListItem>
               </List>
-            </div>
+            </Box>
             <div>
               <List dense>
                 <ListItem>
@@ -349,14 +348,14 @@ export default function addClusterView(props: ClusterViewProps) {
               </List>
             </div>
             {status.creds?.map((label) => (
-              <div className={classes.helper}>
+              <Box sx={classes.helper}>
                 <Button variant='outlined' size='small' className='button' key='admin' onClick={() => { handleCrcLogin(label.adminCredentials, label.url); }}>
                   <ExitToAppIcon fontSize='small' />Login using {label.adminCredentials.username}
                 </Button>
                 <Button variant='outlined' size='small' className='button' key='developer' onClick={() => { handleCrcLogin(label.developerCredentials, label.url); }}>
                   <ExitToAppIcon fontSize='small' />Login using {label.developerCredentials.username}
                 </Button>
-              </div>))}
+              </Box>))}
           </AccordionDetails><Divider /><AccordionActions>
             {(status.openshiftStatus === 'Stopped') ?
               (<Button size='small' component='span' className='status-button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
@@ -509,7 +508,7 @@ export default function addClusterView(props: ClusterViewProps) {
               <ListItemText
                 primary={<span>Provide the pull secret.<sup style={{color: '#BE0000'}}>*</sup></span>}
                 secondary={<span>To pull container images from the registry, a pull secret is necessary. You can download the pull secret from the <a href={crcDefaults.CrcLandingPageURL}>Red Hat OpenShift Local download page</a> and upload it.</span>} />
-              <div className={classes.uploadLabel}>
+              <Box sx={classes.uploadLabel}>
                 <input
                   style={{ display: 'none' }}
                   id='contained-button-file'
@@ -522,7 +521,7 @@ export default function addClusterView(props: ClusterViewProps) {
                       Select Pull Secret file
                     </Button>} />
                 </label>
-              </div>
+              </Box>
             </ListItem>
             {pullSecretPath && (
               <TextField
@@ -601,17 +600,17 @@ export default function addClusterView(props: ClusterViewProps) {
 
   const WizardSteps = () => (
     <Paper elevation={3}>
-      <blockquote className={classes.blockquoteText}>
+      <Box component='blockquote' sx={classes.blockquoteText}>
         <Typography variant='body2' component='p' style={{textAlign: 'center'}}>
           Install OpenShift {props.openshiftCrc} on your system using OpenShift Local {props.crc}.
         </Typography>
-      </blockquote>
+      </Box>
       <Stepper activeStep={activeStep} orientation='vertical' children={steps.map((label, index) => (
         <Step key={label}>
           <StepLabel>{label}</StepLabel>
           <StepContent>
             {getStepContent(index)}
-            <div className={classes.actionsContainer}>
+            <Box sx={classes.actionsContainer}>
               <div>
                 {(activeStep !== 0) && (
                   <Button
@@ -628,7 +627,7 @@ export default function addClusterView(props: ClusterViewProps) {
                   {activeStep === steps.length - 1 ? 'Start Cluster' : 'Next'}
                 </Button>
               </div>
-            </div>
+            </Box>
           </StepContent>
         </Step>
       ))} />
@@ -639,38 +638,38 @@ export default function addClusterView(props: ClusterViewProps) {
     <ThemeProvider theme={ClusterViewStyles.ClusterViewTheme}>
     <div>
       {(!settingPresent) && (
-        <div className={classes.root}>
+        <Box sx={classes.root}>
           {WizardSteps()}
           {(activeStep === steps.length) && (
           <div>
             <Paper square elevation={3} className='resetContainer'>
               <StartStopLoader />
-              <div className={classes.actionsContainer}>
+              <Box sx={classes.actionsContainer}>
                 <Button onClick={handleBack} className='button' disabled={(crcProgress || crcStopProgress)}>
                   Back
                 </Button>
                 <Button onClick={handleReset} className='button' disabled={(crcProgress || crcStopProgress)}>
                   Reset
                 </Button>
-              </div>
+              </Box>
             </Paper>
           </div>
         )}
-      </div>)}
+      </Box>)}
       {(settingPresent) && (
-        <div className={classes.root}>
+        <Box sx={classes.root}>
           <Paper square elevation={3} className='resetContainer'>
-            <blockquote className={classes.blockquoteText}>
+            <Box component='blockquote' sx={classes.blockquoteText}>
               <Typography variant='body2'>
                 OpenShift Local configuration is detected in workspace settings. If you need to setup a new OpenShift Local instance, click on Reset and proceed with guided workflow.
               </Typography>
-            </blockquote>
+            </Box>
             <StartStopLoader />
             <Button onClick={handleReset} className='button' disabled={(crcProgress || crcStopProgress)}>
               Reset
             </Button>
           </Paper>
-        </div>
+        </Box>
       )}
     </div>
     </ThemeProvider>

@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import { Button, CircularProgress, TextField } from '@mui/material';
+import { Button, CircularProgress, styled, TextField, ThemeProvider } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { ThemeProvider, styled } from '@mui/styles';
 import * as React from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';

@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { createTheme, Theme } from '@mui/material/styles';
-import { createStyles } from '@mui/styles';
 
 const theme = createTheme();
 export const ClusterTheme = createTheme({
@@ -151,8 +150,7 @@ export const ClusterTheme = createTheme({
     }
 });
 
-export default (theme: Theme) =>
-    createStyles({
+export default (theme: Theme) => ({
         iconContainer: {
             height: 60,
             marginBottom: '3em',
@@ -196,4 +194,4 @@ export default (theme: Theme) =>
             maxHeight: '100%',
             maxWidth: '100%'
         }
-    })
+    });
