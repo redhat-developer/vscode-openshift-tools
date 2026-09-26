@@ -40,12 +40,10 @@ const crcDefaults = {
 	DefaultCrcUrlBase: 'https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc'
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getSteps() {
   return ['Download OpenShift Local', 'File path of image pull secret', 'Select optional configurations', 'Setup OpenShift Local', 'Start the cluster'];
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function addClusterView(props: ClusterViewProps) {
   const theme = useTheme();
   const classes = ClusterViewStyles.getStyles(theme);
@@ -358,15 +356,15 @@ export default function addClusterView(props: ClusterViewProps) {
               </Box>))}
           </AccordionDetails><Divider /><AccordionActions>
             {(status.openshiftStatus === 'Stopped') ?
-              (<Button size='small' component='span' className='status-button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
-              (<Button size='small' component='span' className='status-button' onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
-            <Button size='small' component='span' className='status-button' onClick={handleRefresh} startIcon={<RefreshIcon />}>
+              (<Button size='small' component='span' nativeButton={false} className='status-button' onClick={handleStartProcess} startIcon={<PlayArrowIcon />}>Start Cluster</Button>) :
+              (<Button size='small' component='span' nativeButton={false} className='status-button' onClick={handleStopProcess} startIcon={<StopIcon />}>Stop Cluster</Button>)}
+            <Button size='small' component='span' nativeButton={false} className='status-button' onClick={handleRefresh} startIcon={<RefreshIcon />}>
               Refresh Status
             </Button>
             {(status.openshiftStatus !== 'Stopped') && (
               <div>
                 <a href={crcDefaults.DefaultWebConsoleURL} style={{ textDecoration: 'none' }}>
-                    <Button size='small' component='span' className='status-button' endIcon={<Launch />}>
+                    <Button size='small' component='span' nativeButton={false} className='status-button' endIcon={<Launch />}>
                         Open Console Dashboard
                     </Button>
                 </a>
@@ -375,13 +373,17 @@ export default function addClusterView(props: ClusterViewProps) {
       )}
     {(statusSkeleton && !statusError) && (
       <div>
-        <Typography paragraph>Refreshing the OpenShift Local status</Typography>
+        <Typography sx={{
+          marginBottom: '16px'
+        }}>Refreshing the OpenShift Local status</Typography>
         <LinearProgress />
       </div>
     )}
     {(!statusSkeleton && statusError) && (
       <div>
-        <Typography paragraph>Oh snap!! It looks like there is an error in settings. Please Reset and start.</Typography>
+        <Typography sx={{
+          marginBottom: '16px'
+        }}>Oh snap!! It looks like there is an error in settings. Please Reset and start.</Typography>
       </div>
     )}
     </>
@@ -414,7 +416,9 @@ export default function addClusterView(props: ClusterViewProps) {
     </div>)}
     {(statusError) && (
       <div>
-        <Typography paragraph>Cannot fetch the status of the cluster.</Typography>
+        <Typography sx={{
+          marginBottom: '16px'
+        }}>Cannot fetch the status of the cluster.</Typography>
       </div>
     )}
     {(crcStartError || crcStopError) && (
@@ -452,6 +456,7 @@ export default function addClusterView(props: ClusterViewProps) {
                     <a href={fetchDownloadBinary()} style={{ textDecoration: 'none'}}>
                       <Button
                         component='span'
+                        nativeButton={false}
                         className='button'
                       >
                         Download OpenShift Local
@@ -474,7 +479,7 @@ export default function addClusterView(props: ClusterViewProps) {
                     onChange={handleUploadPath}
                     />
                     <label htmlFor='contained-button-file'>
-                      <Tooltip title='This is a required field' placement='left' children={<Button component='span' className='button'>
+                      <Tooltip title='This is a required field' placement='left' children={<Button component='span' nativeButton={false} className='button'>
                         Select Path
                       </Button>} />
                     </label>
@@ -489,15 +494,18 @@ export default function addClusterView(props: ClusterViewProps) {
                       style= {{ marginTop: '20px', width: '100%' }}
                       fullWidth
                       defaultValue={fileName}
-                      InputProps={{
-                        readOnly: true,
-                      }}
                       variant='outlined'
                       size='small'
+                      slotProps={{
+                        input: {
+                          readOnly: true,
+                        }
+                      }}
                     />
                   )}
             </List>
-          </div>)
+            </div>
+          );
         case 1:
           return (
             <List>
@@ -517,28 +525,31 @@ export default function addClusterView(props: ClusterViewProps) {
                   onChange={handleUploadPullSecret}
                 />
                 <label htmlFor='contained-button-file'>
-                    <Tooltip title='This is a required field' placement='left' children={<Button className='button' component='span'>
+                    <Tooltip title='This is a required field' placement='left' children={<Button className='button' component='span' nativeButton={false}>
                       Select Pull Secret file
                     </Button>} />
                 </label>
               </Box>
             </ListItem>
-            {pullSecretPath && (
-              <TextField
-                id='outlined-location'
-                label='Pull Secret Location'
-                className='textContainer'
-                style= {{ marginTop: '20px', width: '100%' }}
-                fullWidth
-                defaultValue={pullSecretPath}
-                InputProps={{
-                  readOnly: true,
-                }}
-                variant='outlined'
-                size='small'
-              />
-            )}
-          </List>)
+              {pullSecretPath && (
+                <TextField
+                  id='outlined-location'
+                  label='Pull Secret Location'
+                  className='textContainer'
+                  style= {{ marginTop: '20px', width: '100%' }}
+                  fullWidth
+                  defaultValue={pullSecretPath}
+                  variant='outlined'
+                  size='small'
+                  slotProps={{
+                    input: {
+                      readOnly: true,
+                    }
+                  }}
+                />
+              )}
+            </List>
+          );
         case 2:
           return (
             <div>
@@ -549,8 +560,10 @@ export default function addClusterView(props: ClusterViewProps) {
                 size='small'
                 onChange={handleCpuSize}
                 value={cpuSize}
-                InputProps={{ inputProps: { min: crcDefaults.DefaultCPUs } }}
                 className='textContainer'
+                slotProps={{
+                  input: { inputProps: { min: crcDefaults.DefaultCPUs } }
+                }}
               />
               <TextField
                 label='Memory to allocate'
@@ -559,9 +572,11 @@ export default function addClusterView(props: ClusterViewProps) {
                 size='small'
                 onChange={handleMemory}
                 value={memory}
-                InputProps={{ inputProps: { min: crcDefaults.DefaultMemory } }}
                 helperText='Value in MiB'
                 className='textContainer'
+                slotProps={{
+                  input: { inputProps: { min: crcDefaults.DefaultMemory } }
+                }}
               />
               <TextField
                 label='Nameserver'
@@ -573,7 +588,8 @@ export default function addClusterView(props: ClusterViewProps) {
                 helperText='IPv4 address of nameserver'
                 className='textContainer'
               />
-            </div>)
+            </div>
+          );
         case 3:
           return (
             <List>

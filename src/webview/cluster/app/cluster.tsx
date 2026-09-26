@@ -49,7 +49,6 @@ const clusterTypes = [
 
 const vscodeApi = window.vscodeApi;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function Header() {
     const classes = clusterStyle(useTheme());
     const [showWizard, setShowWizard] = React.useState('');
@@ -104,7 +103,9 @@ export default function Header() {
             {clusterTypes.map((list, index) => (
                 <Card className='cardTransform' key={index}>
                     <Box sx={classes.cardHeader}>
-                        <Typography variant='caption' display='block'>
+                        <Typography variant='caption' sx={{
+                            display: 'block'
+                        }}>
                             {list.heading}
                         </Typography>
                     </Box>
@@ -132,6 +133,7 @@ export default function Header() {
                                         <Button
                                             variant='contained'
                                             component='span'
+                                            nativeButton={false}
                                         >
                                             {list.buttonText}
                                         </Button>
@@ -141,6 +143,7 @@ export default function Header() {
                                             <Button
                                                 variant='contained'
                                                 component='span'
+                                                nativeButton={false}
                                                 sx={{ marginTop: '.5em' }}
                                             >
                                                 {list.buttonTextSecondary}

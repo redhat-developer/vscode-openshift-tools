@@ -55,10 +55,11 @@ function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                 <>
                     <Stack
                         spacing={1}
-                        justifyContent='flex-start'
-                        alignItems='center'
                         direction='row'
-                    >
+                        sx={{
+                            justifyContent: 'flex-start',
+                            alignItems: 'center'
+                        }}>
                         <Box>
                             <IconButton
                                 size='small'
@@ -70,22 +71,31 @@ function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                                 {isExpanded ? <ExpandLess /> : <ExpandMore />}
                             </IconButton>
                         </Box>
-                        <Stack direction='row' alignItems='baseline' spacing={2}>
+                        <Stack direction='row' spacing={2} sx={{
+                            alignItems: 'baseline'
+                        }}>
                             <Typography variant='h4'>
                                 {props.title}
                                 {props.required && ' *'}
                             </Typography>
-                            <Typography variant='body1' maxWidth='600px' textOverflow='ellipsis' overflow='hidden'>
+                            <Typography
+                                variant='body1'
+                                sx={{
+                                    maxWidth: '600px',
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden'
+                                }}>
                                 {props.description}
                             </Typography>
                         </Stack>
                     </Stack>
                     <Collapse in={isExpanded}>
                         <Box
-                            borderLeft='2px solid'
-                            borderColor='var(--vscode-button-background)'
-                            paddingLeft={1}
-                        >
+                            sx={{
+                                borderLeft: '2px solid',
+                                borderColor: 'var(--vscode-button-background)',
+                                paddingLeft: 1
+                            }}>
                             <Stack spacing={2}>
                                 {props.properties.map((element) => (
                                     <div className='property-wrapper'>{element.content}</div>
@@ -133,21 +143,34 @@ function ArrayFieldTemplate<
     } = registry.templates;
     return (
         <Paper variant='outlined'>
-            <Stack direction='column' spacing={1} p={2}>
-                <Stack direction='row' spacing={2} alignItems='baseline'>
+            <Stack direction='column' spacing={1} sx={{
+                p: 2
+            }}>
+                <Stack direction='row' spacing={2} sx={{
+                    alignItems: 'baseline'
+                }}>
                     <Typography variant='h4'>
                         {title}
                         {required && ' *'}
                     </Typography>
-                    <Typography variant='body1' maxWidth='600px' textOverflow='ellipsis'>
+                    <Typography
+                        variant='body1'
+                        sx={{
+                            maxWidth: '600px',
+                            textOverflow: 'ellipsis'
+                        }}>
                         {schema.description}
                     </Typography>
                 </Stack>
                 {items}
                 {canAdd && (
-                    <Grid container justifyContent='flex-end'>
+                    <Grid container sx={{
+                        justifyContent: 'flex-end'
+                    }}>
                         <Grid>
-                            <Box mt={2}>
+                            <Box sx={{
+                                mt: 2
+                            }}>
                                 <AddButton
                                     className='array-item-add'
                                     onClick={onAddClick}
@@ -208,8 +231,12 @@ function SelectService(props: {
                 props.next();
             }}
         >
-            <Stack direction='column' spacing={2} marginTop={3}>
-                <Box paddingBottom={1}>
+            <Stack direction='column' spacing={2} sx={{
+                marginTop: 3
+            }}>
+                <Box sx={{
+                    paddingBottom: 1
+                }}>
                     <Typography variant='h5'>Select Service Kind</Typography>
                 </Box>
                 <FormControl required>
@@ -244,15 +271,20 @@ function SelectService(props: {
                 </FormControl>
                 {props.selectedServiceKind && props.selectedServiceKind.csvDescription && (
                     <Paper variant='elevation'>
-                        <Box margin={1}>
+                        <Box sx={{
+                            margin: 1
+                        }}>
                             <Stack
                                 direction='row'
-                                width='100%'
-                                alignItems='center'
-                                justifyContent='space-between'
                                 spacing={3}
-                            >
-                                <Stack marginLeft={1} spacing={1} direction='row'>
+                                sx={{
+                                    width: '100%',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between'
+                                }}>
+                                <Stack spacing={1} direction='row' sx={{
+                                    marginLeft: 1
+                                }}>
                                     <IconButton
                                         size='small'
                                         onClick={(e) => {
@@ -270,7 +302,9 @@ function SelectService(props: {
                                 </Alert>
                             </Stack>
                             <Collapse in={isDocumentationExpanded}>
-                                <Box margin={1}>
+                                <Box sx={{
+                                    margin: 1
+                                }}>
                                     <div
                                         dangerouslySetInnerHTML={{
                                             __html: safeConvertToHtml(
@@ -283,7 +317,9 @@ function SelectService(props: {
                         </Box>
                     </Paper>
                 )}
-                <Stack direction='row-reverse' width='100%'>
+                <Stack direction='row-reverse' sx={{
+                    width: '100%'
+                }}>
                     {props.selectedServiceKind ? (
                         <Button
                             variant='contained'
@@ -324,7 +360,9 @@ function SpecifyService(props: {
     };
 
     return (
-        <Stack direction='column' spacing={3} marginY={3}>
+        <Stack direction='column' spacing={3} sx={{
+            marginY: 3
+        }}>
             <Stack direction='row' spacing={2}>
                 <IconButton onClick={props.back} aria-label='back'>
                     <ArrowBack color='action' />

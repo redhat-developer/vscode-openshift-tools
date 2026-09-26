@@ -425,7 +425,13 @@ export default function addSandboxView(): React.ReactElement {
                             Your sandbox account has been provisioned and is ready to use.
                         </Typography>
                         {( !currentState.usePipelineToken ) ? (
-                            <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
+                            <Typography
+                                variant='caption'
+                                style={{ textAlign:'left', margin: '20px 70px' }}
+                                sx={{
+                                    color: 'inherit',
+                                    display: 'block'
+                                }}>
                                 Next steps to connect with Developer Sandbox:<br></br>
                                 1. Click on <strong>Get token</strong> button. In the browser, login using <strong>DevSandbox</strong> button.<br></br>
                                 2. Click on <strong>Display token</strong> link and copy token to clipboard.<br></br>
@@ -433,7 +439,13 @@ export default function addSandboxView(): React.ReactElement {
                                 4. Once successfully logged in, start creating applications and deploy on cluster.
                             </Typography>
                         ) : (
-                            <Typography variant='caption' color='inherit' display='block' style={{ textAlign:'left', margin: '20px 70px' }}>
+                            <Typography
+                                variant='caption'
+                                style={{ textAlign:'left', margin: '20px 70px' }}
+                                sx={{
+                                    color: 'inherit',
+                                    display: 'block'
+                                }}>
                                 Next steps to connect with Developer Sandbox:<br></br>
                                 1. Press <strong>'Login To DevSandbox'</strong> button. This will login you to DevSandbox using a service account provided token.<br></br>
                                 2. Once successfully logged in, start creating applications and deploy on cluster.
@@ -453,7 +465,7 @@ export default function addSandboxView(): React.ReactElement {
                     </div>
                 )}
             </>
-        )
+        );
     }
 
     return (

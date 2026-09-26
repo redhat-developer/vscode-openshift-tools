@@ -32,7 +32,13 @@ const TerminalContextMenu = (props: {
                 boxShadow: '0px 0px 8px var(--vscode-widget-shadow)',
             }}
         >
-            <Stack direction='column' minWidth='200px' marginX='4px' marginY='3px'>
+            <Stack
+                direction='column'
+                sx={{
+                    minWidth: '200px',
+                    marginX: '4px',
+                    marginY: '3px'
+                }}>
                 <Button
                     variant='text'
                     onClick={props.onCopyHandler}
@@ -48,10 +54,11 @@ const TerminalContextMenu = (props: {
                 >
                     <Stack
                         direction='row'
-                        justifyContent='space-between'
-                        marginX='13px'
                         style={{ width: '100%' }}
-                    >
+                        sx={{
+                            justifyContent: 'space-between',
+                            marginX: '13px'
+                        }}>
                         <Typography variant='body1'>Copy</Typography>
                         <Typography variant='body1'>Ctrl+Shift+C</Typography>
                     </Stack>
@@ -71,10 +78,11 @@ const TerminalContextMenu = (props: {
                 >
                     <Stack
                         direction='row'
-                        justifyContent='space-between'
-                        marginX='13px'
                         style={{ width: '100%' }}
-                    >
+                        sx={{
+                            justifyContent: 'space-between',
+                            marginX: '13px'
+                        }}>
                         <Typography variant='body1'>Select All</Typography>
                         <Typography variant='body1'>Ctrl+Shift+A</Typography>
                     </Stack>
@@ -94,10 +102,11 @@ const TerminalContextMenu = (props: {
                 >
                     <Stack
                         direction='row'
-                        justifyContent='space-between'
-                        marginX='13px'
                         style={{ width: '100%' }}
-                    >
+                        sx={{
+                            justifyContent: 'space-between',
+                            marginX: '13px'
+                        }}>
                         <Typography variant='body1'>Paste</Typography>
                         <Typography variant='body1'>Ctrl+Shift+V</Typography>
                     </Stack>
@@ -117,10 +126,11 @@ const TerminalContextMenu = (props: {
                 >
                     <Stack
                         direction='row'
-                        justifyContent='flex-start'
-                        marginX='13px'
                         style={{ width: '100%' }}
-                    >
+                        sx={{
+                            justifyContent: 'flex-start',
+                            marginX: '13px'
+                        }}>
                         <Typography variant='body1'>Clear</Typography>
                     </Stack>
                 </Button>
@@ -405,12 +415,13 @@ export const TerminalInstance = (props: {
     return (
         <Box
             onContextMenu={handleContextMenu}
-            marginY='8px'
-            marginX='16px'
-            width='100%'
-            height='100%'
-            overflow='scroll'
-        >
+            sx={{
+                marginY: '8px',
+                marginX: '16px',
+                width: '100%',
+                height: '100%',
+                overflow: 'scroll'
+            }}>
             <div
                 style={{
                     zIndex: 1000,

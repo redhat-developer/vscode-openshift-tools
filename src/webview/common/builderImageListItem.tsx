@@ -46,7 +46,9 @@ function BuilderImageListContent(props: BuilderImageListItemProps) {
     // for the width setting:
     // one unit of padding is 8px with the default MUI theme, and we add a margin on both sides
     return (
-        <Stack direction="row" spacing={3} alignItems="center">
+        <Stack direction="row" spacing={3} sx={{
+            alignItems: 'center'
+        }}>
             <Box
                 sx={{
                     display: 'flex',
@@ -67,21 +69,23 @@ function BuilderImageListContent(props: BuilderImageListItemProps) {
             <Stack
                 direction="column"
                 spacing={1}
-                maxWidth={!props.showFullDescription ? '90%' : '50rem'}
-                minWidth={0}
-                sx={{ flexShrink: '10' }}
-            >
-                <Stack direction="row" spacing={2} alignItems="center">
+                sx={{
+                    maxWidth: !props.showFullDescription ? '90%' : '50rem',
+                    minWidth: 0,
+                    flexShrink: '10'
+                }}>
+                <Stack direction="row" spacing={2} sx={{
+                    alignItems: 'center'
+                }}>
                     <Typography
                         id="devfileName"
                         variant="body1"
-                        maxWidth={'30%'}
                         sx={{
+                            maxWidth: '30%',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
-                        }}
-                    >
+                        }}>
                         {props.builderImage.displayName}
                     </Typography>
 

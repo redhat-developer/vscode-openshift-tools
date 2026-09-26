@@ -86,7 +86,9 @@ function DevfileListContent(props: DevfileListItemProps) {
     const description = props.devfile?.metadata?.description ?
             props.devfile.metadata.description : props.devfileInfo?.description;
     return (
-        <Stack direction="row" spacing={3} alignItems="center">
+        <Stack direction="row" spacing={3} sx={{
+            alignItems: 'center'
+        }}>
             <Box
                 sx={{
                     display: 'flex',
@@ -106,32 +108,41 @@ function DevfileListContent(props: DevfileListItemProps) {
             <Stack
                 direction="column"
                 spacing={1}
-                maxWidth={ !props.showFullDescription ? '90%': '50rem'}
-                minWidth={0}
-                sx={{ flexShrink: '10' }}
-            >
-                <Stack direction="row" spacing={2} alignItems="center">
+                sx={{
+                    maxWidth: !props.showFullDescription ? '90%': '50rem',
+                    minWidth: 0,
+                    flexShrink: '10'
+                }}>
+                <Stack direction="row" spacing={2} sx={{
+                    alignItems: 'center'
+                }}>
                     <Typography
                         id="devfileName"
                         variant="body1"
-                        maxWidth={'40%'}
                         sx={{
+                            maxWidth: '40%',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
-                        }}
-                    >
+                        }}>
                         {name}{ version && `, v. ${version}`}
                     </Typography>
 
                     {
                         registryName && (
-                            <Typography variant="body2" fontStyle="italic" maxWidth={'50%'}>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontStyle: 'italic',
+                                    maxWidth: '50%'
+                                }}>
                                 from {registryName}
                             </Typography>
                     )}
 
-                    <Stack direction="row" spacing={1} maxWidth={'30%'}>
+                    <Stack direction="row" spacing={1} sx={{
+                        maxWidth: '30%'
+                    }}>
                         {
                             isDebugSupported &&
                                 <Chip

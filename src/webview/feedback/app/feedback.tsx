@@ -55,7 +55,12 @@ export const FeedbackComponent: React.FC<DefaultProps> = () => {
                     <label style={{ display: 'flex', flexDirection: 'row', gap: '1rem', textAlign: 'center', float: 'right', margin: '1rem' }}>
                         <a href='https://github.com/redhat-developer/vscode-openshift-tools/issues'>
                             <div className='section__header-hint section__footer'>
-                                <Stack direction='row' alignItems='center' gap={1}>
+                                <Stack
+                                    direction='row'
+                                    sx={{
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
                                     <GitHubIcon style={{ fontSize: 25 }} />
                                     <Typography variant='body2' className='footerText'>Contact us on GitHub</Typography>
                                 </Stack>
@@ -63,7 +68,12 @@ export const FeedbackComponent: React.FC<DefaultProps> = () => {
                         </a>
                         <a href='https://marketplace.visualstudio.com/items?itemName=redhat.vscode-openshift-connector&ssr=false#review-details'>
                             <div className='section__header-hint section__footer'>
-                                <Stack direction='row' alignItems='center' gap={1}>
+                                <Stack
+                                    direction='row'
+                                    sx={{
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
                                     <SvgIcon
                                         component={MicrosoftIcon}
                                         style={{ margin: '0', fontSize: '23px' }} inheritViewBox/>

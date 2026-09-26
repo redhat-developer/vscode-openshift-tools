@@ -107,7 +107,9 @@ function HelmChartListContent(props: HelmListItemProps) {
     const icon = sanitizeLogoUrl(props.selectedVersion?.icon);
 
     return (
-        <Stack direction='row' spacing={3} alignItems='center'>
+        <Stack direction='row' spacing={3} sx={{
+            alignItems: 'center'
+        }}>
             <Box
                 sx={{
                     display: 'flex',
@@ -136,11 +138,14 @@ function HelmChartListContent(props: HelmListItemProps) {
             <Stack
                 direction='column'
                 spacing={1}
-                maxWidth={!props.isDetailedPage ? '90%' : '50rem'}
-                minWidth={0}
-                sx={{ flexShrink: '10' }}
-            >
-                <Stack direction='row' spacing={2} alignItems='center'>
+                sx={{
+                    maxWidth: !props.isDetailedPage ? '90%' : '50rem',
+                    minWidth: 0,
+                    flexShrink: '10'
+                }}>
+                <Stack direction='row' spacing={2} sx={{
+                    alignItems: 'center'
+                }}>
                     <Typography
                         id='devfileName'
                         variant='body1'
@@ -204,9 +209,9 @@ function HelmChartListContent(props: HelmListItemProps) {
                                 data: {
                                     actionName: 'helmRepoInBrowser',
                                     properties: {
-                                        // eslint-disable-next-line camelcase
+
                                         url: props.helmChart.repoURL,
-                                        // eslint-disable-next-line camelcase
+
                                         helmChartName: props.helmChart.displayName,
                                     },
                                 },

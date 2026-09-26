@@ -113,7 +113,9 @@ export default function CreateComponent() {
 
         if (!isInitialized) {
             return (
-                <Stack direction="column" spacing={3} alignItems="center">
+                <Stack direction="column" spacing={3} sx={{
+                    alignItems: 'center'
+                }}>
                     <CircularProgress />
                     <Typography variant="body2">
                         Loading Page...

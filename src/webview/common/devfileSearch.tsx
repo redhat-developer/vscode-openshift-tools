@@ -87,33 +87,47 @@ function SearchBar(props: {
     devfilesLength: number;
 }) {
     return (
-        <Stack direction="row" alignItems="center" width="100%" justifyContent="space-between">
+        <Stack
+            direction="row"
+            sx={{
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between'
+            }}>
             <TextField
                 variant="outlined"
                 placeholder='Search'
                 margin='normal'
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start" sx={{ marginTop: '0px !important' }}>
-                            <Search color="textSecondary" fontSize='small' />
-                        </InputAdornment>
-                    ),
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <IconButton onClick={() => props.setSearchText('')}>
-                                <Close color="textSecondary" fontSize='small' />
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                    disableUnderline: true
-                }}
                 value={props.searchText}
                 sx={{ flexGrow: '1', maxWidth: '650px', py: 0, background: 'rgba(127, 127, 127, 8%)' }}
                 onChange={(event) => {
                     props.setSearchText(event.target.value.toLowerCase());
                 }}
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start" sx={{ marginTop: '0px !important' }}>
+                                <Search color="textSecondary" fontSize='small' />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => props.setSearchText('')}>
+                                    <Close color="textSecondary" fontSize='small' />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                        disableUnderline: true
+                    }
+                }}
             />
-            <Stack direction="column" justifyContent="space-between" marginTop={0.5} gap={0.5}>
+            <Stack
+                direction="column"
+                sx={{
+                    justifyContent: 'space-between',
+                    marginTop: 0.5,
+                    gap: 0.5
+                }}>
                 <Pagination
                     count={props.numPages}
                     page={props.currentPage}
@@ -121,7 +135,9 @@ function SearchBar(props: {
                         props.setCurrentPage(value);
                     }}
                 />
-                <Typography align="center" flexGrow="1">
+                <Typography align="center" sx={{
+                    flexGrow: '1'
+                }}>
                     Showing items { props.numPages > 0 ? (props.currentPage - 1) * props.perPageCount + 1 : 0} -{' '}
                     {Math.min(props.currentPage * props.perPageCount, props.devfilesLength)} of{' '}
                     {props.devfilesLength}
@@ -402,10 +418,11 @@ const SelectTemplateProject = React.forwardRef(
                     <Stack direction="column" spacing={2}>
                         <Stack
                             direction="row"
-                            justifyContent="space-between"
-                            alignItems="flex-start"
-                            marginBottom={1}
-                        >
+                            sx={{
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                marginBottom: 1
+                            }}>
                             <DevfileListItem
                                 devfileInfo={props.devfileInfo}
                                 devfile={selectedDevfile}
@@ -416,7 +433,9 @@ const SelectTemplateProject = React.forwardRef(
                             </IconButton>
                         </Stack>
                         <FormControl fullWidth>
-                            <Stack direction="row" justifyContent="space-between">
+                            <Stack direction="row" sx={{
+                                justifyContent: 'space-between'
+                            }}>
                                 <InputLabel id='version-select-label'>Version</InputLabel>
                                 <Select
                                     value={initialSelectedVersion}
@@ -452,12 +471,16 @@ const SelectTemplateProject = React.forwardRef(
                                     })}
                                 </Select>
                             </Stack>
-                            <Stack direction="row" justifyContent="space-between">
+                            <Stack direction="row" sx={{
+                                justifyContent: 'space-between'
+                            }}>
                                 <FormHelperText error={isVersionError}>{versionHelperText}</FormHelperText>
                             </Stack>
                         </FormControl>
                         <FormControl fullWidth>
-                            <Stack direction="row" justifyContent="space-between">
+                            <Stack direction="row" sx={{
+                                justifyContent: 'space-between'
+                            }}>
                                 <InputLabel id="template-select-label">Template Project</InputLabel>
                                 <Select
                                     value={selectedTemplateProject}
@@ -482,9 +505,13 @@ const SelectTemplateProject = React.forwardRef(
                                     })}
                                 </Select>
                             </Stack>
-                            <Stack direction="row" justifyContent="space-between">
+                            <Stack direction="row" sx={{
+                                justifyContent: 'space-between'
+                            }}>
                                 <FormHelperText error={isError}>{helperText}</FormHelperText>
-                                <Stack direction="row" marginTop={1} spacing={2}>
+                                <Stack direction="row" spacing={2} sx={{
+                                    marginTop: 1
+                                }}>
                                     <LinkButton
                                         href={projectUrl}
                                         disabled={!projectUrl}
@@ -518,8 +545,12 @@ const SelectTemplateProject = React.forwardRef(
                                 </Stack>
                             </Stack>
                         </FormControl>
-                        <Box justifyContent='space-between'>
-                            <Box paddingTop={1} style={{ float: 'right' }}>
+                        <Box sx={{
+                            justifyContent: 'space-between'
+                        }}>
+                            <Box style={{ float: 'right' }} sx={{
+                                paddingTop: 1
+                            }}>
                                 <CopyToClipboard
                                     text={selectedDevfile.yaml}
                                     onCopy={() => {
@@ -769,7 +800,9 @@ export function DevfileSearch(props: DevfileSearchProps) {
     if (createComponentErrorMessage) {
         return (
             <>
-                <Stack direction="column" height="100%" spacing={0.5}>
+                <Stack direction="column" spacing={0.5} sx={{
+                    height: '100%'
+                }}>
                     <ErrorPage
                         message={`${createComponentErrorMessage}`}
                     />
@@ -833,23 +866,38 @@ export function DevfileSearch(props: DevfileSearchProps) {
 
     return (
         <>
-            <Stack direction="column" height="100%" spacing={0.5}>
+            <Stack direction="column" spacing={0.5} sx={{
+                height: '100%'
+            }}>
                 {
                     !isSomeDevfileInfoRetrieved ?
                         <LoadScreen title='Retrieving Devfiles...' /> :
-                        <Stack direction="row" spacing={1} width={'100%'}>
-                            <Stack direction="column" maxWidth={'30%'} sx={{
-                                height: 'calc(100vh - 100px)',
-                                overflow: 'scroll'
-                            }} spacing={0}>
-                                <Typography variant="body2" marginBottom={1}>
+                        <Stack direction="row" spacing={1} sx={{
+                            width: '100%'
+                        }}>
+                            <Stack
+                                direction="column"
+                                spacing={0}
+                                sx={{
+                                    maxWidth: '30%',
+                                    height: 'calc(100vh - 100px)',
+                                    overflow: 'scroll'
+                                }}>
+                                <Typography variant="body2" sx={{
+                                    marginBottom: 1
+                                }}>
                                     Filter by
                                 </Typography>
 
                                 {
                                     devfileRegistries.length > 1 && (
                                         <>
-                                            <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    marginTop: 1,
+                                                    marginBottom: 1
+                                                }}>
                                                 Devfile Registries
                                             </Typography>
                                             <RegistriesPicker
@@ -864,10 +912,17 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                 {
                                     devfileCapabilities.length > 0 && (
                                         <Stack direction="column" spacing={0}>
-                                            <Typography variant="body2" marginBottom={1} marginTop={1}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    marginBottom: 1,
+                                                    marginTop: 1
+                                                }}>
                                                 Support
                                             </Typography>
-                                            <Stack direction="column" useFlexGap={true} width="100%" spacing={1}>
+                                            <Stack direction="column" useFlexGap={true} spacing={1} sx={{
+                                                width: '100%'
+                                            }}>
                                                 {
                                                     devfileCapabilities.length > 0 && (
                                                         <>
@@ -890,15 +945,27 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                                 height: !showMore ? '55vh' : 'calc(300vh - 150px)',
                                                 overflow: !showMore ? 'hidden' : 'scroll'
                                             }} spacing={0}>
-                                                <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        marginTop: 1,
+                                                        marginBottom: 1
+                                                    }}>
                                                     Tags
                                                 </Typography>
                                                 <TagsPicker
                                                     tagEnabled={tagEnabled}
                                                     setTagEnabled={setTagEnabled} />
                                             </Stack>
-                                            <Stack direction='row' gap={2}>
-                                                <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                            <Stack direction='row' sx={{
+                                                gap: 2
+                                            }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        marginTop: 1,
+                                                        marginBottom: 1
+                                                    }}>
                                                     <Link
                                                         component="button"
                                                         variant="body2"
@@ -917,7 +984,12 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                                 </Typography>
                                                 {
                                                     activeTags.length > 0 &&
-                                                    <Typography variant="body2" marginTop={1} marginBottom={1}>
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            marginTop: 1,
+                                                            marginBottom: 1
+                                                        }}>
                                                         <Link
                                                             component="button"
                                                             color='error'
@@ -938,7 +1010,13 @@ export function DevfileSearch(props: DevfileSearchProps) {
                             </Stack>
                             <Divider orientation="vertical" sx={{ height: 'calc(100vh - 80px)' }} />
 
-                            <Stack direction="column" sx={{ flexGrow: '1' }} spacing={1} width={'70%'}>
+                            <Stack
+                                direction="column"
+                                spacing={1}
+                                sx={{
+                                    width: '70%',
+                                    flexGrow: '1'
+                                }}>
                                 <SearchBar
                                     searchText={searchText}
                                     setSearchText={setSearchText}
@@ -956,10 +1034,12 @@ export function DevfileSearch(props: DevfileSearchProps) {
                                 <Stack
                                     id="devfileList"
                                     direction="column"
-                                    sx={{ height: 'calc(100vh - 140px)', overflow: 'scroll' }}
                                     divider={<Divider />}
-                                    width={'100%'}
-                                >
+                                    sx={{
+                                        width: '100%',
+                                        height: 'calc(100vh - 140px)',
+                                        overflow: 'scroll'
+                                    }}>
                                     {devfiles
                                         .slice(
                                             (currentPage - 1) * ITEMS_PER_PAGE,
@@ -981,7 +1061,12 @@ export function DevfileSearch(props: DevfileSearchProps) {
                             </Stack>
                         </Stack>
                 }
-                <Stack direction="row-reverse" justifyContent="space-between" alignItems="center">
+                <Stack
+                    direction="row-reverse"
+                    sx={{
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
                     <DevfileExplanation />
                     {props.goBack && (
                         <Button

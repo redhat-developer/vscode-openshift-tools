@@ -202,10 +202,13 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     color: 'var(--vscode-settings-textInputForeground)'
                 }}>
                     <Box
-                        display='flex'
-                        flexDirection={'column'}
-                    >
-                        <Stack direction='column' spacing={4} margin={5}>
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                        <Stack direction='column' spacing={4} sx={{
+                            margin: 5
+                        }}>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
                                 <Button variant='contained'
                                     disabled={true}
@@ -277,14 +280,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
 
                                         return filtered;
                                     }}
-                                    PaperComponent={({ children }) => (
-                                        <Paper sx={{
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                            color: 'var(--vscode-settings-textInputForeground)'
-                                        }}>
-                                            {children}
-                                        </Paper>
-                                    )}
                                     id='image-dropdown'
                                     options={images}
                                     renderOption={(props, option) => <li {...props}>{option}</li>}
@@ -295,6 +290,16 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                         <TextField {...params}
                                             placeholder='Provide full image name (podman, docker, quay)' error={imageData.error} helperText={imageData.helpText} />
                                     )}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper sx={{
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                color: 'var(--vscode-settings-textInputForeground)'
+                                            }}>
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
@@ -309,17 +314,14 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     id='language-dropdown'
                                     options={languages}
                                     onChange={(e, v) => this.handleDropDownChange(e, v, true)}
-                                    PaperComponent={({ children }) => (
-                                        <Paper sx={{
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                            color: 'var(--vscode-settings-textInputForeground)'
-                                        }}>
-                                            {children}
-                                        </Paper>
-                                    )}
                                     renderOption={(params, option) =>
                                         <li {...params}>
-                                            <Stack direction='row' alignItems='center' gap={1}>
+                                            <Stack
+                                                direction='row'
+                                                sx={{
+                                                    alignItems: 'center',
+                                                    gap: 1
+                                                }}>
                                                 <SvgIcon component={this.getIcon(option)} inheritViewBox />
                                                 <Typography variant='body1'>{option}</Typography>
                                             </Stack>
@@ -330,6 +332,16 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     renderInput={(params) => (
                                         <TextField {...params} placeholder='Select the Language Runtime' />
                                     )}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper sx={{
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                color: 'var(--vscode-settings-textInputForeground)'
+                                            }}>
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
@@ -345,20 +357,22 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     options={templates}
                                     disabled={language?.length === 0 || (templates && templates.length === 0)}
                                     onChange={(e, v) => this.handleDropDownChange(e, v)}
-                                    PaperComponent={({ children }) => (
-                                        <Paper sx={{
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                            color: 'var(--vscode-settings-textInputForeground)'
-                                        }}>
-                                            {children}
-                                        </Paper>
-                                    )}
                                     renderOption={(props, option) => <li {...props}>{option}</li>}
                                     fullWidth
                                     disableClearable
                                     renderInput={(params) => (
                                         <TextField {...params} placeholder='Select the Function template' />
                                     )}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper sx={{
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                color: 'var(--vscode-settings-textInputForeground)'
+                                            }}>
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.2}>
@@ -373,18 +387,15 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     id='folder-dropdown'
                                     options={folders}
                                     onChange={(e, v) => this.handleWsFolderDropDownChange(e, v)}
-                                    PaperComponent={({ children }) => (
-                                        <Paper sx={{
-                                            backgroundColor: 'var(--vscode-settings-textInputBackground)',
-                                            color: 'var(--vscode-settings-textInputForeground)'
-                                        }}>
-                                            {children}
-                                        </Paper>
-                                    )}
                                     getOptionLabel={(option: string | Uri) => typeof option === 'string' ? option : option.fsPath}
                                     renderOption={(props, option) =>
                                         <li {...props}>
-                                            <Stack direction='row' alignItems='center' gap={1}>
+                                            <Stack
+                                                direction='row'
+                                                sx={{
+                                                    alignItems: 'center',
+                                                    gap: 1
+                                                }}>
                                                 {
                                                     typeof option === 'string' ?
                                                         <>
@@ -404,6 +415,16 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                                     renderInput={(params) => (
                                         <TextField {...params} placeholder='Select the folder to initialise the function at that path' />
                                     )}
+                                    slots={{
+                                        paper: ({ children }) => (
+                                            <Paper sx={{
+                                                backgroundColor: 'var(--vscode-settings-textInputBackground)',
+                                                color: 'var(--vscode-settings-textInputForeground)'
+                                            }}>
+                                                {children}
+                                            </Paper>
+                                        )
+                                    }}
                                 />
                             </Stack>
                             <Stack direction='column' spacing={0.2}>
@@ -419,6 +440,6 @@ export class CreateFunction extends React.Component<CreateFunctionPageProps, {
                     </Box>
                 </Container>
             </div>
-        )
+        );
     }
 }

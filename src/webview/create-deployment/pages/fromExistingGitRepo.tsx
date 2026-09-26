@@ -160,7 +160,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                     <div style={{ position: 'relative' }}>
                         <Typography variant="h5">Existing Remote Git Repository</Typography>
                     </div>
-                    <Stack direction="column" spacing={2} marginTop={4}>
+                    <Stack direction="column" spacing={2} sx={{
+                        marginTop: 4
+                    }}>
                         <TextField
                             fullWidth
                             variant="outlined"
@@ -205,7 +207,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                             <>
                                 {!cloneFailed ? (
                                     <>
-                                        <Stack direction="row" spacing={2} marginTop={2}>
+                                        <Stack direction="row" spacing={2} sx={{
+                                            marginTop: 2
+                                        }}>
                                             <Button
                                                 variant="contained"
                                                 onClick={handleNext}
@@ -222,7 +226,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                             <Stack
                                                 direction="column"
                                                 spacing={2}
-                                                alignItems="center"
+                                                sx={{
+                                                    alignItems: 'center'
+                                                }}
                                             >
                                                 <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                                                     <CircularProgress variant='determinate' value={recommendedBuilderImage.completionValue} />
@@ -241,7 +247,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                                         <Typography
                                                             variant='caption'
                                                             component='div'
-                                                            color='text.secondary'
+                                                            sx={{
+                                                                color: 'text.secondary'
+                                                            }}
                                                         >{`${Math.round(recommendedBuilderImage.completionValue)}%`}</Typography>
                                                     </Box>
                                                 </Box>
@@ -253,17 +261,20 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         )}
                                     </>
                                 ) : (
-                                    <Stack direction="column" spacing={2} marginTop={2}>
+                                    <Stack direction="column" spacing={2} sx={{
+                                        marginTop: 2
+                                    }}>
                                         <Alert severity="error">
                                             Failed to clone project. Please try again or manually
                                             select a Builder Image.
                                         </Alert>
                                         <Stack
                                             direction="row"
-                                            justifyContent="flex-end"
-                                            marginTop={2}
                                             spacing={1}
-                                        >
+                                            sx={{
+                                                justifyContent: 'flex-end',
+                                                marginTop: 2
+                                            }}>
                                             <Button
                                                 variant="text"
                                                 onClick={() => {
@@ -294,10 +305,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <NoSuitableWarning isComponent={false} />
                                 <Stack
                                     direction="row"
-                                    justifyContent="flex-end"
-                                    marginTop={2}
                                     spacing={1}
-                                >
+                                    sx={{
+                                        justifyContent: 'flex-end',
+                                        marginTop: 2
+                                    }}>
                                     <Button
                                         variant="text"
                                         onClick={() => {
@@ -341,9 +353,10 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                 <Stack direction="column">
                                     <Stack
                                         direction="row"
-                                        justifyContent="space-between"
-                                        marginTop={1}
-                                    >
+                                        sx={{
+                                            justifyContent: 'space-between',
+                                            marginTop: 1
+                                        }}>
                                         <Typography variant="h6">
                                             {selectedBuilderImage
                                                 ? 'Selected BuilderImage'
@@ -354,7 +367,9 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                         )}
                                     </Stack>
                                     {recommendedBuilderImage.isBuilderImageExistsInRepo ? (
-                                        <Box margin={2}>
+                                        <Box sx={{
+                                            margin: 2
+                                        }}>
                                             <Alert severity="info">
                                                 The BuilderImage that exists in the repo will be used
                                             </Alert>
@@ -370,10 +385,11 @@ export function FromExistingGitRepo({ setCurrentView }) {
                                     )}
                                     <Stack
                                         direction="row"
-                                        justifyContent="flex-end"
-                                        marginTop={2}
                                         spacing={1}
-                                    >
+                                        sx={{
+                                            justifyContent: 'flex-end',
+                                            marginTop: 2
+                                        }}>
                                         <Button
                                             variant="text"
                                             onClick={() => {
