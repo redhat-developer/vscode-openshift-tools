@@ -48,15 +48,17 @@
         {
             "label": "watch",
             "dependsOn": [
-                "compile",
+                "kill-watchers",
+                "clean",
+                "build",
                 "watch-all"
             ],
             "dependsOrder": "sequence"
         },
         {
-            "label": "compile",
+            "label": "build",
             "type": "npm",
-            "script": "compile",
+            "script": "build",
             "problemMatcher": "$tsc",
             "presentation": {
                 "reveal": "silent",
@@ -66,6 +68,15 @@
             "label": "setup-tests",
             "type": "shell",
             "command": "${workspaceFolder}/node_modules/.bin/extest setup-tests -e ${workspaceFolder}/test-resources/extensions -c max -i && npm run test:prepare",
+            "problemMatcher": "$tsc",
+            "presentation": {
+                "reveal": "silent",
+            },
+        },
+        {
+            "label": "clean",
+            "type": "npm",
+            "script": "clean",
             "problemMatcher": "$tsc",
             "presentation": {
                 "reveal": "silent",
@@ -86,7 +97,7 @@
             "windows": {
                 "command": ["\"${workspaceFolder}/node_modules/.bin/shx rm -rf ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/shx mv ${workspaceFolder}/out/src ${workspaceFolder}/out/src-orig && ${workspaceFolder}/node_modules/.bin/istanbul instrument --complete-copy --embed-source --output out/src out/src-orig\""],
             },
-            "dependsOn": "compile"
+            "dependsOn": "build"
         }
     ]
 }

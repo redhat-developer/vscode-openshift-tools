@@ -35,7 +35,7 @@
                 "${workspaceFolder}/out/**/*.js"
             ],
             "sourceMaps": true,
-            "preLaunchTask": "compile",
+            "preLaunchTask": "build",
             "env": {
                 "OST_DISABLE_COVERAGE": "yes",
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true"
@@ -73,7 +73,7 @@
                 "${workspaceFolder}/out/**/*.js"
             ],
             "sourceMaps": true,
-            "preLaunchTask": "compile",
+            "preLaunchTask": "build",
             "env": {
                 "VSCODE_REDHAT_TELEMETRY_DEBUG":"true",
                 "IS_OPENSHIFT": "true",
