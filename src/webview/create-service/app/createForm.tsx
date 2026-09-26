@@ -26,7 +26,6 @@ import {
 } from '@mui/material';
 import Form from '@rjsf/mui';
 import type {
-    ArrayFieldTemplateItemType,
     ArrayFieldTemplateProps,
     FormContextType,
     ObjectFieldTemplateProps,
@@ -34,7 +33,6 @@ import type {
     StrictRJSFSchema,
     TitleFieldProps
 } from '@rjsf/utils';
-import { getTemplate, getUiOptions } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import DOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
@@ -130,13 +128,6 @@ function ArrayFieldTemplate<
         title,
     } = props;
 
-    const uiOptions = getUiOptions<T, S, F>(uiSchema);
-    const ArrayFieldItemTemplate = getTemplate<'ArrayFieldItemTemplate', T, S, F>(
-        'ArrayFieldItemTemplate',
-        registry,
-        uiOptions,
-    );
-
     const {
         ButtonTemplates: { AddButton },
     } = registry.templates;
@@ -152,13 +143,10 @@ function ArrayFieldTemplate<
                         {schema.description}
                     </Typography>
                 </Stack>
-                {items &&
-                    items.map(({ key, ...itemProps }: ArrayFieldTemplateItemType<T, S, F>) => (
-                        <ArrayFieldItemTemplate key={key} {...itemProps} />
-                    ))}
+                {items}
                 {canAdd && (
                     <Grid container justifyContent='flex-end'>
-                        <Grid item={true}>
+                        <Grid>
                             <Box mt={2}>
                                 <AddButton
                                     className='array-item-add'

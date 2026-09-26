@@ -166,8 +166,8 @@ export function AddServiceBindingForm() {
                                     Can only contain letters, numbers, and dashes (<code>-</code>).
                                 </FormHelperText>
                             </FormControl>
-                            <Grid container>
-                                <Grid item xs="auto">
+                                <Grid container>
+                                    <Grid size="auto">
                                     {/* Instead of disabling the button when the form entries are invalid,
                                     completely remove it, and instead show an alert explaining what needs to be fixed */}
                                     {!isBindingNameValid(bindingName) || selectedService === '' ? (
@@ -194,7 +194,7 @@ export function AddServiceBindingForm() {
                                         </Button>
                                     )}
                                 </Grid>
-                                <Grid item xs></Grid>
+                                <Grid size="grow"></Grid>
                             </Grid>
                         </Stack>
                     </form>
