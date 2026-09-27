@@ -704,35 +704,80 @@ export class OpenShiftTerminalManager implements WebviewViewProvider {
         // create the object that manages the headless terminal and the pty.
         // the process is run as a child process under node.
         // the webview is synchronized to the pty and headless terminal using message passing
-        this.openShiftTerminals.set(
+        const term = new OpenShiftTerminal(
             newTermUUID,
-            new OpenShiftTerminal(
-                newTermUUID,
-                (message: Message) => {
-                    return this.sendMessage(message);
-                },
-                toolLocation,
-                commandText.args,
-                {
-                    cwd,
-                    env,
-                    name,
-                },
-                isKnative,
-                callbacks
-            )
+            (message: Message) => {
+                return this.sendMessage(message);
+            },
+            toolLocation,
+            commandText.args,
+            {
+                cwd,
+                env,
+                name,
+            },
+            isKnative,
+            callbacks
         );
 
+        return this.registerTerminal(newTermUUID, term, name);
+    }
+
+    /**
+     * Creates an interactive "virtual" terminal tab that isn't backed by a real spawned process
+     * (no `node-pty`, no executable resolution via `ToolsConfig`) — the caller pushes output over
+     * time via the returned API's `sendText()`, and `callbacks.onText` fires for terminal input
+     * exactly like a real spawned terminal's callbacks would (including a user pressing Ctrl-C,
+     * delivered as the raw control byte rather than the printable `^C` a real pty's line
+     * discipline would echo). Used by `devTerminalBridge.ts` to stream dev-session output without
+     * shelling out to a real CLI process.
+     */
+    public async createVirtualTerminal(
+        name: string,
+        cwd: string = process.cwd(),
+        env = process.env,
+        callbacks?: {
+            onSpawn?: () => void;
+            onExit?: (exitCode: number) => void;
+            onText?: (text: string) => void;
+        },
+    ): Promise<OpenShiftTerminalApi> {
+        await commands.executeCommand('openShiftTerminalView.focus');
+        await this.webviewResolved;
+
+        const uuid = randomUUID();
+        const term = new OpenShiftTerminal(
+            uuid,
+            (message: Message) => this.sendMessage(message),
+            '',   // no executable
+            [],
+            { cwd, env, name },
+            false,
+            callbacks,
+            false // do NOT spawn a real pty
+        );
+
+        return this.registerTerminal(uuid, term, name);
+    }
+
+    private async registerTerminal(uuid: string, term: OpenShiftTerminal, name: string): Promise<OpenShiftTerminalApi> {
+        this.openShiftTerminals.set(uuid, term);
+
         // issue request to create terminal in the webview
-        await this.sendMessage({ kind: 'createTerminal', data: { uuid: newTermUUID, name } });
+        await this.sendMessage({ kind: 'createTerminal', data: { uuid, name } });
 
         return {
-            sendText: (text: string) => this.openShiftTerminals.get(newTermUUID).write(text),
+            sendText: (text: string) => this.openShiftTerminals.get(uuid).write(text),
             focusTerminal: () =>
-                void this.sendMessage({ kind: 'switchToTerminal', data: { uuid: newTermUUID } }),
-            kill: () => this.openShiftTerminals.get(newTermUUID).write('\u0003'),
-            forceKill: () => this.openShiftTerminals.get(newTermUUID).forceKill(),
-            id: newTermUUID
+                void this.sendMessage({ kind: 'switchToTerminal', data: { uuid } }),
+            kill: () => this.openShiftTerminals.get(uuid).write('\u0003'),
+            forceKill: () => {
+                const term = this.openShiftTerminals.get(uuid);
+                term.forceKill();
+                // Send termExit message to actually close the terminal tab in the UI
+                void this.sendMessage({ kind: 'termExit', data: { uuid } });
+            },
+            id: uuid
         };
     }
 

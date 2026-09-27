@@ -60,6 +60,7 @@ export interface ComponentItem {
     kubernetes?: Kubernetes;
     openshift?: Kubernetes;  // OpenShift uses same structure as Kubernetes
     image?: Image;
+    volume?: Volume;
 };
 
 export interface Data {
@@ -145,6 +146,15 @@ export interface Container {
     memoryLimit: string;
     mountSources: boolean;
     volumeMounts: VolumeMount[];
+    sourceMapping?: string;
+    env?: EnvVar[];
+    command?: string[];
+    args?: string[];
+}
+
+export interface EnvVar {
+    name: string;
+    value: string;
 }
 
 export interface Endpoint {
@@ -183,6 +193,7 @@ export interface Exec {
     workingDir: string;
     group?: Group;
     hotReloadCapable?: boolean;
+    env?: Array<{ name: string; value: string }>;
 }
 
 export interface Apply {
@@ -227,4 +238,21 @@ export interface DeployState {
 export interface DeployStateFile {
     version: number;
     deployments: Record<string, DeployState>;
+}
+
+export interface DevStateForwardedPort {
+    containerName: string;
+    portName?: string;
+    isDebug?: boolean;
+    localAddress: string;
+    localPort: number;
+    containerPort: number;
+    exposure?: string;
+}
+
+export interface DevState {
+    pid: number;
+    platform: 'cluster' | 'podman' | 'docker' | string;
+    forwardedPorts?: DevStateForwardedPort[];
+    apiServerPort?: number;
 }
