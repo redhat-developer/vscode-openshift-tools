@@ -12,25 +12,7 @@ updates:
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: "@types/node"
-    versions: [">=21.0.0"]
-  - dependency-name: "@mui/icons-material"
-    versions: [">=7.0.0-0"]
-  - dependency-name: "@mui/lab"
-    versions: [">=6.999"]
-  - dependency-name: "@mui/material"
-    versions: [">=7.0.0-0"]
-  - dependency-name: "@mui/styles"
-    versions: [">=7.0.0-0"]
-  - dependency-name: "@mui/x-tree-view"
-    versions: [">=8.0.0-0"]
-  - dependency-name: "@rjsf/core"
-    versions: [">=6.0.0-0"]
-  - dependency-name: "@rjsf/mui"
-    versions: [">=6.0.0-0"]
-  - dependency-name: "@rjsf/utils"
-    versions: [">=6.0.0-0"]
-  - dependency-name: "@rjsf/validator-ajv8"
-    versions: [">=6.0.0-0"]
+    versions: [">=23.0.0"]
   groups:
     typescript-eslint:
       patterns:
