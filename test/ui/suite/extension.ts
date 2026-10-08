@@ -6,6 +6,7 @@
 import { expect } from 'chai';
 import { ActivityBar, ExtensionsViewItem, SideBarView } from 'vscode-extension-tester';
 import * as pjson from '../../../package.json';
+import { waitForItem } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 
 export function checkExtension() {
@@ -63,8 +64,8 @@ export function checkExtension() {
         });
 
         async function getItem(): Promise<ExtensionsViewItem> {
-            const section = await new SideBarView().getContent().getSection(VIEWS.installed);
-            return await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+            const getSection = async () => new SideBarView().getContent().getSection(VIEWS.installed);
+            return await waitForItem(getSection, `@installed ${pjson.displayName}`) as ExtensionsViewItem;
         }
     });
 }
