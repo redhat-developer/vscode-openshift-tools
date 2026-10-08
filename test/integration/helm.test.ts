@@ -36,7 +36,7 @@ suite('helm integration', function () {
 
     suiteTeardown(async function () {
         try {
-            await Helm.unInstallHelmChart(CHART_NAME);
+            await Helm.unInstallHelmChart(CHART_NAME, HELM_NAMESPACE);
         } catch {
             // do nothing
         }
@@ -55,15 +55,15 @@ suite('helm integration', function () {
     });
 
     test('installs a chart as a release', async function () {
-        await Helm.installHelmChart(RELEASE_NAME, REPO_NAME, CHART_NAME, CHART_VERSION, undefined);
-        const releases = await Helm.getHelmReleases();
+        await Helm.installHelmChart(RELEASE_NAME, REPO_NAME, CHART_NAME, CHART_VERSION, undefined, HELM_NAMESPACE);
+        const releases = await Helm.getHelmReleases(HELM_NAMESPACE);
         const sampleChartRelease = releases.find((release) => release.name === RELEASE_NAME);
         expect(sampleChartRelease).to.exist;
     });
 
     test('uninstalls a release', async function () {
-        await Helm.unInstallHelmChart(RELEASE_NAME);
-        const releases = await Helm.getHelmReleases();
+        await Helm.unInstallHelmChart(RELEASE_NAME, HELM_NAMESPACE);
+        const releases = await Helm.getHelmReleases(HELM_NAMESPACE);
         const sampleChartRelease = releases.find((release) => release.name === RELEASE_NAME);
         expect(sampleChartRelease).to.not.exist;
     });

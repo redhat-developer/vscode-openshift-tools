@@ -715,8 +715,8 @@ export class Oc {
      */
     public async getActiveProject(executionContext?: ExecutionContext): Promise<string> {
         return this._listProjects(executionContext)
-            .then((projects) => {
-                const fixedProjects = this.fixActiveProject(projects, executionContext);
+            .then(async (projects) => {
+                const fixedProjects = await this.fixActiveProject(projects, executionContext);
                 const activeProject = fixedProjects.find((project) => project.active);
                 return activeProject ? activeProject.name : null;
             });
@@ -736,7 +736,7 @@ export class Oc {
      *
      * @returns The array of Projects with at least one project marked as an active
      */
-    public fixActiveProject(projects: Project[], executionContext?: ExecutionContext): Project[] {
+    public async fixActiveProject(projects: Project[], executionContext?: ExecutionContext): Promise<Project[]> {
         const k8sConfigInfo = new KubeConfigInfo();
         const k8sConfig = k8sConfigInfo.getEffectiveKubeConfig();
         const currentContext = k8sConfigInfo.findContext(k8sConfig.currentContext);
@@ -765,7 +765,7 @@ export class Oc {
                     activeProject = fixedProjects.find((project) => project.name.includes(projectName));
                     if (activeProject) {
                         activeProject.active = true;
-                        void Oc.Instance.setProject(activeProject.name, executionContext);
+                        await Oc.Instance.setProject(activeProject.name, executionContext);
                         return fixedProjects;
                     }
                 }
@@ -782,7 +782,6 @@ export class Oc {
                     },
                     ...projects
                 ]
-                void Oc.Instance.setProject(currentContext.namespace, executionContext);
                 return fixedProjects;
             }
         }
@@ -797,7 +796,7 @@ export class Oc {
         // Set the first available project as active
         if (fixedProjects.length > 0) {
             fixedProjects[0].active = true;
-            void Oc.Instance.setProject(fixedProjects[0].name, executionContext);
+            await Oc.Instance.setProject(fixedProjects[0].name, executionContext);
         }
 
         return fixedProjects;

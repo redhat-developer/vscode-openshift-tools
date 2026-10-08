@@ -25,8 +25,8 @@ export type HelmRelease = {
  *
  * @returns a list of all Helm releases in the current namespace on the current cluster
  */
-export async function getHelmReleases(): Promise<HelmRelease[]> {
-    const res = await CliChannel.getInstance().executeTool(HelmCommands.listHelmReleases(), undefined, false);
+export async function getHelmReleases(namespace?: string): Promise<HelmRelease[]> {
+    const res = await CliChannel.getInstance().executeTool(HelmCommands.listHelmReleases(namespace), undefined, false);
     try {
         return JSON.parse(res.stdout) as HelmRelease[];
     } catch {
@@ -81,11 +81,12 @@ export async function installHelmChart(
     repoName: string,
     chartName: string,
     version: string,
-    yamlFilePath: string
+    yamlFilePath: string,
+    namespace?: string
 ): Promise<CliExitData> {
     await syncHelmRepo(repoName);
     return await CliChannel.getInstance().executeTool(
-        HelmCommands.installHelmChart(name, repoName, chartName, version, yamlFilePath)
+        HelmCommands.installHelmChart(name, repoName, chartName, version, yamlFilePath, namespace)
     );
 }
 
@@ -95,8 +96,8 @@ export async function installHelmChart(
  * @param name the name of the Helm release to uninstall
  * @returns the CLI output data from running the necessary command
  */
-export async function unInstallHelmChart(name: string): Promise<CliExitData> {
-    return await CliChannel.getInstance().executeTool(HelmCommands.unInstallHelmChart(name), undefined, false);
+export async function unInstallHelmChart(name: string, namespace?: string): Promise<CliExitData> {
+    return await CliChannel.getInstance().executeTool(HelmCommands.unInstallHelmChart(name, namespace), undefined, false);
 }
 
 /**
