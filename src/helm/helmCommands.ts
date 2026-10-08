@@ -24,21 +24,32 @@ export function getRepos(): CommandText {
     return commandText;
 }
 
-export function installHelmChart(name: string, repoName: string, chartName: string, version: string, yamlFilePath: string): CommandText {
+export function installHelmChart(name: string, repoName: string, chartName: string, version: string, yamlFilePath: string, namespace?: string): CommandText {
     const commandText = new CommandText('helm', `install ${name} ${repoName}/${chartName}`)
     commandText.addOption(new CommandOption('--version', version));
+    if (namespace) {
+        commandText.addOption(new CommandOption('--namespace', namespace));
+    }
     if(yamlFilePath && !validator.isEmpty(yamlFilePath)) {
         commandText.addOption(new CommandOption('-f', yamlFilePath));
     }
     return commandText;
 }
 
-export function unInstallHelmChart(name: string): CommandText {
-    return new CommandText('helm', `uninstall ${name}`);
+export function unInstallHelmChart(name: string, namespace?: string): CommandText {
+    const commandText = new CommandText('helm', `uninstall ${name}`);
+    if (namespace) {
+        commandText.addOption(new CommandOption('--namespace', namespace));
+    }
+    return commandText;
 }
 
-export function listHelmReleases(): CommandText {
-    return new CommandText('helm', 'list', [new CommandOption('-o', 'json')]);
+export function listHelmReleases(namespace?: string): CommandText {
+    const commandText = new CommandText('helm', 'list', [new CommandOption('-o', 'json')]);
+    if (namespace) {
+        commandText.addOption(new CommandOption('--namespace', namespace));
+    }
+    return commandText;
 }
 
 export function getYAMLValues(repoName: string, chartName: string): CommandText {
