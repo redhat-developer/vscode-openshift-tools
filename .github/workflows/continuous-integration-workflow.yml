@@ -149,6 +149,8 @@ jobs:
           path: |
             /tmp/test-resources/settings/logs/**/*.log
             /tmp/test-resources/screenshots/**/*.png
+            .vscode-test/user-data/logs/**/*.log
+          include-hidden-files: true
           retention-days: 2
 
       # Upload coverage to codecov.io

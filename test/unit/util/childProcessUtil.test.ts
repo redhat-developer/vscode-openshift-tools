@@ -84,7 +84,7 @@ suite('ChildProcessUtil', function() {
         sinon.assert.calledOnce(spawnStub);
         sinon.assert.calledWith(spawnStub, command, sinon.match({ shell: true }));
 
-        expect(result.error).to.be.instanceOf(Error).and.have.property('message', 'Exited with code 1');
+        expect(result.error).to.be.instanceOf(Error).and.have.property('message', 'Exited with code 1: Error output');
         expect(result.stdout).to.equal(stdout);
         expect(result.stderr).to.equal(stderr);
         expect(result.cwd).to.be.undefined;
