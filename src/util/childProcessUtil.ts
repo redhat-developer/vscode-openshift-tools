@@ -130,8 +130,9 @@ export class ChildProcessUtil {
                 this.odoChannel.print(cmd);
                 this.odoChannel.print(stdout);
                 this.odoChannel.print(stderr);
-                const error = code !== 0 ? new Error(`Exited with code ${code}`) : undefined;
-                resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts.cwd?.toString() });
+                const stderrText = stderr.trim();
+                const error = code !== 0 ? new Error(`Exited with code ${code}${stderrText ? `: ${stderrText}` : ''}`) : undefined;
+                resolve({ error, stdout: stdout.trim(), stderr: stderrText, cwd: opts.cwd?.toString() });
             });
 
             if (childProcess && outText) {
