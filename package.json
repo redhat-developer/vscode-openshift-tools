@@ -205,6 +205,7 @@
 	},
 	"overrides": {
 		"brace-expansion": "^5.0.12",
+		"braces": "npm:@franciscosolis/braces@^3.1.1",
 		"cookie": "^2.0.1",
 		"cross-spawn": "^7.0.6",
 		"diff": "^9.0.0",
