@@ -139,7 +139,7 @@
 		"clipboardy": "^5.3.2",
 		"codemirror": "^6.0.2",
 		"dockerode": "^5.0.1",
-		"dompurify": "^3.4.16",
+		"dompurify": "^3.4.17",
 		"dpdm": "^4.3.0",
 		"esbuild": "^0.28.2",
 		"esbuild-node-externals": "^2.0.0",
