@@ -6,6 +6,9 @@
 import * as chai from 'chai';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as os from 'os';
 import { DevfileResolver } from '../../../src/devfile/devfileResolver';
 import { DevfileUriResolver } from '../../../src/devfile/devfileUriResolver';
 
@@ -312,6 +315,52 @@ suite('devfile/devfileResolver.ts - Resource Processing', () => {
             // URIs should remain (not inlined)
             expect(result.components[0].kubernetes.uri).to.equal('kubernetes/deploy.yaml');
             expect(result.components[0].kubernetes.inlined).to.be.undefined;
+        });
+    });
+
+    suite('resolveDevfilePath - Path Resolution', () => {
+        test('returns undefined when file path does not exist', async () => {
+            const result = await DevfileResolver.resolveDevfilePath('/nonexistent/path/devfile.yaml');
+            expect(result).to.be.undefined;
+        });
+
+        test('returns undefined when directory path does not exist', async () => {
+            const result = await DevfileResolver.resolveDevfilePath('/nonexistent/directory');
+            expect(result).to.be.undefined;
+        });
+
+        test('returns undefined when directory exists but has no devfile', async () => {
+            const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'empty-devfile-'));
+            try {
+                const result = await DevfileResolver.resolveDevfilePath(tmpDir);
+                expect(result).to.be.undefined;
+            } finally {
+                await fs.rm(tmpDir, { recursive: true, force: true });
+            }
+        });
+
+        test('returns file path when valid devfile.yaml exists', async () => {
+            const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'valid-devfile-'));
+            const devfilePath = path.join(tmpDir, 'devfile.yaml');
+            try {
+                await fs.writeFile(devfilePath, 'schemaVersion: 2.2.0\n', 'utf-8');
+                const result = await DevfileResolver.resolveDevfilePath(devfilePath);
+                expect(result).to.equal(devfilePath);
+            } finally {
+                await fs.rm(tmpDir, { recursive: true, force: true });
+            }
+        });
+
+        test('returns devfile.yaml path when directory contains it', async () => {
+            const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dir-with-devfile-'));
+            const devfilePath = path.join(tmpDir, 'devfile.yaml');
+            try {
+                await fs.writeFile(devfilePath, 'schemaVersion: 2.2.0\n', 'utf-8');
+                const result = await DevfileResolver.resolveDevfilePath(tmpDir);
+                expect(result).to.equal(devfilePath);
+            } finally {
+                await fs.rm(tmpDir, { recursive: true, force: true });
+            }
         });
     });
 });

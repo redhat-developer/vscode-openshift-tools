@@ -240,4 +240,35 @@ suite('devfile/describe.ts', function () {
             expect(result.managedBy).to.equal('Unknown');
         });
     });
+
+    test('throws error when devfile path does not exist', async function () {
+        const nonExistentPath = '/nonexistent/path/to/devfile.yaml';
+
+        try {
+            await getComponentDescription(nonExistentPath, {
+                namespace: TEST_NAMESPACE,
+                componentName: COMPONENT_NAME
+            });
+            expect.fail('Expected getComponentDescription to throw');
+        } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+            expect(error.message).to.equal(`No devfile found at: ${nonExistentPath}`);
+        }
+    });
+
+    test('throws error when directory exists but has no devfile', async function () {
+        const emptyDir = await fs.mkdtemp(path.join(os.tmpdir(), 'empty-dir-'));
+        try {
+            await getComponentDescription(emptyDir, {
+                namespace: TEST_NAMESPACE,
+                componentName: COMPONENT_NAME
+            });
+            expect.fail('Expected getComponentDescription to throw');
+        } catch (error) {
+            expect(error).to.be.instanceOf(Error);
+            expect(error.message).to.equal(`No devfile found at: ${emptyDir}`);
+        } finally {
+            await fs.rm(emptyDir, { recursive: true, force: true });
+        }
+    });
 });
