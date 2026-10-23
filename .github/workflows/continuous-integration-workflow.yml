@@ -125,6 +125,25 @@ jobs:
           done
           echo CLUSTER_URL=`kubectl cluster-info | sed -n -e "s/\x1B\[[0-9;]*[a-zA-Z]//g" -e '1s/.*running at \(.*\)$/\1/p'` >> $GITHUB_ENV
 
+      # Rootless podman builds fail intermittently on runners: crun talks to the
+      # systemd user manager over sd-bus, and the runner has no lingering user
+      # session, so systemd replies "Interactive authentication required" and the
+      # deploy image build dies (seen as "Deploy works"/"Undeploy works" UI test
+      # timeouts). Enable lingering AND switch podman off the systemd cgroup path.
+      # GitHub-hosted runners provide passwordless sudo, so this never prompts.
+      - name: Configure rootless podman for CI
+        if: (success() || failure()) && runner.os == 'Linux'
+        run: |
+          sudo loginctl enable-linger "$USER"
+          mkdir -p "$HOME/.config/containers"
+          cat > "$HOME/.config/containers/containers.conf" <<'EOF'
+          [engine]
+          cgroup_manager = "cgroupfs"
+          events_backend = "file"
+          EOF
+          # warm up podman storage and fail fast if the runtime is broken
+          podman info > /dev/null
+
       # Runs regardless of whether the non-cluster UI tests passed - each npm script
       # launches its own fresh VS Code/browser session, so a crash or failure in the
       # non-cluster suite doesn't take the cluster suite's results down with it.
