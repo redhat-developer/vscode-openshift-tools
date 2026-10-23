@@ -88,7 +88,7 @@
 		"@eslint/js": "^10.0.1",
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
-		"@kubernetes/client-node": "^2.0.0",
+		"@kubernetes/client-node": "^2.0.1",
 		"@mui/icons-material": "^9.5.0",
 		"@mui/lab": "^9.0.0-beta.10",
 		"@mui/material": "^9.4.0",
