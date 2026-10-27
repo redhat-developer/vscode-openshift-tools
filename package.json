@@ -204,7 +204,7 @@
 		"yaml": "^2.9.1"
 	},
 	"overrides": {
-		"@azure/msal-node": "^7.1.1",
+		"@azure/msal-node": "^7.1.2",
 		"brace-expansion": "^5.0.12",
 		"braces": "npm:@franciscosolis/braces@^3.1.1",
 		"cookie": "^2.0.1",
