@@ -42,17 +42,23 @@ async function main() {
             launchArgs.push('--verbose');
         }
 
-        // Bootstrap is loaded via NODE_OPTIONS to register ESM-to-CJS module aliases
-        // before the extension activates
-        const bootstrapPath = path.resolve(extensionRootPath, 'out', 'test', 'bootstrap.js');
+        // The test VS Code instance renders everything with software rendering anyway;
+        // disabling its GPU also prevents "'--ozone-platform=wayland' is not compatible
+        // with Vulkan" errors and other GPU-related noise on Wayland sessions.
+        launchArgs.push('--disable-gpu');
 
+        // Note: NODE_OPTIONS must not be set here. VS Code strips it from the extension
+        // host environment, so it never reaches the process that loads the extension and
+        // the tests; the extension host (Node.js >= 22.12) natively supports require() of
+        // the ESM-only dependencies. Setting NODE_OPTIONS would only make the Electron
+        // main and renderer processes print
+        // "Most NODE_OPTIONs are not supported in packaged apps" errors.
         await etest.runTests({
             extensionDevelopmentPath,
             extensionTestsPath,
             launchArgs,
             extensionTestsEnv: {
                 ...process.env,
-                NODE_OPTIONS: `-r ${bootstrapPath}`,
                 ELECTRON_RUN_AS_NODE: undefined  // Unset to prevent workspace file execution
             }
         });

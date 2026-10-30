@@ -10,7 +10,11 @@ suite('Extension activation', function() {
     test('Extension is activated', async function() {
         this.timeout(120_000);
 
-        console.log('Installed extensions:', vscode.extensions.all.map(e => e.id));
+        // Log the list of installed extensions only in verbose mode: it is only needed
+        // when debugging activation problems and it otherwise clutters the test results
+        if (process.env.VERBOSE) {
+            console.log('Installed extensions:', vscode.extensions.all.map(e => e.id));
+        }
 
         const accExt = vscode.extensions.getExtension('redhat.vscode-redhat-account');
         assert.ok(accExt, 'Extension "redhat.vscode-redhat-account" not found');
