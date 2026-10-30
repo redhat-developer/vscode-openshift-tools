@@ -8,10 +8,8 @@
 /* eslint-disable global-require */
 
 import * as fs from 'fs';
-import * as istanbul from 'istanbul';
 import { mkdirp } from 'mkdirp';
 import * as paths from 'path';
-import * as remapIstanbul from 'remap-istanbul';
 
 export interface TestRunnerOptions {
     relativeCoverageDir?: string;
@@ -40,6 +38,13 @@ export class CoverageRunner {
             console.error('No coverage information was collected, exit without writing coverage information');
             return;
         }
+
+        // Loaded lazily, after it is known that coverage data was actually collected:
+        // loading 'istanbul' on every test run triggers a Node.js warning about a
+        // circular dependency inside that (test-only) package
+        const istanbul = require('istanbul');
+        const remapIstanbul = require('remap-istanbul');
+
         const cov = global[this.coverageVar];
 
         const reportingDir = paths.join(this.testsRoot, this.options.relativeCoverageDir);

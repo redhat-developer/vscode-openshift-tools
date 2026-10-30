@@ -5,25 +5,19 @@
 
 import { sync } from 'fast-glob';
 import * as fs from 'fs';
-import Mocha from 'mocha';
 import * as paths from 'path';
 import * as sourceMapSupport from 'source-map-support';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
+import { createMocha } from '../mocha-config';
 
 /* eslint-disable no-console */
 
 sourceMapSupport.install();
 
-const config: Mocha.MochaOptions = {
-    reporter: 'spec',
-    ui: 'tdd',
+const mocha = createMocha({
     timeout: 60000,
-    color: true,
     // grep: 'loads components in workspace',
-    require: ['./helper.js'],
-};
-
-const mocha = new Mocha(config);
+});
 
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;

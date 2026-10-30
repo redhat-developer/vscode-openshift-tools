@@ -5,14 +5,14 @@
 
 import { sync } from 'fast-glob';
 import * as fs from 'fs';
-import Mocha from 'mocha';
 import * as paths from 'path';
 import * as sourceMapSupport from 'source-map-support';
 import { CoverageRunner, TestRunnerOptions } from '../coverage';
+import { createMocha } from '../mocha-config';
 
 sourceMapSupport.install();
 
-const config: Mocha.MochaOptions = {
+const mocha = createMocha({
     // Previously used reporter ('mocha-jenkins-reporter') has been removed as deprecated.
     // We're currently not using Jenkins, but if needed, it's probably better to use `xunit` reporter instead
     // when we're testing on Jenkins. Also, probably this will need an adoption on how the test report is to be
@@ -20,13 +20,8 @@ const config: Mocha.MochaOptions = {
     // in order to output xunit results to the file to be processed on Jenkins).
     //
     // reporter: process.env.JUNIT_REPORT_PATH ? 'mocha-jenkins-reporter' : 'spec',
-    reporter: 'spec',
-    ui: 'tdd',
     timeout: 120000,
-    color: true,
-};
-
-const mocha = new Mocha(config);
+});
 
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
