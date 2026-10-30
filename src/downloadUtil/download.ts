@@ -6,7 +6,6 @@
 import * as fs from 'fs-extra';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
-import { promisify } from 'util';
 
 // need to use `require`, since we replace these imports in the unit tests
 import got from 'got';
@@ -35,7 +34,8 @@ export class DownloadUtil {
                 progressCb(100, 100 - previous);
             });
         }
-        // Pipe url to file
-        await promisify(stream.pipeline)(dls, fs.createWriteStream(toFile));
+        // Pipe url to file; 'stream.promises.pipeline' is the promise-based API
+        // ('stream.pipeline' would need a 'promisify' wrapper on Node.js < 15)
+        await stream.promises.pipeline(dls, fs.createWriteStream(toFile));
     }
 }

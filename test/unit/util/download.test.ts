@@ -41,14 +41,15 @@ suite('Download Util', () => {
         };
 
         const mockStream = {
-            pipeline: async (a, b, cb): Promise<void> => {
-                await wait(300);
-                requestEmitter.emit('downloadProgress', {percent: 0.33});
-                await wait(300);
-                requestEmitter.emit('downloadProgress', {percent: 0.66});
-                await wait(300);
-                requestEmitter.emit('end');
-                cb(null);
+            promises: {
+                pipeline: async (): Promise<void> => {
+                    await wait(300);
+                    requestEmitter.emit('downloadProgress', {percent: 0.33});
+                    await wait(300);
+                    requestEmitter.emit('downloadProgress', {percent: 0.66});
+                    await wait(300);
+                    requestEmitter.emit('end');
+                }
             }
         };
 
