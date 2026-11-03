@@ -24,7 +24,6 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');
     if (process.env.OST_DISABLE_COVERAGE !== 'yes' && fs.existsSync(coverConfigPath)) {
         const coverageConfig = JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions;
-        coverageConfig.relativeCoverageDir = paths.join(coverageConfig.relativeCoverageDir, 'unit');
         coverageRunner = new CoverageRunner(coverageConfig, testsRoot);
     }
     return coverageRunner;
@@ -79,20 +78,18 @@ export async function run(): Promise<void> {
                 const total = passes + failures + pending;
                 const summary = `  Test Results: ${total} total, ${passes} passing, ${failures} failing, ${pending} skipped (${duration}ms)`;
                 console.error(summary);
-                let coverageReported = Promise.resolve();
-                if (coverageRunner) {
-                    coverageReported = coverageRunner.reportCoverage();
-                }
-                coverageReported.then(() => {
+                try {
+                    if (coverageRunner) {
+                        coverageRunner.dumpCoverage();
+                    }
                     if (failed > 0) {
                         reject (new Error(`Test failures: ${failed}`));
                     } else {
                         resolve();
                     }
-                    resolve();
-                }).catch((e) => {
+                } catch (e) {
                     reject(e as Error);
-                })
+                }
             }).on('fail', (test, err) => {
                 console.error('Test failed:', test.fullTitle());
                 console.error(err);

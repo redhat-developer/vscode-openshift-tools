@@ -169,6 +169,7 @@ jobs:
             /tmp/test-resources/settings/logs/**/*.log
             /tmp/test-resources/screenshots/**/*.png
             .vscode-test/user-data/logs/**/*.log
+            .nyc_output/**
           include-hidden-files: true
           retention-days: 2
 
