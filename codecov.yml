@@ -1,2 +1,12 @@
 codecov:
   allow_pseudo_compare: false
+
+coverage:
+  status:
+    project:
+      default:
+        # tolerate small aggregate coverage fluctuations (run-to-run noise,
+        # dependency bumps) without failing the check; regressions in the
+        # changed code are still caught by the patch status
+        target: auto
+        threshold: 1%
