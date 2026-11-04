@@ -6,8 +6,8 @@
 import React from 'react';
 import { Uri } from 'vscode';
 import { ChartResponse } from '../../helm/helmChartType';
-import { ComponentTypeDescription, Registry } from '../../odo/componentType';
-import { StarterProject } from '../../devfile/componentTypeDescription';
+import { ComponentTypeDescription, StarterProject  } from '../../devfile/componentTypeDescription';
+import { DevfileRegistryInfo } from '../../devfile-registry/devfileInfo';
 
 export interface DefaultProps {
     analytics?: import('@segment/analytics-next').Analytics;
@@ -32,7 +32,7 @@ export interface SearchBarProps extends DefaultProps {
 
 export interface FilterProps extends DefaultProps {
     id: string;
-    registries?: Registry[];
+    registries?: DevfileRegistryInfo[];
     onCheckBoxChange: (value: string | string[]) => void;
 }
 

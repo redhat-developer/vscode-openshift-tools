@@ -7,14 +7,14 @@ import { Data, DevState } from './componentTypeDescription';
 import { DevPlatformOutput } from './inner-loop/devPlatform';
 import { DevSession, DevSessionOptions } from './inner-loop/devSession';
 import { clearDevState, saveDevState } from './inner-loop/devStateFile';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 
 /**
  * Sessions started by this extension instance, keyed by component context path. Not reconstructed
- * from `.odo/devstate.json` across extension-host restarts — that file is read-only bookkeeping for
+ * from `.openshift-toolkit/devstate.json` across extension-host restarts — that file is read-only bookkeeping for
  * `describe.ts`/`openInBrowser`/the debugger-attach flow, not something a live session (platform
  * client handles, running processes) can be rebuilt from. This matches the previous CLI-shell-out
- * behavior, which only ever tracked the running `odo dev` pty in-memory too.
+ * behavior, which only ever tracked the running dev session in-memory too.
  */
 const activeSessions = new Map<string, DevSession>();
 

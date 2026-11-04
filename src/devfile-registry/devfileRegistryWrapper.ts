@@ -7,20 +7,36 @@ import { get as httpGet } from 'http';
 import { get as httpsGet } from 'https';
 import * as YAML from 'js-yaml';
 import * as path from 'path';
+import { ExtensionContext } from 'vscode';
 import { DevfileUriResolver } from '../devfile/devfileUriResolver';
-import { Registry } from '../odo/componentType';
-import { OdoPreference } from '../odo/odoPreference';
+import { DevfileRegistryInfo, DevfileData, DevfileInfo  } from './devfileInfo';
+import { DevfileRegistrySettings } from './devfileRegistrySettings';
 import { Platform } from '../util/platform';
 import { ExecutionContext } from '../util/utils';
-import { DevfileData, DevfileInfo } from './devfileInfo';
 
 export const DEVFILE_VERSION_LATEST: string = 'latest';
+
+/**
+ * Returns the root directory of the devfile registry download cache: the
+ * extension's global storage when the extension context is available, and a
+ * directory under the user home as a fallback (e.g. for tests).
+ */
+function getCacheRoot(): string {
+    const globalStorage = DevfileRegistry.extensionContext?.globalStorageUri?.fsPath;
+    if (globalStorage) {
+        return path.join(globalStorage, 'devfile-cache');
+    }
+    return path.join(Platform.getUserHomePath(), '.openshift-toolkit', 'devfile-cache');
+}
 
 /**
  * Wraps some the Devfile Registry REST API calls.
  */
 export class DevfileRegistry {
     private static instance: DevfileRegistry;
+
+    /** Set during activation; provides the global storage location for the download cache. */
+    public static extensionContext: ExtensionContext;
 
     private executionContext: ExecutionContext = new ExecutionContext();
 
@@ -82,18 +98,18 @@ export class DevfileRegistry {
    }
 
     /**
-     * Returns a list of the devfile registries from ODO preferences.
+     * Returns a list of the devfile registries from the extension settings.
      *
      * @returns a list of the devfile registries
      */
-    public async getRegistries(registryUrl?: string): Promise<Registry[]> {
-        // Return only registries registered for user (from ODO preferences)
+    public async getRegistries(registryUrl?: string): Promise<DevfileRegistryInfo[]> {
+        // Return only registries registered for user (from the extension settings)
         // and filter by registryUrl (if provided)
 
-        let registries: Registry[];
+        let registries: DevfileRegistryInfo[];
         const key = ExecutionContext.key('getRegistries');
         if (this.executionContext && !this.executionContext.has(key)) {
-            registries = await OdoPreference.Instance.getRegistries();
+            registries = await DevfileRegistrySettings.Instance.getRegistries();
             this.executionContext.set(key, registries);
         } else {
             registries = this.executionContext.get(key);
@@ -115,7 +131,7 @@ export class DevfileRegistry {
      * @returns a list of the devfile infos
      */
     public async getRegistryDevfileInfos(registryUrl?: string): Promise<DevfileInfo[]> {
-        const registries: Registry[] = await this.getRegistries(registryUrl);
+        const registries: DevfileRegistryInfo[] = await this.getRegistries(registryUrl);
         if (!registries || registries.length === 0) {
             // TODO: should throw 'new Error('No Devfile registries available. Default registry is missing');'
             // here so we can report this to users when a webview is open
@@ -188,11 +204,11 @@ export class DevfileRegistry {
     /**
      * Downloads a resource file from a devfile registry (e.g., docker/Dockerfile, kubernetes/deploy.yaml).
      *
-     * Uses caching in ~/.odo/cache/{registryName}/ to avoid repeated downloads.
+     * Uses caching in the extension's global storage to avoid repeated downloads.
      *
      * @param uri - Relative URI from devfile (e.g., "docker/Dockerfile")
      * @param registryUrl - Registry URL (e.g., "https://registry.devfile.io")
-     * @param registryName - Registry name from preferences (for cache folder)
+     * @param registryName - Registry name from settings (for cache folder)
      * @param stack - Stack name (e.g., "go")
      * @param version - Stack version (e.g., "2.6.0")
      * @returns File content or null if not found (404)
@@ -224,7 +240,7 @@ export class DevfileRegistry {
  * Resolves and downloads resource files (like docker/Dockerfile, kubernetes/deploy.yaml)
  * from devfile registries during component initialization.
  *
- * Resources are cached in ~/.odo/cache/{registryName}/{stack}/{version}/{uri}
+ * Resources are cached in {globalStorage}/devfile-cache/{registryName}/{stack}/{version}/{uri}
  * to avoid repeated downloads and reduce 429 rate limit errors.
  *
  * ┌──────────────────────────────────────────────────────────────────────────┐
@@ -241,7 +257,7 @@ export class RegistryResourceResolver {
      * This is the MAIN ENTRY POINT for registry resource downloads.
      *
      * Flow:
-     * 1. Check cache in ~/.odo/cache/{registryName}/{stack}/{version}/{uri}
+     * 1. Check cache in {globalStorage}/devfile-cache/{registryName}/{stack}/{version}/{uri}
      * 2. If cached, return cached content
      * 3. If not cached, download from registry
      * 4. Save to cache
@@ -249,7 +265,7 @@ export class RegistryResourceResolver {
      *
      * @param uri - Relative URI from devfile (e.g., "docker/Dockerfile")
      * @param registryUrl - Registry URL (e.g., "https://registry.devfile.io")
-     * @param registryName - Registry name from preferences (for cache folder)
+     * @param registryName - Registry name from settings (for cache folder)
      * @param stack - Stack name (e.g., "go")
      * @param version - Stack version (e.g., "2.6.0")
      * @returns File content or null if not found (404)
@@ -393,19 +409,18 @@ export class RegistryResourceResolver {
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // Cache management (uses ~/.odo/cache/)
+    // Cache management (uses the extension's global storage)
     // ─────────────────────────────────────────────────────────────────────
 
     /**
      * Get the cache directory for devfile registry resources.
      *
-     * Location: ~/.odo/cache/{registryName}/{stack}/{version}/
+     * Location: {globalStorage}/devfile-cache/{registryName}/{stack}/{version}/
      *
-     * Example: ~/.odo/cache/DefaultDevfileRegistry/go/2.6.0/
+     * Example: {globalStorage}/devfile-cache/DefaultDevfileRegistry/go/2.6.0/
      */
     private getCacheDir(registryName: string, stack: string, version: string): string {
-        const homeDir = Platform.getUserHomePath();
-        return path.join(homeDir, '.odo', 'cache', registryName, stack, version);
+        return path.join(getCacheRoot(), registryName, stack, version);
     }
 
     /**

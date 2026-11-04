@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
+import { Url } from 'url';
+
 export interface Ctx {
     Fs: any;
 }
@@ -23,7 +25,7 @@ export interface ComponentDescription {
     devfileData: {
         devfile: Data;
         commands: any[],
-        supportedOdoFeatures: {
+        supportedFeatures: {
             debug: boolean;
             deploy: boolean;
             dev: boolean;
@@ -73,6 +75,33 @@ export interface Data {
     events?: Events;
     variables?: Record<string, string>;
 }
+
+export interface RegistryRef {
+    name: string;
+    url: Url;
+    secure: boolean;
+}
+
+export interface DevfileComponentType {
+    name: string;
+    displayName: string;
+    description: string;
+    link: string;
+    registry: RegistryRef;
+    language: string;
+    tags: string[];
+    projectType: string;
+    version: string;
+    starterProjects: string[];
+}
+
+export interface DevfileTypeData {
+    devfileData: {
+        devfile: Data;
+    }
+}
+
+export type ComponentTypeDescription = DevfileComponentType & DevfileTypeData;
 
 export interface Metadata {
     name: string;

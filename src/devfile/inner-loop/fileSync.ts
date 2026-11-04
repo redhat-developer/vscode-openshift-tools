@@ -9,12 +9,12 @@ import ignore, { Ignore } from 'ignore';
 import * as path from 'path';
 
 /** Always ignored regardless of `.gitignore` contents — VCS metadata and this extension's own state dir. */
-const ALWAYS_IGNORED = ['.git', '.odo'];
+const ALWAYS_IGNORED = ['.git', '.openshift-toolkit', '.odo'];
 
 /**
  * Builds the ignore-rule set for a component's dev-mode file sync: the always-ignored entries
- * above, plus the component root's own `.gitignore` if it has one. Matches `odo`'s (and this
- * plan's) scope — nested `.gitignore` files are not merged in, which is a documented,
+ * above, plus the component root's own `.gitignore` if it has one. Matches this
+ * extension's scope — nested `.gitignore` files are not merged in, which is a documented,
  * deliberate simplification, not a hidden gap.
  */
 export async function resolveIgnoreRules(rootDir: string): Promise<Ignore> {

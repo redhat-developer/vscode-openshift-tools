@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ComponentWorkspaceFolder } from '../workspace';
 import { Data, DevStateForwardedPort } from '../componentTypeDescription';
 
 export type DevPlatformKind = 'cluster' | 'podman';
@@ -21,7 +21,7 @@ export interface DevPlatformOutput {
 }
 
 /**
- * Everything a running dev session needs to persist to `.odo/devstate.json` (see
+ * Everything a running dev session needs to persist to `.openshift-toolkit/devstate.json` (see
  * `devStateFile.ts`) and expose to the rest of the extension (describe, openInBrowser, debugger
  * attach) — deliberately shaped to match `DevState` directly rather than inventing a parallel type.
  */

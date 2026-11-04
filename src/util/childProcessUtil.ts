@@ -94,14 +94,14 @@ export class ChildProcessUtil {
 
     private static instance = new ChildProcessUtil(OpenshiftChannel.Instance);
 
-    private odoChannel: OpenshiftChannel;
+    private cliChannel: OpenshiftChannel;
 
     public static get Instance() {
         return ChildProcessUtil.instance;
     }
 
-    private constructor(odoChannel: OpenshiftChannel) {
-        this.odoChannel = odoChannel;
+    private constructor(cliChannel: OpenshiftChannel) {
+        this.cliChannel = cliChannel;
     }
 
     public execute(cmd: string, opts: ExecOptions = {}, outText?: string): Promise<CliExitData> {
@@ -120,16 +120,16 @@ export class ChildProcessUtil {
             });
 
             childProcess.on('error', (error) => {
-                this.odoChannel.print(cmd);
-                this.odoChannel.print(stdout);
-                this.odoChannel.print(stderr);
+                this.cliChannel.print(cmd);
+                this.cliChannel.print(stdout);
+                this.cliChannel.print(stderr);
                 resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), cwd: opts.cwd?.toString() });
             });
 
             childProcess.on('close', (code) => {
-                this.odoChannel.print(cmd);
-                this.odoChannel.print(stdout);
-                this.odoChannel.print(stderr);
+                this.cliChannel.print(cmd);
+                this.cliChannel.print(stdout);
+                this.cliChannel.print(stderr);
                 const stderrText = stderr.trim();
                 const error = code !== 0 ? new Error(`Exited with code ${code}${stderrText ? `: ${stderrText}` : ''}`) : undefined;
                 resolve({ error, stdout: stdout.trim(), stderr: stderrText, cwd: opts.cwd?.toString() });
@@ -143,6 +143,6 @@ export class ChildProcessUtil {
     }
 
     public show() {
-        this.odoChannel.show();
+        this.cliChannel.show();
     }
 }

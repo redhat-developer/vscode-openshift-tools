@@ -14,7 +14,7 @@ import { ClusterDevPlatform } from '../../../src/devfile/inner-loop/clusterDevPl
 import { DevPlatformSession } from '../../../src/devfile/inner-loop/devPlatform';
 import { loadDevState } from '../../../src/devfile/inner-loop/devStateFile';
 import * as fileSync from '../../../src/devfile/inner-loop/fileSync';
-import { ComponentWorkspaceFolder } from '../../../src/odo/workspace';
+import { ComponentWorkspaceFolder } from '../../../src/devfile/workspace';
 
 const { expect } = chai;
 
@@ -41,7 +41,7 @@ function buildComponentFolder(contextPath: string): ComponentWorkspaceFolder {
             devfileData: {
                 devfile: buildDevfile(),
                 commands: [],
-                supportedOdoFeatures: { debug: false, deploy: false, dev: true },
+                supportedFeatures: { debug: false, deploy: false, dev: true },
             },
             devForwardedPorts: [],
             runningIn: [],

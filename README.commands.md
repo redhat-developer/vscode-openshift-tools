@@ -55,7 +55,7 @@ future releases.
 ## Extension Configuration Settings
    * `OpenShift Toolkit: Show Channel On Output` - Show OpenShift Toolkit output channel when new text added to output stream
    * `OpenShift Toolkit: Output verbosity level` - Output verbosity level (value between 0 and 9) for OpenShift Create, Push and Watch commands in output channel and terminal view
-   * `OpenShift Toolkit: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries
+   * `OpenShift Toolkit: Search CLI tools in PATH locations before using included binaries` - Force extension to search for `oc` CLI tools in PATH locations before using bundled binaries
    * `OpenShift Toolkit: CRC Executable Location` - Provide the path where OpenShift Local is installed.
    * `OpenShift Toolkit: CRC Pull Secret Path` - Provide the path where the pull secret file is present.
    * `OpenShift Toolkit: CRC Cpu Cores` - Number of CPU cores to allocate to the OpenShift cluster as selected during the first run.
@@ -83,14 +83,12 @@ When installing the extension directly from the VSCode marketplace all the depen
 
 ### CLI Tools
 
-This extension uses two CLI tools to interact with OpenShift cluster:
+This extension uses CLI tools to interact with OpenShift cluster:
 * OKD CLI client tool - [oc](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.5/)
-* odo - [odo](https://odo.dev/docs/introduction)
 
-> `oc` and `odo` tools for Windows, Linux and macOS are included into extension package. Once the extension is installed, it is ready to use.
+> `oc` tool for Windows, Linux and macOS is included into extension package. Once the extension is installed, it is ready to use.
 
 Follow the links below for additional information:
 
-* [Understanding odo](https://odo.dev/)
 * [Devfile ecosystem](https://devfile.io/)
 * [Red Hat Developer Sandbox](https://developers.redhat.com/developer-sandbox)

@@ -92,12 +92,7 @@ export async function selectWorkspaceFolder(skipWindowPick = false, label?: stri
             openLabel: label || 'Add context folder for component in workspace.',
         });
         if (!selectedFolders) return null;
-        if (fs.existsSync(path.join(selectedFolders[0].fsPath, '.odo', 'config.yaml'))) {
-            void window.showInformationMessage(
-                'The selected folder already contains a component. Please select a different folder.',
-            );
-            return selectWorkspaceFolder(skipWindowPick, label, folderName, initialFolder);
-        } else if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
+        if(folderName && fs.existsSync(path.join(selectedFolders[0].fsPath, folderName))) {
             void window.showInformationMessage(
                 `The folder ${folderName} already exists. Please select a different folder.`,
             );

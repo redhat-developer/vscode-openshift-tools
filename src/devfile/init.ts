@@ -12,10 +12,24 @@ import { DownloadUtil } from '../downloadUtil/download';
 import type {
     Data
 } from './componentTypeDescription';
-import { OdoPreference } from '../odo/odoPreference';
+import { DevfileRegistrySettings } from '../devfile-registry/devfileRegistrySettings';
+import { OpenshiftChannel } from '../util/childProcessUtil';
 import { OpenshiftLogger } from '../util/utils';
 import { cloneRepository } from '../util/git';
 import { DevfileResolver } from './devfileResolver';
+import { stateDir, writeStateFile } from './stateDirectory';
+
+/**
+ * Creates a logger that prints to the OpenShift output channel, so component
+ * creation progress is visible to the user.
+ */
+export function createChannelLogger(): OpenshiftLogger {
+    return {
+        info: (message) => OpenshiftChannel.Instance.print(message),
+        warning: (message) => OpenshiftChannel.Instance.print(`[WARNING] ${message}`),
+        error: (message) => OpenshiftChannel.Instance.print(`[ERROR] ${message}`)
+    };
+}
 
 export async function initComponent(options: ComponentInitOptions) {
     const ctx = await createInitContext(options);
@@ -200,7 +214,7 @@ async function bootstrapWorkspace(ctx: InitContext) {
 
 async function fetchDevfileFromRegistry(devfileRef: string, registry?: string, devfileVersion?: string): Promise<AcquiredDevfile> {
     const registryClient = DevfileRegistry.Instance;
-    const registryUrl = await OdoPreference.Instance.resolveRegistryUrl(registry);
+    const registryUrl = await DevfileRegistrySettings.Instance.resolveRegistryUrl(registry);
     const index = await registryClient.getDevfileInfoList(registryUrl);
 
     const stack = index.find(s => s.name === devfileRef);
@@ -294,10 +308,10 @@ async function acquireDevfile(ctx: InitContext): Promise<AcquiredDevfile> {
     try {
         const acquired = await fetchDevfileFromRegistry(options.registryDevfile!, options.registry, options.devfileVersion);
 
-        // When fetched from defvile registry, the resultig devfile gets added with
+        // When fetched from devfile registry, the resulting devfile gets added with
         // `yaml` property containing an original devfile text.
-        // This makes the real ODO to complain about it as "unknown property" found,
-        // so we have to strip this extra property from the object.
+        // This property is cache metadata and not part of the devfile schema,
+        // so we have to strip it from the object.
         const rawDevfile = acquired?.devfile as any;
         if (rawDevfile?.yaml) {
             delete rawDevfile?.yaml;
@@ -360,7 +374,7 @@ function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
     );
 
     if (!runCmd) {
-        warnings.push('No run command (group: run) found - odo dev will not be available');
+        warnings.push('No run command (group: run) found - Dev mode will not be available');
     }
 
     const debugCmd = devfile.commands?.find(
@@ -368,7 +382,7 @@ function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
     );
 
     if (!debugCmd) {
-        warnings.push('No debug command (group: debug) found - odo debug will not be available');
+        warnings.push('No debug command (group: debug) found - Debug mode will not be available');
     }
 
     const deployCmd = devfile.commands?.find(
@@ -376,7 +390,7 @@ function analyzeDevfileReadiness(devfile: Devfile): DevfileReadiness {
     );
 
     if (!deployCmd) {
-        warnings.push('No deploy command found - odo deploy may not be available');
+        warnings.push('No deploy command found - Deploy will not be available');
     }
 
     return {
@@ -399,8 +413,7 @@ async function writeWorkspace(devfile: Devfile, acquired: AcquiredDevfile, ctx: 
     await fs.writeFile(tmp, content, 'utf-8');
     await fs.rename(tmp, acquired.devfilePath);
 
-    const odoDir = path.join(ctx.projectPath, '.odo');
-    await fs.mkdir(odoDir, { recursive: true });
+    await fs.mkdir(stateDir(ctx.projectPath), { recursive: true });
 }
 
 type InitState = {
@@ -456,11 +469,7 @@ async function writeInitState(readiness: DevfileReadiness, acquired: AcquiredDev
         starter
     };
 
-    await fs.writeFile(
-        path.join(ctx.projectPath, '.odo', 'initstate.json'),
-        JSON.stringify(state, null, 2),
-        'utf-8'
-    );
+    await writeStateFile(ctx.projectPath, 'initstate.json', JSON.stringify(state, null, 2));
 }
 
 function buildInitResult(devfile: Devfile, acquired: AcquiredDevfile, ctx: InitContext): ComponentInitResult {
@@ -494,6 +503,7 @@ function isIgnorableWorkspaceFile(name: string): boolean {
     return [
         '.git',
         '.gitignore',
+        '.openshift-toolkit',
         '.odo',
         '.vscode',
         '.idea',
@@ -575,7 +585,7 @@ async function materializeStarterProjects(devfile: Devfile, ctx: InitContext): P
             throw new Error(`Failed to download starter project: ${result.error}`);
         }
 
-        // Remove .git directory to disconnect from git history (matches odo behavior)
+        // Remove .git directory to disconnect from git history
         const gitDir = path.join(ctx.projectPath, '.git');
         try {
             await fs.rm(gitDir, { recursive: true, force: true });
@@ -762,7 +772,7 @@ async function materializeZipStarter(url: string, projectPath: string) {
  * - kubernetes/deploy.yaml (from kubernetes.uri)
  * - Other resource files referenced in components
  *
- * Files are cached in ~/.odo/cache/{registryName}/ to avoid repeated downloads.
+ * Files are cached in the extension's global storage (devfile-cache/{registryName}/) to avoid repeated downloads.
  *
  * @param devfile - The resolved devfile with URIs
  * @param provenance - Registry provenance (url, stack, version)
@@ -876,7 +886,7 @@ function extractResourceUris(devfile: Devfile): Array<{ uri: string; componentTy
  */
 async function getRegistryName(registryUrl: string): Promise<string> {
     try {
-        const registries = await OdoPreference.Instance.getRegistries();
+        const registries = await DevfileRegistrySettings.Instance.getRegistries();
         const registry = registries.find(r => r.url === registryUrl);
 
         if (registry?.name) {

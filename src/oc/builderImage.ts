@@ -6,9 +6,9 @@
 import * as _ from 'lodash';
 import * as semver from 'semver';
 import { CommandText } from '../base/command';
+import { CliChannel } from '../cli';
 import { K8sResourceCommon, K8sResourceKind, Service } from '../k8s/olm/types';
 import { CliExitData } from '../util/childProcessUtil';
-import { Odo } from './odoWrapper';
 
 export interface BuilderImage {
     readonly name: string;
@@ -70,7 +70,7 @@ export class BuilderImageWrapper {
     }
 
     public async getBuilder(): Promise<NormalizedBuilderImages> {
-        const cliData: CliExitData = await Odo.Instance.execute(
+        const cliData: CliExitData = await CliChannel.getInstance().executeTool(
             new CommandText('oc', 'get imagestreams -o json -n openshift')
         );
         const parse: Service = JSON.parse(cliData.stdout) as Service;
