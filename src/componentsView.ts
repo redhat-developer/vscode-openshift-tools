@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 import { ThemeIcon } from 'vscode';
 import { BaseTreeDataProvider } from './base/baseTreeDataProvider';
 import { Command, CommandProvider, ComponentDescription } from './devfile/componentTypeDescription';
-import { ComponentWorkspaceFolder, OdoWorkspace } from './odo/workspace';
+import { ComponentWorkspace, ComponentWorkspaceFolder } from './devfile/workspace';
 import { Component } from './openshift/component';
 import { imagePath } from './util/utils';
 import { vsCommand } from './vscommand';
@@ -121,12 +121,12 @@ export interface ComponentWorkspaceFolderTreeItem extends vsc.TreeItem {
 export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentInfo> {
 
     static dataProviderInstance: ComponentsTreeDataProvider;
-    public odoWorkspace = new OdoWorkspace();
+    public componentWorkspace = new ComponentWorkspace();
     private children : ComponentInfo[];
 
     private constructor() {
         super();
-        this.odoWorkspace.onDidChangeComponents(() => {
+        this.componentWorkspace.onDidChangeComponents(() => {
             this.refresh();
         });
         Component.onDidStateChanged((ctx) => this.refresh(ctx));
@@ -141,7 +141,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentIn
             }
         }
         this.children = undefined;
-        this.odoWorkspace.reset();
+        this.componentWorkspace.reset();
         this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 
@@ -185,7 +185,7 @@ export class ComponentsTreeDataProvider extends BaseTreeDataProvider<ComponentIn
             return Promise.resolve(this.children);
         }
 
-        const result = this.odoWorkspace.getComponents();
+        const result = this.componentWorkspace.getComponents();
         return Promise.resolve(result).then(async result1 => {
             await vsc.commands.executeCommand('setContext', 'openshift.component.explorer.init', !result1?.length && result1.length === 0);
             this.children = result1.flatMap(f => new ComponentInfoRoot(f));

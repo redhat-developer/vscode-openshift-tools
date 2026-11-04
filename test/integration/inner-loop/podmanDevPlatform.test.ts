@@ -11,7 +11,7 @@ import { ComponentDescription, Data } from '../../../src/devfile/componentTypeDe
 import { DevPlatformSession } from '../../../src/devfile/inner-loop/devPlatform';
 import { PodmanDevPlatform } from '../../../src/devfile/inner-loop/podmanDevPlatform';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
-import { ComponentWorkspaceFolder } from '../../../src/odo/workspace';
+import { ComponentWorkspaceFolder } from '../../../src/devfile/workspace';
 import { connectAndRead } from './netTestUtils';
 
 const COMPONENT_NAME = 'podman-dev-platform-it';
@@ -59,7 +59,7 @@ function buildComponentFolder(contextPath: string, devfile: Data): ComponentWork
             devfileData: {
                 devfile,
                 commands: [],
-                supportedOdoFeatures: { debug: false, deploy: false, dev: true },
+                supportedFeatures: { debug: false, deploy: false, dev: true },
             },
             devForwardedPorts: [],
             runningIn: [],

@@ -39,11 +39,11 @@ suite('tools configuration', () => {
 
     suite('getVersion()', () => {
         test('returns version number with expected output', async () => {
-            const testData: CliExitData = { stdout: 'odo v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
+            const testData: CliExitData = { stdout: 'oc v0.0.13 (65b5bed8)\n line two', stderr: '', error: undefined };
             sb.stub(ChildProcessUtil.prototype, 'execute').resolves(testData);
             sb.stub(fs, 'existsSync').returns(true);
 
-            const result: string = await ToolsConfig.getVersion('odo');
+            const result: string = await ToolsConfig.getVersion('oc');
             assert.equal(result, '0.0.13');
         });
 
@@ -78,14 +78,14 @@ suite('tools configuration', () => {
     suite('detect', () => {
 
         test('returns path to tool detected form PATH locations if detected version is correct', async () => {
-            sb.stub(shelljs, 'which').returns({stdout: 'odo'} as string & shelljs.ShellReturnValue);
+            sb.stub(shelljs, 'which').returns({stdout: 'oc'} as string & shelljs.ShellReturnValue);
             sb.stub(fs, 'existsSync').returns(false);
-            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.odo.version);
-            const toolLocation = await ToolsConfig.detect('odo');
+            sb.stub(ToolsConfig, 'getVersion').returns(ToolsConfig.tools.oc.version);
+            const toolLocation = await ToolsConfig.detect('oc');
             if (vscode.workspace.getConfiguration('openshiftToolkit').get('searchForToolsInPath')) {
-                assert.equal(toolLocation, 'odo');
+                assert.equal(toolLocation, 'oc');
             } else {
-                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.odo.cmdFileName));
+                assert.equal(toolLocation, path.resolve(__dirname, '..', '..', '..', 'out', 'tools', Platform.OS, ToolsConfig.tools.oc.cmdFileName));
             }
         });
 
@@ -103,10 +103,10 @@ suite('tools configuration', () => {
                 sb.stub(fs, 'existsSync').returns(true);
                 sb.stub(fsex, 'ensureDirSync').returns();
                 sb.stub(ToolsConfig, 'getVersion').resolves('0.0.0');
-                sb.stub<any, any>(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.odo.version}`);
-                const stub = sb.stub(utils, 'hashFile').onFirstCall().returns(ToolsConfig.tools.odo.sha256sum);
+                sb.stub<any, any>(vscode.window, 'showInformationMessage').resolves(`Download and install v${ToolsConfig.tools.oc.version}`);
+                const stub = sb.stub(utils, 'hashFile').onFirstCall().returns(ToolsConfig.tools.oc.sha256sum);
                 stub.onSecondCall().returns(ToolsConfig.tools.oc.sha256sum);
-                await ToolsConfig.detect('odo');
+                await ToolsConfig.detect('oc');
                 assert.ok(!chmodSyncStub.called);
             });
         });
@@ -121,8 +121,8 @@ suite('tools configuration', () => {
             });
             test('set executable attribute for tool file', async () => {
                 sb.stub(shelljs, 'which');
-                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.odo.version);
-                await ToolsConfig.detect('odo');
+                sb.stub(ToolsConfig, 'getVersion').resolves(ToolsConfig.tools.oc.version);
+                await ToolsConfig.detect('oc');
                 assert.ok(chmodSyncStub.called);
             });
         });
@@ -130,18 +130,18 @@ suite('tools configuration', () => {
     suite('loadMetadata()', () => {
         test('keeps tool configuration if there is no platform attribute', () => {
             let config = {
-                odo: {
-                    name: 'odo',
+                oc: {
+                    name: 'oc',
                     version: '0.0.100'
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(config.odo);
+            assert.ok(config.oc);
         });
         test('removes tool configuration if platform is not supported', () => {
             let config = {
-                odo: {
-                    name: 'odo',
+                oc: {
+                    name: 'oc',
                     version: '0.0.100',
                     platform: {
                         win32: {
@@ -150,7 +150,7 @@ suite('tools configuration', () => {
                 }
             };
             config = ToolsConfig.loadMetadata(config, 'platform-name');
-            assert.ok(!config.odo);
+            assert.ok(!config.oc);
         });
     });
 

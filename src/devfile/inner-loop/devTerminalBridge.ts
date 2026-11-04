@@ -32,7 +32,7 @@ export interface DevTerminalBridge {
 
 /**
  * Creates a virtual (non-pty) OpenShift Terminal tab that streams dev-session output and reports
- * back when the user presses Ctrl-C in it — mirroring the old `odo dev` pty's "^C to stop" UX
+ * back when the user presses Ctrl-C in it — providing the familiar "^C to stop" UX
  * without shelling out to a real CLI process.
  */
 export async function createDevTerminalBridge(

@@ -17,7 +17,7 @@ import { DevfileUriResolver } from './devfileUriResolver';
 export interface DevfileResolveOptions {
     /**
      * If true, inline resource URIs into the devfile (converting uri → inlined).
-     * Used during `odo dev/deploy` to get a self-contained devfile.
+     * Used during Dev mode/Deploy to get a self-contained devfile.
      * Resources are loaded from disk (if devfilePath provided) or from URLs (if sourceUrl provided).
      */
     inlineResources?: boolean;

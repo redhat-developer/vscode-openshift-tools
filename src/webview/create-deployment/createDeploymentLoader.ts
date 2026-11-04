@@ -10,7 +10,7 @@ import { ColorTheme, commands, Disposable, extensions, Uri, ViewColumn, WebviewP
 import { Alizer } from '../../alizer/alizerWrapper';
 import { AlizerAnalyzeResponse } from '../../alizer/types';
 import { Oc } from '../../oc/ocWrapper';
-import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../odo/builderImage';
+import { BuilderImage, BuilderImageWrapper, NormalizedBuilderImages } from '../../oc/builderImage';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
 import { cloneRepository, CloneResult } from '../../util/git';

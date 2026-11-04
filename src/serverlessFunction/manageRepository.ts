@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Disposable, window } from 'vscode';
-import { Odo } from '../odo/odoWrapper';
+import { CliChannel } from '../cli';
 import sendTelemetry from '../telemetry';
 import { ServerlessCommand } from './commands';
 
@@ -24,7 +24,7 @@ export class ManageRepository implements Disposable {
         await sendTelemetry('openshift.managerepo.delete', {
             name
         });
-        const result = await Odo.Instance.execute(ServerlessCommand.deleteRepo(name), '', false);
+        const result = await CliChannel.getInstance().executeTool(ServerlessCommand.deleteRepo(name), undefined, false);
         if (result.error) {
             await sendTelemetry('openshift.managerepo.delete.error', {
                 error: result.error.message
@@ -40,7 +40,7 @@ export class ManageRepository implements Disposable {
             oldName,
             newName
         });
-        const result = await Odo.Instance.execute(ServerlessCommand.renameRepo(oldName, newName), '', false);
+        const result = await CliChannel.getInstance().executeTool(ServerlessCommand.renameRepo(oldName, newName), undefined, false);
         if (result.error) {
             await sendTelemetry('openshift.managerepo.rename.error', {
                 error: result.error.message
@@ -58,7 +58,7 @@ export class ManageRepository implements Disposable {
         await sendTelemetry('openshift.managerepo.add', {
             name, url
         });
-        const result = await Odo.Instance.execute(ServerlessCommand.addRepo(name, url), '', false);
+        const result = await CliChannel.getInstance().executeTool(ServerlessCommand.addRepo(name, url), undefined, false);
         if (result.error) {
             await sendTelemetry('openshift.managerepo.add.error', {
                 error: result.error.message
@@ -81,7 +81,7 @@ export class ManageRepository implements Disposable {
 
     public async list(): Promise<string[]> {
         await sendTelemetry('openshift.managerepo.list');
-        const result = await Odo.Instance.execute(ServerlessCommand.list(), '', false);
+        const result = await CliChannel.getInstance().executeTool(ServerlessCommand.list(), undefined, false);
         if (result.error) {
             await sendTelemetry('openshift.managerepo.list.error', {
                 error: result.error.message

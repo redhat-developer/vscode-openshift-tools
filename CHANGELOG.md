@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+ * [CRW-13625](https://redhat.atlassian.net/browse/CRW-13625) The odo CLI tool is **removed** from the extension: it is no longer bundled or used, as all odo-dependent functionality is now implemented with `oc` and the Kubernetes API. Devfile registries are stored in the new `openshiftToolkit.devfileRegistries` setting (migrated automatically from `~/.odo/preference.yaml` on first activation), and the extension state files moved from the `.odo/` directory to `.openshift-toolkit/` (state written by older versions is still recognized).
+
 ## 1.21.1 (November 4, 2025)
 
  * [#5453](https://github.com/redhat-developer/vscode-openshift-tools/issues/5453) Remove Git URL validation to support non-standard git repository locations

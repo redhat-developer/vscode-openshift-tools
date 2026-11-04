@@ -11,7 +11,7 @@ import { window } from 'vscode';
 import { CommandText } from '../base/command';
 import { OpenshiftLogger } from '../util/childProcessUtil';
 import { TokenStore } from '../util/credentialManager';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { Data, Command, DeployedResource } from './componentTypeDescription';
 import { isOpenShiftCluster } from '../util/kubeUtils';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
