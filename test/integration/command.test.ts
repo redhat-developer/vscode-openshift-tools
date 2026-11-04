@@ -15,15 +15,15 @@ import { CliChannel } from '../../src/cli';
 import { getComponentDescription } from '../../src/devfile/describe';
 import { initComponent } from '../../src/devfile/init';
 import { Oc } from '../../src/oc/ocWrapper';
-import { OdoPreference } from '../../src/odo/odoPreference';
-import { ComponentWorkspaceFolder } from '../../src/odo/workspace';
+import { DevfileRegistrySettings } from '../../src/devfile-registry/devfileRegistrySettings';
+import { ComponentWorkspaceFolder } from '../../src/devfile/workspace';
 import { LoginUtil } from '../../src/util/loginUtil';
 import { YAML_STRINGIFY_OPTIONS } from '../../src/util/utils';
 
 const newProjectName = `project${Math.round(Math.random() * 1000)}`;
 
 // tests are assuming your current context is already pointing to test cluster on which you can create and delete namespaces
-suite('odo commands integration', function () {
+suite('component commands integration', function () {
 
     const isOpenShift: boolean = Boolean(parseInt(process.env.IS_OPENSHIFT, 10)) || false;
     const clusterUrl = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
@@ -31,7 +31,6 @@ suite('odo commands integration', function () {
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     suiteSetup(async function() {
-        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
@@ -85,7 +84,7 @@ suite('odo commands integration', function () {
 
                 registryDevfile: componentType,
                 devfileVersion: '2.0.0',
-                registry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+                registry: DevfileRegistrySettings.DEFAULT_DEVFILE_REGISTRY_NAME,
 
                 starterProject: componentStarterProject,
 
@@ -101,7 +100,7 @@ suite('odo commands integration', function () {
             // We shouldn't try to push to Docker Hub from these tests.
             // OpenShift comes with a registry built in to the cluster,
             // and there is a way to set this registry as the one that
-            // odo pushes to during deploy.
+            // the deploy process pushes to during deploy.
             // However, you need cluster-admin access in order to expose
             // the registry outside of the cluster and figure out its address.
 
@@ -130,7 +129,7 @@ suite('odo commands integration', function () {
                     expect(deployResult.deployedCommands.length).to.be.greaterThan(0);
 
                     // Verify deploy state was saved
-                    const deployStatePath = path.join(componentLocation, '.odo', 'deploystate.json');
+                    const deployStatePath = path.join(componentLocation, '.openshift-toolkit', 'deploystate.json');
                     await fs.access(deployStatePath);
 
                     // Undeploy
@@ -308,7 +307,7 @@ suite('odo commands integration', function () {
             expect(result.success).to.be.true;
             expect(result.deployedCommands.length).to.be.greaterThan(0);
 
-            const deployStatePath = path.join(componentLocation, '.odo', 'deploystate.json');
+            const deployStatePath = path.join(componentLocation, '.openshift-toolkit', 'deploystate.json');
             await fs.access(deployStatePath);
         });
 
@@ -337,7 +336,7 @@ suite('odo commands integration', function () {
 
             // Verify state file removed
             try {
-                await fs.access(path.join(componentLocation, '.odo', 'deploystate.json'));
+                await fs.access(path.join(componentLocation, '.openshift-toolkit', 'deploystate.json'));
                 assert.fail('Deploy state file should have been deleted');
             } catch (err) {
                 expect(err.code).to.equal('ENOENT');

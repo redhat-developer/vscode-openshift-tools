@@ -24,7 +24,26 @@ suite('devfile/undeploy.ts', () => {
     suite('isDevResource()', () => {
         // These tests verify the logic inline since isDevResource is private
 
-        test('identifies dev mode resources by odo.dev/mode label', () => {
+        test('identifies dev mode resources by openshift-toolkit.dev/mode label', () => {
+            const resource = {
+                metadata: {
+                    name: 'my-component',
+                    labels: {
+                        'openshift-toolkit.dev/mode': 'dev'
+                    }
+                }
+            };
+
+            const labels = resource.metadata?.labels || {};
+            const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
+                labels['odo.dev/mode'] === 'dev' ||
+                labels['controller.devfile.io/devworkspace_id'] !== undefined;
+
+            expect(isDevResource).to.be.true;
+        });
+
+        test('identifies dev mode resources labeled by older extension versions', () => {
             const resource = {
                 metadata: {
                     name: 'my-component',
@@ -36,6 +55,7 @@ suite('devfile/undeploy.ts', () => {
 
             const labels = resource.metadata?.labels || {};
             const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
                 labels['odo.dev/mode'] === 'dev' ||
                 labels['controller.devfile.io/devworkspace_id'] !== undefined;
 
@@ -54,6 +74,7 @@ suite('devfile/undeploy.ts', () => {
 
             const labels = resource.metadata?.labels || {};
             const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
                 labels['odo.dev/mode'] === 'dev' ||
                 labels['controller.devfile.io/devworkspace_id'] !== undefined;
 
@@ -73,6 +94,7 @@ suite('devfile/undeploy.ts', () => {
 
             const labels = resource.metadata?.labels || {};
             const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
                 labels['odo.dev/mode'] === 'dev' ||
                 labels['controller.devfile.io/devworkspace_id'] !== undefined;
 
@@ -88,6 +110,7 @@ suite('devfile/undeploy.ts', () => {
 
             const labels = resource.metadata?.labels || {};
             const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
                 labels['odo.dev/mode'] === 'dev' ||
                 labels['controller.devfile.io/devworkspace_id'] !== undefined;
 
@@ -102,6 +125,7 @@ suite('devfile/undeploy.ts', () => {
 
             const labels = resource.metadata?.labels || {};
             const isDevResource =
+                labels['openshift-toolkit.dev/mode'] === 'dev' ||
                 labels['odo.dev/mode'] === 'dev' ||
                 labels['controller.devfile.io/devworkspace_id'] !== undefined;
 

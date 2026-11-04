@@ -82,9 +82,6 @@ export function testComponentContextMenu() {
 
             await openshiftTerminal.getTerminalText();
 
-            //decline odo telemetry
-            await openshiftTerminal.sendKeysToTerminal(['n', Key.ENTER]);
-
             //wait for start dev to finish
             await waitForStartDevToFinish(true);
 

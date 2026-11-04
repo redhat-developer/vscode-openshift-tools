@@ -125,7 +125,7 @@ export class OpenShiftExplorer implements TreeDataProvider<ExplorerItem>, Dispos
             this.kubeConfigInfo = new KubeConfigInfo();
             this.kubeContext = this.kubeConfigInfo.getEffectiveKubeConfig().getContextObject(this.kubeConfigInfo.getEffectiveKubeConfig().currentContext);
         } catch {
-            // ignore config loading error and let odo report it on first call
+            // ignore config loading error and let the cluster API report it on first call
         }
         try {
             const kubeconfigFiles = getKubeConfigFiles();

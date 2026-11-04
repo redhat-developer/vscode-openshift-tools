@@ -3,10 +3,18 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { Registry } from '../odo/componentType';
 import { Data } from '../devfile/componentTypeDescription';
 
-export type DevfileRegistryInfo = Registry;
+export interface DevfileRegistryInfo {
+    readonly name: string;
+    readonly url: string;
+    readonly secure: boolean;
+    state?: boolean;
+}
+
+export const DEFAULT_DEVFILE_REGISTRY_NAME: string = 'DefaultDevfileRegistry';
+export const DEFAULT_DEVFILE_REGISTRY_URL: string = 'https://registry.devfile.io';
+export const DEFAULT_DEVFILE_REGISTRY_SECURE: boolean = false;
 
 export type DevfileLinksInfo = {
   any
