@@ -77,7 +77,7 @@ suite('devfile/inner-loop/devResourceBuilder.ts', () => {
                 'app.kubernetes.io/instance': 'nodejs-with-uris',
                 'app.kubernetes.io/managed-by': 'openshift-toolkit',
                 component: 'nodejs-with-uris',
-                'odo.dev/mode': 'dev',
+                'openshift-toolkit.dev/mode': 'dev',
             };
 
             expect(deployment.metadata.labels).to.deep.equal(expectedLabels);

@@ -5,7 +5,7 @@
 
 import { expect } from 'chai';
 import { ActivityBar, CustomTreeSection, EditorView, InputBox, SideBarView, ViewSection, VSBrowser, WebDriver } from 'vscode-extension-tester';
-import { OdoPreference } from '../../../src/odo/odoPreference';
+import { DEFAULT_DEVFILE_REGISTRY_NAME } from '../../../src/devfile-registry/devfileInfo';
 import { notificationExists } from '../common/conditions';
 import { VIEWS } from '../common/constants';
 import { closeAllOpenEditors } from '../common/overdrives';
@@ -39,7 +39,7 @@ export function testDevfileRegistries() {
             await registrySection.expand();
             const registry = await registrySection.findItem(VIEWS.devFileRegistry);
             expect(registry).not.undefined;
-            expect(await registry.getText()).to.equal(OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME);
+            expect(await registry.getText()).to.equal(DEFAULT_DEVFILE_REGISTRY_NAME);
         });
 
         it('add new Devfile registry', async function test() {
@@ -118,7 +118,7 @@ export function testDevfileRegistries() {
 
         it('open Devfile registry view from item\'s context menu and verify the content of the registry', async function test() {
             this.timeout(10_000);
-            const devfileRegistry = await registrySection.findItem(OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME);
+            const devfileRegistry = await registrySection.findItem(DEFAULT_DEVFILE_REGISTRY_NAME);
             expect(devfileRegistry, 'DefaultDevfileRegistry not found in registry section').to.not.be.undefined;
             await devfileRegistry.select();
             const menu = await devfileRegistry.openContextMenu();

@@ -54,13 +54,13 @@ suite('devfile/describe.ts', function () {
             version: 2,
             deployments: { [deployContextKey(cluster, namespace)]: state },
         };
-        const odoDir = path.join(componentPath, '.odo');
-        await fs.mkdir(odoDir, { recursive: true });
-        await fs.writeFile(path.join(odoDir, 'deploystate.json'), JSON.stringify(file, null, 2), 'utf-8');
+        const stateDir = path.join(componentPath, '.openshift-toolkit');
+        await fs.mkdir(stateDir, { recursive: true });
+        await fs.writeFile(path.join(stateDir, 'deploystate.json'), JSON.stringify(file, null, 2), 'utf-8');
     }
 
     async function clearDeployState(): Promise<void> {
-        await fs.rm(path.join(componentPath, '.odo', 'deploystate.json'), { force: true });
+        await fs.rm(path.join(componentPath, '.openshift-toolkit', 'deploystate.json'), { force: true });
     }
 
     suiteSetup(async function () {

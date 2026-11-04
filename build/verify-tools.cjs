@@ -19,13 +19,12 @@ async function verifyTools() {
     const configData = require('../src/tools.json');
 
     for (const key in configData) {
-        for (const OS in configData[key].platform) {
+        for (const OS in configData[key].platform ?? {}) {
             const targetFolder = path.resolve(os.tmpdir(), OS);
             await downloadFileAndCreateSha256(
                 targetFolder,
-                configData[key].platform[OS].dlFileName,
-                configData[key].platform[OS].url,
-                configData[key].platform[OS].sha256sum,
+                targetFolder,
+                configData[key].platform[OS],
             );
         }
     }

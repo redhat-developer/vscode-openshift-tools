@@ -28,11 +28,13 @@ suite('devfile/inner-loop/fileSync.ts', () => {
             await fs.rm(rootDir, { recursive: true, force: true });
         });
 
-        test('always ignores .git and .odo, even without a .gitignore', async () => {
+        test('always ignores .git and the extension state dirs, even without a .gitignore', async () => {
             const rules = await resolveIgnoreRules(rootDir);
 
             expect(rules.ignores('.git')).to.be.true;
             expect(rules.ignores('.git/HEAD')).to.be.true;
+            expect(rules.ignores('.openshift-toolkit')).to.be.true;
+            expect(rules.ignores('.openshift-toolkit/devstate.json')).to.be.true;
             expect(rules.ignores('.odo')).to.be.true;
             expect(rules.ignores('.odo/devstate.json')).to.be.true;
         });

@@ -4,10 +4,9 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { KubeConfig } from '@kubernetes/client-node';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { Oc } from '../oc/ocWrapper';
 import { DeployState, DeployStateFile } from './componentTypeDescription';
+import { readStateFile, stateFilePath, writeStateFile } from './stateDirectory';
 
 /**
  * Builds a unique key identifying a deploy context (cluster + namespace pair).
@@ -36,13 +35,17 @@ export async function getCurrentDeployContextKey(): Promise<string> {
 }
 
 /**
- * Loads the deploy state for the current cluster/namespace from .odo/deploystate.json.
+ * Loads the deploy state for the current cluster/namespace from
+ * .openshift-toolkit/deploystate.json (falling back to the legacy
+ * .odo/deploystate.json written by older extension versions).
  * Returns null if no state exists for this context.
  */
 export async function loadDeployState(componentPath: string): Promise<DeployState | null> {
     try {
-        const stateFile = path.join(componentPath, '.odo', 'deploystate.json');
-        const raw = await fs.readFile(stateFile, 'utf-8');
+        const raw = await readStateFile(componentPath, 'deploystate.json');
+        if (raw === null) {
+            return null;
+        }
         const parsed = JSON.parse(raw);
 
         if (parsed.version === 1 && !parsed.deployments) {
@@ -61,24 +64,22 @@ export async function loadDeployState(componentPath: string): Promise<DeployStat
 }
 
 /**
- * Saves the deploy state for a specific cluster/namespace to .odo/deploystate.json.
+ * Saves the deploy state for a specific cluster/namespace to
+ * .openshift-toolkit/deploystate.json.
  * Merges with existing state for other contexts.
  */
 export async function saveDeployState(state: DeployState, componentPath: string): Promise<void> {
-    const odoDir = path.join(componentPath, '.odo');
-    await fs.mkdir(odoDir, { recursive: true });
-
-    const stateFile = path.join(odoDir, 'deploystate.json');
-
     let file: DeployStateFile = { version: 2, deployments: {} };
     try {
-        const raw = await fs.readFile(stateFile, 'utf-8');
-        const parsed = JSON.parse(raw);
-        if (parsed.version === 1 && !parsed.deployments) {
-            const key = deployContextKey(parsed.cluster, parsed.namespace);
-            file = { version: 2, deployments: { [key]: parsed } };
-        } else if (parsed.deployments) {
-            file = parsed;
+        const raw = await readStateFile(componentPath, 'deploystate.json');
+        if (raw !== null) {
+            const parsed = JSON.parse(raw);
+            if (parsed.version === 1 && !parsed.deployments) {
+                const key = deployContextKey(parsed.cluster, parsed.namespace);
+                file = { version: 2, deployments: { [key]: parsed } };
+            } else if (parsed.deployments) {
+                file = parsed;
+            }
         }
     } catch {
         // no existing file
@@ -88,5 +89,12 @@ export async function saveDeployState(state: DeployState, componentPath: string)
     file.deployments[key] = state;
     file.version = 2;
 
-    await fs.writeFile(stateFile, JSON.stringify(file, null, 2), 'utf-8');
+    await writeStateFile(componentPath, 'deploystate.json', JSON.stringify(file, null, 2));
+}
+
+/**
+ * Returns the path of the deploystate.json file for the given component.
+ */
+export function deployStateFilePath(componentPath: string): string {
+    return stateFilePath(componentPath, 'deploystate.json');
 }

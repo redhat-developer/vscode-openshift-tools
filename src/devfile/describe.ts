@@ -41,7 +41,7 @@ export async function getComponentDescription(
 
 
   const normalizedCommands = normalizeCommands(mergedDevfile);
-  const supportedOdoFeatures = detectSupportedFeatures(normalizedCommands);
+  const supportedFeatures = detectSupportedFeatures(normalizedCommands);
 
   const runningIn: string[] = [];
   const runningOn: string[] = [];
@@ -102,7 +102,7 @@ export async function getComponentDescription(
     devfileData: {
       devfile: mergedDevfile,
       commands: normalizedCommands,
-      supportedOdoFeatures,
+      supportedFeatures,
     },
     devForwardedPorts,
     runningIn,
@@ -111,6 +111,20 @@ export async function getComponentDescription(
     managedBy,
     warnings
   };
+}
+
+/**
+ * Describes the component at the given context path.
+ *
+ * Unlike {@link getComponentDescription}, errors are ignored and
+ * `undefined` is returned when the folder does not contain a readable component.
+ */
+export async function describeComponent(contextPath: string): Promise<ComponentDescription | undefined> {
+  try {
+    return await getComponentDescription(contextPath, {});
+  } catch {
+    return undefined;
+  }
 }
 
 export async function describeComponentYAML(
@@ -128,7 +142,7 @@ export async function describeComponentYAML(
 
   const componentInfo = await getComponentDescription(devfilePath, options)
   const devfile = componentInfo.devfileData.devfile;
-  const supportedOdoFeatures = componentInfo.devfileData.supportedOdoFeatures;
+  const supportedFeatures = componentInfo.devfileData.supportedFeatures;
   const devForwardedPorts = componentInfo.devForwardedPorts
 
   const lines: string[] = []
@@ -139,7 +153,7 @@ export async function describeComponentYAML(
   appendRunningOn(lines, componentInfo.runningOn, bold)
   appendDevControlPlane(lines, componentInfo.devControlPlane, bold)
   appendForwardedPorts(lines, devForwardedPorts, bold)
-  appendSupportedFeatures(lines, supportedOdoFeatures, bold)
+  appendSupportedFeatures(lines, supportedFeatures, bold)
   appendCommands(lines, flattenCommands(devfile), bold)
   appendContainerComponents(lines, devfile.components, bold)
   appendKubernetesComponents(lines, devfile.components, bold)
@@ -159,7 +173,7 @@ export async function describeComponentJSON(componentInfo: ComponentDescription)
     devfileData: {
       devfile: componentInfo.devfileData.devfile,
       commands: flattenCommands(componentInfo.devfileData.devfile),
-      supportedOdoFeatures: componentInfo.devfileData.supportedOdoFeatures
+      supportedFeatures: componentInfo.devfileData.supportedFeatures
     },
     devControlPlane: componentInfo.devControlPlane,
     devForwardedPorts: componentInfo.devForwardedPorts,
@@ -425,7 +439,7 @@ function appendManagedBy(lines: string[], managedBy: string, bold: (text: string
 }
 
 function appendSupportedFeatures(lines: string[], features: { dev: boolean; deploy: boolean; debug: boolean }, bold: (text: string) => string) {
-  lines.push(`${bold('Supported odo features:')}`);
+  lines.push(`${bold('Supported features:')}`);
   lines.push(` •  Dev: ${features.dev}`);
   lines.push(` •  Deploy: ${features.deploy}`);
   lines.push(` •  Debug: ${features.debug}`);

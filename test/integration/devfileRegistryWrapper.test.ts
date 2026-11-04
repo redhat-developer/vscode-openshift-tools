@@ -6,14 +6,13 @@
 import { expect } from 'chai';
 import { suite, suiteSetup } from 'mocha';
 import { DevfileRegistry } from '../../src/devfile-registry/devfileRegistryWrapper';
-import { OdoPreference } from '../../src/odo/odoPreference';
+import { DevfileRegistrySettings } from '../../src/devfile-registry/devfileRegistrySettings';
 
 suite('Devfile Registry Wrapper tests', function () {
     const TEST_REGISTRY_NAME = 'TestRegistry';
     const TEST_REGISTRY_URL = 'https://example.org';
 
     suiteSetup(async function () {
-        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
     });
 
     suiteTeardown(async function () {
@@ -39,40 +38,40 @@ suite('Devfile Registry Wrapper tests', function () {
     suite('Devfile Registries', function () {
 
         suiteSetup(async function () {
-            const registries = await OdoPreference.Instance.getRegistries();
+            const registries = await DevfileRegistrySettings.Instance.getRegistries();
             if (registries.find((registry) => registry.name === TEST_REGISTRY_NAME)) {
-                await OdoPreference.Instance.removeRegistry(TEST_REGISTRY_NAME);
+                await DevfileRegistrySettings.Instance.removeRegistry(TEST_REGISTRY_NAME);
             }
         });
 
         suiteTeardown(async function () {
             try {
-                await OdoPreference.Instance.removeRegistry(TEST_REGISTRY_NAME);
+                await DevfileRegistrySettings.Instance.removeRegistry(TEST_REGISTRY_NAME);
             } catch {
                 // do nothing, it's probably already deleted
             }
         });
 
         test('getRegistries()', async function () {
-            const registries = await OdoPreference.Instance.getRegistries();
+            const registries = await DevfileRegistrySettings.Instance.getRegistries();
             expect(registries).to.be.of.length(1);
             const registryNames = registries.map((registry) => registry.name);
-            expect(registryNames).to.contain(OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME);
+            expect(registryNames).to.contain(DevfileRegistrySettings.DEFAULT_DEVFILE_REGISTRY_NAME);
             const registryUrls = registries.map((registry) => registry.url);
-            expect(registryUrls).to.contain(OdoPreference.DEFAULT_DEVFILE_REGISTRY_URL);
+            expect(registryUrls).to.contain(DevfileRegistrySettings.DEFAULT_DEVFILE_REGISTRY_URL);
         });
 
         test('addRegistry()', async function () {
-            await OdoPreference.Instance.addRegistry(TEST_REGISTRY_NAME, TEST_REGISTRY_URL, undefined);
-            const registries = await OdoPreference.Instance.getRegistries();
+            await DevfileRegistrySettings.Instance.addRegistry(TEST_REGISTRY_NAME, TEST_REGISTRY_URL, undefined);
+            const registries = await DevfileRegistrySettings.Instance.getRegistries();
             expect(registries).to.be.of.length(2);
             const registryNames = registries.map((registry) => registry.name);
             expect(registryNames).to.contain(TEST_REGISTRY_NAME);
         });
 
         test('removeRegistry()', async function () {
-            await OdoPreference.Instance.removeRegistry(TEST_REGISTRY_NAME);
-            const registries = await OdoPreference.Instance.getRegistries();
+            await DevfileRegistrySettings.Instance.removeRegistry(TEST_REGISTRY_NAME);
+            const registries = await DevfileRegistrySettings.Instance.getRegistries();
             expect(registries).to.be.of.length(1);
             const registryNames = registries.map((registry) => registry.name);
             expect(registryNames).to.not.contain(TEST_REGISTRY_NAME);

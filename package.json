@@ -2255,7 +2255,40 @@
 					"openshiftToolkit.searchForToolsInPath": {
 						"type": "boolean",
 						"default": false,
-						"description": "Force extension to search for `oc` and `odo` CLI tools in PATH locations before using bundled binaries."
+						"description": "Force extension to search for `oc` CLI tools in PATH locations before using bundled binaries."
+					},
+					"openshiftToolkit.devfileRegistries": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"name",
+								"url",
+								"secure"
+							],
+							"properties": {
+								"name": {
+									"type": "string",
+									"description": "Registry name displayed in the Devfile Registries view."
+								},
+								"url": {
+									"type": "string",
+									"description": "Devfile registry URL (e.g. https://registry.devfile.io)."
+								},
+								"secure": {
+									"type": "boolean",
+									"description": "Whether the registry requires a token to access."
+								}
+							}
+						},
+						"default": [
+							{
+								"name": "DefaultDevfileRegistry",
+								"url": "https://registry.devfile.io",
+								"secure": false
+							}
+						],
+						"description": "Devfile registries used to list and download devfiles for component creation."
 					},
 					"openshiftToolkit.containerRegistryUrl": {
 						"type": "string",

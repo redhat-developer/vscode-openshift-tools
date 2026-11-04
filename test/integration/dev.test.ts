@@ -13,7 +13,7 @@ import { ComponentDescription, Data } from '../../src/devfile/componentTypeDescr
 import { forceStopDevSession, isDevSessionActive, startDevSession, stopDevSession } from '../../src/devfile/dev';
 import { loadDevState } from '../../src/devfile/inner-loop/devStateFile';
 import { Oc } from '../../src/oc/ocWrapper';
-import { ComponentWorkspaceFolder } from '../../src/odo/workspace';
+import { ComponentWorkspaceFolder } from '../../src/devfile/workspace';
 import { connectAndRead } from './inner-loop/netTestUtils';
 
 /**
@@ -73,7 +73,7 @@ suite('devfile/dev.ts', function () {
                 devfileData: {
                     devfile: buildDevfile(),
                     commands: [],
-                    supportedOdoFeatures: { debug: false, deploy: false, dev: true },
+                    supportedFeatures: { debug: false, deploy: false, dev: true },
                 },
                 devForwardedPorts: [],
                 runningIn: [],

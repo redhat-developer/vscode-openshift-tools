@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { Command } from './componentTypeDescription';
 import { ApplyCommandExecutor } from './applyCommand';
 import { CommandResolver } from './commandResolver';
