@@ -6,7 +6,7 @@
 import { CommandOption, CommandText } from '../base/command';
 import { Oc } from '../oc/ocWrapper';
 import { Exec } from './componentTypeDescription';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
 import { DevfileResolver } from './devfileResolver';
 import { VariableResolver } from './variableResolver';

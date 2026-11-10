@@ -10,7 +10,6 @@ import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { OpenShiftExplorer } from '../../../src/explorer';
 import { Oc } from '../../../src/oc/ocWrapper';
-import { Odo } from '../../../src/odo/odoWrapper';
 import { Cluster } from '../../../src/openshift/cluster';
 import { CliExitData } from '../../../src/util/childProcessUtil';
 import { TokenStore } from '../../../src/util/credentialManager';
@@ -56,7 +55,6 @@ suite('Openshift/Cluster', function() {
     setup(() => {
         sandbox = sinon.createSandbox();
         sandbox.stub(TokenStore.extensionContext.secrets);
-        execStub = sandbox.stub(Odo.prototype, 'execute').resolves(testData);
         inputStub = sandbox.stub(vscode.window, 'showInputBox');
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         infoStub = sandbox.stub<any, any>(vscode.window, 'showInformationMessage').resolves('Yes');
@@ -74,6 +72,7 @@ suite('Openshift/Cluster', function() {
     suite.skip('login', () => {
 
         setup(() => {
+            execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves(testData);
             quickPickStub.onFirstCall().resolves({description: 'Current Context', label: testUrl});
             quickPickStub.onSecondCall().resolves({description: 'Current Context', label: testUser});
         });
@@ -198,7 +197,7 @@ suite('Openshift/Cluster', function() {
                 expect(status).null;
             });
 
-            test('errors if there is output on odo stderr', async () => {
+            test('errors if there is output on oc stderr', async () => {
                 execStub.resolves(errorData);
                 let expectedErr: { message: any };
                 try {
@@ -295,6 +294,7 @@ suite('Openshift/Cluster', function() {
         let warnStub: sinon.SinonStub;
 
         setup(() => {
+            execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves(testData);
             warnStub = sandbox.stub(vscode.window, 'showWarningMessage');
         });
 
@@ -325,7 +325,7 @@ suite('Openshift/Cluster', function() {
             expect(status).null;
         });
 
-        test('handles errors from odo', async () => {
+        test('handles errors from oc', async () => {
             warnStub.onFirstCall().resolves('Logout');
             execStub.rejects(fatalErrorText);
             let expectedErr: any;
@@ -338,7 +338,7 @@ suite('Openshift/Cluster', function() {
             expect(expectedErr.message).equals(`Failed to logout of the current cluster with '${fatalErrorText}'!`);
         });
 
-        test('handles errors from odo stderr', async () => {
+        test('handles errors from oc stderr', async () => {
             warnStub.onFirstCall().resolves('Logout');
             execStub.resolves(errorData);
             let expectedErr: any;
@@ -404,6 +404,7 @@ suite('Openshift/Cluster', function() {
             label: 'minishift'
         };
         setup(() => {
+            execStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves(testData);
             execStub.onFirstCall().resolves();
         });
 

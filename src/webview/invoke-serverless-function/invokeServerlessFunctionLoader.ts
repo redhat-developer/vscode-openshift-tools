@@ -5,7 +5,7 @@
 import * as crypto from 'crypto';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Odo } from '../../odo/odoWrapper';
+import { CliChannel } from '../../cli';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import { FunctionStatus, InvokeFunction } from '../../serverlessFunction/types';
 import sendTelemetry from '../../telemetry';
@@ -167,7 +167,7 @@ export class InvokeServerlessFunctionViewLoader {
     }
 
     private static async getTemplates(): Promise<any[]> {
-        const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+        const result = await CliChannel.getInstance().executeTool(ServerlessCommand.getTemplates(), undefined, false);
         if (result.error) {
             void vscode.window.showErrorMessage(result.error.message);
         }

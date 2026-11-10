@@ -18,7 +18,6 @@ import OpenShiftBranding from '../../../../images/welcome/OpenShift-Branding-box
 import CloudBranding from '../../../../images/welcome/cloud.svg';
 import ComponentBranding from '../../../../images/welcome/component.png';
 import MicrosoftLogo from '../../../../images/welcome/microsoft.svg';
-import OdoLogo from '../../../../images/welcome/odo.png';
 import { VSCodeMessage } from './vsCodeMessage';
 import './welcome.scss';
 
@@ -134,27 +133,6 @@ export class Welcome extends React.Component<DefaultProps, {
                                             <img src={OpenShiftExtensionIcon} />
                                         </Icon>
                                         <Typography variant='h6' className='footerText'>Developer Sandbox for Red Hat OpenShift</Typography>
-                                    </Stack>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div className='documentation'>
-                    <ul>
-                        <li>
-                            <a href='#!' onClick={() => this.openExternalPage('https://odo.dev')}>
-                                <div className='section__header-hint section__footer'>
-                                    <Stack
-                                        direction='row'
-                                        sx={{
-                                            alignItems: 'center',
-                                            gap: 1
-                                        }}>
-                                        <Icon fontSize='large'>
-                                            <img src={OdoLogo} />
-                                        </Icon>
-                                        <Typography variant='h6' className='footerText'>odo</Typography>
                                     </Stack>
                                 </div>
                             </a>

@@ -8,7 +8,6 @@ import validator from 'validator';
 import { Uri, commands, window } from 'vscode';
 import { CliChannel } from '../cli';
 import { Oc } from '../oc/ocWrapper';
-import { Odo } from '../odo/odoWrapper';
 import { isTektonAware } from '../tekton/tekton';
 import { ChildProcessUtil, CliExitData } from '../util/childProcessUtil';
 import { getNamespaceKind, isOpenShiftCluster } from '../util/kubeUtils';
@@ -258,7 +257,7 @@ export class Functions {
 
     public undeploy(context: FunctionObject) {
         void Progress.execFunctionWithProgress(`Undeploying the function ${context.name}`, async () => {
-            const result = await Odo.Instance.execute(ServerlessCommand.undeployFunction(context.name));
+            const result = await CliChannel.getInstance().executeTool(ServerlessCommand.undeployFunction(context.name));
             if (result.error) {
                 void window.showErrorMessage(result.error.message);
             } else {

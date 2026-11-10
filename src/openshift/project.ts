@@ -89,7 +89,7 @@ export class Project extends OpenShiftItem implements Disposable {
                 if (currentContext && projectName === currentContext.namespace) {
                     // We have to force refresh on App Explorer in case of the new project name
                     // is the same as the one set in current context (active project) because,
-                    // in case they are equal, the kube config will not be changed by `odo creare project`,
+                    // in case they are equal, the kube config will not be changed by the project creation,
                     // so the App Explorer will not be automatcally refreshed whle it really needs to be
                     // refreshed
                     OpenShiftExplorer.getInstance().refresh();
@@ -139,7 +139,6 @@ export class Project extends OpenShiftItem implements Disposable {
             result = Progress.execFunctionWithProgress(
                 `Deleting ${kind} '${project.metadata.name}'`,
                 async () => {
-                    // migrate to odo3.ts
                     const projects = await oc.getProjects();
                     const selectedProject = projects.find(p => p.name === project.metadata.name);
                     if (selectedProject) {

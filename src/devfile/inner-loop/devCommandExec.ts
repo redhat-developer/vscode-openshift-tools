@@ -13,7 +13,7 @@ import { Writable } from 'stream';
  * the shell in place, so the recorded PID stays valid for the actual command process), and `stop`
  * reads it back and kills it, no external binary required.
  */
-const PID_FILE = '/tmp/.odo-dev-run.pid';
+const PID_FILE = '/tmp/.openshift-toolkit-dev-run.pid';
 
 function shellQuote(value: string): string {
     return `'${value.replace(/'/g, String.raw`'\''`)}'`;

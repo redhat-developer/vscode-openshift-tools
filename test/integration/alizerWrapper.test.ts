@@ -12,8 +12,8 @@ import { promisify } from 'util';
 import { Uri, workspace } from 'vscode';
 import { Alizer } from '../../src/alizer/alizerWrapper';
 import { Oc } from '../../src/oc/ocWrapper';
-import { OdoPreference } from '../../src/odo/odoPreference';
-import { Odo } from '../../src/odo/odoWrapper';
+import { initComponent } from '../../src/devfile/init';
+import { DevfileRegistrySettings } from '../../src/devfile-registry/devfileRegistrySettings';
 import { LoginUtil } from '../../src/util/loginUtil';
 
 suite('./alizer/alizerWrapper.ts', function () {
@@ -23,7 +23,6 @@ suite('./alizer/alizerWrapper.ts', function () {
     const password = process.env.CLUSTER_PASSWORD || 'developer';
 
     suiteSetup(async function () {
-        await OdoPreference.Instance.getRegistries(); // This creates the ODO preferences, if needed
         if (isOpenShift) {
             try {
                 await LoginUtil.Instance.logout();
@@ -62,22 +61,20 @@ suite('./alizer/alizerWrapper.ts', function () {
             await Oc.Instance.createProject(project1);
             tmpFolder1 = Uri.parse(await promisify(tmp.dir)());
             tmpFolder2 = Uri.parse(await promisify(tmp.dir)());
-            await Odo.Instance.createComponentFromFolder(
-                'nodejs',
-                'latest',
-                undefined,
-                'component1',
-                tmpFolder1,
-                'nodejs-starter',
-            );
-            await Odo.Instance.createComponentFromFolder(
-                'go',
-                'latest',
-                undefined,
-                'component2',
-                tmpFolder2,
-                'go-starter',
-            );
+            await initComponent({
+                name: 'component1',
+                projectPath: tmpFolder1.fsPath,
+                registryDevfile: 'nodejs',
+                devfileVersion: 'latest',
+                starterProject: 'nodejs-starter',
+            });
+            await initComponent({
+                name: 'component2',
+                projectPath: tmpFolder2.fsPath,
+                registryDevfile: 'go',
+                devfileVersion: 'latest',
+                starterProject: 'go-starter',
+            });
         });
 
         suiteTeardown(async function () {
@@ -119,11 +116,16 @@ suite('./alizer/alizerWrapper.ts', function () {
             await fs.rm(tmpFolder, { recursive: true, force: true });
         });
 
-        test('createComponentFromTemplateProject()', async function() {
-            await Odo.Instance.createComponentFromTemplateProject(
-                tmpFolder, 'my-component', 8080,
-                COMPONENT_TYPE, COMPONENT_VERSION,
-                OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME, 'dotnet80-example');
+        test('initComponent()', async function() {
+            await initComponent({
+                name: 'my-component',
+                projectPath: tmpFolder,
+                registryDevfile: COMPONENT_TYPE,
+                devfileVersion: COMPONENT_VERSION,
+                registry: DevfileRegistrySettings.DEFAULT_DEVFILE_REGISTRY_NAME,
+                starterProject: 'dotnet80-example',
+                runPort: 8080
+            });
             try {
                 await fs.access(path.join(tmpFolder, 'devfile.yaml'));
             } catch {
@@ -138,6 +140,4 @@ suite('./alizer/alizerWrapper.ts', function () {
         });
 
     });
-
-    test('deleteComponentConfiguration');
 });

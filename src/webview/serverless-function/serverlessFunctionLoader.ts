@@ -7,7 +7,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { stringify } from 'yaml';
-import { Odo } from '../../odo/odoWrapper';
+import { CliChannel } from '../../cli';
 import { ServerlessCommand, Utils } from '../../serverlessFunction/commands';
 import sendTelemetry from '../../telemetry';
 import { CliExitData } from '../../util/childProcessUtil';
@@ -34,7 +34,7 @@ function getDefaultImages(name: string): string[] {
 }
 
 async function getTemplates(): Promise<any[]> {
-    const result = await Odo.Instance.execute(ServerlessCommand.getTemplates(), undefined, false);
+    const result = await CliChannel.getInstance().executeTool(ServerlessCommand.getTemplates(), undefined, false);
     if (result.error) {
         void vscode.window.showErrorMessage(result.error.message);
     }
@@ -145,8 +145,12 @@ export default class ServerlessFunctionViewLoader {
                 break;
             }
             case 'createFunction': {
+                // `folderPath` arrives as the webview-serialized form of a
+                // vscode.Uri, where `fsPath` is only present when it had been
+                // read on the original instance before serialization; `path`
+                // is always carried. Fall back to it.
                 const selctedFolder: vscode.Uri = vscode.Uri.file(
-                    path.join(functionPath.fsPath, functionName),
+                    path.join((functionPath.fsPath ?? functionPath.path) as string, functionName),
                 );
                 await Progress.execFunctionWithProgress(
                     `Creating function '${functionName}'`,
@@ -200,7 +204,7 @@ export default class ServerlessFunctionViewLoader {
     ): Promise<CliExitData> {
         let functionResponse: CliExitData;
         try {
-            const response = await Odo.Instance.execute(
+            const response = await CliChannel.getInstance().executeTool(
                 ServerlessCommand.createFunction(language, template, location),
             );
             if (response && !response.error) {

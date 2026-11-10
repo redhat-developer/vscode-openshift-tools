@@ -10,7 +10,7 @@ import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { CliChannel } from '../../../src/cli';
 import { Oc } from '../../../src/oc/ocWrapper';
-import { Project as OdoProject } from '../../../src/oc/project';
+import { Project as OcProject } from '../../../src/oc/project';
 import { Project } from '../../../src/openshift/project';
 import { ChildProcessUtil } from '../../../src/util/childProcessUtil';
 import * as inputValueUtil from '../../../src/util/inputValue';
@@ -23,7 +23,7 @@ suite('OpenShift/Project', () => {
     let createProjectStub: sinon.SinonStub;
     let deleteProjectStub: sinon.SinonStub;
 
-    let projectItem: OdoProject;
+    let projectItem: OcProject;
     const errorMessage = 'ERROR MESSAGE';
 
     setup(() => {

@@ -41,7 +41,9 @@ export async function createTestPod(podName: string, containerPorts: number[] = 
             containers: [{
                 name: 'main',
                 image: TEST_IMAGE,
-                // TEST_IMAGE is only loaded locally on the Kind node (see doc/plans);
+                // TEST_IMAGE is never pulled from a registry: the Cluster UI tests'
+                // Deploy flow builds it with podman and kind-loads it onto the node
+                // before this suite runs, so it is already present locally;
                 // :latest otherwise defaults to imagePullPolicy Always, which would try (and
                 // fail) to pull it from a real registry.
                 imagePullPolicy: 'IfNotPresent',

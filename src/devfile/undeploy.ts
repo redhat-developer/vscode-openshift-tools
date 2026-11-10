@@ -6,10 +6,11 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { OpenshiftLogger } from '../util/childProcessUtil';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { DeployState } from './componentTypeDescription';
 import { Oc } from '../oc/ocWrapper';
 import { getCurrentDeployContextKey, loadDeployState } from './deployStateFile';
+import { legacyStateFilePath, readStateFile, stateFilePath, writeStateFile } from './stateDirectory';
 
 export interface ComponentUndeployOptions {
     componentPath: string;
@@ -25,8 +26,6 @@ export async function undeployComponent(
 
     logInfo(ctx, `Starting undeploy for component at ${ctx.componentPath}`);
 
-    const stateFile = path.join(ctx.componentPath, '.odo', 'deploystate.json');
-
     // 1. Try to load deploy state
     const deployState = await loadDeployState(ctx.componentPath);
 
@@ -38,7 +37,7 @@ export async function undeployComponent(
 
         // 3. Remove this context's entry from deploy state
         try {
-            await removeDeployStateEntry(stateFile);
+            await removeDeployStateEntry(ctx.componentPath);
             logInfo(ctx, 'Deployment state entry removed');
         } catch (err) {
             logWarning(ctx, `Failed to update deployment state file: ${err.message}`);
@@ -139,17 +138,21 @@ function isDevResource(resource: any): boolean {
     // Check for dev mode indicators
     const labels = resource.metadata?.labels || {};
     return (
-        labels['odo.dev/mode'] === 'dev' ||
+        labels['openshift-toolkit.dev/mode'] === 'dev' ||
+        labels['odo.dev/mode'] === 'dev' || // resources deployed by older extension versions
         labels['controller.devfile.io/devworkspace_id'] !== undefined
     );
 }
 
-async function removeDeployStateEntry(stateFile: string): Promise<void> {
-    const content = await fs.readFile(stateFile, 'utf-8');
-    const parsed = JSON.parse(content);
+async function removeDeployStateEntry(componentPath: string): Promise<void> {
+    const raw = await readStateFile(componentPath, 'deploystate.json');
+    if (raw === null) {
+        return;
+    }
+    const parsed = JSON.parse(raw);
 
     if (parsed.version === 1 && !parsed.deployments) {
-        await fs.unlink(stateFile);
+        await deleteDeployStateFiles(componentPath);
         return;
     }
 
@@ -157,10 +160,17 @@ async function removeDeployStateEntry(stateFile: string): Promise<void> {
     delete parsed.deployments[key];
 
     if (Object.keys(parsed.deployments).length === 0) {
-        await fs.unlink(stateFile);
+        await deleteDeployStateFiles(componentPath);
     } else {
-        await fs.writeFile(stateFile, JSON.stringify(parsed, null, 2), 'utf-8');
+        await writeStateFile(componentPath, 'deploystate.json', JSON.stringify(parsed, null, 2));
+        // remove the stale legacy file so future reads are unambiguous
+        await fs.unlink(legacyStateFilePath(componentPath, 'deploystate.json')).catch(() => {});
     }
+}
+
+async function deleteDeployStateFiles(componentPath: string): Promise<void> {
+    await fs.unlink(stateFilePath(componentPath, 'deploystate.json')).catch(() => {});
+    await fs.unlink(legacyStateFilePath(componentPath, 'deploystate.json')).catch(() => {});
 }
 
 type UndeployContext = {

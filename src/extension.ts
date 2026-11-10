@@ -30,7 +30,8 @@ import { KubernetesResourceLinkProvider } from './k8s/vfs/kuberesources.linkprov
 import { K8S_RESOURCE_SCHEME, K8S_RESOURCE_SCHEME_READONLY, K8sResourceCache } from './k8s/vfs/kuberesources.utils';
 import { KubernetesResourceVirtualFileSystemProvider } from './k8s/vfs/kuberesources.virtualfs';
 import { Oc } from './oc/ocWrapper';
-import { OdoPreference } from './odo/odoPreference';
+import { DevfileRegistrySettings } from './devfile-registry/devfileRegistrySettings';
+import { DevfileRegistry } from './devfile-registry/devfileRegistryWrapper';
 import { Cluster } from './openshift/cluster';
 import { Component } from './openshift/component';
 import { Project as OpenshiftProject } from './openshift/project';
@@ -60,11 +61,12 @@ export function deactivate(): void {
     // intentionally left blank
 }
 
-async function verifyBundledBinaries(): Promise<{ odoPath: string, ocPath: string, helmPath: string }> {
+async function verifyBundledBinaries(): Promise<{ ocPath: string, funcPath: string, helmPath: string, alizerPath: string }> {
     return {
-        odoPath: await ToolsConfig.detect('odo'),
         ocPath: await ToolsConfig.detect('oc'),
+        funcPath: await ToolsConfig.detect('func'),
         helmPath: await ToolsConfig.detect('helm'),
+        alizerPath: await ToolsConfig.detect('alizer'),
     };
 }
 
@@ -81,6 +83,7 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
 
     Cluster.extensionContext = extensionContext;
     TokenStore.extensionContext = extensionContext;
+    DevfileRegistry.extensionContext = extensionContext;
 
     // Temporarily loaded resource providers
     const resourceDocProvider = new KubernetesResourceVirtualFileSystemProvider();
@@ -323,7 +326,13 @@ export async function activate(extensionContext: ExtensionContext): Promise<unkn
     void startTelemetry(extensionContext);
     await verifyBinariesInRemoteContainer();
 
-    void OdoPreference.Instance.getRegistries(); // Initializes '~/.odo/preference.json', if not initialized yet
+    void DevfileRegistrySettings.Instance.migrateFromOdoPreference(); // Migrates '~/.odo/preference.yaml' into settings, if needed
+
+    workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration('openshiftToolkit.devfileRegistries')) {
+            ComponentTypesView.instance.refresh();
+        }
+    });
 
     return {
         verifyBundledBinaries
