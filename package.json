@@ -202,13 +202,13 @@
 		"yaml": "^2.9.1"
 	},
 	"overrides": {
-		"@azure/msal-node": "^7.2.0",
-		"brace-expansion": "^5.0.12",
+		"@azure/msal-node": "^7.2.2",
+		"brace-expansion": "^5.0.13",
 		"braces": "npm:@franciscosolis/braces@^3.1.1",
 		"cookie": "^2.0.2",
 		"cross-spawn": "^7.0.6",
 		"diff": "^9.0.0",
-		"glob": "^14.0.4",
+		"glob": "^14.0.6",
 		"globals": "^17.14.0",
 		"js-cookie": "^3.0.8",
 		"js-yaml": "^5.5.0",
