@@ -16,7 +16,16 @@ import {
     beforeEach
 } from 'vscode-extension-tester';
 import { activateCommand } from '../common/command-activator';
-import { itemExists, notificationExists, stabilizeComponentsView, waitForItem, warn } from '../common/conditions';
+import {
+    itemExists,
+    notificationExists,
+    openContextMenuAndSelect,
+    resetNotificationState,
+    stabilizeComponentsView,
+    waitForItem,
+    waitForItemStable,
+    warn
+} from '../common/conditions';
 import { INPUTS, MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { closeAllOpenEditors } from '../common/overdrives';
 
@@ -39,12 +48,7 @@ export function projectTest(isOpenshiftCluster: boolean) {
         before(async function () {
             this.timeout(10_000);
             view = await (await new ActivityBar().getViewControl(VIEWS.openshift)).openView();
-            try {
-                const notifications = await new Workbench().getNotifications();
-                for (const n of notifications) {
-                    try { await n.dismiss(); } catch { /* Ignore */ }
-                }
-            } catch { /* Ignore */ }
+            await resetNotificationState();
 
             await stabilizeComponentsView(getExplorer);
 
@@ -56,6 +60,13 @@ export function projectTest(isOpenshiftCluster: boolean) {
 
         beforeEach(async function () {
             await closeAllOpenEditors();
+            // Leftover notifications from earlier tests interfere with this
+            // suite in two ways: a sticky toast can cover the status-bar bell
+            // (breaking notificationExists()'s access to the Notifications
+            // Center) or the explorer tree rows (swallowing right-clicks, so
+            // no context menu ever opens). Start every test from a clean
+            // notification slate.
+            await resetNotificationState();
         });
 
         //Switch back to existing project/namespace
@@ -158,44 +169,71 @@ export function projectTest(isOpenshiftCluster: boolean) {
         });
 
         it('Delete a project', async function () {
-            this.timeout(30_000);
+            this.timeout(120_000);
 
-            const projectItem = await waitForItem(getExplorer, projectName) as TreeItem;
-            const contextMenu = await projectItem.openContextMenu();
+            // Self-contained setup: create a dedicated project to delete
+            // instead of reusing one built by the previous tests, so this test
+            // depends on nothing but the cluster. Creating a project also
+            // makes it the active one, and the explorer tree only ever shows
+            // the active project under the cluster node - which is exactly
+            // the user flow this test exercises.
+            const name = getProjectName('project-del-');
 
-            await contextMenu.select(deleteProject);
+            const clusterItem = await waitForItem(getExplorer, clusterName) as TreeItem;
+            await clusterItem.expand();
 
-            let notif;
+            await openContextMenuAndSelect(getExplorer, clusterName, newProject);
 
-            if (isOpenshiftCluster) {
-                notif = await notificationExists(
-                    NOTIFICATIONS.deleteProjectWarning(projectName),
-                    VSBrowser.instance.driver,
-                );
-            } else {
-                notif = await notificationExists(
-                    NOTIFICATIONS.deleteNamespaceWarning(projectName),
-                    VSBrowser.instance.driver,
-                );
-            }
+            await new Promise((res) => {
+                setTimeout(res, 500);
+            });
 
+            const input = await InputBox.create();
+            await input.setText(name);
+            await input.confirm();
+
+            // The item showing up proves both that the project was created
+            // and that it became the active one.
+            await waitForItemStable(getExplorer, name);
+
+            // Re-expand the cluster node - the refresh triggered by the
+            // project creation may have collapsed it.
+            const clusterNode = await waitForItem(getExplorer, clusterName) as TreeItem;
+            await clusterNode.expand();
+
+            await openContextMenuAndSelect(getExplorer, name, deleteProject);
+
+            // Match the warning by prefix: when the project is not empty the
+            // extension appends " and all its contents" before the final
+            // question mark.
+            const warning = isOpenshiftCluster
+                ? `Do you want to delete Project '${name}'`
+                : `Do you want to delete Namespace '${name}'`;
+
+            // The extension runs an oc call before showing the confirmation,
+            // so give the notification a generous timeout.
+            const notif = await notificationExists(warning, VSBrowser.instance.driver, 30_000);
             await notif.takeAction(INPUTS.yes);
 
-            if (isOpenshiftCluster) {
-                await notificationExists(
-                    NOTIFICATIONS.projectDeleteSuccess(projectName),
-                    VSBrowser.instance.driver,
-                );
-            } else {
-                await notificationExists(
-                    NOTIFICATIONS.namespaceDeleteSuccess(projectName),
-                    VSBrowser.instance.driver,
-                );
-            }
+            const success = isOpenshiftCluster
+                ? NOTIFICATIONS.projectDeleteSuccess(name)
+                : NOTIFICATIONS.namespaceDeleteSuccess(name);
+            await notificationExists(success, VSBrowser.instance.driver, 30_000);
+
+            // No tree-level assertion here on purpose: deleting the *active*
+            // project leaves the kubeconfig context pointing at the deleted
+            // namespace, and the explorer keeps showing it (with a
+            // Create/set-active affordance) until the context is switched to
+            // another project - which this suite's after() hook does. The
+            // "successfully deleted" notification above is the authoritative
+            // proof that the cluster-level deletion completed.
         });
 
-        function getProjectName() {
-            return `project${Math.floor(Math.random() * 100)}`;
+        function getProjectName(prefix = 'project') {
+            // Date.now() keeps the name unique across runs on the same
+            // cluster - a short random suffix can collide with a namespace
+            // left over by a previous (failed) run.
+            return `${prefix}${Date.now()}`;
         }
 
         async function getExplorer(): Promise<ViewSection> {
