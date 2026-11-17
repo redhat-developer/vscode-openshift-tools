@@ -93,6 +93,7 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
 
     needs: packaging-job
 
@@ -113,11 +114,11 @@ jobs:
       if: ${{ github.event_name == 'schedule' || inputs.publishToMarketPlace == 'true' || inputs.publishPreRelease == 'true' }}
       run: |
         for platform in darwin-x64 darwin-arm64 linux-x64 linux-arm64 win32-x64 win32-arm64; do
-          vsce publish -p ${{ secrets.VSCODE_MARKETPLACE_TOKEN }} --packagePath openshift-toolkit-${{ env.EXT_VERSION }}-${GITHUB_RUN_NUMBER}-${platform}.vsix
+          vsce publish --oidc --packagePath openshift-toolkit-${{ env.EXT_VERSION }}-${GITHUB_RUN_NUMBER}-${platform}.vsix
         done
     - name: Publish to OpenVSX Registry
       if: ${{ github.event_name == 'schedule' || inputs.publishToOVSX == 'true' || inputs.publishPreRelease == 'true' }}
       run: |
         for platform in darwin-x64 darwin-arm64 linux-x64 linux-arm64 win32-x64 win32-arm64; do
-          ovsx publish -p ${{ secrets.OVSX_MARKETPLACE_TOKEN }} --packagePath openshift-toolkit-${{ env.EXT_VERSION }}-${GITHUB_RUN_NUMBER}-${platform}.vsix
+          ovsx publish --trusted-publishing --packagePath openshift-toolkit-${{ env.EXT_VERSION }}-${GITHUB_RUN_NUMBER}-${platform}.vsix
         done
