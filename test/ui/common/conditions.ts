@@ -7,8 +7,11 @@ import {
     BottomBarPanel,
     EditorView,
     InputBox,
+    Key,
     Notification,
+    NotificationsCenter,
     NotificationType,
+    TreeItem,
     ViewItem,
     ViewSection,
     VSBrowser,
@@ -36,31 +39,91 @@ export async function waitForInputUpdate(
 export async function notificationExists(
     message: string,
     driver: WebDriver,
-    timeout = 10000,
+    timeout = 10_000,
 ): Promise<Notification> {
-    let currentNotifications = undefined;
-    return driver.wait(async () => {
-        try {
-            const center = await new Workbench().openNotificationsCenter();
-            const notifications = await center.getNotifications(NotificationType.Any);
-            currentNotifications = notifications;
-            for (const item of notifications) {
-                if ((await item.getMessage()) === message) {
+    let lastSeenMessages: string[] = [];
+
+    // Notifications are matched by substring rather than by exact text: the
+    // extension appends extra parts to some messages depending on the cluster
+    // state (e.g. "... and all its contents"), which would break exact matches.
+    const findMatch = async (notifications: Notification[]): Promise<Notification | undefined> => {
+        for (const item of notifications) {
+            try {
+                const text = await item.getMessage();
+                lastSeenMessages.push(text);
+                if (text.includes(message)) {
                     return item;
                 }
+            } catch {
+                // the notification disappeared mid-read
             }
-        } catch {
-            // workaround for reloadin notifications
         }
-    }, timeout, `
+        return undefined;
+    };
+
+    let center: NotificationsCenter | undefined;
+    try {
+        return await driver.wait(async () => {
+            lastSeenMessages = [];
+            try {
+                center = await new Workbench().openNotificationsCenter();
+                const match = await findMatch(await center.getNotifications(NotificationType.Any));
+                if (match) {
+                    // Leave the center open: the matched notification lives in
+                    // it and only stays actionable (takeAction()) while the
+                    // center displaying it is visible.
+                    return match;
+                }
+            } catch {
+                // Opening or reading the Notifications Center can fail when a
+                // leftover toast covers the status-bar bell. While the center
+                // is closed the toasts are visible, so check them directly.
+                try {
+                    const match = await findMatch(await new Workbench().getNotifications());
+                    if (match) {
+                        return match;
+                    }
+                } catch {
+                    // the toast container is not present or unreadable right now
+                }
+            }
+        }, timeout, `
         Notification wait timeout.
 
         Expected notification: [${message}]
 
-        Currently visible notifications: [\n
-        ${currentNotifications?.map(n => `\t- [${n.getMessage()}]`).join('\n')}
+        Currently visible notifications: [
+        ${lastSeenMessages.map(text => `\t- [${text}]`).join('\n')}
         ]
     `);
+    } catch (err) {
+        // Never leak an open Notifications Center into whatever runs next: it
+        // interferes with command palette and webview rendering below it.
+        try {
+            await center?.close();
+        } catch { /* Ignore */ }
+        throw err;
+    }
+}
+
+export async function resetNotificationState(): Promise<void> {
+    // Dismiss every standalone toast first: a sticky toast (e.g. one with
+    // action buttons, which never auto-dismisses) can cover both the
+    // status-bar bell, breaking openNotificationsCenter(), and the explorer
+    // tree rows, silently swallowing right-clicks so that no context menu
+    // ever opens.
+    try {
+        const toasts = await new Workbench().getNotifications();
+        for (const toast of toasts) {
+            try { await toast.dismiss(); } catch { /* Ignore */ }
+        }
+    } catch { /* Ignore */ }
+
+    try {
+        const center = await new Workbench().openNotificationsCenter();
+        await center.clearAllNotifications();
+        await center.close();
+    } catch { /* Ignore */ }
 }
 
 export async function notificationDoesNotExist(
@@ -210,6 +273,37 @@ export async function withStableItem(getSection: () => Promise<ViewSection>, lab
             return false;
         }
     }, timeout, `Action on "${label}" could not be performed`);
+}
+
+export async function openContextMenuAndSelect(
+    getSection: () => Promise<ViewSection>,
+    itemLabel: string,
+    menuItem: string,
+    attempts = 3,
+): Promise<void> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+        // Dismiss any context menu left half-open by an earlier attempt or
+        // interaction - it would swallow the next right-click. The page
+        // objects' openContextMenu() waits only two seconds for the menu to
+        // appear and its withRecovery() does not retry the resulting
+        // ElementNotFoundError, so the retrying has to happen out here.
+        try {
+            await VSBrowser.instance.driver.actions().sendKeys(Key.ESCAPE).perform();
+        } catch { /* Ignore */ }
+
+        try {
+            await stabilizeComponentsView(getSection);
+            const item = await waitForItem(getSection, itemLabel) as TreeItem;
+            const menu = await item.openContextMenu();
+            await menu.select(menuItem);
+            return;
+        } catch (e) {
+            lastError = e;
+        }
+    }
+    const reason = lastError instanceof Error ? lastError.message : String(lastError);
+    throw new Error(`Could not open the context menu of "${itemLabel}" and select "${menuItem}" after ${attempts} attempts: ${reason}`);
 }
 
 export async function itemDoesNotExist(
