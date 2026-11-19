@@ -144,7 +144,7 @@ export function AddServiceBindingForm() {
                                     ))}
                                 </Select>
                                 <FormHelperText>
-                                    The Operator-backed service to connect to your component
+                                    The provisioned service to connect to your component
                                 </FormHelperText>
                             </FormControl>
                             <FormControl>
@@ -164,7 +164,7 @@ export function AddServiceBindingForm() {
                                     required
                                 ></TextField>
                                 <FormHelperText>
-                                    The name of the <code>ServiceBinding</code> Kubernetes resource.
+                                    The name of the service binding.
                                     Can only contain letters, numbers, and dashes (<code>-</code>).
                                 </FormHelperText>
                             </FormControl>

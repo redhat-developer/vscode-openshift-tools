@@ -12,21 +12,33 @@ import {
     Workbench,
     before,
 } from 'vscode-extension-tester';
-import { itemExists, notificationExists, warn, webViewIsOpened } from '../common/conditions';
+import { notificationExists, itemExists } from '../common/conditions';
 import { MENUS, NOTIFICATIONS, VIEWS } from '../common/constants';
 import { closeAllOpenEditors, collapseViews, reloadWindow } from '../common/overdrives';
 import { AddServiceBindingWebView } from '../common/ui/webview/addServiceBinding';
 import { CreateServiceWebView, ServiceSetupPage } from '../common/ui/webview/createServiceWebView';
+import {
+    FIXTURE_SERVICE,
+    getCurrentNamespace,
+    installServiceBindingFixture,
+    removeServiceBindingFixture,
+} from '../common/serviceBindingFixture';
 
 export function bindableServiceTest() {
     describe('Bindable Services', function () {
         const cluster = process.env.CLUSTER_URL || 'https://api.crc.testing:6443';
         const clusterName = cluster;
+        const componentName = 'nodejs-starter';
+        const bindingName = 'test-binding';
 
         let view: SideBarView;
         let section: ViewSection;
-        let projectName: string;
         let serviceName: string;
+
+        // shared state between the dependent bind/list/remove tests below:
+        // each test skips itself when a step it depends on did not complete
+        let devRunning = false;
+        let bindingCreated = false;
 
         before(async function () {
             this.timeout(30_000);
@@ -46,6 +58,9 @@ export function bindableServiceTest() {
         after(async function () {
             this.timeout(30_000);
             try {
+                removeServiceBindingFixture();
+            } catch { /* best effort */ }
+            try {
                 const notificationsCenter = await new Workbench().openNotificationsCenter();
                 await notificationsCenter.clearAllNotifications();
                 await notificationsCenter.close();
@@ -63,7 +78,6 @@ export function bindableServiceTest() {
             await clusterItem.getDriver().wait(async () => await clusterItem.hasChildren());
             const children = await clusterItem.getChildren();
             const project = children[0];
-            projectName = await project.getLabel();
             const contextMenu = await project.openContextMenu();
             await contextMenu.select(MENUS.create, MENUS.createOperatorBackedService);
 
@@ -107,50 +121,125 @@ export function bindableServiceTest() {
         });
 
         it('Can bind service to a component', async function () {
-            this.timeout(75_000);
-            const componentName = 'nodejs-starter';
-            const bindingName = 'test-binding';
-            section = await view.getContent().getSection(VIEWS.components);
+            this.timeout(240_000);
 
-            try {
-                await itemExists(componentName, section);
-            } catch {
-                warn(`Component "${componentName}" not found, skipping test`);
-                this.skip();
-            }
+            // install a Provisioned Service fixture in the active project: the CNPG
+            // Cluster created above does not implement the Provisioned Service
+            // pattern (.status.binding) and is not bindable
+            installServiceBindingFixture();
+            const namespace = getCurrentNamespace();
 
-            const component = await section.findItem(componentName);
+            // a lingering notification from the previous test can overlay the
+            // workbench; clear it the same way the suite's before() hook does
+            const notificationsCenter = await new Workbench().openNotificationsCenter();
+            await notificationsCenter.clearAllNotifications();
+            await notificationsCenter.close();
+
+            const componentsSection = await view.getContent().getSection(VIEWS.components);
+            const component = await itemExists(componentName, componentsSection, 60_000);
+
+            // the binding is projected onto the component's workload, so the
+            // component must be running in dev mode first
             let contextMenu = await component.openContextMenu();
+            await contextMenu.select(MENUS.startDev);
+
+            await itemExists(`${componentName} (dev starting)`, componentsSection, 30_000);
+            await itemExists(`${componentName} (dev running)`, componentsSection, 120_000);
+            devRunning = true;
+
+            // bind the fixture service to the component; while dev mode is
+            // running, the component's label carries the state suffix
+            const componentInDevName = `${componentName} (dev running)`;
+            contextMenu = await (await itemExists(componentInDevName, componentsSection, 30_000)).openContextMenu();
             await contextMenu.select(MENUS.bindService);
 
-            const outcome = await Promise.race([
-                webViewIsOpened('Add service binding', VSBrowser.instance.driver, 30_000)
-                    .then(() => 'webview' as const),
-                notificationExists('No bindable services are available', VSBrowser.instance.driver, 30_000)
-                    .then(() => 'no-services' as const),
-            ]);
-
-            if (outcome === 'no-services') {
-                warn('No bindable services are available, skipping test');
-                this.skip();
-            }
+            await notificationExists(NOTIFICATIONS.lookingForBindableServices, VSBrowser.instance.driver, 10_000)
+                .catch(() => { /* the progress notification may already be gone */ });
 
             const addServiceBinding = new AddServiceBindingWebView();
-            await addServiceBinding.initializeEditor();
+            // the extension runs service discovery before creating the panel,
+            // so the editor tab may not exist yet on a slow runner —
+            // getTabByTitle throws immediately instead of waiting
+            await VSBrowser.instance.driver.wait(async () => {
+                try {
+                    await addServiceBinding.initializeEditor();
+                    return true;
+                } catch {
+                    return false;
+                }
+            }, 60_000, 'Add Service Binding webview not initialized');
             await addServiceBinding.clickComboBox();
-            await addServiceBinding.selectItemFromComboBox(`${projectName}/${serviceName}`);
+            await addServiceBinding.selectItemFromComboBox(
+                `${FIXTURE_SERVICE.kind}: ${namespace}/${FIXTURE_SERVICE.name}`,
+            );
             await addServiceBinding.setBindingName(bindingName);
             await addServiceBinding.clickAddServiceBindingButton();
 
-            contextMenu = await component.openContextMenu();
-            await contextMenu.select(MENUS.startDev);
+            await notificationExists(
+                NOTIFICATIONS.bindingCreated(bindingName),
+                VSBrowser.instance.driver,
+                60_000
+            );
 
-            await itemExists(`${componentName} (dev starting)`, section);
-            await itemExists(`${componentName} (dev running)`, section, 35_000);
+            bindingCreated = true;
+        });
+
+        it('Can list service bindings of a component', async function () {
+            if (!bindingCreated) {
+                this.skip();
+            }
+            this.timeout(60_000);
+
+            // while dev mode is running, the component's label carries the state suffix
+            const componentInDevName = `${componentName} (dev running)`;
+            const componentsSection = await view.getContent().getSection(VIEWS.components);
+            const componentItem = (await itemExists(componentInDevName, componentsSection, 30_000)) as TreeItem;
+            await componentItem.expand();
+            const bindingsNode = (await itemExists('Service Bindings', componentsSection, 30_000)) as TreeItem;
+            await bindingsNode.expand();
+            await itemExists(bindingName, componentsSection, 30_000);
+        });
+
+        it('Can remove service binding from a component', async function () {
+            if (!bindingCreated) {
+                this.skip();
+            }
+            this.timeout(120_000);
+
+            const componentsSection = await view.getContent().getSection(VIEWS.components);
+            const bindingItem = (await itemExists(bindingName, componentsSection, 30_000)) as TreeItem;
+            const contextMenu = await bindingItem.openContextMenu();
+            await contextMenu.select(MENUS.removeServiceBinding);
+
+            await notificationExists(
+                NOTIFICATIONS.bindingRemoved(bindingName),
+                VSBrowser.instance.driver,
+                60_000
+            );
+
+            await VSBrowser.instance.driver.wait(async () => {
+                return (await componentsSection.findItem(bindingName)) === undefined;
+            }, 30_000, `Expected binding '${bindingName}' to disappear from the Components view`);
+        });
+
+        it('Stop dev mode', async function () {
+            if (!devRunning) {
+                this.skip();
+            }
+            this.timeout(120_000);
+
+            // while dev mode is running, the component's label carries the state suffix
+            const componentInDevName = `${componentName} (dev running)`;
+            const componentsSection = await view.getContent().getSection(VIEWS.components);
+            const contextMenu = await (await itemExists(componentInDevName, componentsSection, 30_000)).openContextMenu();
+            await contextMenu.select(MENUS.stopDev);
+
+            await itemExists(`${componentName} (dev stopping)`, componentsSection, 10_000)
+                .catch(() => { /* the stopping phase can be quick enough to miss */ });
+            await itemExists(componentName, componentsSection, 60_000);
 
             await collapseViews(view, [VIEWS.components]);
             section = await view.getContent().getSection(VIEWS.appExplorer);
-            await itemExists(bindingName, section);
         });
     });
 }

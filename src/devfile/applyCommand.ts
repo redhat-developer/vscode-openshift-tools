@@ -14,6 +14,8 @@ import { Oc } from '../oc/ocWrapper';
 import { KubernetesVariant } from '../oc/types';
 import { ToolsConfig } from '../tools';
 import { Apply, DeployedResource } from './componentTypeDescription';
+import { applyServiceBindings, isProjectableWorkload } from '../k8s/servicebinding/bindingProjection';
+import { loadBindingRecords } from '../k8s/servicebinding/bindingStateFile';
 import { getOpenShiftRegistryUrl, resolveClusterPlatform } from '../util/kubeUtils';
 import { ComponentWorkspaceFolder } from './workspace';
 import { TokenStore } from '../util/credentialManager';
@@ -162,6 +164,11 @@ export class ApplyCommandExecutor {
         }
 
         resolvedManifest = this.ensureManagedByLabel(resolvedManifest);
+
+        // re-apply service bindings recorded for this component: the deploy
+        // manifest is applied as-is, which would otherwise omit client-side
+        // (projection-mode) bindings
+        resolvedManifest = await this.patchServiceBindings(resolvedManifest, devfileDir);
 
         let patchedContainers: string[] = [];
         if (this.locallyLoadedImages.size > 0) {
@@ -520,6 +527,39 @@ export class ApplyCommandExecutor {
             registryKey: registryKey || undefined,
             pullSecretWarning: pullSecretWarning || undefined,
         };
+    }
+
+    /**
+     * Patches the workload documents of the given manifest with the service
+     * bindings recorded for the component (projection mode only; CR-mode
+     * bindings are reconciled by the cluster). Returns the manifest unchanged
+     * when no bindings are recorded or the manifest cannot be parsed.
+     *
+     * @param manifestContent the manifest to patch
+     * @param componentPath the root path of the component
+     * @returns the patched manifest
+     */
+    public static async patchServiceBindings(manifestContent: string, componentPath: string): Promise<string> {
+        const bindings = (await loadBindingRecords(componentPath))
+            .filter((binding) => binding.mode === 'projection');
+
+        if (bindings.length === 0) {
+            return manifestContent;
+        }
+
+        try {
+            const docs = yaml.loadAll(manifestContent);
+            const patched = docs.map(doc => {
+                if (isProjectableWorkload(doc)) {
+                    applyServiceBindings(doc.spec.template.spec, bindings);
+                }
+                return doc;
+            });
+
+            return patched.map(doc => yaml.dump(doc, { noRefs: true })).join('---\n');
+        } catch {
+            return manifestContent;
+        }
     }
 
     public static ensureManagedByLabel(manifestContent: string): string {

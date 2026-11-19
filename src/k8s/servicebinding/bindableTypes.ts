@@ -2,57 +2,17 @@
  *  Copyright (c) Red Hat, Inc. All rights reserved.
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
-export interface BindableKindStatus {
+
+/**
+ * Describes a custom resource kind that implements the Provisioned Service
+ * pattern (https://servicebinding.io/spec/core/1.1.0/#provisioned-service),
+ * i.e. its instances may expose `.status.binding.name` pointing to a Secret.
+ */
+export interface BindableKindInfo {
     group: string;
     version: string;
     kind: string;
-}
-
-export interface BindableKinds {
-    status: BindableKindStatus[];
-}
-
-export interface RestMapping {
-    group: string;
-    version: string;
-    kind: string;
-    resource: string;
-}
-
-export interface APIResource {
-    name: string;
-    kind: string;
-}
-
-export interface APIResourceList {
-    resources: APIResource[];
-}
-
-export interface ServiceBindingReference {
-    group?: string;
-    version?: string;
-    kind?: string;
-    resource?: string;
-    namespace?: string;
-    name: string;
-}
-
-export interface ServiceBindingSpec {
-    application: ServiceBindingReference;
-    services: ServiceBindingReference[];
-    detectBindingResources: boolean;
-    bindAsFiles: boolean;
-    namingStrategy?: string;
-}
-
-export interface ServiceBinding {
-    apiVersion: 'binding.operators.coreos.com/v1alpha1';
-    kind: 'ServiceBinding';
-    metadata: {
-        name: string;
-        namespace: string;
-    };
-    spec: ServiceBindingSpec;
+    plural: string;
 }
 
 export interface WorkloadReference {
@@ -60,10 +20,4 @@ export interface WorkloadReference {
     kind: string;
     resource: string;
     name: string;
-}
-
-export interface ServiceBindingResource {
-    group: string;
-    version: string;
-    plural: string;
 }

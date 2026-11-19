@@ -23,6 +23,12 @@ const mocha = createMocha({
     timeout: 120000,
 });
 
+// optionally restrict the run to tests matching a substring, e.g.
+//   TEST_GREP="Bindable Services" npm run test-integration
+if (process.env.TEST_GREP) {
+    mocha.grep(process.env.TEST_GREP);
+}
+
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
     let coverageRunner: CoverageRunner;
     const coverConfigPath = paths.join(testsRoot, '..', '..', '..', 'coverconfig.json');

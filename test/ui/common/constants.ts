@@ -48,6 +48,7 @@ export const MENUS = {
     deleteProject: 'Delete Project',
     deleteNamespace: 'Delete Namespace',
     bindService: 'Bind Service',
+    removeServiceBinding: 'Remove Service Binding',
     startDev: 'Start Dev',
     startDevPodman: 'Start Dev on Podman',
     stopDev: 'Stop Dev',
@@ -85,4 +86,6 @@ export const NOTIFICATIONS = {
     deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
     serviceCreated: (name: string) => `Service ${name} successfully created.`,
     lookingForBindableServices: 'Getting bindable services',
+    bindingCreated: (name: string) => `Service binding '${name}' was created successfully.`,
+    bindingRemoved: (name: string) => `Service binding '${name}' was removed successfully.`,
 };

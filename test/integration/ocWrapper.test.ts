@@ -389,7 +389,9 @@ suite('./oc/ocWrapper.ts', function () {
         let expected = false;
         try {
             // alternative method of checking if CRDs are accessible: try to get a crd
-            await Oc.Instance.getKubernetesObject('CustomResourceDefinition', 'bindablekinds.binding.operators.coreos.com');
+            const crds = await Oc.Instance.getKubernetesObjects('crd') as { metadata?: { name?: string } }[];
+            expect(crds.length).to.be.greaterThan(0);
+            await Oc.Instance.getKubernetesObject('CustomResourceDefinition', crds[0].metadata.name);
             expected = true;
         } catch {
             // do nothing

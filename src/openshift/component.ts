@@ -18,6 +18,7 @@ import { createDevTerminalBridge } from '../devfile/inner-loop/devTerminalBridge
 import { undeployComponent } from '../devfile/undeploy';
 import { OpenShiftExplorer } from '../explorer';
 import { BindableService } from '../k8s/servicebinding/bindableService';
+import { BindingRecord, loadBindingRecords } from '../k8s/servicebinding/bindingStateFile';
 import { Oc } from '../oc/ocWrapper';
 import { CommandProvider, DeployState } from '../devfile/componentTypeDescription';
 import { ComponentWorkspaceFolder } from '../devfile/workspace';
@@ -403,7 +404,7 @@ export class Component extends OpenShiftItem {
                     void AddServiceBindingViewLoader.loadView(
                         component.contextPath,
                         bindableServices.map(
-                            (service) => `${service.metadata.namespace}/${service.metadata.name}`,
+                            (service) => `${service.kind}: ${service.metadata.namespace}/${service.metadata.name}`,
                         ),
                         component.component.devfileData.devfile.metadata.name,
                         (panel) => {
@@ -434,7 +435,7 @@ export class Component extends OpenShiftItem {
 
         const selectedServiceObject = bindableServices.filter(
             (service) =>
-                `${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
+                `${service.kind}: ${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
         )[0];
 
         void sendTelemetry('finishAddBindingWizard');
@@ -453,10 +454,66 @@ export class Component extends OpenShiftItem {
                 void window.showInformationMessage(
                     `Service binding '${formResponse.bindingName}' was created successfully.`,
                 );
+                void commands.executeCommand('openshift.componentsView.refresh');
             })
             .catch((error) => {
                 void window.showErrorMessage(
                     `Failed to create service binding: ${
+                        error instanceof Error ? error.message : String(error)
+                    }`,
+                );
+            });
+    }
+
+    @vsCommand('openshift.component.binding.remove')
+    @clusterRequired()
+    static async removeBinding(component: ComponentWorkspaceFolder & { record?: BindingRecord }) {
+        const records = await loadBindingRecords(component.contextPath);
+
+        if (records.length === 0) {
+            void window.showInformationMessage(
+                'No service bindings are recorded for this component.',
+            );
+            return;
+        }
+
+        // when invoked from a binding tree item, that binding is preselected
+        let bindingName: string | undefined = component.record?.name;
+
+        if (!bindingName) {
+            if (records.length === 1) {
+                bindingName = records[0].name;
+            } else {
+                const picked = await window.showQuickPick(
+                    records.map((record) => ({
+                        label: record.name,
+                        description: `${record.service.kind}: ${record.service.name}`,
+                    })),
+                    { placeHolder: 'Select the service binding to remove' },
+                );
+                bindingName = picked?.label;
+            }
+        }
+
+        if (!bindingName) {
+            return;
+        }
+
+        await Progress.execFunctionWithProgress(
+            `Removing service binding ${bindingName}`,
+            async () => {
+                await BindableService.Instance.removeBinding(component.contextPath, bindingName);
+            },
+        )
+            .then(() => {
+                void window.showInformationMessage(
+                    `Service binding '${bindingName}' was removed successfully.`,
+                );
+                void commands.executeCommand('openshift.componentsView.refresh');
+            })
+            .catch((error) => {
+                void window.showErrorMessage(
+                    `Failed to remove service binding: ${
                         error instanceof Error ? error.message : String(error)
                     }`,
                 );

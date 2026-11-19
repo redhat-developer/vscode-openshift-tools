@@ -11,7 +11,6 @@ import * as tmp from 'tmp';
 import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 import { CliExitData } from '../util/childProcessUtil';
 import { isOpenShiftCluster, KubeConfigInfo, loadKubeConfig, serializeKubeConfig } from '../util/kubeUtils';
 import { ExecutionContext } from '../util/utils';
@@ -1137,56 +1136,6 @@ export class Oc {
         }
 
         await this.deleteComponentStateFiles(componentPath, componentName);
-    }
-
-    /**
-     * Returns the list of bindable kinds available in the cluster.
-     * @returns the list of bindable kinds available in the cluster, or an empty list if none are found
-     */
-    public async getBindableKinds(): Promise<BindableKinds> {
-        try {
-            const result = await CliChannel.getInstance().executeTool(
-                new CommandText(
-                    'oc',
-                    'get bindablekinds.binding.operators.coreos.com bindable-kinds',
-                    [new CommandOption('-o', 'json')],
-                ),
-            );
-
-            const bindableKinds = JSON.parse(result.stdout) as BindableKinds;
-
-            if (!bindableKinds.status) {
-                return { status: [] };
-            }
-
-            return bindableKinds;
-        } catch (error) {
-            if (error instanceof Error) {
-                return { status: [] };
-            }
-
-            throw error;
-        }
-    }
-
-    public async getApiResourceList(group: string, version: string): Promise<APIResourceList> {
-        try {
-            // Call /apis/{group}/{version} and get the JSON
-            const result = await CliChannel.getInstance().executeTool(
-                new CommandText(
-                    'oc',
-                    `get --raw /apis/${group}/${version}`,
-                ),
-            );
-
-            return JSON.parse(result.stdout) as APIResourceList;
-        } catch (error) {
-            if (error instanceof Error) {
-                return { resources: [] };
-            }
-
-            throw error;
-        }
     }
 
     public async getComponentPod(componentName: string): Promise<string> {

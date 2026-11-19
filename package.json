@@ -554,6 +554,11 @@
 				"category": "OpenShift"
 			},
 			{
+				"command": "openshift.component.binding.remove",
+				"title": "Remove Service Binding",
+				"category": "OpenShift"
+			},
+			{
 				"command": "openshift.component.exitDevMode",
 				"title": "Stop Dev",
 				"category": "OpenShift"
@@ -1404,6 +1409,10 @@
 					"when": "false"
 				},
 				{
+					"command": "openshift.component.binding.remove",
+					"when": "false"
+				},
+				{
 					"command": "openshift.Serverless.openFunction",
 					"when": "false"
 				},
@@ -1876,6 +1885,16 @@
 					"command": "openshift.component.binding.add",
 					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
 					"group": "c2@2"
+				},
+				{
+					"command": "openshift.component.binding.remove",
+					"when": "view == openshiftComponentsView && viewItem =~ /openshift\\.component.*\\.dep-nrn.*/ || viewItem =~ /openshift\\.component.*\\.dep-run.*/",
+					"group": "c2@3"
+				},
+				{
+					"command": "openshift.component.binding.remove",
+					"when": "view == openshiftComponentsView && viewItem == openshift-component-binding",
+					"group": "c2@0"
 				},
 				{
 					"command": "openshift.component.showDevTerminal",
