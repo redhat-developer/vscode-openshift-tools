@@ -133,7 +133,7 @@ export class Oc {
         });
         try {
             await fs.writeFile(tempJsonFile, jsonString);
-            // call oc create -f path/to/file until odo does support creating services without component
+            // call oc create -f path/to/file, as services are created independently of components
             await CliChannel.getInstance().executeTool(
                 new CommandText('oc', 'create', [new CommandOption('-f', tempJsonFile)]),
             );
@@ -916,7 +916,7 @@ export class Oc {
         }
     }
 
-    async deleteOdoFiles(componentDir: string, componentName?: string): Promise<void> {
+    async deleteComponentStateFiles(componentDir: string, componentName?: string): Promise<void> {
         const devfiles = await findDevfiles(componentDir);
 
         for (const devfile of devfiles) {
@@ -925,7 +925,12 @@ export class Oc {
             }
         }
 
-        // Delete .odo directory
+        // Delete the extension's state directories
+        await fs.rm(path.join(componentDir, '.openshift-toolkit'), {
+            recursive: true,
+            force: true,
+        });
+        // Delete the legacy state directory written by older extension versions
         await fs.rm(path.join(componentDir, '.odo'), {
             recursive: true,
             force: true,
@@ -952,7 +957,8 @@ export class Oc {
 
     }
     /**
-     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
+     * Deletes all the component configuration files associated with the component
+     * (`.openshift-toolkit` state dir, legacy `.odo` dir, `devfile.yaml`) located at the given path.
      *
      * @param componentPath the path to the component
      */
@@ -1130,7 +1136,7 @@ export class Oc {
             // ignore
         }
 
-        await this.deleteOdoFiles(componentPath, componentName);
+        await this.deleteComponentStateFiles(componentPath, componentName);
     }
 
     /**

@@ -90,7 +90,7 @@ function devResourceLabels(componentName: string): Record<string, string> {
         'app.kubernetes.io/instance': componentName,
         'app.kubernetes.io/managed-by': 'openshift-toolkit',
         component: componentName,
-        'odo.dev/mode': 'dev',
+        'openshift-toolkit.dev/mode': 'dev',
     };
 }
 

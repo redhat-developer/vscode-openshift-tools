@@ -15,40 +15,13 @@ import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import * as packagejson from '../../package.json';
-import { CommandText } from '../../src/base/command';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
-import { Odo } from '../../src/odo/odoWrapper';
 import { getNamespaceKind } from '../../src/util/kubeUtils';
 import { Progress } from '../../src/util/progress';
 
 const {expect} = chai;
 chai.use(sinonChai);
-
-function genComponentJson(p: string, a: string, n: string, c: string ): string {
-    return `
-    {
-        "kind": "Component",
-        "apiVersion": "odo.openshift.io/v1alpha1",
-        "metadata": {
-            "name": "${n}",
-            "namespace": "${p}",
-            "creationTimestamp": null
-        },
-        "spec": {
-            "app": "app1",
-            "type": "nodejs:10",
-            "sourceType": "git",
-            "ports": [
-            "8080/TCP"
-            ]
-        },
-        "status": {
-            "context": "${c.replace(/\\/g,'\\\\')}",
-            "state": "Not Pushed"
-        }
-    }`;
-}
 
 suite('openshift toolkit Extension', () => {
     let sandbox: sinon.SinonSandbox;
@@ -66,29 +39,6 @@ suite('openshift toolkit Extension', () => {
         }, {
             uri: comp2Uri, index: 1, name: 'comp2'
         }]);
-
-        sandbox.stub(Odo.prototype, 'execute').callsFake(async (cmd: CommandText, cwd: string)=> {
-            if (`${cmd}`.includes('version')) {
-                return { error: undefined, stdout: 'Server: https://api.crc.testing:6443', stderr: '' };
-            }
-
-            if(`${cmd}`.includes('describe')) {
-                const name = cwd.substr(cwd.lastIndexOf(path.sep)+1);
-                return { error: undefined, stdout: genComponentJson('myproject', 'app1', name, cwd), stderr: '', cwd  };
-            }
-
-            if (`${cmd}`.includes('list --app')) {
-                return { error: undefined, stdout: `
-                {
-                    "kind": "List",
-                    "apiVersion": "odo.openshift.io/v1alpha1",
-                    "metadata": {},
-                    "otherComponents": [],
-                    "devfileComponents": []
-                  }`, stderr: ''}
-            }
-            return { error: undefined, stdout: '', stderr: ''};
-        });
     });
 
     teardown(() => {

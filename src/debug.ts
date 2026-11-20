@@ -26,7 +26,7 @@ class DebugSessionEntry {
 export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
     private static sessions: Map<string, DebugSessionEntry> = new Map();
 
-    private odoWorkspace = ComponentsTreeDataProvider.instance.odoWorkspace;
+    private componentWorkspace = ComponentsTreeDataProvider.instance.componentWorkspace;
 
     private treeView: TreeView<string>;
 
@@ -39,7 +39,7 @@ export class DebugSessionsView implements TreeDataProvider<string>, Disposable {
     public constructor() {
         debug.onDidStartDebugSession((session) => {
             if (session.configuration.contextPath) {
-                void this.odoWorkspace.getComponents().then((components)=> {
+                void this.componentWorkspace.getComponents().then((components)=> {
                     const osObj = components.find((comp) => comp.contextPath === session.configuration.contextPath);
                     DebugSessionsView.sessions.set(session.configuration.contextPath, {
                         label: osObj.component.devfileData.devfile.metadata.name,

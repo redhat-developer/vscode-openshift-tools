@@ -5,21 +5,28 @@
 
 import * as chai from 'chai';
 import * as path from 'path';
+import pq from 'proxyquire';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import { ComponentDescription } from '../../../src/devfile/componentTypeDescription';
-import { Odo } from '../../../src/odo/odoWrapper';
-import { OdoWorkspace } from '../../../src/odo/workspace';
 import * as fixtures from '../../fixtures';
 
 const {expect} = chai;
 chai.use(sinonChai);
 
-suite('Odo/Workspace', () => {
+const describeComponentStub = sinon.stub();
+const { ComponentWorkspace } = pq('../../../src/devfile/workspace', {
+    './describe': {
+        describeComponent: describeComponentStub
+    }
+});
+
+suite('Devfile/Workspace', () => {
     let sandbox: sinon.SinonSandbox;
     setup(() => {
         sandbox = sinon.createSandbox();
+        describeComponentStub.reset();
     });
 
     teardown(() => {
@@ -27,12 +34,13 @@ suite('Odo/Workspace', () => {
     });
 
     function stubDescribeComponentCall() {
-        return sandbox.stub(Odo.Instance, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
+        describeComponentStub.callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
             if (contextPath.includes(`${path.sep}comp`, contextPath.lastIndexOf(path.sep))) {
                 return Promise.resolve({} as ComponentDescription);
             }
             return Promise.resolve<undefined>(undefined);
         });
+        return describeComponentStub;
     }
 
     function initWorkspaceFolders() {
@@ -50,14 +58,14 @@ suite('Odo/Workspace', () => {
     }
 
     test('returns empty array for empty workspace', async () => {
-        const ws = new OdoWorkspace();
+        const ws = new ComponentWorkspace();
         const components = await ws.getComponents();
         expect(components.length).equals(0);
     });
 
     test('loads components in workspace when called first time', async () => {
         const describeCompSpy = initWorkspaceFolders();
-        const ws = new OdoWorkspace();
+        const ws = new ComponentWorkspace();
         const components = await ws.getComponents();
         expect(components.length).equals(3);
         expect(describeCompSpy).called;
@@ -65,7 +73,7 @@ suite('Odo/Workspace', () => {
 
     test('returns cached components for consecutive calls ', async () => {
         const describeCompSpy = initWorkspaceFolders();
-        const ws = new OdoWorkspace();
+        const ws = new ComponentWorkspace();
         await ws.getComponents();
         describeCompSpy.reset();
         const components = await ws.getComponents();
@@ -76,14 +84,9 @@ suite('Odo/Workspace', () => {
     test('do not fire onDidChangeComponents event for folders without components added to workspace', async () => {
         const changeWorkspaceFolders = new vscode.EventEmitter<vscode.WorkspaceFoldersChangeEvent>();
         sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').value(changeWorkspaceFolders.event);
-        const onDidChangeComponentsStub = sandbox.stub(OdoWorkspace.prototype, 'onDidChangeComponents');
-        sandbox.stub(Odo.prototype, 'describeComponent').callsFake((contextPath: string): Promise<ComponentDescription | undefined> => {
-            if (contextPath.includes('/comp', contextPath.lastIndexOf(path.sep))) {
-                return Promise.resolve({} as ComponentDescription);
-            }
-            return Promise.resolve<undefined>(undefined);
-        });
-        const ws = new OdoWorkspace();
+        const onDidChangeComponentsStub = sandbox.stub(ComponentWorkspace.prototype, 'onDidChangeComponents');
+        stubDescribeComponentCall();
+        const ws = new ComponentWorkspace();
         await ws.getComponents();
         return new Promise((resolve, reject) => {
             ws.onDidWorkspaceFoldersChangeProcessed(() => {
@@ -105,7 +108,7 @@ suite('Odo/Workspace', () => {
         const changeWorkspaceFolders = new vscode.EventEmitter<vscode.WorkspaceFoldersChangeEvent>();
         sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').value(changeWorkspaceFolders.event);
         stubDescribeComponentCall();
-        const ws = new OdoWorkspace();
+        const ws = new ComponentWorkspace();
         await ws.getComponents();
         return new Promise((resolve, reject) => {
             ws.onDidChangeComponents((event) => {
@@ -135,7 +138,7 @@ suite('Odo/Workspace', () => {
         initWorkspaceFolders();
         const changeWorkspaceFolders = new vscode.EventEmitter<vscode.WorkspaceFoldersChangeEvent>();
         sandbox.stub(vscode.workspace, 'onDidChangeWorkspaceFolders').value(changeWorkspaceFolders.event);
-        const ws = new OdoWorkspace();
+        const ws = new ComponentWorkspace();
         await ws.getComponents();
         return new Promise((resolve, reject) => {
             ws.onDidChangeComponents((event) => {

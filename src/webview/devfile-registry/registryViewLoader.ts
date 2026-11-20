@@ -5,8 +5,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { ColorTheme, Disposable, Uri, ViewColumn, WebviewPanel, commands, extensions, window, workspace } from 'vscode';
-import { Registry } from '../../odo/componentType';
-import { Odo } from '../../odo/odoWrapper';
+import { createChannelLogger, initComponent } from '../../devfile/init';
+import { DevfileRegistryInfo } from '../../devfile-registry/devfileInfo';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { ExtensionID } from '../../util/constants';
@@ -57,15 +57,16 @@ async function devfileRegistryViewerMessageListener(event: any): Promise<any> {
             const componentFolder = path.join(projectFolder, componentName);
             try {
                 await fs.mkdir(componentFolder);
-                await Odo.Instance.createComponentFromTemplateProject(
-                    componentFolder,
-                    componentName,
-                    portNumber,
-                    templateProject.devfileId,
+                await initComponent({
+                    name: componentName,
+                    projectPath: componentFolder,
+                    registryDevfile: templateProject.devfileId,
                     devfileVersion,
-                    templateProject.registryName,
-                    templateProject.templateProjectName,
-                );
+                    registry: templateProject.registryName,
+                    starterProject: templateProject.templateProjectName,
+                    runPort: portNumber,
+                    logger: createChannelLogger(),
+                });
                 RegistryViewLoader.panel.dispose();
                 if (
                     event.data.addToWorkspace &&
@@ -255,7 +256,7 @@ export default class RegistryViewLoader implements Disposable {
     }
 
     @vsCommand('openshift.componentTypesView.registry.openInEditor')
-    public static async openRegistryInEditor(context: Registry): Promise<void> {
+    public static async openRegistryInEditor(context: DevfileRegistryInfo): Promise<void> {
         await RegistryViewLoader.loadView(`Devfile Registry - ${context.name}`, context.url);
     }
 

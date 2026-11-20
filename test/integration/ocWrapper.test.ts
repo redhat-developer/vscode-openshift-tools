@@ -7,11 +7,13 @@ import { KubeConfig } from '@kubernetes/client-node';
 import { fail } from 'assert';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import * as tmp from 'tmp';
 import { promisify } from 'util';
 import { parse } from 'yaml';
 import { CommandText } from '../../src/base/command';
 import { CliChannel } from '../../src/cli';
+import { initComponent } from '../../src/devfile/init';
 import { Oc } from '../../src/oc/ocWrapper';
 import { Project } from '../../src/oc/project';
 import { ClusterType } from '../../src/oc/types';
@@ -396,6 +398,36 @@ suite('./oc/ocWrapper.ts', function () {
         const actual: boolean = await Oc.Instance.canIGetCRDs();
 
         expect(actual).to.equal(expected);
+    });
+
+    suite('component configuration', function () {
+        let tmpFolder: string;
+
+        suiteSetup(async function () {
+            tmpFolder = await promisify(tmp.dir)();
+            await initComponent({
+                projectPath: tmpFolder,
+                name: 'my-component',
+                registryDevfile: 'dotnet80',
+                devfileVersion: 'latest',
+                starterProject: 'dotnet80-example',
+                runPort: 8080
+            });
+        });
+
+        suiteTeardown(async function () {
+            await fs.rm(tmpFolder, { recursive: true, force: true });
+        });
+
+        test('deleteComponentConfiguration()', async function () {
+            await Oc.Instance.deleteComponentConfiguration(tmpFolder);
+            try {
+                await fs.access(path.join(tmpFolder, 'devfile.yaml'));
+                fail('devfile.yaml should have been deleted');
+            } catch {
+                // deleted successfully
+            }
+        });
     });
 
 });
