@@ -115,13 +115,12 @@ export class PodmanDevPlatform implements DevPlatform {
         // Create pod and containers
         output.onOutput('Creating pod...');
         try {
-            // Create pod with global flags for CI/rootless compatibility:
-            // --events-backend=file: avoids dbus dependency (GitHub Actions, rootless environments)
-            // --cgroup-manager=cgroupfs: works without systemd (matches odo behavior)
-            // Note: these are GLOBAL podman flags and must come before the subcommand
+            // Create pod with global flags for CI/rootless compatibility
+            // (dropped automatically when the podman CLI is remote — see
+            // engineCompatibilityFlags); these are GLOBAL podman flags and
+            // must come before the subcommand
             await this.run('podman', [
-                '--events-backend=file',
-                '--cgroup-manager=cgroupfs',
+                ...await this.engineCompatibilityFlags(),
                 'pod', 'create',
                 '--name', podName,
                 ...portMappings.flatMap(m => ['-p', `${m.localPort}:${m.targetPort}`]),
@@ -134,8 +133,8 @@ export class PodmanDevPlatform implements DevPlatform {
                     component.name === runContainerName ? workingDir : undefined,
                     component.name === runContainerName ? fullCommandLine : undefined,
                 );
-                // Prepend global flags before subcommand args
-                await this.run('podman', ['--events-backend=file', '--cgroup-manager=cgroupfs', ...args]);
+                // Prepend global flags (when supported) before subcommand args
+                await this.run('podman', [...await this.engineCompatibilityFlags(), ...args]);
             }
 
             // Wait for the run container to be ready before syncing
@@ -223,8 +222,7 @@ export class PodmanDevPlatform implements DevPlatform {
     async restartRunCommand(session: DevPlatformSession): Promise<void> {
         const s = session as PodmanDevSession;
         await this.run('podman', [
-            '--events-backend=file',
-            '--cgroup-manager=cgroupfs',
+            ...await this.engineCompatibilityFlags(),
             'restart',
             '--time', `${STOP_GRACE_PERIOD_SECONDS}`,
             s.runContainerName
@@ -447,6 +445,39 @@ export class PodmanDevPlatform implements DevPlatform {
         if (result.error) {
             throw new Error(`Failed to remove files from container: ${result.stderr || result.error.message}`);
         }
+    }
+
+    /**
+     * Global engine-side flags that make podman work without dbus/systemd
+     * (GitHub Actions, rootless environments without a user session).
+     *
+     * The podman CLI only accepts them when driving a local engine: a remote
+     * client (podman machine on macOS/Windows, or CONTAINER_HOST pointing at
+     * a `podman system service`) rejects them with "unknown flag". They are
+     * environment workarounds rather than functional requirements, so probe
+     * once whether the CLI supports them and drop them when it does not.
+     */
+    private static engineFlagsSupported: boolean | undefined;
+
+    private async engineCompatibilityFlags(): Promise<string[]> {
+        if (PodmanDevPlatform.engineFlagsSupported === undefined) {
+            let supported: boolean;
+
+            try {
+                const probe = await ChildProcessUtil.Instance.execute(
+                    'podman --events-backend=file --cgroup-manager=cgroupfs version'
+                );
+                supported = !probe.error;
+            } catch {
+                supported = false;
+            }
+
+            PodmanDevPlatform.engineFlagsSupported = supported;
+        }
+
+        return PodmanDevPlatform.engineFlagsSupported
+            ? ['--events-backend=file', '--cgroup-manager=cgroupfs']
+            : [];
     }
 
     private async run(command: string, args: string[]): Promise<void> {
