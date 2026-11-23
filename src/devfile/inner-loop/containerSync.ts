@@ -105,7 +105,8 @@ export async function pushFiles(
     // Buffer the entire tar stream
     const chunks: Buffer[] = [];
     await new Promise<void>((resolve, reject) => {
-        tarStream.on('data', (chunk) => chunks.push(chunk));
+        // tar-stream (streamx-based) types 'data' chunks as unknown, but tar.pack emits Buffers
+        tarStream.on('data', (chunk) => chunks.push(chunk as Buffer));
         tarStream.on('end', () => resolve());
         tarStream.on('error', reject);
     });
