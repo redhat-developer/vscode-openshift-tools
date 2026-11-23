@@ -13,3 +13,10 @@ public/
 test-resources/
 .DS_Store
 .claude/
+
+# act-based local CI runner (build/act) runtime artifacts
+build/act/artifacts/
+build/act/.npm-cache/
+build/act/continuous-integration-workflow.act.yml
+build/act/podman-docker.sock
+build/act/podman-service.pid
