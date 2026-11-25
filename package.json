@@ -90,7 +90,7 @@
 		"@eslint/js": "^10.0.1",
 		"@kubernetes/client-node": "^2.0.2",
 		"@mui/icons-material": "^9.5.0",
-		"@mui/lab": "^9.0.0-beta.10",
+		"@mui/lab": "^10.0.0-alpha.0",
 		"@mui/material": "^9.4.0",
 		"@mui/x-tree-view": "^9.18.0",
 		"@redhat-developer/vscode-redhat-telemetry": "^0.10.2",
