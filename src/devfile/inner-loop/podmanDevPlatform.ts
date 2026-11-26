@@ -11,7 +11,7 @@ import { VariableResolver } from '../variableResolver';
 import { DevPlatform, DevPlatformKind, DevPlatformOutput, DevPlatformSession } from './devPlatform';
 import { ChildProcessUtil, CliExitData } from '../../util/childProcessUtil';
 import { Util } from '../../util/utils';
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ComponentWorkspaceFolder } from '../workspace';
 import { buildUsablePortPair } from '../../port-forward';
 import { listSyncableFiles } from './clusterDevPlatform';
 import { resolveIgnoreRules } from './fileSync';
@@ -63,7 +63,7 @@ export class PodmanDevPlatform implements DevPlatform {
         const componentName = devfile.metadata.name;
         const podName = `${componentName}-dev`;
 
-        // Output header similar to odo
+        // Output header similar to dev mode output
         output.onOutput(`Developing using the "${componentName}" Devfile`);
         output.onOutput('Platform: podman');
         output.onOutput('');

@@ -103,10 +103,10 @@ export function createComponentTest(contextFolder: string) {
             // wait for component to stop running.
             // the component name changes to
             // `component-name (stopping)`
-            // while `odo dev` is stopping
+            // while dev mode is stopping
             // then it returns to
             // `component-name`
-            // when `odo dev` has stopped
+            // when dev mode has stopped
             await itemExists(compName, components, 60_000);
         });
 

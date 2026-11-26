@@ -4,8 +4,8 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { EventEmitter, workspace, WorkspaceFolder } from 'vscode';
-import { ComponentDescription } from '../devfile/componentTypeDescription';
-import { Odo } from './odoWrapper';
+import { ComponentDescription } from './componentTypeDescription';
+import { describeComponent } from './describe';
 
 export interface ComponentWorkspaceFolder {
     contextPath: string;
@@ -19,7 +19,7 @@ export interface ComponentsChangeEvent {
 
 async function mapFoldersToComponents(folders: readonly WorkspaceFolder[]): Promise<ComponentWorkspaceFolder[]> {
     const descriptions = folders.map(
-        (folder) => Odo.Instance.describeComponent(folder.uri.fsPath)
+        (folder) => describeComponent(folder.uri.fsPath)
             .then((component: ComponentDescription) => {
                 return {
                     contextPath: folder.uri.fsPath,
@@ -31,7 +31,7 @@ async function mapFoldersToComponents(folders: readonly WorkspaceFolder[]): Prom
     return results.filter((compFolder) => !!compFolder.component);
 }
 
-export class OdoWorkspace {
+export class ComponentWorkspace {
 
     private components: ComponentWorkspaceFolder[];
     private componentsChange = new EventEmitter<ComponentsChangeEvent>();

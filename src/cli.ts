@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { VSCodeSettings } from '@redhat-developer/vscode-redhat-telemetry/lib/common/vscode/settings';
 import * as cp from 'child_process';
 import { CommandText } from './base/command';
 import { ToolNotFoundError, ToolsConfig } from './tools';
@@ -13,7 +12,6 @@ import { VsCommandError } from './vscommand';
 
 export class CliChannel {
 
-    private static telemetrySettings = new VSCodeSettings();
     private static instance: CliChannel;
 
     static getInstance(): CliChannel {
@@ -28,17 +26,10 @@ export class CliChannel {
     }
 
     static createTelemetryEnv(): {[key:string]: string} {
-        const env = {
+        return {
             ...process.env,
             TELEMETRY_CALLER: 'vscode',
-            ODO_TRACKING_CONSENT: 'no',
         };
-
-        if (CliChannel.telemetrySettings.isTelemetryEnabled()) {
-            env.ODO_TRACKING_CONSENT = process.env.VSCODE_REDHAT_TELEMETRY_DEBUG === 'true' ? 'no' : 'yes';
-        }
-
-        return env;
     }
 
     static applyEnv<T extends cp.ProcessEnvOptions>(opts: T, env: {[key:string]: string}): cp.ExecOptions {

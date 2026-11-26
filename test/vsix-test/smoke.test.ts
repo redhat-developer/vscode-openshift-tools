@@ -13,8 +13,10 @@ suite('vsix install tests', () => {
 
     test('verify tools', async () => {
         const paths = await extensions.getExtension('redhat.vscode-openshift-connector').exports.verifyBundledBinaries();
-        if (!paths.odoPath) throw Error('odo binary is missing');
         if (!paths.ocPath) throw Error('oc binary is missing');
+        if (!paths.funcPath) throw Error('func binary is missing');
+        if (!paths.helmPath) throw Error('helm binary is missing');
+        if (!paths.alizerPath) throw Error('alizer binary is missing');
     });
 
 });

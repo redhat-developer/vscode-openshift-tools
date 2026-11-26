@@ -13,7 +13,7 @@ import { ComponentDescription, Data } from '../../../src/devfile/componentTypeDe
 import { ClusterDevPlatform } from '../../../src/devfile/inner-loop/clusterDevPlatform';
 import { DevPlatformSession } from '../../../src/devfile/inner-loop/devPlatform';
 import { Oc } from '../../../src/oc/ocWrapper';
-import { ComponentWorkspaceFolder } from '../../../src/odo/workspace';
+import { ComponentWorkspaceFolder } from '../../../src/devfile/workspace';
 import { connectAndRead } from './netTestUtils';
 
 const COMPONENT_NAME = 'cluster-dev-platform-it';
@@ -60,7 +60,7 @@ function buildComponentFolder(contextPath: string, devfile: Data): ComponentWork
             devfileData: {
                 devfile,
                 commands: [],
-                supportedOdoFeatures: { debug: false, deploy: false, dev: true },
+                supportedFeatures: { debug: false, deploy: false, dev: true },
             },
             devForwardedPorts: [],
             runningIn: [],

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ComponentWorkspaceFolder } from '../workspace';
 import { CommandResolver } from '../commandResolver';
 import { Data } from '../componentTypeDescription';
 import { ClusterDevPlatform, listSyncableFiles } from './clusterDevPlatform';
@@ -14,7 +14,7 @@ import { PodmanDevPlatform } from './podmanDevPlatform';
 export interface DevSessionOptions {
     debug?: boolean;
     runOn?: 'podman';
-    /** Mirrors `odo dev --no-watch`: skip setting up the file watcher entirely. */
+    /** Skips setting up the file watcher entirely (watch-less dev mode). */
     manualRebuild?: boolean;
 }
 

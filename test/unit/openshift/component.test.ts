@@ -19,8 +19,7 @@ import { DevfileRegistry } from '../../../src/devfile-registry/devfileRegistryWr
 import { Oc } from '../../../src/oc/ocWrapper';
 import { Project } from '../../../src/oc/project';
 import { CommandProvider } from '../../../src/devfile/componentTypeDescription';
-import { Odo } from '../../../src/odo/odoWrapper';
-import { ComponentWorkspaceFolder, OdoWorkspace } from '../../../src/odo/workspace';
+import { ComponentWorkspaceFolder, ComponentWorkspace } from '../../../src/devfile/workspace';
 import * as openShiftComponent from '../../../src/openshift/component';
 import { Util } from '../../../src/util/async';
 import { Util as fsp } from '../../../src/util/utils';
@@ -33,7 +32,7 @@ chai.use(sinonChai);
 
 suite('OpenShift/Component', function () {
     let sandbox: sinon.SinonSandbox;
-    let execStub: sinon.SinonStub; let ocExecStub: sinon.SinonStub;
+    let ocExecStub: sinon.SinonStub; let describeComponentStub: sinon.SinonStub;
     const fixtureFolder = path.join(__dirname, '..', '..', '..', 'test', 'fixtures').normalize();
     const comp1Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp1'));
     const comp2Uri = vscode.Uri.file(path.join(fixtureFolder, 'components', 'comp2'));
@@ -114,7 +113,7 @@ suite('OpenShift/Component', function () {
                     }
                 },
                 commands: [],
-                supportedOdoFeatures: {
+                supportedFeatures: {
                     debug: true,
                     deploy: true,
                     dev: true
@@ -122,7 +121,7 @@ suite('OpenShift/Component', function () {
             },
             runningIn: null,
             runningOn: null,
-            managedBy: 'odo',
+            managedBy: 'openshift-toolkit',
             devForwardedPorts: []
         }
     };
@@ -200,7 +199,7 @@ suite('OpenShift/Component', function () {
                     }
                 },
                 commands: [],
-                supportedOdoFeatures: {
+                supportedFeatures: {
                     debug: true,
                     deploy: true,
                     dev: true
@@ -208,7 +207,7 @@ suite('OpenShift/Component', function () {
             },
             runningIn: null,
             runningOn: null,
-            managedBy: 'odo',
+            managedBy: 'openshift-toolkit',
             devForwardedPorts: []
         }
     };
@@ -219,13 +218,16 @@ suite('OpenShift/Component', function () {
         sandbox = sinon.createSandbox();
         sandbox.stub(vscode.workspace, 'updateWorkspaceFolders');
 
-        Component = pq('../../../src/openshift/component', {}).Component;
+        describeComponentStub = sandbox.stub().resolves(componentItem1.component);
+        Component = pq('../../../src/openshift/component', {
+            '../devfile/describe': {
+                describeComponent: describeComponentStub
+            }
+        }).Component;
 
-        execStub = sandbox.stub(Odo.prototype, 'execute').resolves({ stdout: '', stderr: undefined, error: undefined });
         ocExecStub = sandbox.stub(CliChannel.prototype, 'executeTool').resolves({ stdout: '', stderr: '', error: undefined });
         sandbox.stub(Oc.prototype, 'getProjects').resolves([projectItem]);
-        sandbox.stub(Odo.prototype, 'describeComponent').resolves(componentItem1.component);
-        sandbox.stub(OdoWorkspace.prototype, 'getComponents').resolves([componentItem1]);
+        sandbox.stub(ComponentWorkspace.prototype, 'getComponents').resolves([componentItem1]);
         sandbox.stub(Util, 'wait').resolves();
         commandStub = sandbox.stub(vscode.commands, 'executeCommand').resolves();
         sandbox.stub()
@@ -256,7 +258,7 @@ suite('OpenShift/Component', function () {
         });
 
         setup(function () {
-            execStub.reset();
+            ocExecStub.reset();
             showWarningMessageStub.resetBehavior();
         });
 
@@ -297,7 +299,7 @@ suite('OpenShift/Component', function () {
                 },
                 contextPath: wsFolder1.uri.fsPath
             } as ComponentWorkspaceFolder);
-            expect(execStub).to.not.be.called;
+            expect(ocExecStub).to.not.be.called;
         });
 
     });
@@ -362,8 +364,8 @@ suite('OpenShift/Component', function () {
             sinon.restore();
         });
 
-        test('calls the correct odo command', async function () {
-            // As `odo describe` has removed, now we need to check the OpenShift terminal output
+        test('runs the dev session in the OpenShift terminal', async function () {
+            // We need to check the OpenShift terminal output
             // instead of stubbing 'executeInTerminal' expecting the command to be invoked on the terminal
             const compName = componentItem2.component.devfileData.devfile.metadata.name
 
@@ -423,7 +425,7 @@ suite('OpenShift/Component', function () {
         test('without context exits if no component selected', async () => {
             const result = await Component.debug(undefined);
             expect(result).is.null;
-            expect(execStub).not.called;
+            expect(ocExecStub).not.called;
         });
 
         test('add/remove debug session to collection when debug started/stopped', () => {
@@ -449,7 +451,7 @@ suite('OpenShift/Component', function () {
                     contextPath: {
                         fsPath: '/path/to/component'
                     },
-                    odoPid: 1
+                    devPid: 1
                 }
             };
             didStart(session);
@@ -560,7 +562,7 @@ suite('OpenShift/Component', function () {
             expect(caughtError).not.undefined;
         });
 
-        test('throws error if odo port-forwarding command fails', async () => {
+        test('throws error if the port-forwarding command fails', async () => {
             const startDebugging = sandbox.stub().resolves(false);
             Component = mockComponent(startDebugging, 1);
 

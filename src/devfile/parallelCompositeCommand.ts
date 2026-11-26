@@ -4,7 +4,7 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { Command } from './componentTypeDescription';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { DevfileCommandRunner } from './devfileCommandRunner';
 
 export class ParallelCompositeCommand {

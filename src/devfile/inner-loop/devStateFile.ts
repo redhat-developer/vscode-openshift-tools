@@ -4,22 +4,19 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import { DevState } from '../componentTypeDescription';
-
-function devStateFilePath(componentPath: string): string {
-    return path.join(componentPath, '.odo', 'devstate.json');
-}
+import { legacyStateFilePath, readStateFile, stateFilePath, writeStateFile } from '../stateDirectory';
 
 export async function saveDevState(state: DevState, componentPath: string): Promise<void> {
-    const odoDir = path.join(componentPath, '.odo');
-    await fs.mkdir(odoDir, { recursive: true });
-    await fs.writeFile(devStateFilePath(componentPath), JSON.stringify(state, null, 2), 'utf-8');
+    await writeStateFile(componentPath, 'devstate.json', JSON.stringify(state, null, 2));
 }
 
 export async function loadDevState(componentPath: string): Promise<DevState | null> {
+    const raw = await readStateFile(componentPath, 'devstate.json');
+    if (raw === null) {
+        return null;
+    }
     try {
-        const raw = await fs.readFile(devStateFilePath(componentPath), 'utf-8');
         return JSON.parse(raw) as DevState;
     } catch {
         return null;
@@ -27,5 +24,7 @@ export async function loadDevState(componentPath: string): Promise<DevState | nu
 }
 
 export async function clearDevState(componentPath: string): Promise<void> {
-    await fs.unlink(devStateFilePath(componentPath)).catch(() => {});
+    await fs.unlink(stateFilePath(componentPath, 'devstate.json')).catch(() => {});
+    // also remove the file written by older extension versions
+    await fs.unlink(legacyStateFilePath(componentPath, 'devstate.json')).catch(() => {});
 }

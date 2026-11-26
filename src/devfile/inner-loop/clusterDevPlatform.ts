@@ -8,7 +8,7 @@ import * as fs from 'fs/promises';
 import { Ignore } from 'ignore';
 import * as path from 'path';
 import { Oc } from '../../oc/ocWrapper';
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ComponentWorkspaceFolder } from '../workspace';
 import { CommandResolver } from '../commandResolver';
 import { Data, DevStateForwardedPort } from '../componentTypeDescription';
 import { getCurrentClusterAndNamespace } from '../deployStateFile';
@@ -52,7 +52,7 @@ export class ClusterDevPlatform implements DevPlatform {
         kc.loadFromDefault();
         const { namespace } = await getCurrentClusterAndNamespace();
 
-        // Output header similar to odo
+        // Output header similar to dev mode output
         output.onOutput(`Developing using the "${componentName}" Devfile`);
         output.onOutput(`Namespace: ${namespace}`);
         output.onOutput('');

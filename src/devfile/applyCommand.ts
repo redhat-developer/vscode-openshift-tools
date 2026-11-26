@@ -15,7 +15,7 @@ import { KubernetesVariant } from '../oc/types';
 import { ToolsConfig } from '../tools';
 import { Apply, DeployedResource } from './componentTypeDescription';
 import { getOpenShiftRegistryUrl, resolveClusterPlatform } from '../util/kubeUtils';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from './workspace';
 import { TokenStore } from '../util/credentialManager';
 import { ContainerRuntimeDetector } from '../util/containerRuntime';
 import { OpenShiftTerminalManager } from '../webview/openshift-terminal/openShiftTerminal';
