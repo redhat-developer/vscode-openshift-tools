@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { createTheme, ThemeProvider } from '@mui/material';
-import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import Header from './cluster';
 import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';

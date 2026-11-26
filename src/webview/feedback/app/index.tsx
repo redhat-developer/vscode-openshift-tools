@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { createRoot } from 'react-dom/client';
-import * as React from 'react';
 import { FeedbackComponent } from './feedback';
 import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 import './index.css';

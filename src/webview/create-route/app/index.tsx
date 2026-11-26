@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 import { createRoot } from 'react-dom/client';
-import * as React from 'react';
 import { CreateService } from './createForm';
 import { WebviewErrorBoundary } from '../../common/webviewErrorBoundary';
 

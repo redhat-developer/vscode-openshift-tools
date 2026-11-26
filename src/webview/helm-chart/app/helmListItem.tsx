@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import { Launch } from '@mui/icons-material';
 import { Box, Button, Chip, Link, Stack, SvgIcon, Tooltip, Typography } from '@mui/material';
-import * as React from 'react';
 import HelmIcon from '../../../../images/helm/helm.svg';
 import { Chart, ChartResponse } from '../../../helm/helmChartType';
 import { VSCodeMessage } from '../vsCodeMessage';
