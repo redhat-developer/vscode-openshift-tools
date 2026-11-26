@@ -12,28 +12,21 @@ $ npm run todo
 > leasot **/*.ts --ignore node_modules -x
 
 
-src/cli.ts
-  line 55   TODO  Refactor to OdoCli or OpenShiftCli class
-
-src/odo.ts
-  line 12   TODO  Review classes hierarchy
-  line 717  TODO  load projects form workspace folders and add missing ones to the model even they
-
 test/coverage.ts
-  line 103  TODO  consider putting this under a conditional flag
-  line 122  TODO  Allow config of reporting directory with
+  line  103  TODO  consider putting this under a conditional flag
+  line  122  TODO  Allow config of reporting directory with
 
 src/openshift/component.ts
-  line 183  TODO  fix eslint rule violation
+  line  183  TODO  fix eslint rule violation
 
- × 6 todos/fixmes found
+ × 3 todos/fixmes found
 ```
 
 # Known Problems
 
 ## Trigger github-actions build after failure related to infrastructure
 
-If build fails because it cannot download oc and odo binaries, there is no way to trigger new
+If build fails because it cannot download oc binaries, there is no way to trigger new
 build through github.com ui. To trigger new build just use
 
 ```

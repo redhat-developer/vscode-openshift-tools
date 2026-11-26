@@ -30,11 +30,29 @@ suite('devfile/inner-loop/devStateFile.ts', () => {
         });
 
         test('returns null when devstate.json is invalid JSON', async () => {
-            await fs.mkdir(path.join(componentPath, '.odo'), { recursive: true });
-            await fs.writeFile(path.join(componentPath, '.odo', 'devstate.json'), 'not json', 'utf-8');
+            await fs.mkdir(path.join(componentPath, '.openshift-toolkit'), { recursive: true });
+            await fs.writeFile(path.join(componentPath, '.openshift-toolkit', 'devstate.json'), 'not json', 'utf-8');
 
             const result = await loadDevState(componentPath);
             expect(result).to.be.null;
+        });
+
+        test('falls back to the legacy .odo location written by older extension versions', async () => {
+            const state: DevState = { pid: 42, platform: 'cluster' };
+            await fs.mkdir(path.join(componentPath, '.odo'), { recursive: true });
+            await fs.writeFile(path.join(componentPath, '.odo', 'devstate.json'), JSON.stringify(state), 'utf-8');
+
+            const result = await loadDevState(componentPath);
+            expect(result).to.deep.equal(state);
+        });
+
+        test('prefers the .openshift-toolkit file over the legacy .odo one', async () => {
+            await fs.mkdir(path.join(componentPath, '.odo'), { recursive: true });
+            await fs.writeFile(path.join(componentPath, '.odo', 'devstate.json'), JSON.stringify({ pid: 1, platform: 'cluster' }), 'utf-8');
+            await saveDevState({ pid: 2, platform: 'podman' }, componentPath);
+
+            const result = await loadDevState(componentPath);
+            expect(result).to.deep.equal({ pid: 2, platform: 'podman' });
         });
     });
 
@@ -82,12 +100,12 @@ suite('devfile/inner-loop/devStateFile.ts', () => {
             expect(result).to.deep.equal(state);
         });
 
-        test('creates the .odo directory if it does not already exist', async () => {
+        test('creates the .openshift-toolkit directory if it does not already exist', async () => {
             const state: DevState = { pid: 1, platform: 'cluster' };
 
             await saveDevState(state, componentPath);
 
-            const stat = await fs.stat(path.join(componentPath, '.odo', 'devstate.json'));
+            const stat = await fs.stat(path.join(componentPath, '.openshift-toolkit', 'devstate.json'));
             expect(stat.isFile()).to.be.true;
         });
 
@@ -103,6 +121,16 @@ suite('devfile/inner-loop/devStateFile.ts', () => {
     suite('clearDevState()', () => {
         test('removes an existing devstate.json', async () => {
             await saveDevState({ pid: 1, platform: 'cluster' }, componentPath);
+
+            await clearDevState(componentPath);
+
+            const result = await loadDevState(componentPath);
+            expect(result).to.be.null;
+        });
+
+        test('removes a legacy .odo devstate.json', async () => {
+            await fs.mkdir(path.join(componentPath, '.odo'), { recursive: true });
+            await fs.writeFile(path.join(componentPath, '.odo', 'devstate.json'), JSON.stringify({ pid: 1, platform: 'cluster' }), 'utf-8');
 
             await clearDevState(componentPath);
 

@@ -10,18 +10,18 @@ import * as path from 'path';
 import { which } from 'shelljs';
 import { commands, debug, DebugConfiguration, DebugSession, Disposable, extensions, ProgressLocation, Uri, window, workspace } from 'vscode';
 import { deployComponent } from '../devfile/deploy';
-import { deployContextKey } from '../devfile/deployStateFile';
-import { describeComponentYAML } from '../devfile/describe';
+import { deployContextKey, deployStateFilePath } from '../devfile/deployStateFile';
+import { describeComponent, describeComponentYAML } from '../devfile/describe';
 import { forceStopDevSession, startDevSession, stopDevSession, syncDevSession } from '../devfile/dev';
 import { DevfileCommandRunner } from '../devfile/devfileCommandRunner';
 import { createDevTerminalBridge } from '../devfile/inner-loop/devTerminalBridge';
 import { undeployComponent } from '../devfile/undeploy';
 import { OpenShiftExplorer } from '../explorer';
 import { BindableService } from '../k8s/servicebinding/bindableService';
+import { BindingRecord, loadBindingRecords } from '../k8s/servicebinding/bindingStateFile';
 import { Oc } from '../oc/ocWrapper';
 import { CommandProvider, DeployState } from '../devfile/componentTypeDescription';
-import { Odo } from '../odo/odoWrapper';
-import { ComponentWorkspaceFolder } from '../odo/workspace';
+import { ComponentWorkspaceFolder } from '../devfile/workspace';
 import sendTelemetry from '../telemetry';
 import { ChildProcessUtil, CliExitData, OpenshiftChannel } from '../util/childProcessUtil';
 import { Progress } from '../util/progress';
@@ -97,7 +97,7 @@ export class Component extends OpenShiftItem {
     ): Promise<void> {
         let shouldBeRunning = false;
         try {
-            const stateFile = path.join(contextPath, '.odo', 'deploystate.json');
+            const stateFile = deployStateFilePath(contextPath);
             const raw = await readFile(stateFile, 'utf-8');
             const parsed = JSON.parse(raw);
             if (parsed.version === 1 && !parsed.deployments) {
@@ -154,11 +154,11 @@ export class Component extends OpenShiftItem {
         let state = componentStates.get(folder.contextPath);
         if (!state) {
             state = {
-                devStatus: folder.component?.devfileData?.supportedOdoFeatures?.dev ? ComponentContextState.DEV : undefined,
-                debugStatus: folder.component?.devfileData?.supportedOdoFeatures?.debug ? ComponentContextState.DEB : undefined,
-                deployStatus: folder.component?.devfileData?.supportedOdoFeatures?.deploy ? ComponentContextState.DEP : undefined,
+                devStatus: folder.component?.devfileData?.supportedFeatures?.dev ? ComponentContextState.DEV : undefined,
+                debugStatus: folder.component?.devfileData?.supportedFeatures?.debug ? ComponentContextState.DEB : undefined,
+                deployStatus: folder.component?.devfileData?.supportedFeatures?.deploy ? ComponentContextState.DEP : undefined,
             };
-            if (folder.component?.devfileData?.supportedOdoFeatures !== undefined) {
+            if (folder.component?.devfileData?.supportedFeatures !== undefined) {
                 componentStates.set(folder.contextPath, state);
                 if (state.deployStatus === ComponentContextState.DEP) {
                     void Component.detectDeployedState(folder);
@@ -404,7 +404,7 @@ export class Component extends OpenShiftItem {
                     void AddServiceBindingViewLoader.loadView(
                         component.contextPath,
                         bindableServices.map(
-                            (service) => `${service.metadata.namespace}/${service.metadata.name}`,
+                            (service) => `${service.kind}: ${service.metadata.namespace}/${service.metadata.name}`,
                         ),
                         component.component.devfileData.devfile.metadata.name,
                         (panel) => {
@@ -435,7 +435,7 @@ export class Component extends OpenShiftItem {
 
         const selectedServiceObject = bindableServices.filter(
             (service) =>
-                `${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
+                `${service.kind}: ${service.metadata.namespace}/${service.metadata.name}` === formResponse.selectedService,
         )[0];
 
         void sendTelemetry('finishAddBindingWizard');
@@ -454,10 +454,66 @@ export class Component extends OpenShiftItem {
                 void window.showInformationMessage(
                     `Service binding '${formResponse.bindingName}' was created successfully.`,
                 );
+                void commands.executeCommand('openshift.componentsView.refresh');
             })
             .catch((error) => {
                 void window.showErrorMessage(
                     `Failed to create service binding: ${
+                        error instanceof Error ? error.message : String(error)
+                    }`,
+                );
+            });
+    }
+
+    @vsCommand('openshift.component.binding.remove')
+    @clusterRequired()
+    static async removeBinding(component: ComponentWorkspaceFolder & { record?: BindingRecord }) {
+        const records = await loadBindingRecords(component.contextPath);
+
+        if (records.length === 0) {
+            void window.showInformationMessage(
+                'No service bindings are recorded for this component.',
+            );
+            return;
+        }
+
+        // when invoked from a binding tree item, that binding is preselected
+        let bindingName: string | undefined = component.record?.name;
+
+        if (!bindingName) {
+            if (records.length === 1) {
+                bindingName = records[0].name;
+            } else {
+                const picked = await window.showQuickPick(
+                    records.map((record) => ({
+                        label: record.name,
+                        description: `${record.service.kind}: ${record.service.name}`,
+                    })),
+                    { placeHolder: 'Select the service binding to remove' },
+                );
+                bindingName = picked?.label;
+            }
+        }
+
+        if (!bindingName) {
+            return;
+        }
+
+        await Progress.execFunctionWithProgress(
+            `Removing service binding ${bindingName}`,
+            async () => {
+                await BindableService.Instance.removeBinding(component.contextPath, bindingName);
+            },
+        )
+            .then(() => {
+                void window.showInformationMessage(
+                    `Service binding '${bindingName}' was removed successfully.`,
+                );
+                void commands.executeCommand('openshift.componentsView.refresh');
+            })
+            .catch((error) => {
+                void window.showErrorMessage(
+                    `Failed to remove service binding: ${
                         error instanceof Error ? error.message : String(error)
                     }`,
                 );
@@ -520,7 +576,7 @@ export class Component extends OpenShiftItem {
             );
             cs.devTerminal = bridge.terminal;
 
-            const debugEnabled = component.component.devfileData.supportedOdoFeatures.debug;
+            const debugEnabled = component.component.devfileData.supportedFeatures.debug;
             await startDevSession(
                 component.component.devfileData.devfile,
                 component,
@@ -580,7 +636,7 @@ export class Component extends OpenShiftItem {
     @vsCommand('openshift.component.openInBrowser')
     @clusterRequired()
     static async openInBrowser(component: ComponentWorkspaceFolder): Promise<string | null | undefined> {
-        const componentDescription = await Odo.Instance.describeComponent(component.contextPath);
+        const componentDescription = await describeComponent(component.contextPath);
         if (componentDescription.devForwardedPorts?.length === 1) {
             const fp = componentDescription.devForwardedPorts[0];
             await commands.executeCommand('vscode.open', Uri.parse(`http://${fp.localAddress}:${fp.localPort}`));
@@ -598,10 +654,6 @@ export class Component extends OpenShiftItem {
             return null;
         }
         return 'No forwarded ports available for component yet. Pleas wait and try again.';
-    }
-
-    static createExperimentalEnv(componentFolder: ComponentWorkspaceFolder) {
-        return Component.getComponentDevState(componentFolder).runOn ? {ODO_EXPERIMENTAL_MODE: 'true'} : {};
     }
 
     static getDevPlatform(componentFolder: ComponentWorkspaceFolder): string {
@@ -696,7 +748,7 @@ export class Component extends OpenShiftItem {
                     }
                 }
                 if (jlsIsActive && jdIsActive) {
-                    result = Component.startOdoAndConnectDebugger(component, {
+                    result = Component.startDevAndConnectDebugger(component, {
                         name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                         type: 'java',
                         request: 'attach',
@@ -719,7 +771,7 @@ export class Component extends OpenShiftItem {
                     }
                 }
                 if (pythonExtIsInstalled) {
-                    result = Component.startOdoAndConnectDebugger(component, {
+                    result = Component.startDevAndConnectDebugger(component, {
                         name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                         type: 'python',
                         request: 'attach',
@@ -748,7 +800,7 @@ export class Component extends OpenShiftItem {
                     }
                 }
                 if (goExtIsInstalled) {
-                    result = Component.startOdoAndConnectDebugger(component, {
+                    result = Component.startDevAndConnectDebugger(component, {
                         name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                         type: 'go',
                         request: 'attach',
@@ -763,7 +815,7 @@ export class Component extends OpenShiftItem {
                     });
                 }
             } else {
-                result = Component.startOdoAndConnectDebugger(component, {
+                result = Component.startDevAndConnectDebugger(component, {
                     name: `Attach to '${component.component.devfileData.devfile.metadata.name}' component.`,
                     type: 'pwa-node',
                     request: 'attach',
@@ -778,8 +830,8 @@ export class Component extends OpenShiftItem {
         return result;
     }
 
-    static async startOdoAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
-            const componentDescription = await Odo.Instance.describeComponent(component.contextPath);
+    static async startDevAndConnectDebugger(component: ComponentWorkspaceFolder, config: DebugConfiguration): Promise<string> {
+            const componentDescription = await describeComponent(component.contextPath);
             if (componentDescription.devForwardedPorts?.length > 0) {
                 // try to find debug port
                 const debugPortsCandidates:number[] = [];

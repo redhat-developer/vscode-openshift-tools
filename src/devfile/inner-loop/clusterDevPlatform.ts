@@ -8,10 +8,12 @@ import * as fs from 'fs/promises';
 import { Ignore } from 'ignore';
 import * as path from 'path';
 import { Oc } from '../../oc/ocWrapper';
-import { ComponentWorkspaceFolder } from '../../odo/workspace';
+import { ComponentWorkspaceFolder } from '../workspace';
 import { CommandResolver } from '../commandResolver';
 import { Data, DevStateForwardedPort } from '../componentTypeDescription';
 import { getCurrentClusterAndNamespace } from '../deployStateFile';
+import { applyServiceBindings } from '../../k8s/servicebinding/bindingProjection';
+import { loadBindingRecords } from '../../k8s/servicebinding/bindingStateFile';
 import { pushFiles, removeFiles } from './containerSync';
 import { executeBuildCommand, RunCommandHandle, startRunCommand } from './devCommandExec';
 import { DevPlatform, DevPlatformKind, DevPlatformOutput, DevPlatformSession } from './devPlatform';
@@ -52,7 +54,7 @@ export class ClusterDevPlatform implements DevPlatform {
         kc.loadFromDefault();
         const { namespace } = await getCurrentClusterAndNamespace();
 
-        // Output header similar to odo
+        // Output header similar to dev mode output
         output.onOutput(`Developing using the "${componentName}" Devfile`);
         output.onOutput(`Namespace: ${namespace}`);
         output.onOutput('');
@@ -63,6 +65,18 @@ export class ClusterDevPlatform implements DevPlatform {
         output.onOutput('Creating pod...');
         try {
             const { deployment, service } = buildDevResources(devfile);
+
+            // re-apply service bindings recorded for this component: dev mode
+            // rebuilds the Deployment on every start, which would otherwise
+            // wipe client-side (projection-mode) bindings
+            const bindings = (await loadBindingRecords(componentFolder.contextPath))
+                .filter((binding) => binding.mode === 'projection');
+
+            if (bindings.length > 0) {
+                applyServiceBindings(deployment.spec.template.spec, bindings);
+                output.onOutput(`Applying service bindings: ${bindings.map((binding) => binding.name).join(', ')}`);
+            }
+
             await Oc.Instance.applyConfiguration(JSON.stringify(deployment));
             if (service) {
                 await Oc.Instance.applyConfiguration(JSON.stringify(service));

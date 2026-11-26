@@ -76,13 +76,30 @@ export default class AddServiceBindingViewLoader {
             'add-service-binding',
             panel,
         );
+
+        // The webview announces readiness from its index.html body onload
+        // ({command: 'ready'}). Messages posted before that point are silently
+        // dropped by VS Code — the React app's message listener is not
+        // registered yet — so the initial data must be sent in response.
+        // (Same handshake the create-service webview uses.)
+        panel.webview.onDidReceiveMessage((message: { command?: string }) => {
+            if (message.command === 'ready') {
+                void panel.webview.postMessage({
+                    action: 'setTheme',
+                    themeValue: vscode.window.activeColorTheme.kind,
+                });
+                void panel.webview.postMessage({
+                    action: 'setAvailableServices',
+                    availableServices,
+                });
+                void panel.webview.postMessage({
+                    action: 'setComponentName',
+                    componentName,
+                });
+            }
+        });
         panel.webview.onDidReceiveMessage(listenerFactory(panel));
 
-        // set theme
-        void panel.webview.postMessage({
-            action: 'setTheme',
-            themeValue: vscode.window.activeColorTheme.kind,
-        });
         const colorThemeDisposable = vscode.window.onDidChangeActiveColorTheme(async function (colorTheme: vscode.ColorTheme) {
             await panel.webview.postMessage({ action: 'setTheme', themeValue: colorTheme.kind });
         });
@@ -93,16 +110,6 @@ export default class AddServiceBindingViewLoader {
             AddServiceBindingViewLoader.views.delete(contextPath);
         });
         AddServiceBindingViewLoader.views.set(contextPath, panel);
-
-        // send initial data to panel
-        void panel.webview.postMessage({
-            action: 'setAvailableServices',
-            availableServices,
-        });
-        void panel.webview.postMessage({
-            action: 'setComponentName',
-            componentName,
-        });
 
         return Promise.resolve(panel);
     }

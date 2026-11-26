@@ -11,7 +11,6 @@ import * as tmp from 'tmp';
 import validator from 'validator';
 import { CommandOption, CommandText } from '../base/command';
 import { CliChannel } from '../cli';
-import { APIResourceList, BindableKinds } from '../k8s/servicebinding/bindableTypes';
 import { CliExitData } from '../util/childProcessUtil';
 import { isOpenShiftCluster, KubeConfigInfo, loadKubeConfig, serializeKubeConfig } from '../util/kubeUtils';
 import { ExecutionContext } from '../util/utils';
@@ -133,7 +132,7 @@ export class Oc {
         });
         try {
             await fs.writeFile(tempJsonFile, jsonString);
-            // call oc create -f path/to/file until odo does support creating services without component
+            // call oc create -f path/to/file, as services are created independently of components
             await CliChannel.getInstance().executeTool(
                 new CommandText('oc', 'create', [new CommandOption('-f', tempJsonFile)]),
             );
@@ -916,7 +915,7 @@ export class Oc {
         }
     }
 
-    async deleteOdoFiles(componentDir: string, componentName?: string): Promise<void> {
+    async deleteComponentStateFiles(componentDir: string, componentName?: string): Promise<void> {
         const devfiles = await findDevfiles(componentDir);
 
         for (const devfile of devfiles) {
@@ -925,7 +924,12 @@ export class Oc {
             }
         }
 
-        // Delete .odo directory
+        // Delete the extension's state directories
+        await fs.rm(path.join(componentDir, '.openshift-toolkit'), {
+            recursive: true,
+            force: true,
+        });
+        // Delete the legacy state directory written by older extension versions
         await fs.rm(path.join(componentDir, '.odo'), {
             recursive: true,
             force: true,
@@ -952,7 +956,8 @@ export class Oc {
 
     }
     /**
-     * Deletes all the odo configuration files associated with the component (`.odo`, `devfile.yaml`) located at the given path.
+     * Deletes all the component configuration files associated with the component
+     * (`.openshift-toolkit` state dir, legacy `.odo` dir, `devfile.yaml`) located at the given path.
      *
      * @param componentPath the path to the component
      */
@@ -1130,57 +1135,7 @@ export class Oc {
             // ignore
         }
 
-        await this.deleteOdoFiles(componentPath, componentName);
-    }
-
-    /**
-     * Returns the list of bindable kinds available in the cluster.
-     * @returns the list of bindable kinds available in the cluster, or an empty list if none are found
-     */
-    public async getBindableKinds(): Promise<BindableKinds> {
-        try {
-            const result = await CliChannel.getInstance().executeTool(
-                new CommandText(
-                    'oc',
-                    'get bindablekinds.binding.operators.coreos.com bindable-kinds',
-                    [new CommandOption('-o', 'json')],
-                ),
-            );
-
-            const bindableKinds = JSON.parse(result.stdout) as BindableKinds;
-
-            if (!bindableKinds.status) {
-                return { status: [] };
-            }
-
-            return bindableKinds;
-        } catch (error) {
-            if (error instanceof Error) {
-                return { status: [] };
-            }
-
-            throw error;
-        }
-    }
-
-    public async getApiResourceList(group: string, version: string): Promise<APIResourceList> {
-        try {
-            // Call /apis/{group}/{version} and get the JSON
-            const result = await CliChannel.getInstance().executeTool(
-                new CommandText(
-                    'oc',
-                    `get --raw /apis/${group}/${version}`,
-                ),
-            );
-
-            return JSON.parse(result.stdout) as APIResourceList;
-        } catch (error) {
-            if (error instanceof Error) {
-                return { resources: [] };
-            }
-
-            throw error;
-        }
+        await this.deleteComponentStateFiles(componentPath, componentName);
     }
 
     public async getComponentPod(componentName: string): Promise<string> {

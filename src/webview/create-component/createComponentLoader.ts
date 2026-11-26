@@ -16,7 +16,8 @@ import { AlizerDevfileResponse, Version } from '../../alizer/types';
 import { DevfileInfo, DevfileInfoExt, DevfileVersionInfo } from '../../devfile-registry/devfileInfo';
 import { DevfileRegistry } from '../../devfile-registry/devfileRegistryWrapper';
 import { Endpoint } from '../../devfile/componentTypeDescription';
-import { Odo } from '../../odo/odoWrapper';
+import { describeComponent } from '../../devfile/describe';
+import { createChannelLogger, initComponent } from '../../devfile/init';
 import { ComponentTypesView } from '../../registriesView';
 import sendTelemetry from '../../telemetry';
 import { getOpenShiftLogChannel } from '../../util/childProcessUtil';
@@ -361,15 +362,16 @@ export default class CreateComponentLoader {
                             message.data.templateProject;
                         componentFolder = path.join(projectFolder, componentName);
                         await fs.mkdir(componentFolder, {recursive: true});
-                        await Odo.Instance.createComponentFromTemplateProject(
-                            componentFolder,
-                            componentName,
-                            portNumber,
-                            templateProject.devfileId,
+                        await initComponent({
+                            name: componentName,
+                            projectPath: componentFolder,
+                            registryDevfile: templateProject.devfileId,
                             devfileVersion,
-                            templateProject.registryName,
-                            templateProject.templateProjectName,
-                        );
+                            registry: templateProject.registryName,
+                            starterProject: templateProject.templateProjectName,
+                            runPort: portNumber,
+                            logger: createChannelLogger(),
+                        });
                         await sendTelemetry('newComponentCreated', {
                             strategy: 'fromTemplateProject',
                             // eslint-disable-next-line camelcase
@@ -398,13 +400,14 @@ export default class CreateComponentLoader {
                         const devfileType = devfileInfo ? devfileInfo.name : message.data.devfileDisplayName;
                         const componentFolderUri = Uri.file(componentFolder);
                         if (!await isDevfileExists(componentFolderUri)) {
-                            await Odo.Instance.createComponentFromLocation(
-                                devfileType,
+                            await initComponent({
+                                name: componentName,
+                                projectPath: componentFolder,
+                                registryDevfile: devfileType,
                                 devfileVersion,
-                                componentName,
-                                portNumber,
-                                Uri.file(componentFolder),
-                            );
+                                runPort: portNumber,
+                                logger: createChannelLogger(),
+                            });
                         } else {
                             // Update component devfile with component's selected name
                             await CreateComponentLoader.updateDevfileWithComponentName(componentFolderUri, componentName);
@@ -509,11 +512,11 @@ export default class CreateComponentLoader {
             void CreateComponentLoader.panel.webview.postMessage({
                 action: 'getRecommendedDevfileStart'
             });
-            const componentDescription = await Odo.Instance.describeComponent(uri.fsPath);
+            const componentDescription = await describeComponent(uri.fsPath);
             if (componentDescription) {
                 rawDevfile = componentDescription.devfileData.devfile;
-                supportsDebug = componentDescription.devfileData.supportedOdoFeatures.debug;
-                supportsDeploy = componentDescription.devfileData.supportedOdoFeatures.deploy;
+                supportsDebug = componentDescription.devfileData.supportedFeatures.debug;
+                supportsDeploy = componentDescription.devfileData.supportedFeatures.deploy;
             }
         } catch {
             // Will try reading the raw devfile

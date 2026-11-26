@@ -1,0 +1,33 @@
+# Test fixture for the Bind Service UI/integration tests: a small
+# Provisioned Service CRD (its schema declares .status.binding.name) that
+# requires no operator on the cluster.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: uibindingservices.tools.openshift-toolkit.dev
+spec:
+  group: tools.openshift-toolkit.dev
+  names:
+    plural: uibindingservices
+    singular: uibindingservice
+    kind: UiBindingService
+    listKind: UiBindingServiceList
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+            status:
+              type: object
+              properties:
+                binding:
+                  type: object
+                  properties:
+                    name:
+                      type: string

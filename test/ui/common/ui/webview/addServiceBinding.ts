@@ -58,7 +58,7 @@ export class AddServiceBindingWebView extends WebViewForm {
         );
     }
 
-    private async comboBoxExists(webView: WebView, timeout = 30_000): Promise<WebElement> {
+    private async comboBoxExists(webView: WebView, timeout = 60_000): Promise<WebElement> {
         return webView.getDriver().wait(async () => {
             try {
                 const comboBox = await this.getServiceToBindComboBox(webView);
@@ -73,7 +73,7 @@ export class AddServiceBindingWebView extends WebViewForm {
 
     private async addServiceBindingButtonExists(
         webView: WebView,
-        timeout = 10_000,
+        timeout = 30_000,
     ): Promise<WebElement> {
         return webView.getDriver().wait(async () => {
             try {

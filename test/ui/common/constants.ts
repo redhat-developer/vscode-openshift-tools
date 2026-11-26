@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-import { OdoPreference } from '../../../src/odo/odoPreference';
+import { DEFAULT_DEVFILE_REGISTRY_NAME } from '../../../src/devfile-registry/devfileInfo';
 
 export const VIEWS = {
     extensions: 'Extensions',
@@ -14,7 +14,7 @@ export const VIEWS = {
     compRegistries: 'Devfile Registries',
     watchSessions: 'Watch Sessions',
     debugSessions: 'Debug Sessions',
-    devFileRegistry: OdoPreference.DEFAULT_DEVFILE_REGISTRY_NAME,
+    devFileRegistry: DEFAULT_DEVFILE_REGISTRY_NAME,
     serverlessFunctions: 'Serverless Functions',
 };
 
@@ -48,6 +48,7 @@ export const MENUS = {
     deleteProject: 'Delete Project',
     deleteNamespace: 'Delete Namespace',
     bindService: 'Bind Service',
+    removeServiceBinding: 'Remove Service Binding',
     startDev: 'Start Dev',
     startDevPodman: 'Start Dev on Podman',
     stopDev: 'Stop Dev',
@@ -85,4 +86,6 @@ export const NOTIFICATIONS = {
     deleteSourceCodeFolder: (path: string) => `Are you sure you want to delete the folder containing the source code for ${path}?`,
     serviceCreated: (name: string) => `Service ${name} successfully created.`,
     lookingForBindableServices: 'Getting bindable services',
+    bindingCreated: (name: string) => `Service binding '${name}' was created successfully.`,
+    bindingRemoved: (name: string) => `Service binding '${name}' was removed successfully.`,
 };
