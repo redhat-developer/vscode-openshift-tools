@@ -4,7 +4,6 @@
  *-----------------------------------------------------------------------------------------------*/
 import { Check } from '@mui/icons-material';
 import { Box, Chip, Stack, Tooltip, Typography } from '@mui/material';
-import * as React from 'react';
 import DevfileLogo from '../../../images/context/devfile.png';
 import { DevfileData, DevfileInfo } from '../../devfile-registry/devfileInfo';
 

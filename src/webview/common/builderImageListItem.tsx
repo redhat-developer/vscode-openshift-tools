@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 import { Box, Stack, SvgIcon, Typography } from '@mui/material';
-import * as React from 'react';
 import { BuilderImage } from './buildImage';
 import { getIcons as getLogo } from './builderImageLogo';
 
